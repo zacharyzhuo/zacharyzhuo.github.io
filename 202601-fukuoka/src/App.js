@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { tripData } from './data';
 import { 
   MapPin, Sun, Cloud, CloudRain, X, Plane, Hotel, Coffee, Camera, 
@@ -159,16 +159,18 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
   };
 
   return (
-    <div className="flex gap-4 px-6 group" onClick={() => onOpen(activity)}>
+    <div className="flex gap-4 px-6 group cursor-pointer" onClick={() => onOpen(activity)}>
       {/* Time Column */}
-      <div className="w-14 pt-1 flex flex-col items-center">
-        <span className="text-sm font-sans font-bold text-jp-text">{activity.time}</span>
-        {!isLast && <div className="w-[1px] bg-stone-200 h-full mt-2 min-h-[3rem]" />}
+      <div className="w-16 shrink-0 flex flex-col items-center pt-1">
+        <span className="text-xl font-serif font-bold text-jp-text leading-none">
+          {activity.time}
+        </span>
+        {!isLast && <div className="w-[1px] bg-stone-200 flex-1 my-2" />}
       </div>
 
       {/* Content */}
       <div className="flex-1 pb-8">
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-stone-100 active:scale-[0.98] transition-transform duration-200">
+        <div className="bg-white rounded-lg p-4 shadow-sm border border-stone-100 active:scale-[0.98] transition-transform duration-200 h-full flex flex-col">
           <div className="flex justify-between items-start mb-2">
             <span className={`text-[10px] tracking-wider uppercase px-2 py-0.5 rounded border font-sans font-bold ${
               activity.type === '美食' ? 'border-orange-200 text-orange-700 bg-orange-50' : 
@@ -208,10 +210,12 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
             </div>
           )}
 
-          <div className="flex items-center gap-2 text-[11px] text-stone-400 font-sans">
+          <div className="flex items-center gap-2 text-[11px] text-stone-400 font-sans mt-auto pt-2">
             {getIcon(activity.type)}
-            <span className="truncate">{activity.nav}</span>
-            <ChevronRight size={12} className="ml-auto shrink-0" />
+            <span className="truncate opacity-70 flex-1">
+              {activity.address || (activity.nav.startsWith('http') ? '查看地圖位置' : activity.nav)}
+            </span>
+            <ChevronRight size={12} className="ml-auto shrink-0 opacity-50" />
           </div>
         </div>
       </div>
@@ -221,7 +225,7 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
 
 // 5. Detail Modal
 
-const DetailModal = ({ activity, onClose, onOpenShopping }) => {
+const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
 
   if (!activity) return null;
 
@@ -329,6 +333,29 @@ const DetailModal = ({ activity, onClose, onOpenShopping }) => {
 
                           </div>
 
+                        )}
+
+            
+
+                        {/* Surroundings Link Block */}
+                        {activity.hasSurroundingsLink && (
+                          <div className="bg-blue-50/50 border border-blue-100 p-5 rounded-xl mb-8">
+                            <h4 className="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
+                              <Hotel size={16} /> 民宿周邊推薦
+                            </h4>
+                            <p className="text-xs text-blue-600/80 mb-3 font-sans leading-relaxed">
+                              回到民宿休息時，不妨去附近的溫泉放鬆，或是到超市採買宵夜。
+                            </p>
+                            <button 
+                              onClick={() => {
+                                onClose();
+                                onOpenInfo('surroundings-section');
+                              }}
+                              className="w-full bg-white text-blue-600 text-xs font-bold py-3 rounded-lg border border-blue-200 shadow-sm hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+                            >
+                              查看詳細資訊 (溫泉/LOPIA) <ChevronRight size={12} />
+                            </button>
+                          </div>
                         )}
 
             
@@ -500,7 +527,19 @@ const DetailModal = ({ activity, onClose, onOpenShopping }) => {
 
 
 // 6. Info Modal (Flight & Prep)
-const InfoModal = ({ isOpen, onClose }) => {
+const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
+  
+  useEffect(() => {
+    if (isOpen && initialScrollTarget) {
+      setTimeout(() => {
+        const element = document.getElementById(initialScrollTarget);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300); // Slight delay to ensure modal is rendered
+    }
+  }, [isOpen, initialScrollTarget]);
+
   if (!isOpen) return null;
 
   return (
@@ -605,26 +644,26 @@ const InfoModal = ({ isOpen, onClose }) => {
 
             {/* 2.5 Accommodation Info */}
             <div>
-              <h3 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <Hotel size={16} /> 住宿資訊
+              <h3 className="text-base font-bold text-stone-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <Hotel size={18} /> 住宿資訊
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-5">
                 {/* Airbnb */}
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-stone-100 relative overflow-hidden">
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 relative overflow-hidden">
                   <div className="flex items-start justify-between">
                     <div>
-                      <span className="text-[10px] font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded mb-2 inline-block">Airbnb</span>
-                      <h4 className="font-serif font-bold text-jp-text text-lg leading-tight mb-1">Flower Base Sakura</h4>
-                      <p className="text-xs text-stone-400 font-sans mb-3">博多駅南 (Near Hakata Station)</p>
+                      <span className="text-xs font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded mb-3 inline-block">Airbnb</span>
+                      <h4 className="font-serif font-bold text-jp-text text-xl leading-tight mb-2">Flower Base Sakura</h4>
+                      <p className="text-sm text-stone-500 font-sans mb-4">博多駅南 (Near Hakata Station)</p>
                       
-                      <div className="flex gap-4 mb-3 text-xs font-sans text-stone-500 bg-stone-50/50 p-2 rounded-lg border border-stone-100">
+                      <div className="flex gap-6 mb-4 text-sm font-sans text-stone-600 bg-stone-50/50 p-3 rounded-lg border border-stone-100">
                         <div>
-                          <span className="block text-[10px] text-stone-400 uppercase tracking-wider font-bold">Check-in</span>
+                          <span className="block text-[10px] text-stone-400 uppercase tracking-wider font-bold mb-1">Check-in</span>
                           <span className="font-bold text-jp-text">01/10 15:00</span>
                         </div>
                         <div className="w-[1px] bg-stone-200"></div>
                         <div>
-                          <span className="block text-[10px] text-stone-400 uppercase tracking-wider font-bold">Check-out</span>
+                          <span className="block text-[10px] text-stone-400 uppercase tracking-wider font-bold mb-1">Check-out</span>
                           <span className="font-bold text-jp-text">01/14 10:00</span>
                         </div>
                       </div>
@@ -633,70 +672,96 @@ const InfoModal = ({ isOpen, onClose }) => {
                         href="https://maps.app.goo.gl/vEDXtXCyJSVLbwP5A" 
                         target="_blank" 
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-bold text-jp-green bg-green-50 px-3 py-1.5 rounded-full hover:bg-green-100 transition-colors"
+                        className="inline-flex items-center gap-2 text-sm font-bold text-jp-green bg-green-50 px-4 py-2 rounded-full hover:bg-green-100 transition-colors"
                       >
-                        <Navigation size={12} /> Google Maps
+                        <Navigation size={14} /> Google Maps
                       </a>
                     </div>
                   </div>
                 </div>
 
-                {/* Onsen Note */}
-                <div className="bg-blue-50 p-5 rounded-2xl border border-blue-100">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="p-1.5 bg-white text-blue-500 rounded-full shadow-sm">
-                      <Bath size={14} />
+                {/* Surroundings */}
+                <div id="surroundings-section">
+                  <h4 className="text-sm font-bold text-stone-400 mb-3 pl-1">周邊推薦 Surroundings</h4>
+                  <div className="grid grid-cols-1 gap-4">
+                    
+                    {/* Onsen */}
+                    <div className="bg-blue-50/50 p-5 rounded-xl border border-blue-100 flex flex-col">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="p-2 bg-white text-blue-500 rounded-full shadow-sm">
+                          <Bath size={16} />
+                        </div>
+                        <span className="text-sm font-bold text-blue-800">八百治博多ホテル 八百治の湯</span>
+                      </div>
+                      <div className="text-xs text-stone-600 space-y-1.5 mb-3 font-sans pl-1">
+                        <p>• 營業：6:30-9:30 / 12:00-24:00</p>
+                        <p>• 費用：平日 1,200円 / 土日祝 1,400円</p>
+                      </div>
+                      <a 
+                        href="https://maps.app.goo.gl/1zHyqqb42Sgi8Vhu5" 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="text-xs text-blue-600 font-bold flex items-center gap-1 hover:underline mt-auto pl-1"
+                      >
+                        查看位置 <ExternalLink size={12} />
+                      </a>
                     </div>
-                    <span className="text-xs font-bold text-blue-800">附近推薦溫泉</span>
-                  </div>
-                  
-                  <h4 className="font-bold text-jp-text text-sm mb-1">八百治博多ホテル 八百治の湯</h4>
-                  <div className="text-xs text-stone-600 space-y-1 mb-3 font-sans">
-                    <p>• 營業：6:30-9:30 / 12:00-24:00</p>
-                    <p>• 費用：平日 1,200円 / 土日祝 1,400円</p>
-                  </div>
 
-                  <a 
-                    href="https://maps.app.goo.gl/1zHyqqb42Sgi8Vhu5" 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="text-xs text-blue-600 font-bold flex items-center gap-1 hover:underline"
-                  >
-                    查看位置 <ExternalLink size={10} />
-                  </a>
+                    {/* LOPIA */}
+                    <div className="bg-red-50/50 p-5 rounded-xl border border-red-100 flex flex-col">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="p-2 bg-white text-red-500 rounded-full shadow-sm">
+                          <ShoppingBag size={16} />
+                        </div>
+                        <span className="text-sm font-bold text-red-800">LOPIA 博多友都八喜店</span>
+                      </div>
+                      <p className="text-xs text-stone-600 mb-3 font-sans pl-1 leading-relaxed">
+                        人氣超市，非常適合購買伴手禮與宵夜。
+                      </p>
+                      <a 
+                        href="https://maps.app.goo.gl/zYKq8J5sbHPdmruP8" 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="text-xs text-red-600 font-bold flex items-center gap-1 hover:underline mt-auto pl-1"
+                      >
+                        查看位置 <ExternalLink size={12} />
+                      </a>
+                    </div>
+
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* 3. Important Notes */}
             <div>
-              <h3 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <AlertCircle size={16} /> 注意事項
+              <h3 className="text-base font-bold text-stone-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <AlertCircle size={18} /> 注意事項
               </h3>
-              <div className="space-y-3">
-                <div className="bg-orange-50 p-4 rounded-xl border border-orange-100 flex gap-3">
-                   <div className="bg-orange-100 p-2 rounded-full h-fit text-orange-600">
-                     <AlertCircle size={16} />
+              <div className="space-y-4">
+                <div className="bg-orange-50 p-5 rounded-xl border border-orange-100 flex gap-4">
+                   <div className="bg-orange-100 p-2.5 rounded-full h-fit text-orange-600">
+                     <AlertCircle size={20} />
                    </div>
                    <div>
-                     <h4 className="font-bold text-orange-900 text-sm mb-1">取票提醒</h4>
-                     <p className="text-xs text-orange-800/80 leading-relaxed">
+                     <h4 className="font-bold text-orange-900 text-sm mb-1.5">取票提醒</h4>
+                     <p className="text-sm text-orange-800/80 leading-relaxed">
                        請提醒 <strong>育辰</strong> 記得在博多站領取「特急ゆふいんの森」的指定席車票。
                      </p>
                    </div>
                 </div>
 
-                <div className="bg-stone-100 p-4 rounded-xl border border-stone-200 flex gap-3">
-                   <div className="bg-white p-2 rounded-full h-fit text-stone-500">
-                     <Luggage size={16} />
+                <div className="bg-stone-100 p-5 rounded-xl border border-stone-200 flex gap-4">
+                   <div className="bg-white p-2.5 rounded-full h-fit text-stone-500">
+                     <Luggage size={20} />
                    </div>
                    <div className="flex-1">
-                     <h4 className="font-bold text-stone-700 text-sm mb-2">行李限重 (AirAsia)</h4>
-                     <div className="flex justify-between items-center text-xs text-stone-600 border-b border-stone-200 pb-2 mb-2">
+                     <h4 className="font-bold text-stone-700 text-sm mb-2.5">行李限重 (AirAsia)</h4>
+                     <div className="flex justify-between items-center text-sm text-stone-600 border-b border-stone-200 pb-2.5 mb-2.5">
                        <span>手提行李</span>
                        <span className="font-bold">7 kg</span>
                      </div>
-                     <div className="flex justify-between items-center text-xs text-stone-600">
+                     <div className="flex justify-between items-center text-sm text-stone-600">
                        <span>托運行李</span>
                        <span className="font-bold">20 kg</span>
                      </div>
@@ -902,8 +967,22 @@ function App() {
   const [showChecklist, setShowChecklist] = useState(false);
   const [showShopping, setShowShopping] = useState(false);
   const [shoppingTab, setShoppingTab] = useState('tenjin');
+  const [infoScrollTarget, setInfoScrollTarget] = useState(null);
   
   const [checkedItems, setCheckedItems] = useState({});
+
+  // Prevent background scroll when modal is open
+  useEffect(() => {
+    const isAnyModalOpen = selectedActivity || isSidebarOpen || showInfo || showChecklist || showShopping;
+    if (isAnyModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedActivity, isSidebarOpen, showInfo, showChecklist, showShopping]);
 
   const currentDayData = tripData.itinerary.find(d => d.day === activeDay) || tripData.itinerary[0];
 
@@ -989,11 +1068,19 @@ function App() {
           setShoppingTab(tab);
           setShowShopping(true);
         }}
+        onOpenInfo={(target) => {
+          setInfoScrollTarget(target);
+          setShowInfo(true);
+        }}
       />
       
       <InfoModal 
         isOpen={showInfo} 
-        onClose={() => setShowInfo(false)} 
+        onClose={() => {
+          setShowInfo(false);
+          setInfoScrollTarget(null);
+        }}
+        initialScrollTarget={infoScrollTarget}
       />
       
       <ChecklistModal 

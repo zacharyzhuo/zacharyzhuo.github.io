@@ -114,13 +114,13 @@ export const tripData = {
       title: '抵達福岡・天神血拚・美食尋覓',
       location: '博多 / 天神',
       weather: '多雲 8°C',
-      image: 'https://loremflickr.com/800/600/fukuoka,night,city?random=1',
+      image: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=800&q=80',
       activities: [
         {
           time: '16:00',
           type: '交通',
           title: '抵達福岡機場',
-          desc: '16:00 降落。建議搭乘計程車直接前往 Airbnb（車程約 15 分鐘，車資約 1,500 日圓），省去長輩轉乘勞累。',
+          desc: '16:00 降落。建議搭乘計程車直接前往民宿（車程約 15 分鐘，車資約 1,500 日圓），省去長輩轉乘勞累。',
           about: '福岡機場距市區極近，被稱為「全日本最方便的機場」。',
           nav: '福岡機場',
           icon: <Plane size={18} />
@@ -128,10 +128,11 @@ export const tripData = {
         {
           time: '17:00',
           type: '住宿',
-          title: '入住 Airbnb：Flower Base Sakura',
+          title: '入住民宿：Flower Base Sakura',
           desc: '辦理入住並放置行李。',
           about: '位於博多站南的安靜住宅區，體驗當地生活感。',
           nav: 'https://maps.app.goo.gl/gcexBfMvJhPvTLsA9',
+          address: '福岡市博多区博多駅南',
           icon: <Hotel size={18} />
         },
         {
@@ -166,7 +167,7 @@ export const tripData = {
       title: '由布院之森・溫泉小鎮一日遊',
       location: '由布院',
       weather: '晴天 5°C',
-      image: 'https://loremflickr.com/800/600/forest,mountain,train?random=2',
+      image: 'https://images.unsplash.com/photo-1624517607344-edd8277b1ba3?auto=format&fit=crop&w=1200&q=80',
       activities: [
         {
           time: '08:00',
@@ -176,6 +177,7 @@ export const tripData = {
           hours: '08:00 - 19:00',
           about: '福岡超人氣麵包店，主打炭烤香腸麵包 (Dacomecca Dog) 與明太子法棍，裝潢華麗宛如美術館，是近期福岡必訪名店。',
           nav: 'https://maps.app.goo.gl/kZhtsngZYEfiVaWn7',
+          address: '福岡市博多区博多駅前4-14-1',
           icon: <Utensils size={18} />
         },
         {
@@ -195,6 +197,7 @@ export const tripData = {
           hours: '11:00 - 16:00 / 17:30 - 21:00',
           about: '由布院必吃排隊名店。推薦「豐後牛三吃」：一吃原味，二加佐料（柚子胡椒），三淋高湯變茶泡飯。',
           nav: 'https://maps.app.goo.gl/nrTjZNdxC9RuhEv76',
+          address: '大分県由布市湯布院町川北5-3',
           icon: <Utensils size={18} />
         },
         {
@@ -205,6 +208,7 @@ export const tripData = {
           hours: '足湯 10:00 - 17:00',
           about: '湖底同時湧出溫泉與清水，秋冬清晨因溫差易產生夢幻晨霧（朝霧）。傳說古代有神龍棲息。',
           nav: 'https://maps.app.goo.gl/7qR3wneN338Bngfv7',
+          address: '大分県由布市湯布院町川上',
           icon: <MapPin size={18} />
         },
         {
@@ -242,16 +246,18 @@ export const tripData = {
           hours: '17:00 - 24:00',
           about: '福岡「雞皮燒烤」發源地之一。雞皮經過 6 天反覆烘烤去油，口感外酥內Q，與一般軟嫩雞皮不同，是博多獨有的下酒菜。',
           nav: 'https://maps.app.goo.gl/AVqaPHZ7FuUB4ymj9',
+          address: '福岡市中央区警固2-16-10',
           icon: <Utensils size={18} />
         },
         {
-          time: '20:30',
+          time: '晚上',
           type: '購物',
           title: '博多運河城逛街 or 休息',
           desc: '晚餐後可至運河城逛逛（有大型水舞秀），或直接回民宿休息。',
           showShoppingLink: true,
           shoppingTab: 'hakata',
           shoppingText: '查看博多逛街地圖',
+          hasSurroundingsLink: true,
           about: '運河城是結合購物、娛樂的大型複合設施，每天晚上的水舞秀非常有名。',
           nav: '博多運河城',
           icon: <ShoppingBag size={18} />
@@ -264,7 +270,7 @@ export const tripData = {
       title: '太宰府參拜・市區美食巡禮',
       location: '太宰府 / 博多',
       weather: '局部降雨 7°C',
-      image: 'https://loremflickr.com/800/600/shrine,japan,temple?random=3',
+      image: 'https://images.unsplash.com/photo-1623310073404-fe9953eadb04?auto=format&fit=crop&w=1200&q=80',
       activities: [
         {
           time: '09:00',
@@ -273,6 +279,7 @@ export const tripData = {
           desc: '在警固神社旁的藍瓶咖啡開啟悠閒的一天。',
           about: '位於警固神社境內，是福岡超人氣的精品咖啡店。環境與神社融合，非常適合早晨放鬆。',
           nav: 'https://maps.app.goo.gl/wXyNwvzSCbQStQYf6',
+          address: '福岡市中央区天神2-2-20',
           icon: <Utensils size={18} />
         },
         {
@@ -282,6 +289,7 @@ export const tripData = {
           desc: '早餐後直接在境內參拜，欣賞繁華天神中的寧靜之地。',
           about: '守護福岡城下町的神社，以祈求消除災難與轉運聞名，其足湯也是一大特色。',
           nav: 'https://maps.app.goo.gl/KKuU72EA69mACRVP9',
+          address: '福岡市中央区天神2-2-20',
           icon: <MapPin size={18} />
         },
         {
@@ -300,6 +308,7 @@ export const tripData = {
           desc: '抵達太宰府站後，搭乘「真秀羅場號」公車前往竈門神社。',
           about: '以「結緣」聞名，神社設計非常現代且精緻。這裡也是《鬼滅之刃》迷的聖地。',
           nav: 'https://maps.app.goo.gl/voYxFMHAqDuL4VtK7',
+          address: '福岡県太宰府市内山883',
           icon: <MapPin size={18} />
         },
         {
@@ -309,6 +318,7 @@ export const tripData = {
           desc: '搭乘公車於「三条公民館」下車，步行前往。',
           about: '位於天滿宮後方山坡，擁有整排紅色的稻荷鳥居，是求財與開運的隱藏版景點。',
           nav: 'https://maps.app.goo.gl/zMVNKwmaSQdJVLo46',
+          address: '福岡県太宰府市宰府4-7-1',
           icon: <MapPin size={18} />
         },
         {
@@ -319,6 +329,7 @@ export const tripData = {
           highlight: '午餐建議：表參道各式小吃或暖暮拉麵',
           about: '福岡最重要的神社之一，供奉學問之神。參道上的星巴克（隈研吾設計）與現烤梅枝餅是必訪重點。',
           nav: 'https://maps.app.goo.gl/yPywku4sE55BYYtx7',
+          address: '福岡県太宰府市宰府4-7-1',
           icon: <MapPin size={18} />,
           subItems: [
             { title: '逛表參道', desc: '各式伴手禮店與宮崎駿商店' },
@@ -326,18 +337,19 @@ export const tripData = {
           ]
         },
         {
-          time: '16:30',
+          time: '晚上',
           type: '購物',
           title: '回天神逛街 or 休息',
           desc: '搭電車返回天神。可繼續購物補貨，或回民宿稍作休息。',
           showShoppingLink: true,
           shoppingTab: 'tenjin',
           shoppingText: '查看天神逛街地圖',
+          hasSurroundingsLink: true,
           nav: '天神駅',
           icon: <ShoppingBag size={18} />
         },
         {
-          time: '19:00',
+          time: '晚餐',
           type: '美食',
           title: '晚餐：中州屋台',
           desc: '傍晚前往那珂川邊，體驗道地的博多屋台文化。',
@@ -353,43 +365,96 @@ export const tripData = {
       title: '門司港復古建築・小倉城漫遊',
       location: '北九州',
       weather: '強風 6°C',
-      image: 'https://loremflickr.com/800/600/castle,japan,retro?random=4',
+      image: 'https://images.unsplash.com/photo-1650960183895-f3931f27bd6f?auto=format&fit=crop&w=1200&q=80',
       activities: [
         {
-          time: '早上',
-          type: '交通',
-          title: '前往門司港',
-          desc: '從博多搭 JR 到小倉轉車，車程約 1 小時。',
-          about: '結束北九州一日遊，返回博多。',
-          nav: '門司港站',
-          icon: <Train size={18} />
-        },
-        {
-          time: '中午',
+          time: '09:00',
           type: '美食',
-          title: '門司港懷舊區',
-          desc: '欣賞港口復古建築，路面平整好走。',
-          highlight: '必吃：燒咖哩 (焗烤咖哩飯)',
-          about: '明治大正時期的國際貿易港，保留許多西洋紅磚建築（舊門司海關、門司港車站）。「懷舊區」充滿浪漫氣氛，適合散步拍照。',
-          nav: '門司港懷舊區',
+          title: '早餐：The Full Full Hakata',
+          desc: '明太子法國麵包非常有名的烘焙坊。',
+          about: '酥脆的法棍搭配滿滿的明太子醬，是博多的超人氣早餐選擇。',
+          nav: 'https://maps.app.goo.gl/CzvpSyu2RpvXhzZy5',
+          address: '福岡市博多区祇園町9-3',
           icon: <Utensils size={18} />
         },
         {
-          time: '下午',
+          time: '10:15',
+          type: '交通',
+          title: '前往小倉',
+          desc: '吃完早餐步行至博多站，搭乘山陽新幹線前往小倉站（車程約 15 分鐘）。',
+          about: '搭乘新幹線是最快速的方式，節省交通時間。',
+          nav: '博多站 -> 小倉站',
+          icon: <Train size={18} />
+        },
+        {
+          time: '11:00',
           type: '景點',
-          title: '小倉城',
-          desc: '參觀小倉城與周邊商店街。',
-          about: '戰國名將細川忠興所築，天守閣外觀獨特（唐造樣式），周邊的旦過市場被稱為「北九州的廚房」。',
-          nav: '小倉城',
+          title: '小倉城 & 八坂神社',
+          desc: '參觀小倉城天守閣（唐造樣式）與相鄰的八坂神社。',
+          about: '小倉城是戰國名將細川忠興所築；八坂神社則以祈求除厄與生意興隆聞名。',
+          nav: 'https://maps.app.goo.gl/yXQ7J2k8X5X7y5X7',
+          address: '北九州市小倉北区城内2-1',
           icon: <MapPin size={18} />
         },
         {
-          time: '晚上',
+          time: '12:30',
+          type: '交通',
+          title: '前往門司港',
+          desc: '從小倉站搭乘 JR 鹿兒島本線前往門司港站（車程約 15 分鐘）。',
+          about: '門司港站本身就是國家重要文化財，復古的站舍非常值得拍照。',
+          nav: '小倉站 -> 門司港站',
+          icon: <Train size={18} />
+        },
+        {
+          time: '13:00',
+          type: '美食',
+          title: '午餐：燒咖哩',
+          desc: '在門司港隨意挑選一間餐廳品嚐名物「燒咖哩」。',
+          about: '門司港的代表性美食，濃郁咖哩加上起司焗烤，香氣四溢。',
+          nav: '門司港燒咖哩',
+          address: '北九州市門司区港町',
+          icon: <Utensils size={18} />
+        },
+        {
+          time: '14:00',
+          type: '景點',
+          title: '門司港懷舊區散策',
+          desc: '參觀懷舊展望室與大連友好記念館，漫步港灣。',
+          about: '漫步在充滿大正浪漫風情的港區，欣賞懷舊洋樓群與港灣美景。',
+          nav: '門司港懷舊區',
+          address: '北九州市門司区港町',
+          icon: <MapPin size={18} />,
+          subItems: [
+            { title: '懷舊展望室', desc: '眺望關門海峽絕景', nav: 'https://maps.app.goo.gl/QVbQzT6F1mhy2Tcp8' },
+            { title: '大連友好記念館', desc: '紅磚歐式建築', nav: 'https://maps.app.goo.gl/hf2VS5aLUHRUdWzh6' }
+          ]
+        },
+        {
+          time: '16:00',
+          type: '交通',
+          title: '前往皿倉山',
+          desc: '門司港站 -> 八幡站，再搭計程車/接駁車前往皿倉山纜車站。',
+          about: '準備前往欣賞著名的「新日本三大夜景」之一。',
+          nav: '八幡站',
+          icon: <Train size={18} />
+        },
+        {
+          time: '17:30',
+          type: '景點',
+          title: '皿倉山夜景',
+          desc: '搭乘纜車與爬坡車登頂，欣賞日落至夜幕低垂的百億美元夜景。',
+          about: '視野極佳，是北九州最浪漫的景點。山頂風大請注意保暖。',
+          nav: '皿倉山',
+          address: '北九州市八幡東区大字尾倉1481-1',
+          icon: <MapPin size={18} />
+        },
+        {
+          time: '19:00',
           type: '交通',
           title: '返回博多',
-          desc: '搭乘 JR 返回博多站，晚餐後回住宿。',
-          about: '結束北九州一日遊，返回博多。',
-          nav: '博多站',
+          desc: '下山後回八幡站 -> 小倉站 -> 轉乘新幹線回博多。',
+          about: '結束充實的北九州一日遊，搭乘舒適的新幹線返回福岡市區。',
+          nav: '八幡站 -> 博多站',
           icon: <Train size={18} />
         }
       ]
@@ -400,35 +465,82 @@ export const tripData = {
       title: '公園散步・伴手禮採買・歸途',
       location: '福岡市區',
       weather: '晴天 9°C',
-      image: 'https://loremflickr.com/800/600/park,lake,nature?random=5',
+      image: 'https://images.unsplash.com/photo-1736243355712-9db556734189?auto=format&fit=crop&w=1200&q=80',
       activities: [
         {
           time: '早上',
+          type: '美食',
+          title: '早餐：民宿簡單吃',
+          desc: '享用前幾天預先買好的早餐，收拾行李準備退房。',
+          about: '最後一天早晨，悠閒地在民宿度過。',
+          nav: '民宿',
+          icon: <Utensils size={18} />
+        },
+        {
+          time: '10:00',
+          type: '住宿',
+          title: 'Check out & 寄放行李',
+          desc: '10:00 辦理退房，將行李寄放在民宿（最晚可延後退房至 12:00）。',
+          about: '輕鬆出門，享受最後的福岡時光。',
+          nav: '民宿',
+          icon: <Hotel size={18} />
+        },
+        {
+          time: '11:00',
           type: '景點',
           title: '大濠公園',
-          desc: '地鐵大濠公園站。環湖散步、舞鶴公園拍照。',
-          about: '原為福岡城的護城河（大堀），仿照中國西湖設計，擁有廣大的湖泊與綠地，是福岡市民的休閒綠洲。',
+          desc: '搭乘地鐵至大濠公園站。環湖散步，享受城市綠洲的氛圍。',
+          about: '原為福岡城的護城河，仿照中國西湖設計，是福岡市民最愛的休閒場所。',
           nav: '大濠公園',
           icon: <MapPin size={18} />
         },
         {
-          time: '中午',
-          type: '購物',
-          title: '最後採買伴手禮',
-          desc: '博多站購買明產、藥妝。',
-          highlight: '必買：筑紫餅、一蘭拉麵包',
-          about: '博多站是九州最大的車站，聚集了許多伴手禮店。推薦「筑紫餅」與「一蘭拉麵」包裝版。',
-          nav: '博多站',
-          icon: <ShoppingBag size={18} />
+          time: '備選',
+          type: '美食',
+          title: '&LOCALS 大濠公園',
+          desc: '位於公園內的時尚咖啡廳，販售九州在地食材製作的餐點與飲品。（想吃可以來）',
+          about: '八女茶與稻荷壽司是招牌，建築本身也相當有特色，適合休憩。',
+          nav: 'https://maps.app.goo.gl/PfVJNtWqruEuEME19',
+          address: '福岡市中央区大濠公園1-9',
+          icon: <Utensils size={18} />
+        },
+        {
+          time: '甜點',
+          type: '美食',
+          title: 'Parfait Lab PINSIRIO',
+          desc: '品嚐精緻的芭菲（聖代）甜點。',
+          about: '位於大濠公園附近的人氣甜點店，以如同藝術品般的芭菲聞名。',
+          nav: 'https://maps.app.goo.gl/jHGg9naMgRfus2VU7',
+          address: '福岡市中央区黒門8-15',
+          icon: <Utensils size={18} />
+        },
+        {
+          time: '12:30',
+          type: '景點',
+          title: '舞鶴公園 & 福岡城跡',
+          desc: '步行前往鄰近的舞鶴公園，參觀福岡城遺跡。',
+          about: '福岡城又名「舞鶴城」，雖天jf閣已不復存在，但石垣與城門仍保留著過往的威嚴。',
+          nav: '舞鶴公園',
+          icon: <MapPin size={18} />
+        },
+        {
+          time: '午餐',
+          type: '美食',
+          title: '午餐：Sanuki Udon Shinari',
+          desc: '品嚐著名的讚岐烏龍麵（志成）。',
+          about: '福岡排名頂尖的烏龍麵店，麵條勁道，炸物也相當出色。',
+          nav: 'https://maps.app.goo.gl/5JTUN5zRNpAtbtMW7',
+          address: '福岡市中央区大手門3-3-24',
+          icon: <Utensils size={18} />
         },
         {
           time: '14:00',
           type: '交通',
-          title: '前往機場',
-          desc: '預留登機與安檢時間，準備搭機。',
-          about: '帶著滿滿的回憶與戰利品，準備搭機返家。',
-          nav: '福岡機場',
-          icon: <Plane size={18} />
+          title: '回民宿領取行李 & 前往機場',
+          desc: '從大濠公園站回民宿拿行李，接著從博多站前往福岡機場。',
+          about: '預留充足時間辦理登機手續，帶著滿滿的回憶返家。',
+          nav: '民宿 -> 博多站 -> 福岡機場',
+          icon: <Train size={18} />
         }
       ]
     }
