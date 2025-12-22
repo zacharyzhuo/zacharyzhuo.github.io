@@ -1,18 +1,7 @@
 {
   "short_name": "2026 Family Trip to Fukuoka",
   "name": "2026 Family Trip to Fukuoka",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "favicon.svg?v=2026",
-      "type": "image/svg+xml",
-      "sizes": "any"
-    }
-  ],
+  "icons": [],
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",

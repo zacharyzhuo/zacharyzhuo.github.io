@@ -191,7 +191,6 @@ export const tripData = {
           type: "購物",
           title: "天神商圈：買鞋與冬裝",
           desc: "主要目標：在 HOKA 購買爸媽好走的鞋子，並在 UNIQLO 補貨發熱衣與羽絨外套。",
-          tips: ["HOKA 天神店", "UNIQLO 天神店", "Mina 天神"],
           highlight: "必買：長輩健走鞋、發熱衣",
           showShoppingLink: true,
           shoppingTab: "tenjin",
