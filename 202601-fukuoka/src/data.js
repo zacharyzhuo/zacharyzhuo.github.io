@@ -35,6 +35,39 @@ export const tripData = {
         link: "https://maps.app.goo.gl/AhT9FQU2SYxCUhDA8",
       },
       {
+        name: "Mina Tenjin",
+        isBuilding: true,
+        hours: "10:00 - 20:00",
+        shops: [
+          {
+            name: "3COINS＋",
+            floor: "B1F",
+            link: "https://maps.app.goo.gl/CU5TtzJ3RE9v4tnY7",
+          },
+          {
+            name: "UNIQLO",
+            floor: "1F-2F",
+            link: "https://maps.app.goo.gl/oiVDfiSjVvLoyRmk8",
+          },
+          {
+            name: "GU",
+            floor: "3F",
+            link: "https://maps.app.goo.gl/o4hrRNPQzuM9d6Ni8",
+          },
+          {
+            name: "LOFT",
+            floor: "4F",
+            link: "https://maps.app.goo.gl/67iMaH4ygF64y7xX8",
+          },
+        ],
+      },
+      {
+        name: "天神地下街",
+        building: "Underground",
+        hours: "10:00 - 20:00",
+        link: "https://maps.app.goo.gl/6wAuWeLaQ7m6FnHN8",
+      },
+      {
         name: "PARCO Fukuoka",
         isBuilding: true,
         hours: "10:00 - 20:30",
@@ -43,11 +76,6 @@ export const tripData = {
             name: "Onitsuka Tiger",
             floor: "Main Bldg 3F",
             link: "https://maps.app.goo.gl/PKJcnZVR1Fb1w2rQA",
-          },
-          {
-            name: "HARE",
-            floor: "New Bldg 3F",
-            link: "https://maps.app.goo.gl/3vrmV18mAawmVqw1A",
           },
           {
             name: "9090",
@@ -60,6 +88,31 @@ export const tripData = {
             link: "https://maps.app.goo.gl/5NbbUX4bjui2iu9u9",
           },
           {
+            name: "ABC-MART Grand Stage",
+            floor: "Main Bldg 3F",
+            link: "https://maps.app.goo.gl/JfzZ8zZUNoo3xBRGA",
+          },
+          {
+            name: "SNIDEL",
+            floor: "Main Bldg 4F",
+            link: "https://maps.app.goo.gl/cPGyvz7BgK8tWZ52A",
+          },
+          {
+            name: "Francfranc",
+            floor: "Main Bldg 5F",
+            link: "https://maps.app.goo.gl/C3fXMNXPqefDycyL6",
+          },
+          {
+            name: "BEAMS",
+            floor: "New Bldg 1F-2F",
+            link: "https://maps.app.goo.gl/AJSXxSANUdLgE1ah8",
+          },
+          {
+            name: "HARE",
+            floor: "New Bldg 3F",
+            link: "https://maps.app.goo.gl/3vrmV18mAawmVqw1A",
+          },
+          {
             name: "FREAK’S STORE",
             floor: "New Bldg 4F",
             link: "https://maps.app.goo.gl/7tgNznxC4pkZjikk9",
@@ -67,7 +120,7 @@ export const tripData = {
         ],
       },
       {
-        name: "ABC-MART Grand Stage",
+        name: "ABC-MART Grand Stage Tenjin",
         building: "Standalone",
         floor: "1F-3F",
         hours: "11:00 - 21:00",
@@ -94,6 +147,20 @@ export const tripData = {
         hours: "13:00 - 18:00",
         link: "https://maps.app.goo.gl/Ua9n4WMQmYXZCYay8",
       },
+      {
+        name: "ZARA Tenjin Nishi-dori",
+        building: "Standalone",
+        floor: "1F-3F",
+        hours: "11:00 - 21:00",
+        link: "https://maps.app.goo.gl/Xrxwm1MxqdareXKo8",
+      },
+      {
+        name: "大賀藥局 (Oga Pharmacy)",
+        building: "Standalone",
+        floor: "1F",
+        hours: "10:00 - 22:00",
+        link: "https://maps.app.goo.gl/VeBCd8cwSFmkfXfE8",
+      },
     ],
     hakata: [
       {
@@ -102,8 +169,18 @@ export const tripData = {
         hours: "10:00 - 20:00",
         shops: [
           {
+            name: "Le Dome (Édifice/Iéna)",
+            floor: "3F",
+            link: "https://maps.app.goo.gl/jzqbSAUmET3wF4NQ9",
+          },
+          {
+            name: "BEAMS",
+            floor: "3F",
+            link: "https://maps.app.goo.gl/iCcZZhPZq8ejruLW6",
+          },
+          {
             name: "FREAK’S STORE",
-            floor: "5F",
+            floor: "4F",
             link: "https://maps.app.goo.gl/b1izKYHJ4yMRgwDe9",
           },
           {
@@ -112,9 +189,31 @@ export const tripData = {
             link: "https://maps.app.goo.gl/n4Vs7cBi3YLRdhxQ6",
           },
           {
-            name: "Le Dome (Édifice/Iéna)",
-            floor: "3F",
-            link: "https://maps.app.goo.gl/jzqbSAUmET3wF4NQ9",
+            name: "MUJI",
+            floor: "6F",
+            link: "https://maps.app.goo.gl/Gakfdg8VufxCiBU26",
+          },
+          {
+            name: "ABC-MART",
+            floor: "7F",
+            link: "https://maps.app.goo.gl/2coZLK3pjuuhAiqB7",
+          },
+        ],
+      },
+      {
+        name: "AMU EST",
+        isBuilding: true,
+        hours: "10:00 - 20:00",
+        shops: [
+          {
+            name: "LOWRYS FARM",
+            floor: "B1F",
+            link: "https://maps.app.goo.gl/jeEdzq12MYoiFoeW7",
+          },
+          {
+            name: "UNIQLO",
+            floor: "1F",
+            link: "https://maps.app.goo.gl/3BvK8xANZNywev6a7",
           },
         ],
       },
@@ -140,6 +239,199 @@ export const tripData = {
             name: "RAGEBLUE",
             floor: "North Bldg 2F",
             link: "https://maps.app.goo.gl/xFkdyyTTst84dLzy8",
+          },
+          {
+            name: "MUJI",
+            floor: "North Bldg 3F-4F",
+            link: "https://maps.app.goo.gl/VLNEuqq8FgtDWhLW9",
+          },
+          {
+            name: "Adidas Originals",
+            floor: "Center Walk 1F",
+            link: "https://maps.app.goo.gl/3odaPqBG6DA15sf39",
+          },
+          {
+            name: "MOUSSY",
+            floor: "Center Walk 2F",
+            link: "https://maps.app.goo.gl/QxHoaxJfeXue31ng9",
+          },
+          {
+            name: "Asics",
+            floor: "Center Walk 2F",
+            link: "https://maps.app.goo.gl/7UzytRJtTVGMkVbc8",
+          },
+          {
+            name: "Levi’s",
+            floor: "Center Walk 2F",
+            link: "https://maps.app.goo.gl/Xiz2YmqPAR5d7fLy5",
+          },
+          {
+            name: "ABC-MART Grand Stage",
+            floor: "Center Walk 3F",
+            link: "https://maps.app.goo.gl/R48HbE8Jj1mmJNZb9",
+          },
+          {
+            name: "Alpen Fukuoka",
+            floor: "South Bldg 1F-3F",
+            link: "https://maps.app.goo.gl/ThnejdLYkkYmfB5H7",
+          },
+          {
+            name: "Onitsuka Tiger",
+            floor: "South Bldg 2F",
+            link: "https://maps.app.goo.gl/3MKG63X1FCaWU94D9",
+          },
+        ],
+      },
+    ],
+  },
+  food: {
+    tenjin: [
+      {
+        category: "咖啡廳",
+        shops: [
+          {
+            name: "The Full Full",
+            link: "https://maps.app.goo.gl/LHHurbd9sAQtgUo6A",
+            hours: "10:00 - 20:00",
+            desc: "著名的明太子法國麵包與烘焙咖啡。",
+          },
+          {
+            name: "藍瓶咖啡 Blue Bottle Coffee",
+            link: "https://maps.app.goo.gl/vfv5WZg1MmPDLGG78",
+            hours: "08:00 - 20:00",
+            desc: "精品咖啡，店內氛圍靜謐。",
+          },
+        ],
+      },
+      {
+        category: "甜點",
+        shops: [
+          {
+            name: "ASAKO IWAYANAGI FUKUOKA",
+            link: "https://maps.app.goo.gl/cMMPu1wgPTrVmxwr9",
+            hours: "11:00 - 20:00",
+            desc: "精緻華麗的芭菲與甜點藝術。",
+          },
+        ],
+      },
+      {
+        category: "丼飯",
+        shops: [
+          {
+            name: "黒田飯",
+            link: "https://maps.app.goo.gl/rXPeRvUyoAzfPSLW9",
+            hours: "11:30 - 14:00 / 18:00 - 22:00",
+            desc: "在地特色丼飯與日式料理。",
+          },
+        ],
+      },
+    ],
+    nakasu: [
+      {
+        category: "拉麵",
+        shops: [
+          {
+            name: "一蘭 本社総本店",
+            link: "https://maps.app.goo.gl/bwLkRDyBGLX4QGtA6",
+            hours: "24 小時營業",
+            desc: "一蘭拉麵全球總本店，感受最道地的氛圍。",
+          },
+        ],
+      },
+      {
+        category: "屋台",
+        shops: [
+          {
+            name: "中洲屋台街",
+            link: "https://maps.app.goo.gl/BWU9r7K9qX9vGvXp8",
+            hours: "18:00 - 24:00",
+            desc: "福岡最具代表性的夜間路邊攤文化。",
+          },
+        ],
+      },
+    ],
+    hakata: [
+      {
+        category: "拉麵",
+        shops: [
+          {
+            name: "博多一双",
+            link: "https://maps.app.goo.gl/Y5Lria8iFp5oQdnU8",
+            hours: "11:00 - 24:00",
+            desc: "濃厚系的豚骨拉麵，排隊人氣名店。",
+          },
+          {
+            name: "麺屋 いしヰ",
+            link: "https://maps.app.goo.gl/Rb9mkZ127C1f5MyZ8",
+            hours: "11:00 - 15:00 / 17:00 - 21:00",
+            desc: "特色沾麵與精緻拉麵料理。",
+          },
+        ],
+      },
+      {
+        category: "燒肉",
+        shops: [
+          {
+            name: "博多 焼肉 八十八―YASOHACHI",
+            link: "https://maps.app.goo.gl/rd1Kdn5bSxVEvvMu9",
+            hours: "11:30 - 14:30 / 17:00 - 23:00",
+            desc: "高品質和牛燒肉，環境優雅。",
+          },
+        ],
+      },
+      {
+        category: "火鍋",
+        shops: [
+          {
+            name: "博多牛腸鍋 前田屋",
+            link: "https://maps.app.goo.gl/p6ZDh8ugnxabm7P69",
+            hours: "11:00 - 15:00 / 17:00 - 23:00",
+            desc: "福岡名物牛腸鍋，湯頭鮮美。",
+          },
+        ],
+      },
+      {
+        category: "咖啡廳",
+        shops: [
+          {
+            name: "Dacomecca",
+            link: "https://maps.app.goo.gl/VvoVz7BfkViapyZn9",
+            hours: "08:00 - 19:00",
+            desc: "美術館般的麵包名店，視覺與味覺雙重享受。",
+          },
+          {
+            name: "The Full Full Hakata",
+            link: "https://maps.app.goo.gl/2dZFZWGBq3cLNTUy7",
+            hours: "08:00 - 21:00",
+            desc: "明太子法國麵包代表店，近博多站。",
+          },
+          {
+            name: "FUK COFFEE",
+            link: "https://maps.app.goo.gl/mFtDAdeWpFM2owAz9",
+            hours: "08:00 - 20:00",
+            desc: "以旅遊為主題的特色咖啡店。",
+          },
+        ],
+      },
+      {
+        category: "甜點",
+        shops: [
+          {
+            name: "蜂樂饅頭",
+            link: "https://maps.app.goo.gl/k8gvtBbfNDp3h5Zd9",
+            hours: "10:00 - 19:00",
+            desc: "經典日式甜點，內餡飽滿紮實。",
+          },
+        ],
+      },
+      {
+        category: "居酒屋",
+        shops: [
+          {
+            name: "博多かわ屋",
+            link: "https://maps.app.goo.gl/J1hb3Jk5zJUAJRR9A",
+            hours: "17:00 - 24:00",
+            desc: "招牌烤雞皮串，福岡必吃美食。",
           },
         ],
       },

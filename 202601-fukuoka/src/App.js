@@ -84,10 +84,10 @@ const Sidebar = ({ isOpen, onClose, onSelect }) => {
                 <Info size={20} />
               </div>
               <div>
-                <span className="block font-serif font-bold text-jp-text text-sm">
+                <span className="block font-serif font-bold text-jp-text text-base">
                   旅程資訊
                 </span>
-                <span className="block text-[10px] text-stone-400 font-sans tracking-wide">
+                <span className="block text-xs text-stone-400 font-sans tracking-wide">
                   Flight & Info
                 </span>
               </div>
@@ -98,13 +98,13 @@ const Sidebar = ({ isOpen, onClose, onSelect }) => {
               className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-stone-100 transition-all text-left group"
             >
               <div className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center group-hover:bg-green-100 transition-colors">
-                <ClipboardList size={20} />
+                <ClipboardList size={22} />
               </div>
               <div>
-                <span className="block font-serif font-bold text-jp-text text-sm">
+                <span className="block font-serif font-bold text-jp-text text-base">
                   行李清單
                 </span>
-                <span className="block text-[10px] text-stone-400 font-sans tracking-wide">
+                <span className="block text-xs text-stone-400 font-sans tracking-wide">
                   Packing List
                 </span>
               </div>
@@ -115,14 +115,31 @@ const Sidebar = ({ isOpen, onClose, onSelect }) => {
               className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-stone-100 transition-all text-left group"
             >
               <div className="w-10 h-10 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center group-hover:bg-pink-100 transition-colors">
-                <ShoppingBag size={20} />
+                <ShoppingBag size={22} />
               </div>
               <div>
-                <span className="block font-serif font-bold text-jp-text text-sm">
+                <span className="block font-serif font-bold text-jp-text text-base">
                   逛街清單
                 </span>
-                <span className="block text-[10px] text-stone-400 font-sans tracking-wide">
+                <span className="block text-xs text-stone-400 font-sans tracking-wide">
                   Shopping Map
+                </span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => onSelect("food")}
+              className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-stone-100 transition-all text-left group"
+            >
+              <div className="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center group-hover:bg-orange-100 transition-colors">
+                <Utensils size={22} />
+              </div>
+              <div>
+                <span className="block font-serif font-bold text-jp-text text-base">
+                  美食清單
+                </span>
+                <span className="block text-xs text-stone-400 font-sans tracking-wide">
+                  Food List
                 </span>
               </div>
             </button>
@@ -130,7 +147,7 @@ const Sidebar = ({ isOpen, onClose, onSelect }) => {
         </div>
 
         <div className="p-6 border-t border-stone-100 bg-stone-50">
-          <p className="text-[10px] text-stone-400 text-center font-sans tracking-widest uppercase">
+          <p className="text-xs text-stone-400 text-center font-sans tracking-widest uppercase">
             Family Trip 2026
           </p>
         </div>
@@ -155,7 +172,7 @@ const DateStrip = ({ days, activeDay, onSelect }) => {
             className="flex flex-col items-center gap-1 min-w-[3rem]"
           >
             <span
-              className={`text-[10px] tracking-widest uppercase font-sans ${
+              className={`text-xs tracking-widest uppercase font-sans ${
                 isActive ? "text-jp-red font-bold" : "text-stone-400"
               }`}
             >
@@ -239,13 +256,17 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
         <div className="bg-white rounded-lg p-4 shadow-sm border border-stone-100 active:scale-[0.98] transition-transform duration-200 h-full flex flex-col">
           <div className="flex justify-between items-start mb-2">
             <span
-              className={`text-[10px] tracking-wider uppercase px-2 py-0.5 rounded border font-sans font-bold ${
+              className={`text-xs tracking-wider uppercase px-2 py-0.5 rounded border font-sans font-bold ${
                 activity.type === "美食"
                   ? "border-orange-200 text-orange-700 bg-orange-50"
                   : activity.type === "交通"
                   ? "border-blue-200 text-blue-700 bg-blue-50"
                   : activity.type === "購物"
                   ? "border-pink-200 text-pink-700 bg-pink-50"
+                  : activity.type === "景點"
+                  ? "border-emerald-200 text-emerald-700 bg-emerald-50"
+                  : activity.type === "住宿"
+                  ? "border-purple-200 text-purple-700 bg-purple-50"
                   : "border-stone-200 text-stone-500 bg-stone-50"
               }`}
             >
@@ -256,12 +277,12 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
           <h4 className="text-lg font-serif font-bold text-jp-text mb-1 leading-snug">
             {activity.title}
           </h4>
-          <p className="text-xs text-jp-sub line-clamp-3 font-sans mb-2 leading-relaxed opacity-80">
+          <p className="text-sm text-jp-sub line-clamp-3 font-sans mb-2 leading-relaxed opacity-80">
             {activity.desc}
           </p>
 
           {activity.hours && (
-            <div className="flex items-center gap-1.5 text-[11px] text-stone-500 font-sans mb-3 bg-stone-50 w-fit px-2 py-1 rounded">
+            <div className="flex items-center gap-1.5 text-xs text-stone-500 font-sans mb-3 bg-stone-50 w-fit px-2 py-1 rounded">
               <Clock size={12} />
               <span>{activity.hours}</span>
             </div>
@@ -272,20 +293,20 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
               {activity.subItems.map((item, idx) => (
                 <div
                   key={idx}
-                  className="flex flex-col gap-0.5 text-xs font-sans"
+                  className="flex flex-col gap-0.5 text-sm font-sans"
                 >
                   <div className="flex justify-between items-baseline">
                     <span className="font-bold text-stone-600">
                       {item.title}
                     </span>
                     {item.hours && (
-                      <span className="text-[10px] text-stone-400">
+                      <span className="text-xs text-stone-400">
                         {item.hours}
                       </span>
                     )}
                   </div>
                   {item.desc && (
-                    <span className="text-[10px] text-stone-400 line-clamp-1">
+                    <span className="text-xs text-stone-400 line-clamp-1">
                       {item.desc}
                     </span>
                   )}
@@ -294,7 +315,7 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
             </div>
           )}
 
-          <div className="flex items-center gap-2 text-[11px] text-stone-400 font-sans mt-auto pt-2">
+          <div className="flex items-center gap-2 text-xs text-stone-400 font-sans mt-auto pt-2">
             {getIcon(activity.type)}
             <span className="truncate opacity-70 flex-1">
               {activity.address ||
@@ -328,7 +349,21 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
 
           <div className="flex justify-between items-start p-8 pb-4 sticky top-0 bg-[#FDFBF9]/95 backdrop-blur-sm z-10 rounded-t-[2rem] border-b border-stone-100/50">
             <div className="flex items-center gap-3">
-              <span className="px-3 py-1 border border-jp-red text-jp-red text-[10px] tracking-widest font-bold font-sans">
+              <span
+                className={`px-3 py-1 border text-xs tracking-widest font-bold font-sans uppercase rounded ${
+                  activity.type === "美食"
+                    ? "border-orange-200 text-orange-700 bg-orange-50"
+                    : activity.type === "交通"
+                    ? "border-blue-200 text-blue-700 bg-blue-50"
+                    : activity.type === "購物"
+                    ? "border-pink-200 text-pink-700 bg-pink-50"
+                    : activity.type === "景點"
+                    ? "border-emerald-200 text-emerald-700 bg-emerald-50"
+                    : activity.type === "住宿"
+                    ? "border-purple-200 text-purple-700 bg-purple-50"
+                    : "border-stone-200 text-stone-500 bg-stone-50"
+                }`}
+              >
                 {activity.type}
               </span>
 
@@ -354,17 +389,20 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
               {activity.title}
             </h2>
 
-            <div className="flex items-center gap-2 text-sm text-stone-500 mb-8 font-sans">
+            <div className="flex items-center gap-2 text-base text-stone-500 mb-8 font-sans">
               <MapPin size={14} />
 
-              {activity.nav}
+              {activity.address ||
+                (activity.nav.startsWith("http")
+                  ? "查看地圖位置"
+                  : activity.nav)}
             </div>
 
             {/* Body Content */}
 
             <div className="space-y-8">
               <div className="relative pl-6 border-l border-stone-200">
-                <p className="text-jp-text leading-loose font-serif text-sm opacity-90">
+                <p className="text-jp-text leading-relaxed font-serif text-base opacity-90">
                   {activity.desc}
                 </p>
               </div>
@@ -376,7 +414,7 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
                     關於此處
                   </h3>
 
-                  <p className="text-sm text-stone-600 leading-relaxed font-sans text-justify">
+                  <p className="text-base text-stone-600 leading-relaxed font-sans text-justify">
                     {activity.about}
                   </p>
                 </div>
@@ -419,7 +457,7 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
                       <ShoppingBag size={18} />
                     </div>
 
-                    <span className="font-bold text-pink-700 text-sm">
+                    <span className="font-bold text-pink-700 text-base">
                       {activity.shoppingText || "查看天神逛街地圖"}
                     </span>
                   </div>
@@ -438,7 +476,7 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
                     行程重點
                   </h3>
 
-                  <p className="text-sm text-stone-600 leading-relaxed font-sans">
+                  <p className="text-base text-stone-600 leading-relaxed font-sans">
                     {activity.highlight}
                   </p>
                 </div>
@@ -446,7 +484,7 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
 
               {activity.tips && (
                 <div>
-                  <h3 className="text-[10px] font-bold text-stone-400 mb-3 uppercase tracking-[0.2em] font-sans border-b border-stone-100 pb-2">
+                  <h3 className="text-xs font-bold text-stone-400 mb-3 uppercase tracking-[0.2em] font-sans border-b border-stone-100 pb-2">
                     Traveler Tips / 旅人攻略
                   </h3>
 
@@ -531,17 +569,17 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
           <div className="overflow-y-auto px-8 pb-10 space-y-8">
             {/* 1. Flight Info */}
             <div>
-              <h3 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <Plane size={16} /> 航班資訊
+              <h3 className="text-base font-bold text-stone-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <Plane size={18} /> 航班資訊
               </h3>
               <div className="space-y-4">
                 {/* Outbound */}
                 <div className="bg-white p-5 rounded-2xl shadow-sm border border-stone-100">
                   <div className="flex justify-between items-center mb-4 border-b border-stone-50 pb-2">
-                    <span className="text-xs font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded">
+                    <span className="text-sm font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded">
                       去程 01/10
                     </span>
-                    <span className="text-xs font-bold text-jp-green">
+                    <span className="text-sm font-bold text-jp-green">
                       AirAsia AK 1510
                     </span>
                   </div>
@@ -555,11 +593,11 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                       </div>
                     </div>
                     <div className="flex flex-col items-center text-stone-300">
-                      <span className="text-[10px] mb-1">3h 20m</span>
+                      <span className="text-sm mb-1">3h 20m</span>
                       <div className="flex items-center">
                         <div className="w-3 h-3 rounded-full border border-stone-300" />
                         <div className="w-12 h-[1px] bg-stone-300" />
-                        <Plane size={16} className="rotate-90 text-stone-400" />
+                        <Plane size={18} className="rotate-90 text-stone-400" />
                         <div className="w-12 h-[1px] bg-stone-300" />
                         <div className="w-3 h-3 rounded-full bg-stone-300" />
                       </div>
@@ -578,10 +616,10 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                 {/* Inbound */}
                 <div className="bg-white p-5 rounded-2xl shadow-sm border border-stone-100">
                   <div className="flex justify-between items-center mb-4 border-b border-stone-50 pb-2">
-                    <span className="text-xs font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded">
+                    <span className="text-sm font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded">
                       回程 01/14
                     </span>
-                    <span className="text-xs font-bold text-jp-green">
+                    <span className="text-sm font-bold text-jp-green">
                       AirAsia AK 1511
                     </span>
                   </div>
@@ -595,11 +633,11 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                       </div>
                     </div>
                     <div className="flex flex-col items-center text-stone-300">
-                      <span className="text-[10px] mb-1">2h 35m</span>
+                      <span className="text-sm mb-1">2h 35m</span>
                       <div className="flex items-center">
                         <div className="w-3 h-3 rounded-full border border-stone-300" />
                         <div className="w-12 h-[1px] bg-stone-300" />
-                        <Plane size={16} className="rotate-90 text-stone-400" />
+                        <Plane size={18} className="rotate-90 text-stone-400" />
                         <div className="w-12 h-[1px] bg-stone-300" />
                         <div className="w-3 h-3 rounded-full bg-stone-300" />
                       </div>
@@ -619,8 +657,8 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
 
             {/* 2. Preparation */}
             <div>
-              <h3 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <ClipboardList size={16} /> 行前準備
+              <h3 className="text-base font-bold text-stone-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <ClipboardList size={18} /> 行前準備
               </h3>
               <button
                 onClick={() =>
@@ -636,12 +674,12 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                     <h4 className="text-xl font-serif font-bold mb-1">
                       Visit Japan Web
                     </h4>
-                    <p className="text-xs opacity-80 font-sans tracking-wide">
+                    <p className="text-sm opacity-80 font-sans tracking-wide">
                       入境日本必備・提前填寫申報
                     </p>
                   </div>
                   <ExternalLink
-                    size={20}
+                    size={24}
                     className="opacity-80 group-hover:opacity-100"
                   />
                 </div>
@@ -658,31 +696,31 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 relative overflow-hidden">
                   <div className="flex items-start justify-between">
                     <div>
-                      <span className="text-xs font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded mb-3 inline-block">
+                      <span className="text-sm font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded mb-3 inline-block">
                         Airbnb
                       </span>
                       <h4 className="font-serif font-bold text-jp-text text-xl leading-tight mb-2">
                         Flower Base Sakura
                       </h4>
-                      <p className="text-sm text-stone-500 font-sans mb-4">
+                      <p className="text-base text-stone-500 font-sans mb-4">
                         博多駅南 (Near Hakata Station)
                       </p>
 
                       <div className="flex gap-6 mb-4 text-sm font-sans text-stone-600 bg-stone-50/50 p-3 rounded-lg border border-stone-100">
                         <div>
-                          <span className="block text-[10px] text-stone-400 uppercase tracking-wider font-bold mb-1">
+                          <span className="block text-sm text-stone-400 uppercase tracking-wider font-bold mb-1">
                             Check-in
                           </span>
-                          <span className="font-bold text-jp-text">
+                          <span className="font-bold text-jp-text text-sm">
                             01/10 15:00
                           </span>
                         </div>
                         <div className="w-[1px] bg-stone-200"></div>
                         <div>
-                          <span className="block text-[10px] text-stone-400 uppercase tracking-wider font-bold mb-1">
+                          <span className="block text-sm text-stone-400 uppercase tracking-wider font-bold mb-1">
                             Check-out
                           </span>
-                          <span className="font-bold text-jp-text">
+                          <span className="font-bold text-jp-text text-sm">
                             01/14 10:00
                           </span>
                         </div>
@@ -692,9 +730,9 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                         href="https://maps.app.goo.gl/vEDXtXCyJSVLbwP5A"
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-2 text-sm font-bold text-jp-green bg-green-50 px-4 py-2 rounded-full hover:bg-green-100 transition-colors"
+                        className="text-sm text-jp-green font-bold flex items-center gap-1 hover:underline mt-auto pl-1"
                       >
-                        <Navigation size={14} /> Google Maps
+                        查看位置 <ExternalLink size={14} />
                       </a>
                     </div>
                   </div>
@@ -703,20 +741,20 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                 {/* Surroundings */}
                 <div id="surroundings-section">
                   <h4 className="text-sm font-bold text-stone-400 mb-3 pl-1">
-                    周邊推薦 Surroundings
+                    周邊推薦
                   </h4>
                   <div className="grid grid-cols-1 gap-4">
                     {/* Onsen */}
                     <div className="bg-blue-50/50 p-5 rounded-xl border border-blue-100 flex flex-col">
                       <div className="flex items-center gap-2 mb-3">
                         <div className="p-2 bg-white text-blue-500 rounded-full shadow-sm">
-                          <Bath size={16} />
+                          <Bath size={18} />
                         </div>
-                        <span className="text-sm font-bold text-blue-800">
+                        <span className="text-base font-bold text-blue-800">
                           八百治博多ホテル 八百治の湯
                         </span>
                       </div>
-                      <div className="text-xs text-stone-600 space-y-1.5 mb-3 font-sans pl-1">
+                      <div className="text-sm text-stone-600 space-y-1.5 mb-3 font-sans pl-1">
                         <p>• 營業：6:30-9:30 / 12:00-24:00</p>
                         <p>• 費用：平日 1,200円 / 土日祝 1,400円</p>
                       </div>
@@ -724,9 +762,9 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                         href="https://maps.app.goo.gl/1zHyqqb42Sgi8Vhu5"
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs text-blue-600 font-bold flex items-center gap-1 hover:underline mt-auto pl-1"
+                        className="text-sm text-blue-600 font-bold flex items-center gap-1 hover:underline mt-auto pl-1"
                       >
-                        查看位置 <ExternalLink size={12} />
+                        查看位置 <ExternalLink size={14} />
                       </a>
                     </div>
 
@@ -734,22 +772,22 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                     <div className="bg-red-50/50 p-5 rounded-xl border border-red-100 flex flex-col">
                       <div className="flex items-center gap-2 mb-3">
                         <div className="p-2 bg-white text-red-500 rounded-full shadow-sm">
-                          <ShoppingBag size={16} />
+                          <ShoppingBag size={18} />
                         </div>
-                        <span className="text-sm font-bold text-red-800">
+                        <span className="text-base font-bold text-red-800">
                           LOPIA 博多友都八喜店
                         </span>
                       </div>
-                      <p className="text-xs text-stone-600 mb-3 font-sans pl-1 leading-relaxed">
+                      <p className="text-sm text-stone-600 mb-3 font-sans pl-1 leading-relaxed">
                         人氣超市，非常適合購買伴手禮與宵夜。
                       </p>
                       <a
                         href="https://maps.app.goo.gl/zYKq8J5sbHPdmruP8"
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs text-red-600 font-bold flex items-center gap-1 hover:underline mt-auto pl-1"
+                        className="text-sm text-red-600 font-bold flex items-center gap-1 hover:underline mt-auto pl-1"
                       >
-                        查看位置 <ExternalLink size={12} />
+                        查看位置 <ExternalLink size={14} />
                       </a>
                     </div>
                   </div>
@@ -765,10 +803,10 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
               <div className="space-y-4">
                 <div className="bg-orange-50 p-5 rounded-xl border border-orange-100 flex gap-4">
                   <div className="bg-orange-100 p-2.5 rounded-full h-fit text-orange-600">
-                    <AlertCircle size={20} />
+                    <AlertCircle size={24} />
                   </div>
                   <div>
-                    <h4 className="font-bold text-orange-900 text-sm mb-1.5">
+                    <h4 className="font-bold text-orange-900 text-base mb-1.5">
                       取票提醒
                     </h4>
                     <p className="text-sm text-orange-800/80 leading-relaxed">
@@ -780,19 +818,53 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
 
                 <div className="bg-stone-100 p-5 rounded-xl border border-stone-200 flex gap-4">
                   <div className="bg-white p-2.5 rounded-full h-fit text-stone-500">
-                    <Luggage size={20} />
+                    <Luggage size={24} />
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-bold text-stone-700 text-sm mb-2.5">
-                      行李限重 (AirAsia)
+                    <h4 className="font-bold text-stone-700 text-base mb-3">
+                      行李限重與規定 (AirAsia)
                     </h4>
-                    <div className="flex justify-between items-center text-sm text-stone-600 border-b border-stone-200 pb-2.5 mb-2.5">
-                      <span>手提行李</span>
-                      <span className="font-bold">7 kg</span>
+
+                    {/* Weight Limits */}
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between items-center text-sm text-stone-600 border-b border-stone-200 pb-2">
+                        <span>手提行李 (最多 2 件)</span>
+                        <span className="font-bold">合計 7 kg</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm text-stone-600">
+                        <span>托運行李 (已加購)</span>
+                        <span className="font-bold text-right">
+                          合計 20 kg
+                          <br />
+                          <span className="text-[10px] font-normal text-stone-400">
+                            不限件數，單件 &lt;32kg
+                          </span>
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center text-sm text-stone-600">
-                      <span>托運行李</span>
-                      <span className="font-bold">20 kg</span>
+
+                    {/* Detailed Rules */}
+                    <div className="bg-white/50 rounded-lg p-3 space-y-3">
+                      <div>
+                        <p className="text-sm font-bold text-stone-500 uppercase tracking-wider mb-1">
+                          隨身行李限制
+                        </p>
+                        <ul className="text-sm text-stone-600 space-y-1 list-disc pl-3">
+                          <li>主要行李：56 x 36 x 23 cm 以內</li>
+                          <li>隨身小包：40 x 30 x 10 cm 以內</li>
+                          <li>液體需單瓶 &lt;100ml，總體積 &lt;1L 透明袋裝</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-stone-500 uppercase tracking-wider mb-1">
+                          禁止託運 (務必隨身)
+                        </p>
+                        <ul className="text-sm text-red-600/80 space-y-1 list-disc pl-3">
+                          <li>行動電源、鋰電池</li>
+                          <li>相機電池、筆電、平板</li>
+                          <li>打火機 (限 1 個，需隨身)</li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -833,7 +905,7 @@ const ChecklistModal = ({ isOpen, onClose, checkedItems, onToggle }) => {
           <div className="overflow-y-auto px-8 pb-10 grid grid-cols-1 gap-6">
             {Object.entries(checklistData).map(([category, items]) => (
               <div key={category}>
-                <h3 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3 border-b border-stone-100 pb-1">
+                <h3 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-3 border-b border-stone-100 pb-1">
                   {category}
                 </h3>
                 <ul className="space-y-3">
@@ -857,7 +929,7 @@ const ChecklistModal = ({ isOpen, onClose, checkedItems, onToggle }) => {
                           <Check size={12} strokeWidth={3} />
                         </div>
                         <span
-                          className={`text-sm font-serif transition-all ${
+                          className={`text-base font-serif transition-all ${
                             isChecked
                               ? "text-stone-400 line-through"
                               : "text-jp-text"
@@ -881,6 +953,26 @@ const ChecklistModal = ({ isOpen, onClose, checkedItems, onToggle }) => {
 // 8. Shopping Modal
 const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
   const [activeTab, setActiveTab] = useState("tenjin"); // tenjin or hakata
+
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe && activeTab === "tenjin") setActiveTab("hakata");
+    if (isRightSwipe && activeTab === "hakata") setActiveTab("tenjin");
+  };
 
   React.useEffect(() => {
     if (isOpen && initialTab) {
@@ -913,7 +1005,12 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
             </button>
           </div>
 
-          <div className="overflow-y-auto px-8 pb-10 space-y-4">
+          <div
+            className="overflow-y-auto px-8 pb-10 space-y-4"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
             {/* Tabs */}
             <div className="flex gap-2 p-1 bg-stone-100 rounded-xl mb-6">
               <button
@@ -955,8 +1052,8 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
                         {item.name}
                       </h3>
                       {item.isBuilding && item.hours && (
-                        <span className="text-[10px] text-stone-400 font-sans mt-1 flex items-center gap-1">
-                          <Clock size={10} /> {item.hours}
+                        <span className="text-xs text-stone-500 font-sans mt-1 flex items-center gap-1">
+                          <Clock size={12} /> {item.hours}
                         </span>
                       )}
                     </div>
@@ -987,11 +1084,15 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
                           <p className="font-bold text-sm text-stone-700">
                             {shop.name}
                           </p>
-                          <div className="flex items-center gap-2 text-xs text-stone-400 font-sans">
-                            <span className="bg-stone-100 px-1.5 py-0.5 rounded text-[10px]">
+                          <div className="flex items-center gap-2 text-xs text-stone-500 font-sans">
+                            <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-600 font-medium">
                               {shop.floor}
                             </span>
-                            {shop.hours && <span>{shop.hours}</span>}
+                            {shop.hours && (
+                              <span className="flex items-center gap-1">
+                                <Clock size={12} /> {shop.hours}
+                              </span>
+                            )}
                           </div>
                         </div>
                         <a
@@ -1027,15 +1128,175 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
   );
 };
 
+// 9. Food Modal
+const FoodModal = ({ isOpen, onClose }) => {
+  const [activeTab, setActiveTab] = useState("tenjin"); // tenjin, nakasu, or hakata
+
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  const tabs = ["tenjin", "nakasu", "hakata"];
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    const currentIndex = tabs.indexOf(activeTab);
+    if (isLeftSwipe && currentIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentIndex + 1]);
+    }
+    if (isRightSwipe && currentIndex > 0) {
+      setActiveTab(tabs[currentIndex - 1]);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  const currentCategories = tripData.food[activeTab];
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50"
+        onClick={onClose}
+      />
+      <div className="fixed inset-x-0 bottom-0 z-50 transform animate-slide-up">
+        <div className="bg-[#FDFBF9] rounded-t-[2rem] shadow-2xl min-h-[70vh] max-h-[90vh] flex flex-col relative">
+          {/* Header (Sticky) */}
+          <div className="flex justify-between items-center p-8 pb-4 sticky top-0 bg-[#FDFBF9]/95 backdrop-blur-sm z-10 rounded-t-[2rem] border-b border-stone-100/50">
+            <h2 className="text-2xl font-serif font-bold text-jp-text">
+              美食清單
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <div
+            className="overflow-y-auto px-8 pb-10 space-y-6"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
+            {/* Tabs */}
+            <div className="flex gap-2 p-1 bg-stone-100 rounded-xl mb-6">
+              {[
+                { id: "tenjin", label: "天神" },
+                { id: "nakasu", label: "中洲" },
+                { id: "hakata", label: "博多" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                    activeTab === tab.id
+                      ? "bg-white shadow text-jp-text"
+                      : "text-stone-400"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* List by Category */}
+            <div className="space-y-8">
+              {currentCategories.map((cat, cIdx) => (
+                <div key={cIdx}>
+                  <h3 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4 border-b border-stone-100 pb-2">
+                    {cat.category}
+                  </h3>
+                  <div className="space-y-4">
+                    {cat.shops.map((shop, sIdx) => (
+                      <div
+                        key={sIdx}
+                        className="bg-white rounded-xl p-5 border border-stone-100 shadow-sm group"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h4 className="font-bold text-jp-text font-serif text-lg leading-tight">
+                              {shop.name}
+                            </h4>
+                            {shop.hours && (
+                              <span className="text-xs text-stone-500 font-sans mt-1 flex items-center gap-1">
+                                <Clock size={12} /> {shop.hours}
+                              </span>
+                            )}
+                          </div>
+                          <a
+                            href={shop.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-2 bg-stone-50 rounded-full text-stone-400 hover:text-jp-green hover:bg-green-50 transition-colors"
+                          >
+                            <Navigation size={16} />
+                          </a>
+                        </div>
+                        <p className="text-sm text-stone-500 leading-relaxed font-sans">
+                          {shop.desc}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
 function App() {
   const [activeDay, setActiveDay] = useState(1);
   const [selectedActivity, setSelectedActivity] = useState(null);
+
+  // Swipe logic for days
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && activeDay < tripData.itinerary.length) {
+      setActiveDay((prev) => prev + 1);
+    }
+    if (isRightSwipe && activeDay > 1) {
+      setActiveDay((prev) => prev - 1);
+    }
+  };
 
   // Modal States
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
   const [showShopping, setShowShopping] = useState(false);
+  const [showFood, setShowFood] = useState(false);
   const [shoppingTab, setShoppingTab] = useState("tenjin");
   const [infoScrollTarget, setInfoScrollTarget] = useState(null);
 
@@ -1048,7 +1309,8 @@ function App() {
       isSidebarOpen ||
       showInfo ||
       showChecklist ||
-      showShopping;
+      showShopping ||
+      showFood;
     if (isAnyModalOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -1077,11 +1339,17 @@ function App() {
       if (menu === "info") setShowInfo(true);
       if (menu === "checklist") setShowChecklist(true);
       if (menu === "shopping") setShowShopping(true);
+      if (menu === "food") setShowFood(true);
     }, 200);
   };
 
   return (
-    <div className="min-h-screen bg-jp-bg text-jp-text font-serif pb-12">
+    <div
+      className="min-h-screen bg-jp-bg text-jp-text font-serif pb-12"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       {/* 1. Header with Sidebar Toggle */}
       <div className="relative pt-8 pb-4 px-6 flex items-center justify-between">
         <button
@@ -1092,14 +1360,14 @@ function App() {
         </button>
 
         <div className="flex flex-col items-center">
-          <p className="text-[10px] tracking-[0.4em] uppercase text-stone-400 mb-1 font-sans font-bold">
+          <p className="text-xs tracking-[0.4em] uppercase text-stone-400 mb-1 font-sans font-bold">
             Family Trip
           </p>
           <div className="flex items-center justify-center gap-3">
             <h1 className="text-2xl font-bold tracking-[0.2em] text-jp-text">
               九州旅行
             </h1>
-            <span className="px-2 py-0.5 border border-stone-300 rounded-full text-[10px] text-stone-400 font-sans font-bold">
+            <span className="px-2 py-0.5 border border-stone-300 rounded-full text-xs text-stone-400 font-sans font-bold">
               2026/01
             </span>
           </div>
@@ -1178,6 +1446,8 @@ function App() {
         onClose={() => setShowShopping(false)}
         initialTab={shoppingTab}
       />
+
+      <FoodModal isOpen={showFood} onClose={() => setShowFood(false)} />
     </div>
   );
 }
