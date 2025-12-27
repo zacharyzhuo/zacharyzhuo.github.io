@@ -3,5 +3,5 @@
   <rect width="512" height="512" fill="#FFE4E6" rx="64"/>
   
   <!-- 櫻花 emoji - 置中並放大 -->
-  <text x="256" y="280" font-size="400" text-anchor="middle" dominant-baseline="central" font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif">🌸</text>
+  <text x="256" y="300" font-size="400" text-anchor="middle" dominant-baseline="central" font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif">🌸</text>
 </svg>

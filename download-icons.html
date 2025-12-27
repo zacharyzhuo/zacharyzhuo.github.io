@@ -18,8 +18,8 @@
     <p>點擊按鈕下載對應尺寸的 PNG 圖標</p>
     
     <div class="preview">
-      <img id="preview192" src="sakura-icon.svg" width="192" height="192">
-      <img id="preview512" src="sakura-icon.svg" width="512" height="512">
+      <canvas id="preview192" width="192" height="192" style="border: 2px solid #ddd; border-radius: 8px; margin: 10px;"></canvas>
+      <canvas id="preview512" width="512" height="512" style="border: 2px solid #ddd; border-radius: 8px; margin: 10px;"></canvas>
     </div>
     
     <div>
@@ -33,10 +33,8 @@
   </div>
 
   <script>
-    function download(size) {
-      const canvas = document.createElement('canvas');
-      canvas.width = size;
-      canvas.height = size;
+    // 繪製圖標的函數
+    function drawIcon(canvas, size) {
       const ctx = canvas.getContext('2d');
       
       // 繪製淺粉色背景
@@ -47,8 +45,26 @@
       ctx.font = `${size * 0.78}px Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      // 向下調整一點，讓視覺上更置中
-      ctx.fillText('🌸', size / 2, size / 2 + size * 0.05);
+      // 向下調整更多，讓視覺上更置中
+      ctx.fillText('🌸', size / 2, size / 2 + size * 0.1);
+    }
+
+    // 初始化預覽
+    window.addEventListener('load', function() {
+      const preview192 = document.getElementById('preview192');
+      const preview512 = document.getElementById('preview512');
+      
+      if (preview192) drawIcon(preview192, 192);
+      if (preview512) drawIcon(preview512, 512);
+    });
+
+    // 下載函數
+    function download(size) {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      
+      drawIcon(canvas, size);
       
       // 下載
       canvas.toBlob(function(blob) {
