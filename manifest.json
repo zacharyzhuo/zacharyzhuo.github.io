@@ -1,9 +1,24 @@
 {
-  "short_name": "2026 Family Trip to Fukuoka",
+  "short_name": "福岡旅行",
   "name": "2026 Family Trip to Fukuoka",
-  "icons": [],
+  "icons": [
+    {
+      "src": "logo192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait",
+  "theme_color": "#5C6E58",
+  "background_color": "#F9F8F4",
+  "description": "2026 年福岡家庭旅行行程規劃"
 }

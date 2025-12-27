@@ -25,6 +25,11 @@ import {
   Clock,
   Bath,
   BookOpen,
+  Phone,
+  PhoneCall,
+  Shield,
+  Flame,
+  Building2,
 } from "lucide-react";
 
 // --- DATA ---
@@ -68,7 +73,8 @@ const Sidebar = ({ isOpen, onClose, onSelect }) => {
           </h2>
           <button
             onClick={onClose}
-            className="p-2 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors"
+            className="p-3 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="關閉選單"
           >
             <X size={18} />
           </button>
@@ -143,6 +149,23 @@ const Sidebar = ({ isOpen, onClose, onSelect }) => {
                 </span>
               </div>
             </button>
+
+            <button
+              onClick={() => onSelect("emergency")}
+              className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-red-50 transition-all text-left group border-2 border-red-100"
+            >
+              <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center group-hover:bg-red-100 transition-colors">
+                <PhoneCall size={22} />
+              </div>
+              <div>
+                <span className="block font-serif font-bold text-red-700 text-base">
+                  緊急聯絡
+                </span>
+                <span className="block text-xs text-red-400 font-sans tracking-wide">
+                  Emergency
+                </span>
+              </div>
+            </button>
           </nav>
         </div>
 
@@ -197,7 +220,8 @@ const DateStrip = ({ days, activeDay, onSelect }) => {
           <button
             key={day.day}
             onClick={() => handleTap(day.day)}
-            className="flex flex-col items-center gap-1 min-w-[3rem]"
+            className="flex flex-col items-center gap-1 min-w-[3rem] min-h-[44px] justify-center touch-manipulation px-2"
+            aria-label={`選擇第 ${day.day} 天`}
           >
             <span
               className={`text-xs tracking-widest uppercase font-sans ${
@@ -224,28 +248,47 @@ const DateStrip = ({ days, activeDay, onSelect }) => {
 };
 
 // 3. Hero Section (Image + Title)
-const HeroSection = ({ location, title, image }) => (
-  <div className="relative mx-4 mt-4 rounded-xl overflow-hidden shadow-lg h-48 group">
-    <div className="absolute inset-0 bg-gradient-to-br from-stone-600 to-stone-800 mix-blend-multiply" />
-    <img
-      src={image}
-      alt={location}
-      className="absolute inset-0 w-full h-full object-cover opacity-60"
-    />
+const HeroSection = ({ location, title, image }) => {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
-    <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-6 text-center">
-      <div className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase opacity-80 mb-2 font-sans">
-        <span className="w-6 h-[1px] bg-white"></span>
-        <span>今日行程</span>
-        <span className="w-6 h-[1px] bg-white"></span>
+  return (
+    <div className="relative mx-4 mt-4 rounded-xl overflow-hidden shadow-lg h-48 group">
+      <div className="absolute inset-0 bg-gradient-to-br from-stone-600 to-stone-800 mix-blend-multiply" />
+      {!imageError ? (
+        <img
+          src={image}
+          alt={location}
+          className={`absolute inset-0 w-full h-full object-cover opacity-60 transition-opacity duration-300 ${
+            imageLoaded ? "opacity-60" : "opacity-0"
+          }`}
+          loading="lazy"
+          onLoad={() => setImageLoaded(true)}
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-stone-500 to-stone-700" />
+      )}
+      {!imageLoaded && !imageError && (
+        <div className="absolute inset-0 bg-stone-300 animate-pulse" />
+      )}
+
+      <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-6 text-center">
+        <div className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase opacity-80 mb-2 font-sans">
+          <span className="w-6 h-[1px] bg-white"></span>
+          <span>今日行程</span>
+          <span className="w-6 h-[1px] bg-white"></span>
+        </div>
+        <h2 className="text-2xl font-serif font-bold tracking-wide mb-1 shadow-black drop-shadow-md">
+          {title}
+        </h2>
+        <p className="text-xs font-sans opacity-90 tracking-widest">
+          {location}
+        </p>
       </div>
-      <h2 className="text-2xl font-serif font-bold tracking-wide mb-1 shadow-black drop-shadow-md">
-        {title}
-      </h2>
-      <p className="text-xs font-sans opacity-90 tracking-widest">{location}</p>
     </div>
-  </div>
-);
+  );
+};
 
 // 4. Activity List Item
 const ActivityItem = ({ activity, isLast, onOpen }) => {
@@ -281,7 +324,7 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
 
       {/* Content */}
       <div className="flex-1 pb-8">
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-stone-100 active:scale-[0.98] transition-transform duration-200 h-full flex flex-col">
+        <div className="bg-white rounded-lg p-4 shadow-sm border border-stone-100 active:scale-[0.98] transition-transform duration-200 h-full flex flex-col touch-manipulation">
           <div className="flex justify-between items-start mb-2">
             <span
               className={`text-xs tracking-wider uppercase px-2 py-0.5 rounded border font-sans font-bold ${
@@ -423,7 +466,8 @@ const DetailModal = ({
 
             <button
               onClick={onClose}
-              className="p-2 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors"
+              className="p-3 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="關閉詳情"
             >
               <X size={20} />
             </button>
@@ -483,7 +527,8 @@ const DetailModal = ({
                       onClose();
                       onOpenInfo("surroundings-section");
                     }}
-                    className="w-full bg-white text-blue-600 text-xs font-bold py-3 rounded-lg border border-blue-200 shadow-sm hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+                    className="w-full bg-white text-blue-600 text-xs font-bold py-3 rounded-lg border border-blue-200 shadow-sm hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 touch-manipulation min-h-[44px]"
+                    aria-label="查看民宿周邊推薦詳細資訊"
                   >
                     查看詳細資訊 (溫泉/LOPIA) <ChevronRight size={12} />
                   </button>
@@ -499,7 +544,8 @@ const DetailModal = ({
 
                     onOpenShopping(currentActivity.shoppingTab || "tenjin");
                   }}
-                  className="w-full flex items-center justify-between p-4 bg-pink-50 border border-pink-100 rounded-xl group active:scale-[0.98] transition-all"
+                  className="w-full flex items-center justify-between p-4 bg-pink-50 border border-pink-100 rounded-xl group active:scale-[0.98] transition-all touch-manipulation min-h-[48px]"
+                  aria-label="查看逛街清單"
                 >
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-white rounded-full text-pink-500 shadow-sm">
@@ -554,7 +600,7 @@ const DetailModal = ({
 
           {/* Action Button */}
 
-          <div className="sticky bottom-4 mt-12 pt-4 pb-4 px-8 bg-gradient-to-t from-[#FDFBF9] via-[#FDFBF9] to-transparent">
+          <div className="sticky bottom-4 mt-12 pt-4 pb-4 px-8 bg-gradient-to-t from-[#FDFBF9] via-[#FDFBF9] to-transparent safe-area-bottom">
             <button
               onClick={() => {
                 const url = currentActivity.nav.startsWith("http")
@@ -565,7 +611,8 @@ const DetailModal = ({
 
                 window.open(url, "_blank");
               }}
-              className="w-full bg-jp-green text-white py-4 rounded-lg font-serif font-medium tracking-wide flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-lg shadow-jp-green/20"
+              className="w-full bg-jp-green text-white py-4 rounded-lg font-serif font-medium tracking-wide flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-lg shadow-jp-green/20 touch-manipulation min-h-[48px]"
+              aria-label={`開啟 ${currentActivity.title} 的 Google Maps 導航`}
             >
               <Navigation size={16} />
               Google Maps 導航
@@ -613,7 +660,8 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
             </h2>
             <button
               onClick={onClose}
-              className="p-2 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors"
+              className="p-3 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="關閉詳情"
             >
               <X size={20} />
             </button>
@@ -717,7 +765,8 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                 onClick={() =>
                   window.open("https://vjw-lp.digital.go.jp/zh-hant/", "_blank")
                 }
-                className="w-full bg-[#6B9080] text-white p-6 rounded-2xl shadow-md hover:brightness-105 transition-all text-left group relative overflow-hidden"
+                className="w-full bg-[#6B9080] text-white p-6 rounded-2xl shadow-md hover:brightness-105 transition-all text-left group relative overflow-hidden touch-manipulation min-h-[48px]"
+                aria-label="開啟 Visit Japan Web 網站"
               >
                 <div className="absolute right-[-10px] top-[-10px] opacity-10 rotate-12">
                   <Plane size={100} />
@@ -783,7 +832,8 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                         href="https://maps.app.goo.gl/vEDXtXCyJSVLbwP5A"
                         target="_blank"
                         rel="noreferrer"
-                        className="text-sm text-jp-green font-bold flex items-center gap-1 hover:underline mt-auto pl-1"
+                        className="text-sm text-jp-green font-bold flex items-center gap-1 hover:underline mt-auto pl-1 py-2 touch-manipulation min-h-[44px]"
+                        aria-label="查看民宿位置"
                       >
                         查看位置 <ExternalLink size={14} />
                       </a>
@@ -815,7 +865,8 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                         href="https://maps.app.goo.gl/1zHyqqb42Sgi8Vhu5"
                         target="_blank"
                         rel="noreferrer"
-                        className="text-sm text-blue-600 font-bold flex items-center gap-1 hover:underline mt-auto pl-1"
+                        className="text-sm text-blue-600 font-bold flex items-center gap-1 hover:underline mt-auto pl-1 py-2 touch-manipulation min-h-[44px]"
+                        aria-label="查看溫泉位置"
                       >
                         查看位置 <ExternalLink size={14} />
                       </a>
@@ -838,7 +889,8 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                         href="https://maps.app.goo.gl/zYKq8J5sbHPdmruP8"
                         target="_blank"
                         rel="noreferrer"
-                        className="text-sm text-red-600 font-bold flex items-center gap-1 hover:underline mt-auto pl-1"
+                        className="text-sm text-red-600 font-bold flex items-center gap-1 hover:underline mt-auto pl-1 py-2 touch-manipulation min-h-[44px]"
+                        aria-label="查看 LOPIA 超市位置"
                       >
                         查看位置 <ExternalLink size={14} />
                       </a>
@@ -953,7 +1005,8 @@ const ChecklistModal = ({ isOpen, onClose, checkedItems, onToggle }) => {
             </h2>
             <button
               onClick={onClose}
-              className="p-2 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors"
+              className="p-3 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="關閉詳情"
             >
               <X size={20} />
             </button>
@@ -973,8 +1026,17 @@ const ChecklistModal = ({ isOpen, onClose, checkedItems, onToggle }) => {
                     return (
                       <li
                         key={uniqueKey}
-                        className="flex items-start gap-3 group cursor-pointer"
+                        className="flex items-start gap-3 group cursor-pointer touch-manipulation min-h-[44px] py-1"
                         onClick={() => onToggle(uniqueKey)}
+                        role="checkbox"
+                        aria-checked={isChecked}
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onToggle(uniqueKey);
+                          }
+                        }}
                       >
                         <div
                           className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
@@ -1114,7 +1176,8 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
             </h2>
             <button
               onClick={onClose}
-              className="p-2 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors"
+              className="p-3 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="關閉詳情"
             >
               <X size={20} />
             </button>
@@ -1132,21 +1195,25 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
               <div className="flex gap-2 p-1 bg-stone-100 rounded-xl shadow-sm">
                 <button
                   onClick={() => handleTap("tenjin")}
-                  className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                  className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all touch-manipulation min-h-[44px] ${
                     activeTab === "tenjin"
                       ? "bg-white shadow text-jp-text"
                       : "text-stone-400"
                   }`}
+                  aria-label="天神逛街清單"
+                  aria-pressed={activeTab === "tenjin"}
                 >
                   天神
                 </button>
                 <button
                   onClick={() => handleTap("hakata")}
-                  className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                  className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all touch-manipulation min-h-[44px] ${
                     activeTab === "hakata"
                       ? "bg-white shadow text-jp-text"
                       : "text-stone-400"
                   }`}
+                  aria-label="博多逛街清單"
+                  aria-pressed={activeTab === "hakata"}
                 >
                   博多
                 </button>
@@ -1185,7 +1252,8 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
                       href={item.link}
                       target="_blank"
                       rel="noreferrer"
-                      className="p-2 bg-stone-50 rounded-full text-stone-400 hover:text-jp-green hover:bg-green-50 transition-colors"
+                      className="p-3 bg-stone-50 rounded-full text-stone-400 hover:text-jp-green hover:bg-green-50 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+                      aria-label={`查看 ${item.name} 的位置`}
                     >
                       <Navigation size={16} />
                     </a>
@@ -1219,7 +1287,8 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
                           href={shop.link}
                           target="_blank"
                           rel="noreferrer"
-                          className="opacity-40 group-hover:opacity-100 group-hover:text-jp-green transition-all"
+                          className="opacity-40 group-hover:opacity-100 group-hover:text-jp-green transition-all p-2 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+                          aria-label={`查看 ${shop.name} 的位置`}
                         >
                           <Navigation size={14} />
                         </a>
@@ -1248,7 +1317,153 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
   );
 };
 
-// 9. Food Modal
+// 9. Emergency Modal
+const EmergencyModal = ({ isOpen, onClose }) => {
+  const { emergency } = tripData;
+
+  const getPhoneNumber = (number) => {
+    // Remove spaces and format for tel: link
+    return number.replace(/\s/g, "").replace(/-/g, "");
+  };
+
+  const getPhoneLabel = (name) => {
+    const labels = {
+      Police: "警察",
+      "Fire/Ambulance": "消防/救護車",
+      "TECO Fukuoka": "駐福岡辦事處",
+    };
+    return labels[name] || name;
+  };
+
+  const getPhoneIcon = (name) => {
+    if (name === "Police") return <Shield size={28} className="text-red-600" />;
+    if (name === "Fire/Ambulance")
+      return <Flame size={28} className="text-red-600" />;
+    if (name === "TECO Fukuoka")
+      return <Building2 size={28} className="text-red-600" />;
+    return <Phone size={28} className="text-red-600" />;
+  };
+
+  return (
+    <>
+      <div
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 transition-opacity duration-300 ${
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={onClose}
+      />
+      <div
+        className={`fixed inset-x-0 bottom-0 z-50 transform transition-transform duration-300 ease-out ${
+          isOpen ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
+        <div className="bg-[#FDFBF9] rounded-t-[2rem] shadow-2xl min-h-[50vh] max-h-[90vh] flex flex-col relative">
+          {/* Header (Sticky) */}
+          <div className="flex justify-between items-center p-8 pb-4 sticky top-0 bg-[#FDFBF9]/95 backdrop-blur-sm z-10 rounded-t-[2rem] border-b border-red-100/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-50 rounded-full text-red-600">
+                <PhoneCall size={24} />
+              </div>
+              <h2 className="text-2xl font-serif font-bold text-jp-text">
+                緊急聯絡
+              </h2>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-3 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="關閉緊急聯絡"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="overflow-y-auto px-8 pb-10 pt-6 space-y-4">
+            <div className="bg-red-50/50 border border-red-100 p-4 rounded-xl mb-6">
+              <div className="flex items-start gap-3">
+                <AlertCircle
+                  size={20}
+                  className="text-red-600 mt-0.5 shrink-0"
+                />
+                <div>
+                  <h3 className="font-bold text-red-900 text-sm mb-1">
+                    緊急情況處理
+                  </h3>
+                  <p className="text-xs text-red-700/80 leading-relaxed">
+                    在日本遇到緊急情況時，請直接撥打對應的緊急電話。警察為
+                    110，消防/救護車為
+                    119。如需台灣駐日辦事處協助，可撥打駐福岡辦事處電話。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {emergency.map((contact, idx) => (
+              <a
+                key={idx}
+                href={`tel:${getPhoneNumber(contact.number)}`}
+                className="block bg-white rounded-xl p-5 border-2 border-stone-100 shadow-sm hover:border-red-200 hover:shadow-md transition-all group active:scale-[0.98] touch-manipulation"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
+                      {getPhoneIcon(contact.name)}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-serif font-bold text-jp-text text-lg mb-1">
+                        {getPhoneLabel(contact.name)}
+                      </h3>
+                      <p className="text-sm text-stone-500 font-sans">
+                        {contact.name}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-2xl font-serif font-bold text-red-600 mb-0.5">
+                        {contact.number}
+                      </p>
+                      <p className="text-xs text-stone-400 font-sans">
+                        點擊撥號
+                      </p>
+                    </div>
+                    <div className="p-3 bg-red-50 rounded-full text-red-600 group-hover:bg-red-100 transition-colors">
+                      <Phone size={20} />
+                    </div>
+                  </div>
+                </div>
+              </a>
+            ))}
+
+            <div className="mt-6 pt-6 border-t border-stone-100">
+              <h4 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3 font-sans">
+                其他重要資訊
+              </h4>
+              <div className="space-y-3">
+                <div className="bg-stone-50 p-4 rounded-lg border border-stone-100">
+                  <p className="text-xs text-stone-600 leading-relaxed font-sans">
+                    <strong className="text-stone-700">語言協助：</strong>
+                    撥打緊急電話時，如果不會日語，可以說 "English, please" 或
+                    "Taiwanese, please"，接線員會協助轉接。
+                  </p>
+                </div>
+                <div className="bg-stone-50 p-4 rounded-lg border border-stone-100">
+                  <p className="text-xs text-stone-600 leading-relaxed font-sans">
+                    <strong className="text-stone-700">位置資訊：</strong>
+                    撥打緊急電話時，請盡可能提供詳細的位置資訊，例如：地址、附近的地標、或使用
+                    Google Maps 分享位置。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+// 10. Food Modal
 const FoodModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState("tenjin"); // tenjin, nakasu, or hakata
   const [lastTap, setLastTap] = useState(0);
@@ -1354,7 +1569,8 @@ const FoodModal = ({ isOpen, onClose }) => {
             </h2>
             <button
               onClick={onClose}
-              className="p-2 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors"
+              className="p-3 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="關閉詳情"
             >
               <X size={20} />
             </button>
@@ -1378,11 +1594,13 @@ const FoodModal = ({ isOpen, onClose }) => {
                   <button
                     key={tab.id}
                     onClick={() => handleTap(tab.id)}
-                    className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                    className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all touch-manipulation min-h-[44px] ${
                       activeTab === tab.id
                         ? "bg-white shadow text-jp-text"
                         : "text-stone-400"
                     }`}
+                    aria-label={`${tab.label}美食清單`}
+                    aria-pressed={activeTab === tab.id}
                   >
                     {tab.label}
                   </button>
@@ -1420,7 +1638,8 @@ const FoodModal = ({ isOpen, onClose }) => {
                             href={shop.link}
                             target="_blank"
                             rel="noreferrer"
-                            className="p-2 bg-stone-50 rounded-full text-stone-400 hover:text-jp-green hover:bg-green-50 transition-colors"
+                            className="p-3 bg-stone-50 rounded-full text-stone-400 hover:text-jp-green hover:bg-green-50 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+                            aria-label={`查看 ${shop.name} 的位置`}
                           >
                             <Navigation size={16} />
                           </a>
@@ -1444,11 +1663,82 @@ const FoodModal = ({ isOpen, onClose }) => {
 function App() {
   const [activeDay, setActiveDay] = useState(1);
   const [selectedActivity, setSelectedActivity] = useState(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
   // Reset scroll on day change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [activeDay]);
+
+  // Monitor online/offline status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  // Handle PWA install prompt
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      // 阻止預設的安裝提示
+      e.preventDefault();
+      // 保存事件以便稍後使用
+      setDeferredPrompt(e);
+      // 檢查是否已經安裝過
+      const isInstalled =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone ||
+        document.referrer.includes("android-app://");
+
+      if (!isInstalled) {
+        // 延遲顯示安裝提示，避免打擾用戶
+        setTimeout(() => {
+          setShowInstallPrompt(true);
+        }, 3000);
+      }
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
+    };
+  }, []);
+
+  // Handle install button click
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      return;
+    }
+
+    // 顯示安裝提示
+    deferredPrompt.prompt();
+
+    // 等待用戶回應
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === "accepted") {
+      console.log("User accepted the install prompt");
+    } else {
+      console.log("User dismissed the install prompt");
+    }
+
+    // 清除保存的提示
+    setDeferredPrompt(null);
+    setShowInstallPrompt(false);
+  };
 
   // Swipe logic for days
   const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
@@ -1484,7 +1774,8 @@ function App() {
       showInfo ||
       showChecklist ||
       showShopping ||
-      showFood;
+      showFood ||
+      showEmergency;
     if (isAnyModalOpen) return;
 
     const distanceX = touchStart.x - touchEnd.x;
@@ -1509,10 +1800,29 @@ function App() {
   const [showChecklist, setShowChecklist] = useState(false);
   const [showShopping, setShowShopping] = useState(false);
   const [showFood, setShowFood] = useState(false);
+  const [showEmergency, setShowEmergency] = useState(false);
   const [shoppingTab, setShoppingTab] = useState("tenjin");
   const [infoScrollTarget, setInfoScrollTarget] = useState(null);
 
-  const [checkedItems, setCheckedItems] = useState({});
+  // Load checked items from localStorage
+  const [checkedItems, setCheckedItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem("fukuoka-checklist");
+      return saved ? JSON.parse(saved) : {};
+    } catch (error) {
+      console.error("Failed to load checklist from localStorage:", error);
+      return {};
+    }
+  });
+
+  // Save checked items to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem("fukuoka-checklist", JSON.stringify(checkedItems));
+    } catch (error) {
+      console.error("Failed to save checklist to localStorage:", error);
+    }
+  }, [checkedItems]);
 
   // Prevent background scroll when modal is open
   useEffect(() => {
@@ -1522,7 +1832,8 @@ function App() {
       showInfo ||
       showChecklist ||
       showShopping ||
-      showFood;
+      showFood ||
+      showEmergency;
     if (isAnyModalOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -1538,6 +1849,7 @@ function App() {
     showChecklist,
     showShopping,
     showFood,
+    showEmergency,
   ]);
 
   const currentDayData =
@@ -1559,21 +1871,71 @@ function App() {
       if (menu === "checklist") setShowChecklist(true);
       if (menu === "shopping") setShowShopping(true);
       if (menu === "food") setShowFood(true);
+      if (menu === "emergency") setShowEmergency(true);
     }, 200);
   };
 
   return (
     <div
-      className="min-h-screen bg-jp-bg text-jp-text font-serif pb-12"
+      className="min-h-screen bg-jp-bg text-jp-text font-serif pb-12 safe-area-inset"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
+      {/* Offline Indicator */}
+      {!isOnline && (
+        <div className="fixed top-0 left-0 right-0 bg-orange-500 text-white text-center py-2 text-sm z-50 safe-area-inset">
+          目前處於離線狀態（部分功能可能受限）
+        </div>
+      )}
+
+      {/* PWA Install Prompt */}
+      {showInstallPrompt && deferredPrompt && (
+        <div className="fixed bottom-4 left-4 right-4 bg-jp-green text-white p-4 rounded-xl shadow-2xl z-50 safe-area-bottom max-w-md mx-auto">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="font-serif font-bold text-lg mb-1">
+                安裝到主畫面
+              </h3>
+              <p className="text-sm opacity-90 font-sans">
+                將此應用安裝到手機主畫面，可離線使用並快速開啟
+              </p>
+            </div>
+            <button
+              onClick={() => setShowInstallPrompt(false)}
+              className="p-1 text-white/80 hover:text-white transition-colors touch-manipulation min-w-[32px] min-h-[32px] flex items-center justify-center"
+              aria-label="關閉"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={handleInstallClick}
+              className="flex-1 bg-white text-jp-green py-2.5 rounded-lg font-serif font-bold text-sm hover:bg-stone-50 transition-colors touch-manipulation min-h-[44px]"
+            >
+              安裝
+            </button>
+            <button
+              onClick={() => setShowInstallPrompt(false)}
+              className="px-4 py-2.5 text-white/80 hover:text-white transition-colors touch-manipulation text-sm font-sans min-h-[44px]"
+            >
+              稍後
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 1. Header with Sidebar Toggle */}
-      <div className="relative pt-8 pb-4 px-6 flex items-center justify-between">
+      <div
+        className={`relative pt-8 pb-4 px-6 flex items-center justify-between ${
+          !isOnline ? "mt-8" : ""
+        }`}
+      >
         <button
           onClick={() => setSidebarOpen(true)}
-          className="p-2 text-stone-400 hover:text-jp-text transition-colors"
+          className="p-3 text-stone-400 hover:text-jp-text transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+          aria-label="開啟選單"
         >
           <Menu size={24} />
         </button>
@@ -1668,6 +2030,11 @@ function App() {
       />
 
       <FoodModal isOpen={showFood} onClose={() => setShowFood(false)} />
+
+      <EmergencyModal
+        isOpen={showEmergency}
+        onClose={() => setShowEmergency(false)}
+      />
     </div>
   );
 }

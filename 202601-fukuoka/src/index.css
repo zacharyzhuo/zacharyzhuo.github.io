@@ -2,14 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import Google Fonts: Noto Serif JP & Noto Sans JP */
+/* Import Google Fonts: Noto Serif JP & Noto Sans JP with font-display swap */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600;700&display=swap');
+
+/* Preload critical fonts */
+@font-face {
+  font-family: "Noto Serif JP";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Sans JP";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
 
 body {
   background-color: #F9F8F4;
   color: #2C2C2C;
   font-family: "Noto Serif JP", serif; /* 預設改為襯線體以符合雜誌風 */
   -webkit-font-smoothing: antialiased;
+  /* Improve scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+  /* Prevent text size adjustment on iOS */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Safe Area Insets for iPhone X and newer */
+.safe-area-inset {
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-area-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* Touch manipulation optimization */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Hide Scrollbar but keep functionality */
