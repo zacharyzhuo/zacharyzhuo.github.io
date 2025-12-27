@@ -343,7 +343,7 @@ export const tripData = {
         shops: [
           {
             name: "中洲屋台街",
-            link: "https://maps.app.goo.gl/BWU9r7K9qX9vGvXp8",
+            link: "https://maps.app.goo.gl/W1oZfQnYa5MgMoxV7",
             hours: "18:00 - 24:00",
             desc: "福岡最具代表性的夜間路邊攤文化。",
           },
@@ -735,11 +735,11 @@ export const tripData = {
         {
           time: "晚餐",
           type: "美食",
-          title: "晚餐：中州屋台",
+          title: "晚餐：中洲屋台",
           desc: "傍晚前往那珂川邊，體驗道地的博多屋台文化。",
           about:
             "屋台是福岡最具代表性的夜生活文化之一，沿著那珂川與中洲一帶點燈後氣氛非常熱鬧。必吃推薦：博多豚骨拉麵、關東煮、烤雞串、一口餃子、明太子系小菜（例如明太子玉子燒）等；多人同行最適合每樣點一點分食。屋台座位通常不多、翻桌快但仍可能排隊；帶長輩可先找有空位的屋台坐下再慢慢點餐，天冷時記得帶圍巾或暖暖包。",
-          nav: "中州屋台",
+          nav: "中洲屋台",
           icon: <Utensils size={18} />,
         },
       ],

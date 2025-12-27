@@ -1026,7 +1026,7 @@ const ChecklistModal = ({ isOpen, onClose, checkedItems, onToggle }) => {
                     return (
                       <li
                         key={uniqueKey}
-                        className="flex items-start gap-3 group cursor-pointer touch-manipulation min-h-[44px] py-1"
+                        className="flex items-center gap-3 group cursor-pointer touch-manipulation py-0.5"
                         onClick={() => onToggle(uniqueKey)}
                         role="checkbox"
                         aria-checked={isChecked}
@@ -1039,7 +1039,7 @@ const ChecklistModal = ({ isOpen, onClose, checkedItems, onToggle }) => {
                         }}
                       >
                         <div
-                          className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                          className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all flex-shrink-0 ${
                             isChecked
                               ? "bg-jp-green border-jp-green text-white"
                               : "border-stone-300 text-transparent hover:border-stone-400"
@@ -1048,7 +1048,7 @@ const ChecklistModal = ({ isOpen, onClose, checkedItems, onToggle }) => {
                           <Check size={12} strokeWidth={3} />
                         </div>
                         <span
-                          className={`text-base font-serif transition-all ${
+                          className={`text-base font-serif transition-all leading-tight ${
                             isChecked
                               ? "text-stone-400 line-through"
                               : "text-jp-text"
