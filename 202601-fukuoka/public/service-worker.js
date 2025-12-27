@@ -1,6 +1,7 @@
 // Service Worker for Fukuoka Trip PWA
-const CACHE_NAME = "fukuoka-trip-v1";
-const RUNTIME_CACHE = "fukuoka-runtime-v1";
+// 更新版本號以強制清除舊快取
+const CACHE_NAME = "fukuoka-trip-v2";
+const RUNTIME_CACHE = "fukuoka-runtime-v2";
 
 // 需要快取的靜態資源
 const STATIC_CACHE_URLS = [
@@ -31,22 +32,30 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   console.log("[Service Worker] Activating...");
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((cacheName) => {
-            // 刪除舊版本的快取
-            return cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE;
-          })
-          .map((cacheName) => {
-            console.log("[Service Worker] Deleting old cache:", cacheName);
-            return caches.delete(cacheName);
-          })
-      );
-    })
+    caches
+      .keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames
+            .filter((cacheName) => {
+              // 刪除所有舊版本的快取（包括 v1 和其他版本）
+              return (
+                cacheName !== CACHE_NAME &&
+                cacheName !== RUNTIME_CACHE &&
+                cacheName.startsWith("fukuoka-")
+              );
+            })
+            .map((cacheName) => {
+              console.log("[Service Worker] Deleting old cache:", cacheName);
+              return caches.delete(cacheName);
+            })
+        );
+      })
+      .then(() => {
+        // 立即控制所有客戶端
+        return self.clients.claim();
+      })
   );
-  // 立即控制所有客戶端
-  return self.clients.claim();
 });
 
 // 攔截網路請求
@@ -167,4 +176,11 @@ self.addEventListener("sync", (event) => {
 self.addEventListener("push", (event) => {
   console.log("[Service Worker] Push notification received");
   // 可以在這裡實作推送通知邏輯
+});
+
+// 處理來自客戶端的消息（用於強制更新）
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });

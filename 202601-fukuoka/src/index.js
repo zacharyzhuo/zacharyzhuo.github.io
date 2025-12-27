@@ -23,6 +23,11 @@ if ("serviceWorker" in navigator) {
           registration.scope
         );
 
+        // 定期檢查更新（每小時檢查一次）
+        setInterval(() => {
+          registration.update();
+        }, 60 * 60 * 1000); // 每小時檢查一次
+
         // 檢查是否有更新
         registration.addEventListener("updatefound", () => {
           const newWorker = registration.installing;
@@ -34,12 +39,17 @@ if ("serviceWorker" in navigator) {
               ) {
                 // 有新版本可用
                 console.log("New version available!");
-                // 可以在這裡觸發更新提示
-                if (window.confirm("有新版本可用，是否重新載入頁面？")) {
-                  window.location.reload();
-                }
+                // 自動更新，不詢問用戶
+                newWorker.postMessage({ type: "SKIP_WAITING" });
               }
             });
+          }
+        });
+
+        // 手動檢查更新（頁面可見時）
+        document.addEventListener("visibilitychange", () => {
+          if (!document.hidden) {
+            registration.update();
           }
         });
       })
