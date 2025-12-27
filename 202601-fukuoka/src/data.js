@@ -436,6 +436,47 @@ export const tripData = {
         ],
       },
     ],
+    ohori: [
+      {
+        category: "拉麵",
+        shops: [
+          {
+            name: "志成",
+            link: "https://maps.app.goo.gl/uWwZYkskXBgo3x2m6",
+            hours: "11:00 - 22:00",
+            desc: "湯頭濃郁、風味扎實；想吃熱食補能量很適合。",
+          },
+        ],
+      },
+      {
+        category: "居酒屋",
+        shops: [
+          {
+            name: "焼とり 鳥次",
+            link: "https://maps.app.goo.gl/FKcEhwPyQ2jRXpet5",
+            hours: "17:00 - 24:00",
+            desc: "串燒專門店，晚餐時段氣氛很讚；想小酌配烤物首選。",
+          },
+        ],
+      },
+      {
+        category: "咖啡廳",
+        shops: [
+          {
+            name: "&LOCALS",
+            link: "https://maps.app.goo.gl/R92FcbksPQQxYDjJ9",
+            hours: "08:00 - 20:00",
+            desc: "氛圍舒服、節奏放慢的好去處；適合喝咖啡休息充電。",
+          },
+          {
+            name: "Parfait Lab PINSIRIO",
+            link: "https://maps.app.goo.gl/vG5ZXMwe51GPWo8k9",
+            hours: "10:00 - 20:00",
+            desc: "芭菲專門店，擺盤精緻很適合拍照；當作下午甜點收尾超滿足。",
+          },
+        ],
+      },
+    ],
   },
   accommodation: {
     name: "Flower Base Sakura",

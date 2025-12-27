@@ -1465,14 +1465,14 @@ const EmergencyModal = ({ isOpen, onClose }) => {
 
 // 10. Food Modal
 const FoodModal = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState("tenjin"); // tenjin, nakasu, or hakata
+  const [activeTab, setActiveTab] = useState("tenjin"); // tenjin, nakasu, hakata, or ohori
   const [lastTap, setLastTap] = useState(0);
   const scrollContainerRef = React.useRef(null);
 
   const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
   const [touchEnd, setTouchEnd] = useState({ x: 0, y: 0 });
 
-  const tabs = ["tenjin", "nakasu", "hakata"];
+  const tabs = ["tenjin", "nakasu", "hakata", "ohori"];
 
   const handleToggleScroll = () => {
     if (!scrollContainerRef.current) return;
@@ -1590,6 +1590,7 @@ const FoodModal = ({ isOpen, onClose }) => {
                   { id: "tenjin", label: "天神" },
                   { id: "nakasu", label: "中洲" },
                   { id: "hakata", label: "博多" },
+                  { id: "ohori", label: "大濠公園" },
                 ].map((tab) => (
                   <button
                     key={tab.id}
