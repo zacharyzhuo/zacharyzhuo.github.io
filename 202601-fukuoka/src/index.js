@@ -23,6 +23,9 @@ if ("serviceWorker" in navigator) {
           registration.scope
         );
 
+        // 立即檢查更新（頁面載入時）
+        registration.update();
+
         // 定期檢查更新（每小時檢查一次）
         setInterval(() => {
           registration.update();
