@@ -486,7 +486,7 @@ export const tripData = {
           highlight: "必買：長輩健走鞋、發熱衣",
           showShoppingLink: true,
           shoppingTab: "tenjin",
-          shoppingText: "查看天神逛街地圖",
+          shoppingText: "查看天神逛街清單",
           about:
             "天神是九州最大的繁華街，百貨林立。HOKA 以其超厚底避震聞名，非常適合長輩健走；UNIQLO 日本定價約為台灣 7 折，必買發熱衣。",
           nav: "天神駅",
@@ -632,7 +632,7 @@ export const tripData = {
           desc: "晚餐後可至運河城逛逛（有大型水舞秀），或直接回民宿休息。",
           showShoppingLink: true,
           shoppingTab: "hakata",
-          shoppingText: "查看博多逛街地圖",
+          shoppingText: "查看博多逛街清單",
           hasSurroundingsLink: true,
           about:
             "運河城是結合購物、娛樂的大型複合設施，每天晚上的水舞秀非常有名。",
@@ -727,7 +727,7 @@ export const tripData = {
           desc: "搭電車返回天神。可繼續購物補貨，或回民宿稍作休息。",
           showShoppingLink: true,
           shoppingTab: "tenjin",
-          shoppingText: "查看天神逛街地圖",
+          shoppingText: "查看天神逛街清單",
           hasSurroundingsLink: true,
           nav: "天神駅",
           icon: <ShoppingBag size={18} />,

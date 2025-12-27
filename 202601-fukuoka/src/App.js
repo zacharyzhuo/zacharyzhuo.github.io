@@ -158,6 +158,34 @@ const Sidebar = ({ isOpen, onClose, onSelect }) => {
 
 // 2. Date Strip (Top Calendar)
 const DateStrip = ({ days, activeDay, onSelect }) => {
+  const [lastTap, setLastTap] = useState(0);
+
+  const handleToggleScroll = () => {
+    const isAtBottom =
+      window.innerHeight + window.scrollY >= document.body.offsetHeight - 100;
+
+    if (isAtBottom) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const handleTap = (dayId) => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+
+    if (now - lastTap < DOUBLE_TAP_DELAY) {
+      handleToggleScroll();
+    } else {
+      onSelect(dayId);
+    }
+    setLastTap(now);
+  };
+
   return (
     <div className="flex justify-between items-center px-6 py-4 border-b border-stone-200/50 bg-jp-bg sticky top-0 z-10">
       {days.map((day) => {
@@ -168,7 +196,7 @@ const DateStrip = ({ days, activeDay, onSelect }) => {
         return (
           <button
             key={day.day}
-            onClick={() => onSelect(day.day)}
+            onClick={() => handleTap(day.day)}
             className="flex flex-col items-center gap-1 min-w-[3rem]"
           >
             <span
@@ -333,17 +361,38 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
 
 // 5. Detail Modal
 
-const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
-  if (!activity) return null;
+const DetailModal = ({
+  isOpen,
+  activity,
+  onClose,
+  onOpenShopping,
+  onOpenInfo,
+}) => {
+  const [displayActivity, setDisplayActivity] = useState(null);
+
+  useEffect(() => {
+    if (activity) {
+      setDisplayActivity(activity);
+    }
+  }, [activity]);
+
+  const currentActivity = activity || displayActivity;
+  if (!currentActivity) return null;
 
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50"
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 transition-opacity duration-300 ${
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
         onClick={onClose}
       />
 
-      <div className="fixed inset-x-0 bottom-0 z-50 transform animate-slide-up">
+      <div
+        className={`fixed inset-x-0 bottom-0 z-50 transform transition-transform duration-300 ease-out ${
+          isOpen ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
         <div className="bg-[#FDFBF9] rounded-t-[2rem] shadow-2xl min-h-[60vh] max-h-[90vh] flex flex-col relative">
           {/* Header (Sticky) */}
 
@@ -351,24 +400,24 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
             <div className="flex items-center gap-3">
               <span
                 className={`px-3 py-1 border text-xs tracking-widest font-bold font-sans uppercase rounded ${
-                  activity.type === "美食"
+                  currentActivity.type === "美食"
                     ? "border-orange-200 text-orange-700 bg-orange-50"
-                    : activity.type === "交通"
+                    : currentActivity.type === "交通"
                     ? "border-blue-200 text-blue-700 bg-blue-50"
-                    : activity.type === "購物"
+                    : currentActivity.type === "購物"
                     ? "border-pink-200 text-pink-700 bg-pink-50"
-                    : activity.type === "景點"
+                    : currentActivity.type === "景點"
                     ? "border-emerald-200 text-emerald-700 bg-emerald-50"
-                    : activity.type === "住宿"
+                    : currentActivity.type === "住宿"
                     ? "border-purple-200 text-purple-700 bg-purple-50"
                     : "border-stone-200 text-stone-500 bg-stone-50"
                 }`}
               >
-                {activity.type}
+                {currentActivity.type}
               </span>
 
               <span className="font-serif text-xl text-stone-400">
-                {activity.time}
+                {currentActivity.time}
               </span>
             </div>
 
@@ -386,16 +435,16 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
             {/* Title */}
 
             <h2 className="text-3xl font-serif font-bold text-jp-text mb-2 leading-tight mt-2">
-              {activity.title}
+              {currentActivity.title}
             </h2>
 
             <div className="flex items-center gap-2 text-base text-stone-500 mb-8 font-sans">
               <MapPin size={14} />
 
-              {activity.address ||
-                (activity.nav.startsWith("http")
+              {currentActivity.address ||
+                (currentActivity.nav.startsWith("http")
                   ? "查看地圖位置"
-                  : activity.nav)}
+                  : currentActivity.nav)}
             </div>
 
             {/* Body Content */}
@@ -403,11 +452,11 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
             <div className="space-y-8">
               <div className="relative pl-6 border-l border-stone-200">
                 <p className="text-jp-text leading-relaxed font-serif text-base opacity-90">
-                  {activity.desc}
+                  {currentActivity.desc}
                 </p>
               </div>
 
-              {activity.about && (
+              {currentActivity.about && (
                 <div className="bg-[#F8F6F4] p-5 rounded-xl border border-stone-100">
                   <h3 className="font-bold text-stone-500 mb-2 flex items-center gap-2 text-xs uppercase tracking-widest font-sans">
                     <BookOpen size={14} />
@@ -415,13 +464,13 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
                   </h3>
 
                   <p className="text-base text-stone-600 leading-relaxed font-sans text-justify">
-                    {activity.about}
+                    {currentActivity.about}
                   </p>
                 </div>
               )}
 
               {/* Surroundings Link Block */}
-              {activity.hasSurroundingsLink && (
+              {currentActivity.hasSurroundingsLink && (
                 <div className="bg-blue-50/50 border border-blue-100 p-5 rounded-xl mb-8">
                   <h4 className="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
                     <Hotel size={16} /> 民宿周邊推薦
@@ -443,12 +492,12 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
 
               {/* Special Action Link: Shopping List */}
 
-              {activity.showShoppingLink && (
+              {currentActivity.showShoppingLink && (
                 <button
                   onClick={() => {
                     onClose();
 
-                    onOpenShopping(activity.shoppingTab || "tenjin");
+                    onOpenShopping(currentActivity.shoppingTab || "tenjin");
                   }}
                   className="w-full flex items-center justify-between p-4 bg-pink-50 border border-pink-100 rounded-xl group active:scale-[0.98] transition-all"
                 >
@@ -458,7 +507,7 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
                     </div>
 
                     <span className="font-bold text-pink-700 text-base">
-                      {activity.shoppingText || "查看天神逛街地圖"}
+                      {currentActivity.shoppingText || "查看天神逛街清單"}
                     </span>
                   </div>
 
@@ -469,7 +518,7 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
                 </button>
               )}
 
-              {activity.highlight && (
+              {currentActivity.highlight && (
                 <div className="bg-stone-50 p-6 rounded-xl border border-stone-100/50">
                   <h3 className="font-bold text-jp-text mb-3 flex items-center gap-2 text-sm">
                     <span className="w-1.5 h-1.5 bg-jp-red rounded-full"></span>
@@ -477,19 +526,19 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
                   </h3>
 
                   <p className="text-base text-stone-600 leading-relaxed font-sans">
-                    {activity.highlight}
+                    {currentActivity.highlight}
                   </p>
                 </div>
               )}
 
-              {activity.tips && (
+              {currentActivity.tips && (
                 <div>
                   <h3 className="text-xs font-bold text-stone-400 mb-3 uppercase tracking-[0.2em] font-sans border-b border-stone-100 pb-2">
                     Traveler Tips / 旅人攻略
                   </h3>
 
                   <div className="flex flex-wrap gap-2">
-                    {activity.tips.map((tip) => (
+                    {currentActivity.tips.map((tip) => (
                       <span
                         key={tip}
                         className="px-4 py-2 bg-white border border-stone-200 rounded-full text-xs text-stone-600 shadow-sm font-sans"
@@ -508,10 +557,10 @@ const DetailModal = ({ activity, onClose, onOpenShopping, onOpenInfo }) => {
           <div className="sticky bottom-4 mt-12 pt-4 pb-4 px-8 bg-gradient-to-t from-[#FDFBF9] via-[#FDFBF9] to-transparent">
             <button
               onClick={() => {
-                const url = activity.nav.startsWith("http")
-                  ? activity.nav
+                const url = currentActivity.nav.startsWith("http")
+                  ? currentActivity.nav
                   : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                      activity.nav
+                      currentActivity.nav
                     )}`;
 
                 window.open(url, "_blank");
@@ -543,15 +592,19 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
     }
   }, [isOpen, initialScrollTarget]);
 
-  if (!isOpen) return null;
-
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50"
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 transition-opacity duration-300 ${
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
         onClick={onClose}
       />
-      <div className="fixed inset-x-0 bottom-0 z-50 transform animate-slide-up">
+      <div
+        className={`fixed inset-x-0 bottom-0 z-50 transform transition-transform duration-300 ease-out ${
+          isOpen ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
         <div className="bg-[#FDFBF9] rounded-t-[2rem] shadow-2xl min-h-[60vh] max-h-[90vh] flex flex-col relative">
           {/* Header (Sticky) */}
           <div className="flex justify-between items-center p-8 pb-4 sticky top-0 bg-[#FDFBF9]/95 backdrop-blur-sm z-10 rounded-t-[2rem] border-b border-stone-100/50">
@@ -879,15 +932,19 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
 
 // 7. Checklist Modal
 const ChecklistModal = ({ isOpen, onClose, checkedItems, onToggle }) => {
-  if (!isOpen) return null;
-
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50"
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 transition-opacity duration-300 ${
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
         onClick={onClose}
       />
-      <div className="fixed inset-x-0 bottom-0 z-50 transform animate-slide-up">
+      <div
+        className={`fixed inset-x-0 bottom-0 z-50 transform transition-transform duration-300 ease-out ${
+          isOpen ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
         <div className="bg-[#FDFBF9] rounded-t-[2rem] shadow-2xl min-h-[60vh] max-h-[90vh] flex flex-col relative">
           {/* Header (Sticky) */}
           <div className="flex justify-between items-center p-8 pb-4 sticky top-0 bg-[#FDFBF9]/95 backdrop-blur-sm z-10 rounded-t-[2rem] border-b border-stone-100/50">
@@ -953,25 +1010,72 @@ const ChecklistModal = ({ isOpen, onClose, checkedItems, onToggle }) => {
 // 8. Shopping Modal
 const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
   const [activeTab, setActiveTab] = useState("tenjin"); // tenjin or hakata
+  const [lastTap, setLastTap] = useState(0);
+  const scrollContainerRef = React.useRef(null);
 
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
+  const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
+  const [touchEnd, setTouchEnd] = useState({ x: 0, y: 0 });
 
-  const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+  const handleToggleScroll = () => {
+    if (!scrollContainerRef.current) return;
+    const container = scrollContainerRef.current;
+    const isAtBottom =
+      container.scrollHeight - container.scrollTop <=
+      container.clientHeight + 50;
+
+    if (isAtBottom) {
+      container.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   };
 
-  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+  const handleTap = (tabId) => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+
+    if (now - lastTap < DOUBLE_TAP_DELAY) {
+      handleToggleScroll();
+    } else {
+      setActiveTab(tabId);
+    }
+    setLastTap(now);
+  };
+
+  const onTouchStart = (e) => {
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
+    setTouchStart({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
+  };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
+    if (!touchStart.x || !touchEnd.x) return;
+    const distanceX = touchStart.x - touchEnd.x;
+    const distanceY = touchStart.y - touchEnd.y;
+    const minSwipeDistance = 75;
 
-    if (isLeftSwipe && activeTab === "tenjin") setActiveTab("hakata");
-    if (isRightSwipe && activeTab === "hakata") setActiveTab("tenjin");
+    // Only trigger if horizontal movement is significantly greater than vertical movement
+    if (Math.abs(distanceX) > Math.abs(distanceY) * 2) {
+      if (distanceX > minSwipeDistance && activeTab === "tenjin")
+        setActiveTab("hakata");
+      if (distanceX < -minSwipeDistance && activeTab === "hakata")
+        setActiveTab("tenjin");
+    }
   };
 
   React.useEffect(() => {
@@ -980,22 +1084,33 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
     }
   }, [isOpen, initialTab]);
 
-  if (!isOpen) return null;
-
   const currentList = tripData.shopping[activeTab];
+
+  // Reset scroll on tab change
+  React.useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0 });
+    }
+  }, [activeTab]);
 
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50"
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 transition-opacity duration-300 ${
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
         onClick={onClose}
       />
-      <div className="fixed inset-x-0 bottom-0 z-50 transform animate-slide-up">
+      <div
+        className={`fixed inset-x-0 bottom-0 z-50 transform transition-transform duration-300 ease-out ${
+          isOpen ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
         <div className="bg-[#FDFBF9] rounded-t-[2rem] shadow-2xl min-h-[70vh] max-h-[90vh] flex flex-col relative">
           {/* Header (Sticky) */}
-          <div className="flex justify-between items-center p-8 pb-4 sticky top-0 bg-[#FDFBF9]/95 backdrop-blur-sm z-10 rounded-t-[2rem] border-b border-stone-100/50">
+          <div className="flex justify-between items-center px-8 pt-8 pb-0 sticky top-0 bg-[#FDFBF9] z-20 rounded-t-[2rem]">
             <h2 className="text-2xl font-serif font-bold text-jp-text">
-              逛街地圖
+              逛街清單
             </h2>
             <button
               onClick={onClose}
@@ -1006,34 +1121,39 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
           </div>
 
           <div
+            ref={scrollContainerRef}
             className="overflow-y-auto px-8 pb-10 space-y-4"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
-            {/* Tabs */}
-            <div className="flex gap-2 p-1 bg-stone-100 rounded-xl mb-6">
-              <button
-                onClick={() => setActiveTab("tenjin")}
-                className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-                  activeTab === "tenjin"
-                    ? "bg-white shadow text-jp-text"
-                    : "text-stone-400"
-                }`}
-              >
-                天神 Tenjin
-              </button>
-              <button
-                onClick={() => setActiveTab("hakata")}
-                className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-                  activeTab === "hakata"
-                    ? "bg-white shadow text-jp-text"
-                    : "text-stone-400"
-                }`}
-              >
-                博多 Hakata
-              </button>
+            {/* Tabs (Sticky) */}
+            <div className="sticky top-0 z-10 bg-[#FDFBF9] py-4 -mx-1 px-1 border-b border-stone-100/50">
+              <div className="flex gap-2 p-1 bg-stone-100 rounded-xl shadow-sm">
+                <button
+                  onClick={() => handleTap("tenjin")}
+                  className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                    activeTab === "tenjin"
+                      ? "bg-white shadow text-jp-text"
+                      : "text-stone-400"
+                  }`}
+                >
+                  天神
+                </button>
+                <button
+                  onClick={() => handleTap("hakata")}
+                  className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                    activeTab === "hakata"
+                      ? "bg-white shadow text-jp-text"
+                      : "text-stone-400"
+                  }`}
+                >
+                  博多
+                </button>
+              </div>
             </div>
+
+            {/* List */}
 
             {/* List */}
             {currentList.map((item, idx) => (
@@ -1131,48 +1251,104 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
 // 9. Food Modal
 const FoodModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState("tenjin"); // tenjin, nakasu, or hakata
+  const [lastTap, setLastTap] = useState(0);
+  const scrollContainerRef = React.useRef(null);
 
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
+  const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
+  const [touchEnd, setTouchEnd] = useState({ x: 0, y: 0 });
 
   const tabs = ["tenjin", "nakasu", "hakata"];
 
-  const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+  const handleToggleScroll = () => {
+    if (!scrollContainerRef.current) return;
+    const container = scrollContainerRef.current;
+    const isAtBottom =
+      container.scrollHeight - container.scrollTop <=
+      container.clientHeight + 50;
+
+    if (isAtBottom) {
+      container.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   };
 
-  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+  const handleTap = (tabId) => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+
+    if (now - lastTap < DOUBLE_TAP_DELAY) {
+      handleToggleScroll();
+    } else {
+      setActiveTab(tabId);
+    }
+    setLastTap(now);
+  };
+
+  const onTouchStart = (e) => {
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
+    setTouchStart({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
+  };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
+    if (!touchStart.x || !touchEnd.x) return;
+    const distanceX = touchStart.x - touchEnd.x;
+    const distanceY = touchStart.y - touchEnd.y;
+    const minSwipeDistance = 75;
 
-    const currentIndex = tabs.indexOf(activeTab);
-    if (isLeftSwipe && currentIndex < tabs.length - 1) {
-      setActiveTab(tabs[currentIndex + 1]);
-    }
-    if (isRightSwipe && currentIndex > 0) {
-      setActiveTab(tabs[currentIndex - 1]);
+    // Only trigger if horizontal movement is significantly greater than vertical movement
+    if (Math.abs(distanceX) > Math.abs(distanceY) * 2) {
+      const currentIndex = tabs.indexOf(activeTab);
+      if (distanceX > minSwipeDistance && currentIndex < tabs.length - 1) {
+        setActiveTab(tabs[currentIndex + 1]);
+      }
+      if (distanceX < -minSwipeDistance && currentIndex > 0) {
+        setActiveTab(tabs[currentIndex - 1]);
+      }
     }
   };
 
-  if (!isOpen) return null;
-
   const currentCategories = tripData.food[activeTab];
+
+  // Reset scroll on tab change
+  React.useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0 });
+    }
+  }, [activeTab]);
 
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50"
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 transition-opacity duration-300 ${
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
         onClick={onClose}
       />
-      <div className="fixed inset-x-0 bottom-0 z-50 transform animate-slide-up">
+      <div
+        className={`fixed inset-x-0 bottom-0 z-50 transform transition-transform duration-300 ease-out ${
+          isOpen ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
         <div className="bg-[#FDFBF9] rounded-t-[2rem] shadow-2xl min-h-[70vh] max-h-[90vh] flex flex-col relative">
           {/* Header (Sticky) */}
-          <div className="flex justify-between items-center p-8 pb-4 sticky top-0 bg-[#FDFBF9]/95 backdrop-blur-sm z-10 rounded-t-[2rem] border-b border-stone-100/50">
+          <div className="flex justify-between items-center px-8 pt-8 pb-0 sticky top-0 bg-[#FDFBF9] z-20 rounded-t-[2rem]">
             <h2 className="text-2xl font-serif font-bold text-jp-text">
               美食清單
             </h2>
@@ -1185,31 +1361,36 @@ const FoodModal = ({ isOpen, onClose }) => {
           </div>
 
           <div
+            ref={scrollContainerRef}
             className="overflow-y-auto px-8 pb-10 space-y-6"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
-            {/* Tabs */}
-            <div className="flex gap-2 p-1 bg-stone-100 rounded-xl mb-6">
-              {[
-                { id: "tenjin", label: "天神" },
-                { id: "nakasu", label: "中洲" },
-                { id: "hakata", label: "博多" },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-                    activeTab === tab.id
-                      ? "bg-white shadow text-jp-text"
-                      : "text-stone-400"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+            {/* Tabs (Sticky) */}
+            <div className="sticky top-0 z-10 bg-[#FDFBF9] py-4 -mx-1 px-1 border-b border-stone-100/50">
+              <div className="flex gap-2 p-1 bg-stone-100 rounded-xl shadow-sm">
+                {[
+                  { id: "tenjin", label: "天神" },
+                  { id: "nakasu", label: "中洲" },
+                  { id: "hakata", label: "博多" },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleTap(tab.id)}
+                    className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                      activeTab === tab.id
+                        ? "bg-white shadow text-jp-text"
+                        : "text-stone-400"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {/* List by Category */}
 
             {/* List by Category */}
             <div className="space-y-8">
@@ -1264,30 +1445,61 @@ function App() {
   const [activeDay, setActiveDay] = useState(1);
   const [selectedActivity, setSelectedActivity] = useState(null);
 
-  // Swipe logic for days
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
+  // Reset scroll on day change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [activeDay]);
 
-  const minSwipeDistance = 50;
+  // Swipe logic for days
+  const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
+  const [touchEnd, setTouchEnd] = useState({ x: 0, y: 0 });
+
+  const minSwipeDistance = 100;
 
   const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
+    setTouchStart({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
   };
 
-  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+  const onTouchMove = (e) => {
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
+  };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
+    if (!touchStart.x || !touchEnd.x) return;
 
-    if (isLeftSwipe && activeDay < tripData.itinerary.length) {
-      setActiveDay((prev) => prev + 1);
-    }
-    if (isRightSwipe && activeDay > 1) {
-      setActiveDay((prev) => prev - 1);
+    // Don't swipe background if a modal is open
+    const isAnyModalOpen =
+      selectedActivity ||
+      isSidebarOpen ||
+      showInfo ||
+      showChecklist ||
+      showShopping ||
+      showFood;
+    if (isAnyModalOpen) return;
+
+    const distanceX = touchStart.x - touchEnd.x;
+    const distanceY = touchStart.y - touchEnd.y;
+    const isLeftSwipe = distanceX > minSwipeDistance;
+    const isRightSwipe = distanceX < -minSwipeDistance;
+
+    // Only trigger if horizontal movement is significantly greater than vertical movement
+    if (Math.abs(distanceX) > Math.abs(distanceY) * 1.5) {
+      if (isLeftSwipe && activeDay < tripData.itinerary.length) {
+        setActiveDay((prev) => prev + 1);
+      }
+      if (isRightSwipe && activeDay > 1) {
+        setActiveDay((prev) => prev - 1);
+      }
     }
   };
 
@@ -1319,7 +1531,14 @@ function App() {
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [selectedActivity, isSidebarOpen, showInfo, showChecklist, showShopping]);
+  }, [
+    selectedActivity,
+    isSidebarOpen,
+    showInfo,
+    showChecklist,
+    showShopping,
+    showFood,
+  ]);
 
   const currentDayData =
     tripData.itinerary.find((d) => d.day === activeDay) ||
@@ -1413,6 +1632,7 @@ function App() {
       />
 
       <DetailModal
+        isOpen={!!selectedActivity}
         activity={selectedActivity}
         onClose={() => setSelectedActivity(null)}
         onOpenShopping={(tab) => {
