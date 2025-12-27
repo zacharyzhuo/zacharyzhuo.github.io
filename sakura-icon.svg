@@ -1,0 +1,7 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 - 淺粉色 -->
+  <rect width="512" height="512" fill="#FFE4E6" rx="64"/>
+  
+  <!-- 櫻花 emoji - 精確置中，調整位置和大小 -->
+  <text x="256" y="270" font-size="300" text-anchor="middle" dominant-baseline="central" font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">🌸</text>
+</svg>

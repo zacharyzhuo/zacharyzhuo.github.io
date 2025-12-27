@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>下載櫻花圖標</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; text-align: center; background: #f5f5f5; }
+    .container { background: white; padding: 40px; border-radius: 12px; max-width: 600px; margin: 0 auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    button { background: #FFB6C1; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px; }
+    button:hover { background: #ff9eb5; }
+    .preview { margin: 20px 0; }
+    img { border: 2px solid #ddd; border-radius: 8px; margin: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌸 櫻花圖標下載</h1>
+    <p>點擊按鈕下載對應尺寸的 PNG 圖標</p>
+    
+    <div class="preview">
+      <img id="preview192" src="sakura-icon.svg" width="192" height="192">
+      <img id="preview512" src="sakura-icon.svg" width="512" height="512">
+    </div>
+    
+    <div>
+      <button onclick="download(192)">下載 logo192.png (192x192)</button>
+      <button onclick="download(512)">下載 logo512.png (512x512)</button>
+    </div>
+    
+    <p style="margin-top: 30px; color: #666; font-size: 14px;">
+      下載後，將檔案放到 public/ 資料夾中覆蓋原有檔案
+    </p>
+  </div>
+
+  <script>
+    function download(size) {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      
+      // 繪製淺粉色背景
+      ctx.fillStyle = '#FFE4E6';
+      ctx.fillRect(0, 0, size, size);
+      
+      // 繪製櫻花 emoji - 精確置中，微調垂直位置
+      ctx.font = `${size * 0.6}px Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      // 微調垂直位置，讓視覺上更置中
+      ctx.fillText('🌸', size / 2, size / 2 + size * 0.03);
+      
+      // 下載
+      canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `logo${size}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    }
+  </script>
+</body>
+</html>
+

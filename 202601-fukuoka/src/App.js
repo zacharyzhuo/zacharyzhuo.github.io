@@ -1688,26 +1688,53 @@ function App() {
 
   // Handle PWA install prompt
   useEffect(() => {
+    // 檢查是否已經安裝過
+    const isInstalled =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone ||
+      document.referrer.includes("android-app://");
+
+    if (isInstalled) {
+      return; // 已安裝，不需要監聽
+    }
+
     const handleBeforeInstallPrompt = (e) => {
+      console.log("beforeinstallprompt event fired");
       // 阻止預設的安裝提示
       e.preventDefault();
       // 保存事件以便稍後使用
       setDeferredPrompt(e);
-      // 檢查是否已經安裝過
-      const isInstalled =
-        window.matchMedia("(display-mode: standalone)").matches ||
-        window.navigator.standalone ||
-        document.referrer.includes("android-app://");
 
-      if (!isInstalled) {
-        // 延遲顯示安裝提示，避免打擾用戶
-        setTimeout(() => {
-          setShowInstallPrompt(true);
-        }, 3000);
-      }
+      // 延遲顯示安裝提示，給用戶時間瀏覽網站
+      // Chrome 通常需要用戶與網站互動至少 30 秒後才會顯示
+      setTimeout(() => {
+        setShowInstallPrompt(true);
+      }, 5000); // 增加到 5 秒
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    // 如果事件已經觸發但我們錯過了，檢查是否可以直接顯示
+    // 這在某些情況下可能發生
+    const checkInstallability = () => {
+      // 檢查 manifest 是否存在
+      const manifestLink = document.querySelector('link[rel="manifest"]');
+      if (manifestLink) {
+        fetch(manifestLink.href)
+          .then((res) => res.json())
+          .then((manifest) => {
+            console.log("Manifest loaded:", manifest);
+            // 如果 manifest 有效，但沒有觸發 beforeinstallprompt
+            // 可能是因為其他條件不滿足（如用戶互動時間不足）
+          })
+          .catch((err) => {
+            console.error("Failed to load manifest:", err);
+          });
+      }
+    };
+
+    // 延遲檢查，確保頁面完全載入
+    setTimeout(checkInstallability, 2000);
 
     return () => {
       window.removeEventListener(
@@ -1720,25 +1747,56 @@ function App() {
   // Handle install button click
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
+      console.warn("No deferred prompt available");
+      // 如果沒有 deferredPrompt，可能是因為：
+      // 1. 已經安裝過
+      // 2. 瀏覽器不支援
+      // 3. 不滿足安裝條件
+      alert(
+        "無法顯示安裝提示。請確認：\n1. 使用 Chrome/Edge 瀏覽器\n2. 網站已通過 HTTPS 訪問\n3. 已訪問網站至少 30 秒"
+      );
       return;
     }
 
-    // 顯示安裝提示
-    deferredPrompt.prompt();
+    try {
+      // 顯示安裝提示
+      deferredPrompt.prompt();
 
-    // 等待用戶回應
-    const { outcome } = await deferredPrompt.userChoice;
+      // 等待用戶回應
+      const { outcome } = await deferredPrompt.userChoice;
 
-    if (outcome === "accepted") {
-      console.log("User accepted the install prompt");
-    } else {
-      console.log("User dismissed the install prompt");
+      if (outcome === "accepted") {
+        console.log("User accepted the install prompt");
+        setShowInstallPrompt(false);
+      } else {
+        console.log("User dismissed the install prompt");
+      }
+    } catch (error) {
+      console.error("Error showing install prompt:", error);
     }
 
-    // 清除保存的提示
+    // 清除保存的提示（無論結果如何）
     setDeferredPrompt(null);
     setShowInstallPrompt(false);
   };
+
+  // Debug: 檢查 PWA 安裝條件（僅在開發環境）
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("=== PWA 安裝條件檢查 ===");
+      console.log("Service Worker 支援:", "serviceWorker" in navigator);
+      console.log("HTTPS:", window.location.protocol === "https:");
+      console.log(
+        "Manifest:",
+        document.querySelector('link[rel="manifest"]')?.href
+      );
+      console.log(
+        "已安裝:",
+        window.matchMedia("(display-mode: standalone)").matches
+      );
+      console.log("Deferred Prompt:", !!deferredPrompt);
+    }
+  }, [deferredPrompt]);
 
   // Swipe logic for days
   const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
