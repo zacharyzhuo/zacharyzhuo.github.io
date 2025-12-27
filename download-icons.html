@@ -43,12 +43,12 @@
       ctx.fillStyle = '#FFE4E6';
       ctx.fillRect(0, 0, size, size);
       
-      // 繪製櫻花 emoji - 精確置中，微調垂直位置
-      ctx.font = `${size * 0.6}px Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif`;
+      // 繪製櫻花 emoji - 置中並放大，向下微調
+      ctx.font = `${size * 0.78}px Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      // 微調垂直位置，讓視覺上更置中
-      ctx.fillText('🌸', size / 2, size / 2 + size * 0.03);
+      // 向下調整一點，讓視覺上更置中
+      ctx.fillText('🌸', size / 2, size / 2 + size * 0.05);
       
       // 下載
       canvas.toBlob(function(blob) {
