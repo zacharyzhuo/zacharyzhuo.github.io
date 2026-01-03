@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 export const tripData = {
+  version: "2026.01.03.02",
   flight: [
     {
       date: "01/10",

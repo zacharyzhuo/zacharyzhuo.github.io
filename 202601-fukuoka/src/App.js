@@ -173,6 +173,11 @@ const Sidebar = ({ isOpen, onClose, onSelect }) => {
           <p className="text-xs text-stone-400 text-center font-sans tracking-widest uppercase">
             Family Trip 2026
           </p>
+          {tripData.version && (
+            <p className="text-[8px] text-stone-300 text-center font-sans mt-1">
+              v{tripData.version}
+            </p>
+          )}
         </div>
       </div>
     </>
@@ -1667,11 +1672,39 @@ function App() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
 
   // Reset scroll on day change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [activeDay]);
+
+  // Monitor service worker updates
+  useEffect(() => {
+    const handleUpdate = () => {
+      console.log("swUpdated event received in App.js");
+      setShowUpdatePrompt(true);
+    };
+
+    window.addEventListener("swUpdated", handleUpdate);
+    return () => window.removeEventListener("swUpdated", handleUpdate);
+  }, []);
+
+  // Handle manual update
+  const handleUpdateClick = () => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistration().then((reg) => {
+        if (reg && reg.waiting) {
+          reg.waiting.postMessage({ type: "SKIP_WAITING" });
+        } else {
+          // If no waiting worker, just reload
+          window.location.reload();
+        }
+      });
+    } else {
+      window.location.reload();
+    }
+  };
 
   // Monitor online/offline status
   useEffect(() => {
@@ -1941,12 +1974,31 @@ function App() {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* Offline Indicator */}
-      {!isOnline && (
-        <div className="fixed top-0 left-0 right-0 bg-orange-500 text-white text-center py-2 text-sm z-50 safe-area-inset">
-          目前處於離線狀態（部分功能可能受限）
-        </div>
-      )}
+       {/* Offline Indicator */}
+       {!isOnline && (
+         <div className="fixed top-0 left-0 right-0 bg-orange-500 text-white text-center py-2 text-sm z-50 safe-area-inset">
+           目前處於離線狀態（部分功能可能受限）
+         </div>
+       )}
+
+       {/* New Version Update Prompt */}
+       {showUpdatePrompt && (
+         <div className="fixed top-4 left-4 right-4 bg-jp-red text-white p-4 rounded-xl shadow-2xl z-[60] flex items-center justify-between gap-4 animate-slide-up">
+           <div className="flex items-center gap-3">
+             <AlertCircle size={20} />
+             <div>
+               <p className="font-bold text-sm leading-tight">發現新版本</p>
+               <p className="text-[10px] opacity-90">點擊更新以套用最新行程</p>
+             </div>
+           </div>
+           <button
+             onClick={handleUpdateClick}
+             className="bg-white text-jp-red px-4 py-2 rounded-lg text-xs font-bold shadow-sm active:scale-95 transition-all min-h-[36px]"
+           >
+             立即更新
+           </button>
+         </div>
+       )}
 
       {/* PWA Install Prompt */}
       {showInstallPrompt && deferredPrompt && (

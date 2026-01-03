@@ -40,10 +40,9 @@ if ("serviceWorker" in navigator) {
                 newWorker.state === "installed" &&
                 navigator.serviceWorker.controller
               ) {
-                // 有新版本可用
+                // 有新版本可用，發送自定義事件通知 App.js
                 console.log("New version available!");
-                // 自動更新，不詢問用戶
-                newWorker.postMessage({ type: "SKIP_WAITING" });
+                window.dispatchEvent(new Event("swUpdated"));
               }
             });
           }
