@@ -35,6 +35,13 @@ export const tripData = {
         link: "https://maps.app.goo.gl/AhT9FQU2SYxCUhDA8",
       },
       {
+        name: "Super Sports Xebio Fukuoka Tenjin",
+        building: "Standalone",
+        floor: "1F",
+        hours: "10:00 - 21:00",
+        link: "https://maps.app.goo.gl/eDGBA2UK6RQuneh87",
+      },
+      {
         name: "Mina Tenjin",
         isBuilding: true,
         hours: "10:00 - 20:00",
@@ -822,7 +829,7 @@ export const tripData = {
           desc: "參觀小倉城天守閣（唐造樣式）與相鄰的八坂神社。",
           about:
             "小倉城的歷史可追溯到戰國末期，著名武將細川忠興與其後藩主都在此留下痕跡。現在看到的天守雖為後世重建，但城郭布局與石垣仍能感受到北九州戰略要地的氣勢；登高也能俯瞰市景。相鄰的八坂神社則是在地人祈求除厄、家內平安與生意興隆的重要神社。建議參觀順序：先在城外拍全景與護城河，再進天守看展覽/眺望，最後到神社簡單參拜收尾，節奏最順也不會太累。",
-          nav: "https://maps.app.goo.gl/yXQ7J2k8X5X7y5X7",
+          nav: "https://maps.app.goo.gl/6qNuDHZTx42uYjSu9",
           address: "北九州市小倉北区城内2-1",
           icon: <MapPin size={18} />,
         },
