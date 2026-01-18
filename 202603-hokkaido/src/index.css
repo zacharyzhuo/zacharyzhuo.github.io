@@ -1,0 +1,360 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Google Fonts: Noto Serif JP & Noto Sans JP with font-display swap */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600;700&display=swap');
+
+/* Preload critical fonts */
+@font-face {
+  font-family: "Noto Serif JP";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Sans JP";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+body {
+  background-color: #F9F8F4;
+  color: #2C2C2C;
+  font-family: "Noto Serif JP", serif;
+  /* 預設改為襯線體以符合雜誌風 */
+  -webkit-font-smoothing: antialiased;
+  /* Improve scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+  /* Prevent text size adjustment on iOS */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Safe Area Insets for iPhone X and newer */
+.safe-area-inset {
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-area-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* Touch manipulation optimization */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Hide Scrollbar but keep functionality */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Modal Animation */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Proposal Modal Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes floatHeart {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+
+  50% {
+    transform: translateY(-100px) translateX(20px) rotate(180deg);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: translateY(-200px) translateX(-20px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes sparkle {
+
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-float-heart {
+  animation: floatHeart 3s ease-out forwards;
+}
+
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+/* 愛心彈出動畫 */
+@keyframes heartPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 愛心搖晃動畫 */
+@keyframes heartShake {
+
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  25% {
+    transform: rotate(-10deg) scale(1.05);
+  }
+
+  50% {
+    transform: rotate(10deg) scale(1.05);
+  }
+
+  75% {
+    transform: rotate(-8deg) scale(1.02);
+  }
+}
+
+/* 愛心放大動畫 */
+@keyframes heartExpand {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    /* 使用足夠大的 scale 值確保填滿整個螢幕（包括對角線） */
+    transform: scale(150) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* 日期條中的愛心動畫：直接顯示 + 搖晃兩下 */
+.animate-heart-pop-shake {
+  animation: heartShake 0.6s ease-in-out 0.1s 2;
+}
+
+/* 全螢幕愛心動畫：搖晃兩下 + 慢慢放大（流暢版本） */
+@keyframes heartFullSequence {
+
+  /* 開始：正常大小 */
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+
+  /* 搖晃第一下 */
+  8% {
+    transform: rotate(-10deg) scale(1.05);
+  }
+
+  16% {
+    transform: rotate(10deg) scale(1.05);
+  }
+
+  /* 搖晃第二下 */
+  24% {
+    transform: rotate(-8deg) scale(1.02);
+  }
+
+  32% {
+    transform: rotate(8deg) scale(1.02);
+  }
+
+  /* 回到中心，準備放大 */
+  40% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+
+  /* 開始慢慢放大 */
+  45% {
+    transform: scale(2) rotate(0deg);
+  }
+
+  60% {
+    transform: scale(10) rotate(0deg);
+  }
+
+  80% {
+    transform: scale(50) rotate(0deg);
+  }
+
+  100% {
+    transform: scale(200) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.animate-heart-expand {
+  animation: heartFullSequence 7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  will-change: transform;
+  transform-origin: center center;
+}
+
+/* 過場動畫：愛心放大並淡出，然後照片淡入 */
+@keyframes heartTransition {
+  from {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    filter: brightness(1);
+  }
+
+  60% {
+    transform: translate(-50%, -50%) scale(60);
+    opacity: 1;
+    filter: brightness(1);
+  }
+
+  85% {
+    transform: translate(-50%, -50%) scale(60);
+    opacity: 1;
+    filter: brightness(1);
+  }
+
+  95% {
+    transform: translate(-50%, -50%) scale(60);
+    opacity: 0.8;
+    filter: brightness(1);
+  }
+
+  to {
+    transform: translate(-50%, -50%) scale(60);
+    opacity: 0;
+    filter: brightness(1);
+  }
+}
+
+@keyframes bgFadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  40% {
+    opacity: 0.4;
+  }
+
+  60% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes photoFadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-heart-transition {
+  animation: heartTransition 2.5s cubic-bezier(0.2, 0, 0.1, 1) forwards !important;
+  will-change: transform, opacity;
+  transform-origin: center center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  shape-rendering: geometricPrecision;
+  position: absolute;
+  filter: brightness(1) !important;
+}
+
+.animate-bg-fade-in {
+  animation: bgFadeIn 2.5s ease-out forwards;
+}
+
+.animate-photo-fade-in {
+  animation: photoFadeIn 0.3s ease-out forwards;
+}
