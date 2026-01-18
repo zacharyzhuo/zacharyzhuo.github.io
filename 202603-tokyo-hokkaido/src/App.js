@@ -2518,17 +2518,19 @@ function App() {
           <Menu size={24} />
         </button>
 
-        <div className="flex flex-col items-center">
-          <p className="text-xs tracking-[0.4em] uppercase text-stone-400 mb-1 font-sans font-bold text-center">
-            2026/03
-            <br />
-            Tokyo&Hokkaido Trip
+        <div className="flex flex-col items-center flex-1 px-4">
+          {/* 日期 */}
+          <p className="text-[11px] tracking-[0.3em] uppercase text-stone-400 mb-2 font-sans font-medium">
+            2026 / 03
           </p>
-          <div className="flex items-center justify-center gap-3">
-            <h1 className="text-2xl font-bold tracking-[0.2em] text-jp-text">
-              東京＆北海道旅行
-            </h1>
-          </div>
+          {/* 英文標題 */}
+          <p className="text-xs tracking-[0.15em] uppercase text-stone-400 mb-3 font-sans font-medium">
+            Tokyo & Hokkaido Trip
+          </p>
+          {/* 日文標題 */}
+          <h1 className="text-2xl font-bold tracking-[0.1em] text-jp-text leading-tight">
+            東京&北海道旅行
+          </h1>
         </div>
 
         {/* Placeholder for balance, or could keep quick flight info if user wants, but request said move all to sidebar */}
