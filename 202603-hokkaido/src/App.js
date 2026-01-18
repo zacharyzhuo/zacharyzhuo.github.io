@@ -1540,6 +1540,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [showProposal, setShowProposal] = useState(false);
   const [showTransition, setShowTransition] = useState(false);
+  const [hasStartedTransition, setHasStartedTransition] = useState(false); // 追蹤是否已經開始過渡動畫
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [elapsedBeforePause, setElapsedBeforePause] = useState(0);
@@ -1563,36 +1564,43 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       setCurrentPhotoIndex(0);
       setShowProposal(false);
       setProgress(0);
+      setShowTransition(false); // 初始不顯示動畫
+      setHasStartedTransition(false); // 重置過渡狀態
       
-      // 如果 heartPosition 已設置（表示是從搖晃觸發的），立即開始動畫
-      // 否則等待事件觸發
+      // 如果 heartPosition 已設置（表示是從搖晃觸發的），等待搖晃完成後開始動畫
       if (heartPosition) {
-        // 立即開始動畫，確保無縫銜接
-        setShowTransition(true);
-      } else {
-        // 監聽搖晃完成事件（備用方案）
-        const handleShakeComplete = () => {
+        // 等待搖晃完成（1.2秒）後立即開始動畫
+        const shakeTimer = setTimeout(() => {
           setShowTransition(true);
-        };
-        window.addEventListener('heart-shake-complete', handleShakeComplete);
+          setHasStartedTransition(true);
+        }, 1200);
         
+        // 過場動畫在開始後 2.5 秒開始淡入照片（與動畫時長一致）
+        const transitionTimer = setTimeout(() => {
+          setShowTransition(false);
+        }, 3700); // 1.2秒搖晃 + 2.5秒動畫
+
         return () => {
-          window.removeEventListener('heart-shake-complete', handleShakeComplete);
+          clearTimeout(shakeTimer);
+          clearTimeout(transitionTimer);
+        };
+      } else {
+        // 如果沒有 heartPosition，立即開始（備用方案）
+        setShowTransition(true);
+        setHasStartedTransition(true);
+        const transitionTimer = setTimeout(() => {
+          setShowTransition(false);
+        }, 2500);
+
+        return () => {
+          clearTimeout(transitionTimer);
         };
       }
-      
-      // 過場動畫在 2 秒後開始淡入照片
-      const transitionTimer = setTimeout(() => {
-        setShowTransition(false);
-      }, 2000);
-
-      return () => {
-        clearTimeout(transitionTimer);
-      };
     } else {
       // 關閉時重置
       setShowTransition(false);
       setShowProposal(false);
+      setHasStartedTransition(false);
     }
   }, [isOpen, heartPosition]);
 
@@ -1750,7 +1758,9 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       className="fixed inset-0 z-[100] overflow-hidden" 
       style={{ 
         pointerEvents: showTransition ? 'none' : 'auto',
-        backgroundColor: 'transparent'
+        backgroundColor: 'transparent',
+        opacity: (showTransition || hasStartedTransition) ? 1 : 0,
+        visibility: (showTransition || hasStartedTransition) ? 'visible' : 'hidden'
       }}
     >
       {/* 黑色背景過渡層：在愛心動畫後期逐漸顯示 */}
@@ -1806,7 +1816,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       
 
       {/* Instagram 限時動態風格的照片瀏覽 */}
-      {!showTransition && !showProposal && (
+      {!showTransition && !showProposal && hasStartedTransition && (
         <div
           className="relative w-full h-full cursor-pointer animate-photo-fade-in select-none"
           onClick={handlePhotoClick}
@@ -2385,10 +2395,8 @@ function App() {
         });
       }
       
-      // 在搖晃完成後（1.2秒）打開模態框，動畫會自動開始（因為 heartPosition 已設置）
-      setTimeout(() => {
-        setShowProposal(true);
-      }, 1200);
+      // 立即打開模態框（但保持透明），讓它在搖晃期間就準備好
+      setShowProposal(true);
     }
   };
 
