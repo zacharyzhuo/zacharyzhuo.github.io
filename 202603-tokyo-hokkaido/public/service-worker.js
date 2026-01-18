@@ -1,7 +1,7 @@
-// Service Worker for Fukuoka Trip PWA
+// Service Worker for Tokyo & Hokkaido Trip PWA
 // 版本號會在 build 時自動替換，無需手動修改
-const CACHE_NAME = "fukuoka-trip-__BUILD_TIME__";
-const RUNTIME_CACHE = "fukuoka-runtime-__BUILD_TIME__";
+const CACHE_NAME = "tokyo-hokkaido-trip-__BUILD_TIME__";
+const RUNTIME_CACHE = "tokyo-hokkaido-runtime-__BUILD_TIME__";
 
 // 需要快取的靜態資源
 const STATIC_CACHE_URLS = [
@@ -42,7 +42,8 @@ self.addEventListener("activate", (event) => {
               return (
                 cacheName !== CACHE_NAME &&
                 cacheName !== RUNTIME_CACHE &&
-                cacheName.startsWith("fukuoka-")
+                (cacheName.startsWith("tokyo-hokkaido-") || 
+                 cacheName.startsWith("fukuoka-"))
               );
             })
             .map((cacheName) => {

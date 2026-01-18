@@ -1,6 +1,6 @@
 {
-  "short_name": "九州旅行",
-  "name": "2026 Family Trip to Fukuoka",
+  "short_name": "北海道旅行",
+  "name": "2026 Hokkaido Trip",
   "icons": [
     {
       "src": "logo192.png",
@@ -20,5 +20,5 @@
   "orientation": "portrait",
   "theme_color": "#5C6E58",
   "background_color": "#F9F8F4",
-  "description": "2026 Family Trip to Fukuoka"
+  "description": "2026 Hokkaido Trip"
 }

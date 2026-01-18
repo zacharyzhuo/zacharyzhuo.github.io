@@ -2,13 +2,9 @@ import React, { useState, useEffect } from "react";
 import { tripData } from "./data";
 import {
   MapPin,
-  Sun,
-  Cloud,
-  CloudRain,
   X,
   Plane,
   Hotel,
-  Coffee,
   Camera,
   Utensils,
   ShoppingBag,
@@ -31,9 +27,6 @@ import {
   Flame,
   Building2,
   Heart,
-  Sparkles,
-  MoreVertical,
-  User,
 } from "lucide-react";
 
 // --- DATA ---
@@ -211,19 +204,19 @@ const DateStrip = ({ days, activeDay, onSelect, onDay4Click, day4ClickCount, isD
     const now = Date.now();
     const DOUBLE_TAP_DELAY = 300;
 
-    // 如果是 day 4，處理點擊計數（但不阻止日期選擇）
-    if (dayId === 4) {
-      e.stopPropagation();
-      onDay4Click();
-      // 繼續執行日期選擇功能
-    }
-
+    // 先執行日期選擇
     if (now - lastTap < DOUBLE_TAP_DELAY) {
       handleToggleScroll();
     } else {
       onSelect(dayId);
     }
     setLastTap(now);
+
+    // 如果是 day 4，處理點擊計數（在日期選擇之後）
+    if (dayId === 4) {
+      e.stopPropagation();
+      onDay4Click();
+    }
   };
 
   // Scroll to active day when it changes
@@ -1538,7 +1531,6 @@ const EmergencyModal = ({ isOpen, onClose }) => {
 // 10. Proposal Modal (求婚彩蛋 - Instagram 限時動態風格)
 const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const [showProposal, setShowProposal] = useState(false);
   const [showTransition, setShowTransition] = useState(false);
   const [hasStartedTransition, setHasStartedTransition] = useState(false); // 追蹤是否已經開始過渡動畫
   const [progress, setProgress] = useState(0);
@@ -1562,7 +1554,6 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
   useEffect(() => {
     if (isOpen) {
       setCurrentPhotoIndex(0);
-      setShowProposal(false);
       setProgress(0);
       setShowTransition(false); // 初始不顯示動畫
       setHasStartedTransition(false); // 重置過渡狀態
@@ -1599,14 +1590,13 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     } else {
       // 關閉時重置
       setShowTransition(false);
-      setShowProposal(false);
       setHasStartedTransition(false);
     }
   }, [isOpen, heartPosition]);
 
   // 自動播放和進度條
   useEffect(() => {
-    if (!isOpen || showTransition || showProposal) return;
+    if (!isOpen || showTransition) return;
 
     // 如果暫停，不啟動計時器
     if (isPaused) return;
@@ -1625,24 +1615,23 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
           setCurrentPhotoIndex((prevIndex) => prevIndex + 1);
           setElapsedBeforePause(0); // 重置已過時間
         } else {
-          // 最後一張後顯示求婚
-          setShowProposal(true);
+          // 最後一張後保持顯示，不切換到求婚畫面
+          setProgress(100);
         }
-        setProgress(0);
       } else {
         setProgress(newProgress);
       }
     }, 50); // 每50ms更新一次，讓動畫更流暢
 
     return () => clearInterval(interval);
-  }, [isOpen, currentPhotoIndex, showTransition, showProposal, isPaused, elapsedBeforePause, photos.length]);
+  }, [isOpen, currentPhotoIndex, showTransition, isPaused, elapsedBeforePause, photos.length]);
 
   // 當照片切換時，重置已過時間
   useEffect(() => {
-    if (!isOpen || showTransition || showProposal) return;
+    if (!isOpen || showTransition) return;
     setElapsedBeforePause(0);
     setProgress(0);
-  }, [currentPhotoIndex, isOpen, showTransition, showProposal]);
+  }, [currentPhotoIndex, isOpen, showTransition]);
 
   const handlePhotoClick = (e) => {
     // 如果點擊到按鈕，不處理
@@ -1672,8 +1661,8 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
         setProgress(0); // 重置進度
         setElapsedBeforePause(0);
       } else {
-        // 最後一張後顯示求婚
-        setShowProposal(true);
+        // 最後一張後保持顯示
+        setProgress(100);
       }
     }
   };
@@ -1736,14 +1725,6 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     setIsPaused(false);
   };
 
-  const handleYes = () => {
-    alert("💕 太好了！讓我們一起創造更多美好的回憶！");
-    onClose();
-  };
-
-  const handleNo = () => {
-    alert("😊 沒關係，我們可以再等等～");
-  };
 
   if (!isOpen) return null;
 
@@ -1796,7 +1777,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
               strokeWidth: 2,
               shapeRendering: 'geometricPrecision',
               display: 'block',
-              filter: 'none',
+              filter: 'brightness(1)',
               opacity: 1
             }}
           />
@@ -1816,7 +1797,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       
 
       {/* Instagram 限時動態風格的照片瀏覽 */}
-      {!showTransition && !showProposal && hasStartedTransition && (
+      {!showTransition && hasStartedTransition && (
         <div
           className="relative w-full h-full cursor-pointer animate-photo-fade-in select-none"
           onClick={handlePhotoClick}
@@ -1897,42 +1878,6 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       )}
 
       {/* 求婚視窗 */}
-      {showProposal && (
-        <div 
-          className="absolute inset-0 flex items-center justify-center p-6 animate-photo-fade-in"
-          style={{
-            background: 'linear-gradient(to bottom right, #89CFF0, #5BA3D0, #4A90C2)'
-          }}
-        >
-          <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-10 shadow-2xl max-w-md w-full text-center animate-scale-in">
-            <div className="mb-6">
-              <Heart
-                size={64}
-                className="mx-auto mb-4 animate-bounce"
-                style={{ color: '#89CFF0', fill: '#89CFF0' }}
-              />
-            </div>
-            <h2 className="text-3xl font-serif font-bold text-jp-text mb-8">
-              你願意嫁給我嗎？
-            </h2>
-            <div className="flex gap-4 justify-center">
-              <button
-                onClick={handleYes}
-                className="text-white px-10 py-4 rounded-full font-serif font-bold text-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all touch-manipulation min-h-[56px] flex-1"
-                style={{ background: 'linear-gradient(to right, #89CFF0, #5BA3D0)' }}
-              >
-                願意 💕
-              </button>
-              <button
-                onClick={handleNo}
-                className="bg-stone-200 text-stone-600 px-10 py-4 rounded-full font-serif font-bold text-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all touch-manipulation min-h-[56px] flex-1"
-              >
-                再想想
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -2371,6 +2316,15 @@ function App() {
   const [heartPosition, setHeartPosition] = useState(null);
 
   const handleDay4Click = () => {
+    // 如果還沒有選中週三04，先選中它並重置計數器
+    if (activeDay !== 4) {
+      setActiveDay(4);
+      setDay4ClickCount(0);
+      setLastDay4ClickTime(0);
+      return; // 不計算點擊次數，只選中日期
+    }
+
+    // 只有當 activeDay === 4 時才開始計算點擊次數
     const now = Date.now();
     // 如果距離上次點擊超過 2 秒，重置計數
     if (now - lastDay4ClickTime > 2000) {
@@ -2403,7 +2357,7 @@ function App() {
   // Load checked items from localStorage
   const [checkedItems, setCheckedItems] = useState(() => {
     try {
-      const saved = localStorage.getItem("hokkaido-checklist");
+      const saved = localStorage.getItem("tokyo-hokkaido-checklist");
       return saved ? JSON.parse(saved) : {};
     } catch (error) {
       console.error("Failed to load checklist from localStorage:", error);
@@ -2414,7 +2368,7 @@ function App() {
   // Save checked items to localStorage whenever they change
   useEffect(() => {
     try {
-      localStorage.setItem("hokkaido-checklist", JSON.stringify(checkedItems));
+      localStorage.setItem("tokyo-hokkaido-checklist", JSON.stringify(checkedItems));
     } catch (error) {
       console.error("Failed to save checklist to localStorage:", error);
     }
@@ -2450,7 +2404,16 @@ function App() {
 
   const currentDayData =
     tripData.itinerary.find((d) => d.day === activeDay) ||
-    tripData.itinerary[0];
+    tripData.itinerary[0] ||
+    {
+      day: 1,
+      date: "03/01 (週日)",
+      title: "行程規劃中",
+      location: "北海道",
+      weather: "",
+      image: "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=800&q=80",
+      activities: []
+    };
 
   const handleChecklistToggle = (key) => {
     setCheckedItems((prev) => ({
@@ -2556,16 +2519,15 @@ function App() {
         </button>
 
         <div className="flex flex-col items-center">
-          <p className="text-xs tracking-[0.4em] uppercase text-stone-400 mb-1 font-sans font-bold">
-            Family Trip
+          <p className="text-xs tracking-[0.4em] uppercase text-stone-400 mb-1 font-sans font-bold text-center">
+            2026/03
+            <br />
+            Tokyo&Hokkaido Trip
           </p>
           <div className="flex items-center justify-center gap-3">
             <h1 className="text-2xl font-bold tracking-[0.2em] text-jp-text">
-              北海道旅行
+              東京＆北海道旅行
             </h1>
-            <span className="px-2 py-0.5 border border-stone-300 rounded-full text-xs text-stone-400 font-sans font-bold">
-              2026/03
-            </span>
           </div>
         </div>
 

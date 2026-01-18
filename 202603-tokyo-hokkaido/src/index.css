@@ -291,7 +291,7 @@ body {
     filter: brightness(1);
   }
 
-  85% {
+  90% {
     transform: translate(-50%, -50%) scale(60);
     opacity: 1;
     filter: brightness(1);
@@ -299,7 +299,13 @@ body {
 
   95% {
     transform: translate(-50%, -50%) scale(60);
-    opacity: 0.8;
+    opacity: 1;
+    filter: brightness(1);
+  }
+
+  98% {
+    transform: translate(-50%, -50%) scale(60);
+    opacity: 0.9;
     filter: brightness(1);
   }
 

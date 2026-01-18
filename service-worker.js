@@ -1,7 +1,7 @@
-// Service Worker for Fukuoka Trip PWA
+// Service Worker for Hokkaido Trip PWA
 // 更新版本號以強制清除舊快取
-const CACHE_NAME = "fukuoka-trip-v3";
-const RUNTIME_CACHE = "fukuoka-runtime-v3";
+const CACHE_NAME = "hokkaido-trip-v1";
+const RUNTIME_CACHE = "hokkaido-runtime-v1";
 
 // 需要快取的靜態資源
 const STATIC_CACHE_URLS = [
