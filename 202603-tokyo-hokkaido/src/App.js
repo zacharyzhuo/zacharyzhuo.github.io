@@ -54,43 +54,44 @@ const Sidebar = ({ isOpen, onClose, onSelect }) => {
   return (
     <>
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-transparent z-40 transition-opacity duration-300 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
       />
       <div
-        className={`fixed inset-y-0 left-0 w-64 bg-[#FDFBF9] shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${
+        className={`fixed inset-y-0 left-0 w-64 z-50 transform transition-transform duration-300 ease-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="p-6 border-b border-stone-100 flex justify-between items-center bg-white/50">
-          <h2 className="text-xl font-serif font-bold text-jp-text">
-            Trip Menu
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-3 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
-            aria-label="關閉選單"
-          >
-            <X size={18} />
-          </button>
-        </div>
+        <div className="h-full w-full glass-sidebar flex flex-col">
+          <div className="p-6 flex justify-between items-center">
+            <h2 className="text-xl font-serif font-bold text-jp-text">
+              Trip Menu
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-3 liquid-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="關閉選單"
+            >
+              <X size={18} />
+            </button>
+          </div>
 
-        <div className="flex-1 overflow-y-auto py-4">
-          <nav className="space-y-2 px-4">
+          <div className="flex-1 overflow-y-auto py-4">
+            <nav className="space-y-2 px-4">
             <button
               onClick={() => onSelect("info")}
-              className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-stone-100 transition-all text-left group"
+              className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/20 transition-all text-left group"
             >
-              <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-blue-50/80 text-blue-600 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
                 <Info size={20} />
               </div>
               <div>
                 <span className="block font-serif font-bold text-jp-text text-base">
                   旅程資訊
                 </span>
-                <span className="block text-xs text-stone-400 font-sans tracking-wide">
+                <span className="block text-xs text-stone-500 font-serif tracking-wide">
                   Flight & Info
                 </span>
               </div>
@@ -98,16 +99,16 @@ const Sidebar = ({ isOpen, onClose, onSelect }) => {
 
             <button
               onClick={() => onSelect("checklist")}
-              className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-stone-100 transition-all text-left group"
+              className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/20 transition-all text-left group"
             >
-              <div className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center group-hover:bg-green-100 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-green-50/80 text-green-600 flex items-center justify-center group-hover:bg-green-100 transition-colors">
                 <ClipboardList size={22} />
               </div>
               <div>
                 <span className="block font-serif font-bold text-jp-text text-base">
                   行李清單
                 </span>
-                <span className="block text-xs text-stone-400 font-sans tracking-wide">
+                <span className="block text-xs text-stone-500 font-serif tracking-wide">
                   Packing List
                 </span>
               </div>
@@ -115,16 +116,16 @@ const Sidebar = ({ isOpen, onClose, onSelect }) => {
 
             <button
               onClick={() => onSelect("shopping")}
-              className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-stone-100 transition-all text-left group"
+              className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/20 transition-all text-left group"
             >
-              <div className="w-10 h-10 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center group-hover:bg-pink-100 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-pink-50/80 text-pink-600 flex items-center justify-center group-hover:bg-pink-100 transition-colors">
                 <ShoppingBag size={22} />
               </div>
               <div>
                 <span className="block font-serif font-bold text-jp-text text-base">
                   逛街清單
                 </span>
-                <span className="block text-xs text-stone-400 font-sans tracking-wide">
+                <span className="block text-xs text-stone-500 font-serif tracking-wide">
                   Shopping Map
                 </span>
               </div>
@@ -132,16 +133,16 @@ const Sidebar = ({ isOpen, onClose, onSelect }) => {
 
             <button
               onClick={() => onSelect("food")}
-              className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-stone-100 transition-all text-left group"
+              className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/20 transition-all text-left group"
             >
-              <div className="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center group-hover:bg-orange-100 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-orange-50/80 text-orange-600 flex items-center justify-center group-hover:bg-orange-100 transition-colors">
                 <Utensils size={22} />
               </div>
               <div>
                 <span className="block font-serif font-bold text-jp-text text-base">
                   美食清單
                 </span>
-                <span className="block text-xs text-stone-400 font-sans tracking-wide">
+                <span className="block text-xs text-stone-500 font-serif tracking-wide">
                   Food List
                 </span>
               </div>
@@ -149,16 +150,16 @@ const Sidebar = ({ isOpen, onClose, onSelect }) => {
 
             <button
               onClick={() => onSelect("emergency")}
-              className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-red-50 transition-all text-left group border-2 border-red-100"
+              className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/20 transition-all text-left group"
             >
-              <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center group-hover:bg-red-100 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-red-50/80 text-red-600 flex items-center justify-center group-hover:bg-red-100 transition-colors">
                 <PhoneCall size={22} />
               </div>
               <div>
                 <span className="block font-serif font-bold text-red-700 text-base">
                   緊急聯絡
                 </span>
-                <span className="block text-xs text-red-400 font-sans tracking-wide">
+                <span className="block text-xs text-red-400 font-serif tracking-wide">
                   Emergency
                 </span>
               </div>
@@ -166,17 +167,13 @@ const Sidebar = ({ isOpen, onClose, onSelect }) => {
           </nav>
         </div>
 
-        <div className="p-6 border-t border-stone-100 bg-stone-50">
-          <p className="text-xs text-stone-400 text-center font-sans tracking-widest uppercase">
-            Family Trip 2026
+        <div className="p-6">
+          <p className="text-xs text-stone-500 text-center font-serif tracking-widest uppercase opacity-70">
+            Tokyo & Hokkaido Trip 2026
           </p>
-          {tripData.version && (
-            <p className="text-[8px] text-stone-300 text-center font-sans mt-1">
-              v{tripData.version}
-            </p>
-          )}
         </div>
       </div>
+    </div>
     </>
   );
 };
@@ -286,7 +283,7 @@ const DateStrip = ({ days, activeDay, onSelect, onDay4Click, day4ClickCount, isD
               ) : (
                 <>
                   <span
-                    className={`text-xs tracking-widest uppercase font-sans ${
+                    className={`text-xs tracking-widest uppercase font-serif ${
                       isActive ? "text-jp-red font-bold" : "text-stone-400"
                     }`}
                   >
@@ -318,14 +315,13 @@ const HeroSection = ({ location, title, image }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
-    <div className="relative mx-4 mt-4 rounded-xl overflow-hidden shadow-lg h-48 group">
-      <div className="absolute inset-0 bg-gradient-to-br from-stone-600 to-stone-800 mix-blend-multiply" />
+    <div className="relative rounded-none overflow-hidden h-48 group">
       {!imageError ? (
         <img
           src={image}
           alt={location}
-          className={`absolute inset-0 w-full h-full object-cover opacity-60 transition-opacity duration-300 ${
-            imageLoaded ? "opacity-60" : "opacity-0"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+            imageLoaded ? "opacity-70" : "opacity-0"
           }`}
           loading="lazy"
           onLoad={() => setImageLoaded(true)}
@@ -337,9 +333,20 @@ const HeroSection = ({ location, title, image }) => {
       {!imageLoaded && !imageError && (
         <div className="absolute inset-0 bg-stone-300 animate-pulse" />
       )}
+      
+      {/* 從上方開始的漸變遮罩，讓底部自然淡出到背景色 */}
+      <div 
+        className="absolute inset-0" 
+        style={{
+          background: 'linear-gradient(to bottom, transparent 0%, transparent 30%, rgba(249, 248, 244, 0.05) 45%, rgba(249, 248, 244, 0.15) 60%, rgba(249, 248, 244, 0.3) 72%, rgba(249, 248, 244, 0.5) 82%, rgba(249, 248, 244, 0.7) 90%, rgba(249, 248, 244, 0.85) 95%, rgba(249, 248, 244, 0.95) 98%, rgb(249, 248, 244) 100%)'
+        }}
+      />
+      
+      {/* 輕微的深色遮罩保持文字可讀性 */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-transparent" />
 
-      <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-6 text-center">
-        <div className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase opacity-80 mb-2 font-sans">
+      <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-6 text-center z-10">
+        <div className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase opacity-80 mb-2 font-serif">
           <span className="w-6 h-[1px] bg-white"></span>
           <span>今日行程</span>
           <span className="w-6 h-[1px] bg-white"></span>
@@ -347,7 +354,7 @@ const HeroSection = ({ location, title, image }) => {
         <h2 className="text-2xl font-serif font-bold tracking-wide mb-1 shadow-black drop-shadow-md">
           {title}
         </h2>
-        <p className="text-xs font-sans opacity-90 tracking-widest">
+        <p className="text-xs font-serif opacity-90 tracking-widest">
           {location}
         </p>
       </div>
@@ -381,7 +388,7 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
     >
       {/* Time Column */}
       <div className="w-16 shrink-0 flex flex-col items-center pt-1">
-        <span className="text-xl font-serif font-bold text-jp-text leading-none">
+        <span className="text-xg font-serif font-bold text-jp-text leading-none">
           {activity.time}
         </span>
         {!isLast && <div className="w-[1px] bg-stone-200 flex-1 my-2" />}
@@ -389,10 +396,10 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
 
       {/* Content */}
       <div className="flex-1 pb-8">
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-stone-100 active:scale-[0.98] transition-transform duration-200 h-full flex flex-col touch-manipulation">
+        <div className="bg-white rounded-lg p-4 border border-stone-100 active:scale-[0.98] transition-transform duration-200 h-full flex flex-col touch-manipulation">
           <div className="flex justify-between items-start mb-2">
             <span
-              className={`text-xs tracking-wider uppercase px-2 py-0.5 rounded border font-sans font-bold ${
+              className={`text-xs tracking-wider uppercase px-2 py-0.5 rounded border font-serif font-bold ${
                 activity.type === "美食"
                   ? "border-orange-200 text-orange-700 bg-orange-50"
                   : activity.type === "交通"
@@ -413,12 +420,12 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
           <h4 className="text-lg font-serif font-bold text-jp-text mb-1 leading-snug">
             {activity.title}
           </h4>
-          <p className="text-sm text-jp-sub line-clamp-3 font-sans mb-2 leading-relaxed opacity-80">
+          <p className="text-sm text-jp-sub text-stone-500 line-clamp-3 font-serif mb-2 leading-relaxed opacity-80">
             {activity.desc}
           </p>
 
           {activity.hours && (
-            <div className="flex items-center gap-1.5 text-xs text-stone-500 font-sans mb-3 bg-stone-50 w-fit px-2 py-1 rounded">
+            <div className="flex items-center gap-1.5 text-xs text-stone-500 font-serif mb-3 bg-stone-50 w-fit px-2 py-1 rounded">
               <Clock size={12} />
               <span>{activity.hours}</span>
             </div>
@@ -429,7 +436,7 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
               {activity.subItems.map((item, idx) => (
                 <div
                   key={idx}
-                  className="flex flex-col gap-0.5 text-sm font-sans"
+                  className="flex flex-col gap-0.5 text-sm font-serif"
                 >
                   <div className="flex justify-between items-baseline">
                     <span className="font-bold text-stone-600">
@@ -451,9 +458,9 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
             </div>
           )}
 
-          <div className="flex items-center gap-2 text-xs text-stone-400 font-sans mt-auto pt-2">
+          <div className="flex items-center gap-2 text-xs text-stone-400 font-serif mt-auto pt-2">
             {getIcon(activity.type)}
-            <span className="truncate opacity-70 flex-1">
+            <span className="truncate text-stone-500 opacity-70 flex-1">
               {activity.address ||
                 (activity.nav.startsWith("http")
                   ? "查看地圖位置"
@@ -490,7 +497,7 @@ const DetailModal = ({
   return (
     <>
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-transparent z-40 transition-opacity duration-300 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -501,13 +508,19 @@ const DetailModal = ({
           isOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
-        <div className="bg-[#FDFBF9] rounded-t-[2rem] shadow-2xl min-h-[60vh] max-h-[90vh] flex flex-col relative">
-          {/* Header (Sticky) */}
+        <div className="glass-bottom-sheet min-h-[60vh] max-h-[79vh] flex flex-col relative overflow-hidden">
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 z-20 p-3 liquid-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="關閉詳情"
+          >
+            <X size={20} />
+          </button>
 
-          <div className="flex justify-between items-start p-8 pb-4 sticky top-0 bg-[#FDFBF9]/95 backdrop-blur-sm z-10 rounded-t-[2rem] border-b border-stone-100/50">
-            <div className="flex items-center gap-3">
+          <div className="overflow-y-auto px-8 pb-10 flex-1 pt-8">
+            <div className="flex items-center gap-3 mb-2">
               <span
-                className={`px-3 py-1 border text-xs tracking-widest font-bold font-sans uppercase rounded ${
+                className={`px-3 py-1 border text-xs tracking-widest font-bold font-serif uppercase rounded ${
                   currentActivity.type === "美食"
                     ? "border-orange-200 text-orange-700 bg-orange-50"
                     : currentActivity.type === "交通"
@@ -524,30 +537,18 @@ const DetailModal = ({
                 {currentActivity.type}
               </span>
 
-              <span className="font-serif text-xl text-stone-400">
+              <span className="font-serif text-xl text-stone-600">
                 {currentActivity.time}
               </span>
             </div>
 
-            <button
-              onClick={onClose}
-              className="p-3 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-label="關閉詳情"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          {/* Scrollable Content */}
-
-          <div className="overflow-y-auto px-8 pb-10">
             {/* Title */}
 
-            <h2 className="text-3xl font-serif font-bold text-jp-text mb-2 leading-tight mt-2">
+            <h2 className="text-2xl font-serif font-bold text-jp-text mb-2 leading-tight mt-2 pr-12">
               {currentActivity.title}
             </h2>
 
-            <div className="flex items-center gap-2 text-base text-stone-500 mb-8 font-sans">
+            <div className="flex items-center gap-2 text-sm text-stone-600 mb-8 font-serif">
               <MapPin size={14} />
 
               {currentActivity.address ||
@@ -559,105 +560,15 @@ const DetailModal = ({
             {/* Body Content */}
 
             <div className="space-y-8">
-              <div className="relative pl-6 border-l border-stone-200">
-                <p className="text-jp-text leading-relaxed font-serif text-base opacity-90">
-                  {currentActivity.desc}
-                </p>
-              </div>
-
               {currentActivity.about && (
-                <div className="bg-[#F8F6F4] p-5 rounded-xl border border-stone-100">
-                  <h3 className="font-bold text-stone-500 mb-2 flex items-center gap-2 text-xs uppercase tracking-widest font-sans">
+                <div>
+                  <h3 className="font-bold text-jp-text mb-2 flex items-center gap-2 text-base font-serif">
                     <BookOpen size={14} />
                     關於此處
                   </h3>
-
-                  <p className="text-base text-stone-600 leading-relaxed font-sans text-justify">
+                  <p className="text-jp-text leading-relaxed font-serif text-base opacity-90">
                     {currentActivity.about}
                   </p>
-                </div>
-              )}
-
-              {/* Surroundings Link Block */}
-              {currentActivity.hasSurroundingsLink && (
-                <div className="bg-blue-50/50 border border-blue-100 p-5 rounded-xl mb-8">
-                  <h4 className="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
-                    <Hotel size={16} /> 民宿周邊推薦
-                  </h4>
-                  <p className="text-xs text-blue-600/80 mb-3 font-sans leading-relaxed">
-                    回到民宿休息時，不妨去附近的溫泉放鬆，或是到超市採買宵夜。
-                  </p>
-                  <button
-                    onClick={() => {
-                      onClose();
-                      onOpenInfo("surroundings-section");
-                    }}
-                    className="w-full bg-white text-blue-600 text-xs font-bold py-3 rounded-lg border border-blue-200 shadow-sm hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 touch-manipulation min-h-[44px]"
-                    aria-label="查看民宿周邊推薦詳細資訊"
-                  >
-                    查看詳細資訊 (溫泉/LOPIA) <ChevronRight size={12} />
-                  </button>
-                </div>
-              )}
-
-              {/* Special Action Link: Shopping List */}
-
-              {currentActivity.showShoppingLink && (
-                <button
-                  onClick={() => {
-                    onClose();
-
-                    onOpenShopping(currentActivity.shoppingTab || "sapporo");
-                  }}
-                  className="w-full flex items-center justify-between p-4 bg-pink-50 border border-pink-100 rounded-xl group active:scale-[0.98] transition-all touch-manipulation min-h-[48px]"
-                  aria-label="查看逛街清單"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white rounded-full text-pink-500 shadow-sm">
-                      <ShoppingBag size={18} />
-                    </div>
-
-                    <span className="font-bold text-pink-700 text-base">
-                      {currentActivity.shoppingText || "查看天神逛街清單"}
-                    </span>
-                  </div>
-
-                  <ChevronRight
-                    size={16}
-                    className="text-pink-300 group-hover:translate-x-1 transition-transform"
-                  />
-                </button>
-              )}
-
-              {currentActivity.highlight && (
-                <div className="bg-stone-50 p-6 rounded-xl border border-stone-100/50">
-                  <h3 className="font-bold text-jp-text mb-3 flex items-center gap-2 text-sm">
-                    <span className="w-1.5 h-1.5 bg-jp-red rounded-full"></span>
-                    行程重點
-                  </h3>
-
-                  <p className="text-base text-stone-600 leading-relaxed font-sans">
-                    {currentActivity.highlight}
-                  </p>
-                </div>
-              )}
-
-              {currentActivity.tips && (
-                <div>
-                  <h3 className="text-xs font-bold text-stone-400 mb-3 uppercase tracking-[0.2em] font-sans border-b border-stone-100 pb-2">
-                    Traveler Tips / 旅人攻略
-                  </h3>
-
-                  <div className="flex flex-wrap gap-2">
-                    {currentActivity.tips.map((tip) => (
-                      <span
-                        key={tip}
-                        className="px-4 py-2 bg-white border border-stone-200 rounded-full text-xs text-stone-600 shadow-sm font-sans"
-                      >
-                        {tip}
-                      </span>
-                    ))}
-                  </div>
                 </div>
               )}
             </div>
@@ -665,7 +576,7 @@ const DetailModal = ({
 
           {/* Action Button */}
 
-          <div className="sticky bottom-4 mt-12 pt-4 pb-4 px-8 bg-gradient-to-t from-[#FDFBF9] via-[#FDFBF9] to-transparent safe-area-bottom">
+          <div className="sticky bottom-4 mt-12 pt-4 pb-4 px-8 safe-area-bottom">
             <button
               onClick={() => {
                 const url = currentActivity.nav.startsWith("http")
@@ -676,7 +587,7 @@ const DetailModal = ({
 
                 window.open(url, "_blank");
               }}
-              className="w-full bg-jp-green text-white py-4 rounded-lg font-serif font-medium tracking-wide flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-lg shadow-jp-green/20 touch-manipulation min-h-[48px]"
+              className="w-full liquid-glass-button text-stone-600 py-4 rounded-xl font-serif tracking-wide flex items-center justify-center gap-2 touch-manipulation min-h-[48px]"
               aria-label={`開啟 ${currentActivity.title} 的 Google Maps 導航`}
             >
               <Navigation size={16} />
@@ -707,7 +618,7 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
   return (
     <>
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-transparent z-40 transition-opacity duration-300 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -717,107 +628,86 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
           isOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
-        <div className="bg-[#FDFBF9] rounded-t-[2rem] shadow-2xl min-h-[60vh] max-h-[90vh] flex flex-col relative">
-          {/* Header (Sticky) */}
-          <div className="flex justify-between items-center p-8 pb-4 sticky top-0 bg-[#FDFBF9]/95 backdrop-blur-sm z-10 rounded-t-[2rem] border-b border-stone-100/50">
-            <h2 className="text-2xl font-serif font-bold text-jp-text">
+        <div className="glass-bottom-sheet min-h-[60vh] max-h-[79vh] flex flex-col relative overflow-hidden">
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 z-20 p-3 liquid-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="關閉詳情"
+          >
+            <X size={20} />
+          </button>
+
+          <div className="overflow-y-auto px-8 pb-10 space-y-8 flex-1 pt-8">
+            <h2 className="text-2xl font-serif font-bold text-jp-text mb-2 pr-12">
               旅程資訊
             </h2>
-            <button
-              onClick={onClose}
-              className="p-3 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-label="關閉詳情"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          <div className="overflow-y-auto px-8 pb-10 space-y-8">
             {/* 1. Flight Info */}
             <div>
               <h3 className="text-base font-bold text-stone-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                 <Plane size={18} /> 航班資訊
               </h3>
               <div className="space-y-4">
-                {/* Outbound */}
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-stone-100">
-                  <div className="flex justify-between items-center mb-4 border-b border-stone-50 pb-2">
-                    <span className="text-sm font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded">
-                      去程 01/10
-                    </span>
-                    <span className="text-sm font-bold text-jp-green">
-                      AirAsia AK 1510
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="text-center">
-                      <div className="text-2xl font-serif font-bold text-jp-text">
-                        12:40
+                {tripData.flight.map((flight, index) => {
+                  const [departure, arrival] = flight.route.split(" -> ");
+                  const [depTime, arrTime] = flight.time.split(" - ");
+                  const airportNames = {
+                    "TPE": "台北",
+                    "NRT": "成田",
+                    "HND": "羽田",
+                    "HKD": "函館",
+                    "CTS": "新千歲"
+                  };
+                  
+                  return (
+                    <div key={index} className="bg-white p-5 rounded-2xl border border-stone-100">
+                      <div className="flex justify-between items-center mb-4 border-b border-stone-50 pb-2">
+                        <span className="text-sm font-bold border border-blue-200 text-blue-700 bg-blue-50 px-2 py-1 rounded">
+                          {flight.date}
+                        </span>
+                        <span className="text-sm font-bold text-jp-green">
+                          {flight.flightNo}
+                        </span>
                       </div>
-                      <div className="text-sm text-stone-400 font-sans">
-                        TPE 台北
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-serif font-bold text-jp-text">
+                            {depTime}
+                          </div>
+                          <div className="text-sm text-stone-400 font-serif">
+                            {departure} {airportNames[departure] || ""}
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-center text-stone-300">
+                          <div className="flex items-center">
+                            <div className="w-3 h-3 rounded-full border border-stone-300" />
+                            <div className="w-12 h-[1px] bg-stone-300" />
+                            <Plane size={18} className="rotate-90 text-stone-400" />
+                            <div className="w-12 h-[1px] bg-stone-300" />
+                            <div className="w-3 h-3 rounded-full bg-stone-300" />
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-serif font-bold text-jp-text">
+                            {arrTime}
+                          </div>
+                          <div className="text-sm text-stone-400 font-serif">
+                            {arrival} {airportNames[arrival] || ""}
+                          </div>
+                        </div>
                       </div>
+                      {flight.baggage && (
+                        <div className="mt-4 pt-4 border-t border-stone-100">
+                          <div className="flex items-start gap-2">
+                            <Luggage size={16} className="text-stone-500 mt-0.5 flex-shrink-0" />
+                            <div className="text-sm text-stone-600 leading-relaxed whitespace-pre-line">
+                              {flight.baggage}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex flex-col items-center text-stone-300">
-                      <span className="text-sm mb-1">3h 20m</span>
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 rounded-full border border-stone-300" />
-                        <div className="w-12 h-[1px] bg-stone-300" />
-                        <Plane size={18} className="rotate-90 text-stone-400" />
-                        <div className="w-12 h-[1px] bg-stone-300" />
-                        <div className="w-3 h-3 rounded-full bg-stone-300" />
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-serif font-bold text-jp-text">
-                        16:00
-                      </div>
-                      <div className="text-sm text-stone-400 font-sans">
-                        FUK 福岡
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Inbound */}
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-stone-100">
-                  <div className="flex justify-between items-center mb-4 border-b border-stone-50 pb-2">
-                    <span className="text-sm font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded">
-                      回程 01/14
-                    </span>
-                    <span className="text-sm font-bold text-jp-green">
-                      AirAsia AK 1511
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="text-center">
-                      <div className="text-2xl font-serif font-bold text-jp-text">
-                        16:55
-                      </div>
-                      <div className="text-sm text-stone-400 font-sans">
-                        FUK 福岡
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-center text-stone-300">
-                      <span className="text-sm mb-1">2h 35m</span>
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 rounded-full border border-stone-300" />
-                        <div className="w-12 h-[1px] bg-stone-300" />
-                        <Plane size={18} className="rotate-90 text-stone-400" />
-                        <div className="w-12 h-[1px] bg-stone-300" />
-                        <div className="w-3 h-3 rounded-full bg-stone-300" />
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-serif font-bold text-jp-text">
-                        18:30
-                      </div>
-                      <div className="text-sm text-stone-400 font-sans">
-                        TPE 台北
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -830,7 +720,7 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                 onClick={() =>
                   window.open("https://vjw-lp.digital.go.jp/zh-hant/", "_blank")
                 }
-                className="w-full bg-[#6B9080] text-white p-6 rounded-2xl shadow-md hover:brightness-105 transition-all text-left group relative overflow-hidden touch-manipulation min-h-[48px]"
+                className="w-full bg-[#6B9080] text-white p-6 rounded-2xl hover:brightness-105 transition-all text-left group relative overflow-hidden touch-manipulation min-h-[48px]"
                 aria-label="開啟 Visit Japan Web 網站"
               >
                 <div className="absolute right-[-10px] top-[-10px] opacity-10 rotate-12">
@@ -841,7 +731,7 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
                     <h4 className="text-xl font-serif font-bold mb-1">
                       Visit Japan Web
                     </h4>
-                    <p className="text-sm opacity-80 font-sans tracking-wide">
+                    <p className="text-sm opacity-80 font-serif tracking-wide">
                       入境日本必備・提前填寫申報
                     </p>
                   </div>
@@ -858,186 +748,76 @@ const InfoModal = ({ isOpen, onClose, initialScrollTarget }) => {
               <h3 className="text-base font-bold text-stone-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                 <Hotel size={18} /> 住宿資訊
               </h3>
-              <div className="space-y-5">
-                {/* Airbnb */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 relative overflow-hidden">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <span className="text-sm font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded mb-3 inline-block">
-                        Airbnb
-                      </span>
-                      <h4 className="font-serif font-bold text-jp-text text-xl leading-tight mb-2">
-                        Flower Base Sakura
-                      </h4>
-                      <p className="text-base text-stone-500 font-sans mb-4">
-                        博多駅南 (Near Hakata Station)
-                      </p>
-
-                      <div className="flex gap-6 mb-4 text-sm font-sans text-stone-600 bg-stone-50/50 p-3 rounded-lg border border-stone-100">
-                        <div>
-                          <span className="block text-sm text-stone-400 uppercase tracking-wider font-bold mb-1">
-                            Check-in
-                          </span>
-                          <span className="font-bold text-jp-text text-sm">
-                            01/10 15:00
-                          </span>
-                        </div>
-                        <div className="w-[1px] bg-stone-200"></div>
-                        <div>
-                          <span className="block text-sm text-stone-400 uppercase tracking-wider font-bold mb-1">
-                            Check-out
-                          </span>
-                          <span className="font-bold text-jp-text text-sm">
-                            01/14 10:00
-                          </span>
-                        </div>
-                      </div>
-
-                      <a
-                        href="https://maps.app.goo.gl/vEDXtXCyJSVLbwP5A"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-sm text-jp-green font-bold flex items-center gap-1 hover:underline mt-auto pl-1 py-2 touch-manipulation min-h-[44px]"
-                        aria-label="查看民宿位置"
-                      >
-                        查看位置 <ExternalLink size={14} />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Surroundings */}
-                <div id="surroundings-section">
-                  <h4 className="text-sm font-bold text-stone-400 mb-3 pl-1">
-                    周邊推薦
-                  </h4>
-                  <div className="grid grid-cols-1 gap-4">
-                    {/* Onsen */}
-                    <div className="bg-blue-50/50 p-5 rounded-xl border border-blue-100 flex flex-col">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="p-2 bg-white text-blue-500 rounded-full shadow-sm">
-                          <Bath size={18} />
-                        </div>
-                        <span className="text-base font-bold text-blue-800">
-                          八百治博多ホテル 八百治の湯
-                        </span>
-                      </div>
-                      <div className="text-sm text-stone-600 space-y-1.5 mb-3 font-sans pl-1">
-                        <p>• 營業：6:30-9:30 / 12:00-24:00</p>
-                        <p>• 費用：平日 1,200円 / 土日祝 1,400円</p>
-                      </div>
-                      <a
-                        href="https://maps.app.goo.gl/1zHyqqb42Sgi8Vhu5"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-sm text-blue-600 font-bold flex items-center gap-1 hover:underline mt-auto pl-1 py-2 touch-manipulation min-h-[44px]"
-                        aria-label="查看溫泉位置"
-                      >
-                        查看位置 <ExternalLink size={14} />
-                      </a>
-                    </div>
-
-                    {/* LOPIA */}
-                    <div className="bg-red-50/50 p-5 rounded-xl border border-red-100 flex flex-col">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="p-2 bg-white text-red-500 rounded-full shadow-sm">
-                          <ShoppingBag size={18} />
-                        </div>
-                        <span className="text-base font-bold text-red-800">
-                          LOPIA 博多友都八喜店
-                        </span>
-                      </div>
-                      <p className="text-sm text-stone-600 mb-3 font-sans pl-1 leading-relaxed">
-                        人氣超市，非常適合購買伴手禮與宵夜。
-                      </p>
-                      <a
-                        href="https://maps.app.goo.gl/zYKq8J5sbHPdmruP8"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-sm text-red-600 font-bold flex items-center gap-1 hover:underline mt-auto pl-1 py-2 touch-manipulation min-h-[44px]"
-                        aria-label="查看 LOPIA 超市位置"
-                      >
-                        查看位置 <ExternalLink size={14} />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 3. Important Notes */}
-            <div>
-              <h3 className="text-base font-bold text-stone-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <AlertCircle size={18} /> 注意事項
-              </h3>
-              <div className="space-y-4">
-                <div className="bg-orange-50 p-5 rounded-xl border border-orange-100 flex gap-4">
-                  <div className="bg-orange-100 p-2.5 rounded-full h-fit text-orange-600">
-                    <AlertCircle size={24} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-orange-900 text-base mb-1.5">
-                      取票提醒
+              <div className="space-y-6">
+                {tripData.accommodation.map((accommodation, index) => (
+                  <div key={index}>
+                    {/* Region Title */}
+                    <h4 className="text-sm font-bold text-stone-500 mb-3 pl-1">
+                      {accommodation.region}
                     </h4>
-                    <p className="text-sm text-orange-800/80 leading-relaxed">
-                      請提醒 <strong>育辰</strong>{" "}
-                      記得在博多站領取「特急ゆふいんの森」的指定席車票。
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-stone-100 p-5 rounded-xl border border-stone-200 flex gap-4">
-                  <div className="bg-white p-2.5 rounded-full h-fit text-stone-500">
-                    <Luggage size={24} />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-stone-700 text-base mb-3">
-                      行李限重與規定 (AirAsia)
-                    </h4>
-
-                    {/* Weight Limits */}
-                    <div className="space-y-2 mb-4">
-                      <div className="flex justify-between items-center text-sm text-stone-600 border-b border-stone-200 pb-2">
-                        <span>手提行李 (最多 2 件)</span>
-                        <span className="font-bold">合計 7 kg</span>
-                      </div>
-                      <div className="flex justify-between items-center text-sm text-stone-600">
-                        <span>托運行李 (已加購)</span>
-                        <span className="font-bold text-right">
-                          合計 20 kg
-                          <br />
-                          <span className="text-[10px] font-normal text-stone-400">
-                            不限件數，單件 &lt;32kg
+                    {/* Accommodation Card */}
+                    <div className="bg-white p-6 rounded-2xl border border-stone-100 relative overflow-hidden">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <span className={`text-sm font-bold border px-2 py-1 rounded mb-3 inline-block ${
+                            accommodation.type === "hotel" 
+                              ? "border-purple-200 text-purple-700 bg-purple-50" 
+                              : accommodation.type === "airbnb" 
+                              ? "border-pink-200 text-pink-700 bg-pink-50" 
+                              : "border-stone-200 text-stone-500 bg-stone-50"
+                          }`}>
+                            {accommodation.type === "hotel" ? "飯店" : accommodation.type === "airbnb" ? "Airbnb" : "住宿"}
                           </span>
-                        </span>
-                      </div>
-                    </div>
+                          <h5 className="font-serif font-bold text-jp-text text-xl leading-tight mb-2">
+                            {accommodation.name}
+                          </h5>
+                          <p className="text-sm text-stone-500 font-serif mb-4">
+                            {accommodation.address}
+                          </p>
 
-                    {/* Detailed Rules */}
-                    <div className="bg-white/50 rounded-lg p-3 space-y-3">
-                      <div>
-                        <p className="text-sm font-bold text-stone-500 uppercase tracking-wider mb-1">
-                          隨身行李限制
-                        </p>
-                        <ul className="text-sm text-stone-600 space-y-1 list-disc pl-3">
-                          <li>主要行李：56 x 36 x 23 cm 以內</li>
-                          <li>隨身小包：40 x 30 x 10 cm 以內</li>
-                          <li>液體需單瓶 &lt;100ml，總體積 &lt;1L 透明袋裝</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-stone-500 uppercase tracking-wider mb-1">
-                          禁止託運 (務必隨身)
-                        </p>
-                        <ul className="text-sm text-red-600/80 space-y-1 list-disc pl-3">
-                          <li>行動電源、鋰電池</li>
-                          <li>相機電池、筆電、平板</li>
-                          <li>打火機 (限 1 個，需隨身)</li>
-                        </ul>
+                          <div className="flex gap-6 mb-4 text-sm font-serif text-stone-600 bg-stone-50/50 p-3 rounded-lg border border-stone-100">
+                            <div>
+                              <span className="block text-sm text-stone-500 uppercase font-serif tracking-wider mb-1">
+                                Check-in
+                              </span>
+                              <span className="text-sm text-stone-500 font-serif mb-4">
+                                {accommodation.checkIn}
+                              </span>
+                            </div>
+                            <div className="w-[1px] bg-stone-200"></div>
+                            <div>
+                              <span className="block text-sm text-stone-500 uppercase font-serif tracking-wider mb-1">
+                                Check-out
+                              </span>
+                              <span className="text-sm text-stone-500 font-serif mb-4">
+                                {accommodation.checkOut}
+                              </span>
+                            </div>
+                          </div>
+
+                          {accommodation.note && (
+                            <p className="text-sm text-stone-600 mb-2 font-serif leading-relaxed">
+                              {accommodation.note}
+                            </p>
+                          )}
+
+                          {accommodation.mapUrl && (
+                            <a
+                              href={accommodation.mapUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="w-full liquid-glass-button text-stone-600 py-3 rounded-xl font-serif tracking-wide flex items-center justify-center gap-2 mt-4 touch-manipulation min-h-[44px]"
+                              aria-label="查看住宿位置"
+                            >
+                              <Navigation size={16} />
+                              Google Maps 導航
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -1052,7 +832,7 @@ const ChecklistModal = ({ isOpen, onClose, checkedItems, onToggle }) => {
   return (
     <>
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-transparent z-40 transition-opacity duration-300 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -1062,25 +842,22 @@ const ChecklistModal = ({ isOpen, onClose, checkedItems, onToggle }) => {
           isOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
-        <div className="bg-[#FDFBF9] rounded-t-[2rem] shadow-2xl min-h-[60vh] max-h-[90vh] flex flex-col relative">
-          {/* Header (Sticky) */}
-          <div className="flex justify-between items-center p-8 pb-4 sticky top-0 bg-[#FDFBF9]/95 backdrop-blur-sm z-10 rounded-t-[2rem] border-b border-stone-100/50">
-            <h2 className="text-2xl font-serif font-bold text-jp-text">
+        <div className="glass-bottom-sheet min-h-[60vh] max-h-[79vh] flex flex-col relative overflow-hidden">
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 z-20 p-3 liquid-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="關閉詳情"
+          >
+            <X size={20} />
+          </button>
+
+          <div className="overflow-y-auto px-8 pb-10 grid grid-cols-1 gap-6 flex-1 pt-8">
+            <h2 className="text-2xl font-serif font-bold text-jp-text mb-2 pr-12">
               行李清單
             </h2>
-            <button
-              onClick={onClose}
-              className="p-3 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-label="關閉詳情"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          <div className="overflow-y-auto px-8 pb-10 grid grid-cols-1 gap-6">
             {Object.entries(checklistData).map(([category, items]) => (
               <div key={category}>
-                <h3 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-3 border-b border-stone-100 pb-1">
+                <h3 className="text-sm font-bold uppercase tracking-widest mb-3 pb-1">
                   {category}
                 </h3>
                 <ul className="space-y-3">
@@ -1223,7 +1000,7 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
   return (
     <>
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-transparent z-40 transition-opacity duration-300 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -1233,65 +1010,31 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
           isOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
-        <div className="bg-[#FDFBF9] rounded-t-[2rem] shadow-2xl min-h-[70vh] max-h-[90vh] flex flex-col relative">
-          {/* Header (Sticky) */}
-          <div className="flex justify-between items-center px-8 pt-8 pb-0 sticky top-0 bg-[#FDFBF9] z-20 rounded-t-[2rem]">
-            <h2 className="text-2xl font-serif font-bold text-jp-text">
-              逛街清單
-            </h2>
-            <button
-              onClick={onClose}
-              className="p-3 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-label="關閉詳情"
-            >
-              <X size={20} />
-            </button>
-          </div>
+        <div className="glass-bottom-sheet min-h-[60vh] max-h-[79vh] flex flex-col relative overflow-hidden">
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 z-20 p-3 liquid-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="關閉詳情"
+          >
+            <X size={20} />
+          </button>
 
           <div
             ref={scrollContainerRef}
-            className="overflow-y-auto px-8 pb-10 space-y-4"
+            className="overflow-y-auto px-8 pb-32 space-y-4 pt-8"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
-            {/* Tabs (Sticky) */}
-            <div className="sticky top-0 z-10 bg-[#FDFBF9] py-4 -mx-1 px-1 border-b border-stone-100/50">
-              <div className="flex gap-2 p-1 bg-stone-100 rounded-xl shadow-sm">
-                <button
-                    onClick={() => handleTap("sapporo")}
-                    className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all touch-manipulation min-h-[44px] ${
-                      activeTab === "sapporo"
-                        ? "bg-white shadow text-jp-text"
-                        : "text-stone-400"
-                    }`}
-                    aria-label="札幌逛街清單"
-                    aria-pressed={activeTab === "sapporo"}
-                  >
-                    札幌
-                  </button>
-                  <button
-                    onClick={() => handleTap("hakodate")}
-                    className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all touch-manipulation min-h-[44px] ${
-                      activeTab === "hakodate"
-                        ? "bg-white shadow text-jp-text"
-                        : "text-stone-400"
-                    }`}
-                    aria-label="函館逛街清單"
-                    aria-pressed={activeTab === "hakodate"}
-                  >
-                    函館
-                  </button>
-              </div>
-            </div>
-
-            {/* List */}
+            <h2 className="text-2xl font-serif font-bold text-jp-text mb-4 pr-12">
+              逛街清單
+            </h2>
 
             {/* List */}
             {currentList.map((item, idx) => (
               <div
                 key={idx}
-                className="bg-white rounded-xl p-5 border border-stone-100 shadow-sm"
+                className="bg-white rounded-xl p-5 border border-stone-100"
               >
                 {/* Header Row */}
                 <div className="flex justify-between items-start mb-3">
@@ -1304,7 +1047,7 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
                         {item.name}
                       </h3>
                       {item.isBuilding && item.hours && (
-                        <span className="text-xs text-stone-500 font-sans mt-1 flex items-center gap-1">
+                        <span className="text-xs text-stone-500 font-serif mt-1 flex items-center gap-1">
                           <Clock size={12} /> {item.hours}
                         </span>
                       )}
@@ -1337,7 +1080,7 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
                           <p className="font-bold text-sm text-stone-700">
                             {shop.name}
                           </p>
-                          <div className="flex items-center gap-2 text-xs text-stone-500 font-sans">
+                          <div className="flex items-center gap-2 text-xs text-stone-500 font-serif">
                             <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-600 font-medium">
                               {shop.floor}
                             </span>
@@ -1364,7 +1107,7 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
 
                 {/* Details for Standalone */}
                 {!item.isBuilding && (
-                  <div className="mt-2 flex items-center gap-3 text-xs text-stone-500 font-sans pl-11">
+                  <div className="mt-2 flex items-center gap-3 text-xs text-stone-500 font-serif pl-11">
                     <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-600 font-medium">
                       {item.floor}
                     </span>
@@ -1375,6 +1118,32 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
                 )}
               </div>
             ))}
+          </div>
+
+          {/* Floating Tabs (Bottom) */}
+          <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
+            <div className="liquid-tab-track pointer-events-auto shadow-2xl">
+              <button
+                onClick={() => handleTap("sapporo")}
+                className={`liquid-tab-btn px-8 ${
+                  activeTab === "sapporo" ? "active" : ""
+                }`}
+                aria-label="札幌逛街清單"
+                aria-pressed={activeTab === "sapporo"}
+              >
+                札幌
+              </button>
+              <button
+                onClick={() => handleTap("hakodate")}
+                className={`liquid-tab-btn px-8 ${
+                  activeTab === "hakodate" ? "active" : ""
+                }`}
+                aria-label="函館逛街清單"
+                aria-pressed={activeTab === "hakodate"}
+              >
+                函館
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -1412,7 +1181,7 @@ const EmergencyModal = ({ isOpen, onClose }) => {
   return (
     <>
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-transparent z-40 transition-opacity duration-300 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -1422,10 +1191,18 @@ const EmergencyModal = ({ isOpen, onClose }) => {
           isOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
-        <div className="bg-[#FDFBF9] rounded-t-[2rem] shadow-2xl min-h-[50vh] max-h-[90vh] flex flex-col relative">
-          {/* Header (Sticky) */}
-          <div className="flex justify-between items-center p-8 pb-4 sticky top-0 bg-[#FDFBF9]/95 backdrop-blur-sm z-10 rounded-t-[2rem] border-b border-red-100/50">
-            <div className="flex items-center gap-3">
+        <div className="glass-bottom-sheet min-h-[50vh] max-h-[79vh] flex flex-col relative overflow-hidden">
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 z-20 p-3 liquid-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="關閉緊急聯絡"
+          >
+            <X size={20} />
+          </button>
+
+          {/* Content */}
+          <div className="overflow-y-auto px-8 pb-10 pt-8 space-y-4">
+            <div className="flex items-center gap-3 mb-4 pb-4 pr-12">
               <div className="p-2 bg-red-50 rounded-full text-red-600">
                 <PhoneCall size={24} />
               </div>
@@ -1433,18 +1210,7 @@ const EmergencyModal = ({ isOpen, onClose }) => {
                 緊急聯絡
               </h2>
             </div>
-            <button
-              onClick={onClose}
-              className="p-3 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-label="關閉緊急聯絡"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          {/* Content */}
-          <div className="overflow-y-auto px-8 pb-10 pt-6 space-y-4">
-            <div className="bg-red-50/50 border border-red-100 p-4 rounded-xl mb-6">
+            <div className="bg-red-50/50 p-4 rounded-xl mb-6">
               <div className="flex items-start gap-3">
                 <AlertCircle
                   size={20}
@@ -1467,7 +1233,7 @@ const EmergencyModal = ({ isOpen, onClose }) => {
               <a
                 key={idx}
                 href={`tel:${getPhoneNumber(contact.number)}`}
-                className="block bg-white rounded-xl p-5 border-2 border-stone-100 shadow-sm hover:border-red-200 hover:shadow-md transition-all group active:scale-[0.98] touch-manipulation"
+                className="block bg-white rounded-xl p-5 border-2 border-stone-100 transition-all group active:scale-[0.98] touch-manipulation"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 flex-1">
@@ -1478,7 +1244,7 @@ const EmergencyModal = ({ isOpen, onClose }) => {
                       <h3 className="font-serif font-bold text-jp-text text-lg mb-1">
                         {getPhoneLabel(contact.name)}
                       </h3>
-                      <p className="text-sm text-stone-500 font-sans">
+                      <p className="text-sm text-stone-500 font-serif">
                         {contact.name}
                       </p>
                     </div>
@@ -1488,7 +1254,7 @@ const EmergencyModal = ({ isOpen, onClose }) => {
                       <p className="text-2xl font-serif font-bold text-red-600 mb-0.5">
                         {contact.number}
                       </p>
-                      <p className="text-xs text-stone-400 font-sans">
+                      <p className="text-xs text-stone-400 font-serif">
                         點擊撥號
                       </p>
                     </div>
@@ -1500,20 +1266,20 @@ const EmergencyModal = ({ isOpen, onClose }) => {
               </a>
             ))}
 
-            <div className="mt-6 pt-6 border-t border-stone-100">
-              <h4 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3 font-sans">
+            <div className="mt-6 pt-6">
+              <h4 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3 font-serif">
                 其他重要資訊
               </h4>
               <div className="space-y-3">
                 <div className="bg-stone-50 p-4 rounded-lg border border-stone-100">
-                  <p className="text-xs text-stone-600 leading-relaxed font-sans">
+                  <p className="text-xs text-stone-600 leading-relaxed font-serif">
                     <strong className="text-stone-700">語言協助：</strong>
                     撥打緊急電話時，如果不會日語，可以說 "English, please" 或
                     "Taiwanese, please"，接線員會協助轉接。
                   </p>
                 </div>
                 <div className="bg-stone-50 p-4 rounded-lg border border-stone-100">
-                  <p className="text-xs text-stone-600 leading-relaxed font-sans">
+                  <p className="text-xs text-stone-600 leading-relaxed font-serif">
                     <strong className="text-stone-700">位置資訊：</strong>
                     撥打緊急電話時，請盡可能提供詳細的位置資訊，例如：地址、附近的地標、或使用
                     Google Maps 分享位置。
@@ -1744,12 +1510,12 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
         visibility: (showTransition || hasStartedTransition) ? 'visible' : 'hidden'
       }}
     >
-      {/* 黑色背景過渡層：在愛心動畫後期逐漸顯示 */}
+      {/* 白色背景過渡層：在愛心動畫後期逐漸顯示 */}
       {showTransition && (
         <div 
           className="absolute inset-0 animate-bg-fade-in"
           style={{ 
-            backgroundColor: 'black',
+            backgroundColor: 'white',
             zIndex: 9998
           }}
         />
@@ -1770,26 +1536,33 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
           }}
         >
           <Heart
-            size={32}
+            size={256}
             style={{ 
               color: '#89CFF0', 
               fill: '#89CFF0',
-              strokeWidth: 2,
-              shapeRendering: 'geometricPrecision',
+              strokeWidth: 1,
+              shapeRendering: 'auto',
               display: 'block',
               filter: 'brightness(1)',
-              opacity: 1
+              opacity: 1,
+              transform: 'translateZ(0) scale(0.125)',
+              WebkitTransform: 'translateZ(0) scale(0.125)',
+              imageRendering: 'auto',
+              WebkitFontSmoothing: 'antialiased',
+              MozOsxFontSmoothing: 'grayscale',
+              textRendering: 'optimizeLegibility',
+              willChange: 'transform'
             }}
           />
         </div>
       )}
       
-      {/* 當 showTransition 為 false 時，確保背景是黑色 */}
+      {/* 當 showTransition 為 false 時，確保背景是白色 */}
       {!showTransition && (
         <div 
           className="absolute inset-0"
           style={{ 
-            backgroundColor: 'black',
+            backgroundColor: 'white',
             zIndex: 0
           }}
         />
@@ -1811,7 +1584,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
           {/* 照片 */}
           <img
             src={photos[currentPhotoIndex]}
-            alt={`Photo ${currentPhotoIndex + 1}`}
+            alt={`${currentPhotoIndex + 1}`}
             className="w-full h-full object-cover pointer-events-none"
             draggable="false"
             onError={(e) => {
@@ -1970,7 +1743,7 @@ const FoodModal = ({ isOpen, onClose }) => {
   return (
     <>
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-transparent z-40 transition-opacity duration-300 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -1980,66 +1753,38 @@ const FoodModal = ({ isOpen, onClose }) => {
           isOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
-        <div className="bg-[#FDFBF9] rounded-t-[2rem] shadow-2xl min-h-[70vh] max-h-[90vh] flex flex-col relative">
-          {/* Header (Sticky) */}
-          <div className="flex justify-between items-center px-8 pt-8 pb-0 sticky top-0 bg-[#FDFBF9] z-20 rounded-t-[2rem]">
-            <h2 className="text-2xl font-serif font-bold text-jp-text">
-              美食清單
-            </h2>
-            <button
-              onClick={onClose}
-              className="p-3 bg-stone-100 rounded-full text-stone-500 hover:bg-stone-200 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-label="關閉詳情"
-            >
-              <X size={20} />
-            </button>
-          </div>
+        <div className="glass-bottom-sheet min-h-[60vh] max-h-[79vh] flex flex-col relative overflow-hidden">
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 z-20 p-3 liquid-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="關閉詳情"
+          >
+            <X size={20} />
+          </button>
 
           <div
             ref={scrollContainerRef}
-            className="overflow-y-auto px-8 pb-10 space-y-6"
+            className="overflow-y-auto px-8 pb-32 space-y-6 pt-8"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
-            {/* Tabs (Sticky) */}
-            <div className="sticky top-0 z-10 bg-[#FDFBF9] py-4 -mx-1 px-1 border-b border-stone-100/50">
-              <div className="flex gap-2 p-1 bg-stone-100 rounded-xl shadow-sm">
-                {[
-                  { id: "sapporo", label: "札幌" },
-                  { id: "hakodate", label: "函館" },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTap(tab.id)}
-                    className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all touch-manipulation min-h-[44px] ${
-                      activeTab === tab.id
-                        ? "bg-white shadow text-jp-text"
-                        : "text-stone-400"
-                    }`}
-                    aria-label={`${tab.label}美食清單`}
-                    aria-pressed={activeTab === tab.id}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* List by Category */}
+            <h2 className="text-2xl font-serif font-bold text-jp-text mb-4 pr-12">
+              美食清單
+            </h2>
 
             {/* List by Category */}
             <div className="space-y-8">
               {currentCategories.map((cat, cIdx) => (
                 <div key={cIdx}>
-                  <h3 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4 border-b border-stone-100 pb-2">
+                  <h3 className="text-xs font-bold text-stone-600 uppercase tracking-widest mb-4 pb-2">
                     {cat.category}
                   </h3>
                   <div className="space-y-4">
                     {cat.shops.map((shop, sIdx) => (
                       <div
                         key={sIdx}
-                        className="bg-white rounded-xl p-5 border border-stone-100 shadow-sm group"
+                        className="bg-white rounded-xl p-5 border border-stone-100 group"
                       >
                         <div className="flex justify-between items-start mb-2">
                           <div>
@@ -2047,7 +1792,7 @@ const FoodModal = ({ isOpen, onClose }) => {
                               {shop.name}
                             </h4>
                             {shop.hours && (
-                              <span className="text-xs text-stone-500 font-sans mt-1 flex items-center gap-1">
+                              <span className="text-xs text-stone-500 font-serif mt-1 flex items-center gap-1">
                                 <Clock size={12} /> {shop.hours}
                               </span>
                             )}
@@ -2062,13 +1807,35 @@ const FoodModal = ({ isOpen, onClose }) => {
                             <Navigation size={16} />
                           </a>
                         </div>
-                        <p className="text-sm text-stone-500 leading-relaxed font-sans">
+                        <p className="text-sm text-stone-500 leading-relaxed font-serif">
                           {shop.desc}
                         </p>
                       </div>
                     ))}
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Floating Tabs (Bottom) */}
+          <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
+            <div className="liquid-tab-track pointer-events-auto shadow-2xl">
+              {[
+                { id: "sapporo", label: "札幌" },
+                { id: "hakodate", label: "函館" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTap(tab.id)}
+                  className={`liquid-tab-btn px-8 ${
+                    activeTab === tab.id ? "active" : ""
+                  }`}
+                  aria-label={`${tab.label}美食清單`}
+                  aria-pressed={activeTab === tab.id}
+                >
+                  {tab.label}
+                </button>
               ))}
             </div>
           </div>
@@ -2450,7 +2217,7 @@ function App() {
 
        {/* New Version Update Prompt */}
        {showUpdatePrompt && (
-         <div className="fixed top-4 left-4 right-4 bg-jp-red text-white p-4 rounded-xl shadow-2xl z-[60] flex items-center justify-between gap-4 animate-slide-up">
+        <div className="fixed top-4 left-4 right-4 bg-jp-red text-white p-4 rounded-xl z-[60] flex items-center justify-between gap-4 animate-slide-up">
            <div className="flex items-center gap-3">
              <AlertCircle size={20} />
              <div>
@@ -2460,7 +2227,7 @@ function App() {
            </div>
            <button
              onClick={handleUpdateClick}
-             className="bg-white text-jp-red px-4 py-2 rounded-lg text-xs font-bold shadow-sm active:scale-95 transition-all min-h-[36px]"
+              className="bg-white text-jp-red px-4 py-2 rounded-lg text-xs font-bold active:scale-95 transition-all min-h-[36px]"
            >
              立即更新
            </button>
@@ -2475,13 +2242,13 @@ function App() {
               <h3 className="font-serif font-bold text-lg mb-1">
                 安裝到主畫面
               </h3>
-              <p className="text-sm opacity-90 font-sans">
+              <p className="text-sm opacity-90 font-serif">
                 將此應用安裝到手機主畫面，可離線使用並快速開啟
               </p>
             </div>
             <button
               onClick={() => setShowInstallPrompt(false)}
-              className="p-1 text-white/80 hover:text-white transition-colors touch-manipulation min-w-[32px] min-h-[32px] flex items-center justify-center"
+              className="p-1 liquid-glass-button-dark rounded-full text-white/80 hover:text-white transition-colors touch-manipulation min-w-[32px] min-h-[32px] flex items-center justify-center"
               aria-label="關閉"
             >
               <X size={18} />
@@ -2496,7 +2263,7 @@ function App() {
             </button>
             <button
               onClick={() => setShowInstallPrompt(false)}
-              className="px-4 py-2.5 text-white/80 hover:text-white transition-colors touch-manipulation text-sm font-sans min-h-[44px]"
+              className="px-4 py-2.5 text-white/80 hover:text-white transition-colors touch-manipulation text-sm font-serif min-h-[44px]"
             >
               稍後
             </button>
@@ -2520,11 +2287,11 @@ function App() {
 
         <div className="flex flex-col items-center flex-1 px-4">
           {/* 日期 */}
-          <p className="text-[11px] tracking-[0.3em] uppercase text-stone-400 mb-2 font-sans font-medium">
-            2026 / 03
+          <p className="text-[11px] tracking-[0.3em] uppercase text-stone-400 mb-2 font-serif font-medium">
+            2026/03
           </p>
           {/* 英文標題 */}
-          <p className="text-xs tracking-[0.15em] uppercase text-stone-400 mb-3 font-sans font-medium">
+          <p className="text-xs tracking-[0.15em] uppercase text-stone-400 mb-3 font-serif font-medium">
             Tokyo & Hokkaido Trip
           </p>
           {/* 日文標題 */}
