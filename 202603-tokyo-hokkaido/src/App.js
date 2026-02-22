@@ -19,7 +19,6 @@ import {
   Luggage,
   Menu,
   Clock,
-  Bath,
   BookOpen,
   Phone,
   PhoneCall,
@@ -27,24 +26,49 @@ import {
   Flame,
   Building2,
   Heart,
+  Send,
 } from "lucide-react";
 
 // --- DATA ---
 const checklistData = {
-  Money: ["外幣", "護照", "信用卡", "鑰匙"],
-  Clothes: ["4 套衣服", "內衣/內褲/襪子", "外套", "帽子/圍巾/手套", "睡衣"],
-  Appliances: ["esim or sim card", "耳機", "行動電源", "充電器", "自拍桿"],
-  Toiletries: [
+  "Documents & Money": [
+    "護照",
+    "外幣",
+    "信用卡",
+    "鑰匙",
+    "駕照",
+    "駕照日文譯本",
+  ],
+  Clothes: [
+    "衣物 (上衣/褲子/裙子/外套)",
+    "內衣",
+    "發熱衣",
+    "內褲",
+    "襪子",
+    "帽子",
+    "圍巾",
+    "手套",
+    "睡衣",
+  ],
+  Electronics: [
+    "eSIM",
+    "耳機",
+    "行動電源",
+    "充電器 (充電線/轉接頭)",
+    "自拍桿",
+  ],
+  "Toiletries & Beauty": [
+    "洗面乳",
     "化妝品",
     "防曬",
-    "暖暖包",
-    "洗面乳",
-    "飾品（項鍊/耳環/戒指）",
     "保養品",
-    "口罩",
+    "香水",
+    "梳子",
+    "飾品（項鍊/耳環/戒指）",
+    "小圓鏡",
   ],
-  Health: ["定期需要吃的藥"],
-  Others: ["梳子", "衛生紙＆濕紙巾", "雨傘", "酒精噴霧"],
+  "Health & Care": ["常備藥品", "暖暖包", "口罩", "牙套維持器"],
+  Others: ["衛生紙/濕紙巾", "雨傘"],
 };
 
 // --- COMPONENTS ---
@@ -247,7 +271,7 @@ const DateStrip = ({ days, activeDay, onSelect, onDay4Click, day4ClickCount, isD
 
   return (
     <div
-      className="border-b border-stone-200/50 bg-jp-bg sticky top-0 z-10 overflow-hidden"
+      className="border-b border-stone-200/50 bg-jp-bg sticky top-0 z-20 overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -345,7 +369,7 @@ const HeroSection = ({ location, title, image }) => {
       {/* 輕微的深色遮罩保持文字可讀性 */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-transparent" />
 
-      <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-6 text-center z-10">
+      <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-6 text-center z-0">
         <div className="flex items-center gap-2 text-xs tracking-[0.2em] uppercase opacity-80 mb-2 font-serif">
           <span className="w-6 h-[1px] bg-white"></span>
           <span>今日行程</span>
@@ -476,13 +500,7 @@ const ActivityItem = ({ activity, isLast, onOpen }) => {
 
 // 5. Detail Modal
 
-const DetailModal = ({
-  isOpen,
-  activity,
-  onClose,
-  onOpenShopping,
-  onOpenInfo,
-}) => {
+const DetailModal = ({ isOpen, activity, onClose }) => {
   const [displayActivity, setDisplayActivity] = useState(null);
 
   useEffect(() => {
@@ -1162,9 +1180,9 @@ const EmergencyModal = ({ isOpen, onClose }) => {
 
   const getPhoneLabel = (name) => {
     const labels = {
-      Police: "警察",
+      "Police": "警察",
       "Fire/Ambulance": "消防/救護車",
-      "TECO Fukuoka": "駐福岡辦事處",
+      "TECO Sapporo": "駐札幌辦事處",
     };
     return labels[name] || name;
   };
@@ -1173,7 +1191,7 @@ const EmergencyModal = ({ isOpen, onClose }) => {
     if (name === "Police") return <Shield size={28} className="text-red-600" />;
     if (name === "Fire/Ambulance")
       return <Flame size={28} className="text-red-600" />;
-    if (name === "TECO Fukuoka")
+    if (name === "TECO Sapporo")
       return <Building2 size={28} className="text-red-600" />;
     return <Phone size={28} className="text-red-600" />;
   };
@@ -1202,10 +1220,7 @@ const EmergencyModal = ({ isOpen, onClose }) => {
 
           {/* Content */}
           <div className="overflow-y-auto px-8 pb-10 pt-8 space-y-4">
-            <div className="flex items-center gap-3 mb-4 pb-4 pr-12">
-              <div className="p-2 bg-red-50 rounded-full text-red-600">
-                <PhoneCall size={24} />
-              </div>
+            <div className="mb-4 pb-4 pr-12">
               <h2 className="text-2xl font-serif font-bold text-jp-text">
                 緊急聯絡
               </h2>
@@ -1235,22 +1250,20 @@ const EmergencyModal = ({ isOpen, onClose }) => {
                 href={`tel:${getPhoneNumber(contact.number)}`}
                 className="block bg-white rounded-xl p-5 border-2 border-stone-100 transition-all group active:scale-[0.98] touch-manipulation"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
-                      {getPhoneIcon(contact.name)}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-serif font-bold text-jp-text text-lg mb-1">
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors flex-shrink-0">
+                    {getPhoneIcon(contact.name)}
+                  </div>
+                  <div className="flex-1 flex flex-col gap-3 min-w-0">
+                    <div>
+                      <h3 className="font-serif font-bold text-jp-text text-lg mb-0.5">
                         {getPhoneLabel(contact.name)}
                       </h3>
                       <p className="text-sm text-stone-500 font-serif">
                         {contact.name}
                       </p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
+                    <div>
                       <p className="text-2xl font-serif font-bold text-red-600 mb-0.5">
                         {contact.number}
                       </p>
@@ -1258,9 +1271,9 @@ const EmergencyModal = ({ isOpen, onClose }) => {
                         點擊撥號
                       </p>
                     </div>
-                    <div className="p-3 bg-red-50 rounded-full text-red-600 group-hover:bg-red-100 transition-colors">
-                      <Phone size={20} />
-                    </div>
+                  </div>
+                  <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors flex-shrink-0">
+                    <Phone size={20} />
                   </div>
                 </div>
               </a>
@@ -1294,35 +1307,79 @@ const EmergencyModal = ({ isOpen, onClose }) => {
   );
 };
 
-// 10. Proposal Modal (求婚彩蛋 - Instagram 限時動態風格)
+// 彩蛋照片/影片列表：請將檔案放在 public/proposal-photos/
+// 圖片：JPEG 或 WebP（勿用 HEIC）。影片：.mov 或 .mp4（.mov 在 Safari 支援佳，Chrome 建議 .mp4）。
+const PROPOSAL_PHOTOS = [
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/1.MOV`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/2.MOV`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/3.MOV`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/4.MOV`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/5.MOV`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/6.MOV`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/7.MOV`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/8.MOV`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/9.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/10.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/11.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/12.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/13.MOV`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/14.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/15.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/16.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/17.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/18.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/19.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/20.MOV`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/21.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/22.JPG`,
+  // 可加入影片：`${process.env.PUBLIC_URL || ''}/proposal-photos/VID_001.mov`
+];
+
+const isVideoUrl = (url) => /\.(mov|mp4|webm)(\?|$)/i.test(url || '');
+
+// 10. Proposal Modal (彩蛋 - Instagram 限時動態風格)
 const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [visibleLayer, setVisibleLayer] = useState(0); // 0 或 1，哪一層正在顯示（雙層預載，下一則已在另一層載好）
   const [showTransition, setShowTransition] = useState(false);
   const [hasStartedTransition, setHasStartedTransition] = useState(false); // 追蹤是否已經開始過渡動畫
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [elapsedBeforePause, setElapsedBeforePause] = useState(0);
   const [pauseStartTime, setPauseStartTime] = useState(null);
+  const [heartLiked, setHeartLiked] = useState(false);
+  const videoRef0 = React.useRef(null);
+  const videoRef1 = React.useRef(null);
 
-  // 照片列表（請將照片放在 public/proposal-photos/ 資料夾中）
-  const photos = [
-    // 範例路徑，請根據實際檔案名稱更新
-    `${process.env.PUBLIC_URL || ''}/proposal-photos/IMG_2270.jpeg`,
-    `${process.env.PUBLIC_URL || ''}/proposal-photos/IMG_2306.jpeg`,
-    `${process.env.PUBLIC_URL || ''}/proposal-photos/IMG_2582.jpeg`,
-    `${process.env.PUBLIC_URL || ''}/proposal-photos/IMG_2666.jpeg`,
-    `${process.env.PUBLIC_URL || ''}/proposal-photos/IMG_2685.jpeg`,
-    // 可以繼續添加更多照片...
-  ];
+  const photos = PROPOSAL_PHOTOS;
+  const PHOTO_DURATION = 6000; // 6秒
+  const currentIsVideo = isVideoUrl(photos[currentPhotoIndex]);
+  // 每層顯示的內容索引：當前層顯示 currentPhotoIndex，另一層顯示下一則（預載）
+  const getLayerIndex = (layer) =>
+    layer === visibleLayer ? currentPhotoIndex : Math.min(currentPhotoIndex + 1, photos.length - 1);
+  const visibleVideoRef = visibleLayer === 0 ? videoRef0 : videoRef1;
 
-  const PHOTO_DURATION = 5000; // 5秒
+  // 預載下一張與前一張（僅圖片；影片不預載）
+  useEffect(() => {
+    if (!isOpen || !photos.length) return;
+    const preload = (index) => {
+      if (index >= 0 && index < photos.length && !isVideoUrl(photos[index])) {
+        const img = new Image();
+        img.src = photos[index];
+      }
+    };
+    preload(currentPhotoIndex + 1);
+    preload(currentPhotoIndex - 1);
+  }, [isOpen, currentPhotoIndex, photos]);
 
   useEffect(() => {
     if (isOpen) {
       setCurrentPhotoIndex(0);
+      setVisibleLayer(0);
       setProgress(0);
       setShowTransition(false); // 初始不顯示動畫
       setHasStartedTransition(false); // 重置過渡狀態
+      setHeartLiked(false); // 每次打開彩蛋時愛心重置為未按
       
       // 如果 heartPosition 已設置（表示是從搖晃觸發的），等待搖晃完成後開始動畫
       if (heartPosition) {
@@ -1360,44 +1417,64 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     }
   }, [isOpen, heartPosition]);
 
-  // 自動播放和進度條
+  // 自動播放和進度條（僅圖片；影片由 video 的 onTimeUpdate / onEnded 驅動）
   useEffect(() => {
-    if (!isOpen || showTransition) return;
+    if (!isOpen || showTransition || currentIsVideo) return;
 
-    // 如果暫停，不啟動計時器
     if (isPaused) return;
 
-    const startTime = Date.now() - elapsedBeforePause; // 從暫停前的時間點繼續
+    const startTime = Date.now() - elapsedBeforePause;
     
     const interval = setInterval(() => {
-      if (isPaused) return; // 如果暫停，不更新進度
+      if (isPaused) return;
       
       const elapsed = Date.now() - startTime;
       const newProgress = (elapsed / PHOTO_DURATION) * 100;
       
       if (newProgress >= 100) {
-        // 切換到下一張照片
         if (currentPhotoIndex < photos.length - 1) {
+          setVisibleLayer((v) => 1 - v);
           setCurrentPhotoIndex((prevIndex) => prevIndex + 1);
-          setElapsedBeforePause(0); // 重置已過時間
+          setElapsedBeforePause(0);
         } else {
-          // 最後一張後保持顯示，不切換到求婚畫面
           setProgress(100);
         }
       } else {
         setProgress(newProgress);
       }
-    }, 50); // 每50ms更新一次，讓動畫更流暢
+    }, 50);
 
     return () => clearInterval(interval);
-  }, [isOpen, currentPhotoIndex, showTransition, isPaused, elapsedBeforePause, photos.length]);
+  }, [isOpen, currentPhotoIndex, showTransition, isPaused, elapsedBeforePause, photos.length, currentIsVideo]);
 
-  // 當照片切換時，重置已過時間
+  // 當照片/影片切換時，重置已過時間
   useEffect(() => {
     if (!isOpen || showTransition) return;
     setElapsedBeforePause(0);
     setProgress(0);
   }, [currentPhotoIndex, isOpen, showTransition]);
+
+  // 影片：只播放可見層、暫停另一層；長按暫停/放開播放
+  useEffect(() => {
+    const otherRef = visibleLayer === 0 ? videoRef1 : videoRef0;
+    otherRef.current?.pause();
+    const v = visibleVideoRef.current;
+    if (!currentIsVideo || !v) return;
+    if (isPaused) v.pause();
+    else v.play().catch(() => {});
+  }, [currentIsVideo, isPaused, visibleLayer]);
+
+  // 影片進度條：每 50ms 輪詢，只讀取目前可見層的 video
+  useEffect(() => {
+    if (!isOpen || showTransition || !currentIsVideo || isPaused) return;
+    const interval = setInterval(() => {
+      const v = visibleVideoRef.current;
+      if (!v || !v.duration || !isFinite(v.duration)) return;
+      const p = (v.currentTime / v.duration) * 100;
+      setProgress(p);
+    }, 50);
+    return () => clearInterval(interval);
+  }, [isOpen, showTransition, currentIsVideo, isPaused, currentPhotoIndex, visibleLayer]);
 
   const handlePhotoClick = (e) => {
     // 如果點擊到按鈕，不處理
@@ -1416,13 +1493,15 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     if (isLeftHalf) {
       // 點擊左半邊，上一張
       if (currentPhotoIndex > 0) {
+        setVisibleLayer((v) => 1 - v);
         setCurrentPhotoIndex(currentPhotoIndex - 1);
         setProgress(0); // 重置進度
         setElapsedBeforePause(0);
       }
     } else {
-      // 點擊右半邊，下一張
+      // 點擊右半邊，下一張（翻到已預載的層，無載入延遲）
       if (currentPhotoIndex < photos.length - 1) {
+        setVisibleLayer((v) => 1 - v);
         setCurrentPhotoIndex(currentPhotoIndex + 1);
         setProgress(0); // 重置進度
         setElapsedBeforePause(0);
@@ -1569,10 +1648,10 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       )}
       
 
-      {/* Instagram 限時動態風格的照片瀏覽 */}
+      {/* Instagram 限時動態風格：圖片只顯示到傳送訊息區塊上方，整體黑底 */}
       {!showTransition && hasStartedTransition && (
         <div
-          className="relative w-full h-full cursor-pointer animate-photo-fade-in select-none"
+          className="flex flex-col w-full h-full bg-black cursor-pointer animate-photo-fade-in select-none"
           onClick={handlePhotoClick}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
@@ -1581,76 +1660,144 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
           onMouseLeave={handleMouseUp}
           style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
         >
-          {/* 照片 */}
-          <img
-            src={photos[currentPhotoIndex]}
-            alt={`${currentPhotoIndex + 1}`}
-            className="w-full h-full object-cover pointer-events-none"
-            draggable="false"
-            onError={(e) => {
-              console.error("Failed to load image:", photos[currentPhotoIndex]);
-              e.target.style.display = 'none';
-            }}
-          />
-
-          {/* 進度條（Instagram 風格 - 動態進度） */}
-          <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 px-2 pt-2">
-            {photos.map((_, index) => (
-              <div
-                key={index}
-                className="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden"
-              >
+          {/* 上方：雙層預載（層 0 / 層 1），下一則已在另一層載好，切換只翻層不重載 */}
+          <div className="flex-1 min-h-0 relative overflow-hidden bg-black">
+            {[0, 1].map((layer) => {
+              const idx = getLayerIndex(layer);
+              const isVisible = visibleLayer === layer;
+              const isVideo = isVideoUrl(photos[idx]);
+              return (
                 <div
-                  className="h-full bg-white transition-all duration-75 ease-linear"
+                  key={layer}
+                  className="absolute inset-0 w-full h-full"
                   style={{
-                    width: index < currentPhotoIndex 
-                      ? '100%' 
-                      : index === currentPhotoIndex 
-                      ? `${progress}%` 
-                      : '0%',
+                    opacity: isVisible ? 1 : 0,
+                    pointerEvents: isVisible ? 'auto' : 'none',
+                    zIndex: isVisible ? 1 : 0,
                   }}
+                >
+                  {isVideo ? (
+                    <video
+                      ref={layer === 0 ? videoRef0 : videoRef1}
+                      src={photos[idx]}
+                      className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                      playsInline
+                      muted
+                      autoPlay={isVisible}
+                      onEnded={() => {
+                        if (currentPhotoIndex < photos.length - 1) {
+                          setVisibleLayer((v) => 1 - v);
+                          setCurrentPhotoIndex((i) => i + 1);
+                          setProgress(0);
+                        } else {
+                          setProgress(100);
+                        }
+                      }}
+                      onError={(e) => {
+                        console.error("Failed to load video:", photos[idx]);
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={photos[idx]}
+                      alt={`${idx + 1}`}
+                      className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                      draggable="false"
+                      onError={(e) => {
+                        console.error("Failed to load image:", photos[idx]);
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
+
+            {/* 進度條（Instagram 風格 - 動態進度） */}
+            <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 px-2 pt-2">
+              {photos.map((_, index) => (
+                <div
+                  key={index}
+                  className="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden"
+                >
+                  <div
+                    className="h-full bg-white transition-all duration-75 ease-linear"
+                    style={{
+                      width: index < currentPhotoIndex 
+                        ? '100%' 
+                        : index === currentPhotoIndex 
+                        ? `${progress}%` 
+                        : '0%',
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* 左上角：Profile 圖片 + 帳號名稱 */}
+            <div className="absolute top-4 left-4 z-20 flex items-center gap-2 h-[44px]">
+              <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <img
+                  src={`${process.env.PUBLIC_URL || ''}/proposal-photos/gokigen_panda.png`}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
                 />
               </div>
-            ))}
-          </div>
-
-          {/* 左上角：Profile 圖片 + 帳號名稱 */}
-          <div className="absolute top-4 left-4 z-20 flex items-center gap-2 h-[44px]">
-            <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center overflow-hidden flex-shrink-0">
-              <img
-                src={`${process.env.PUBLIC_URL || ''}/proposal-photos/gokigen_panda.png`}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
+              <span className="text-white font-sans font-semibold text-sm leading-[44px]">
+                zacharyzhuoyc
+              </span>
             </div>
-            <span className="text-white font-sans font-semibold text-sm leading-[44px]">
-              zacharyzhuoyc
-            </span>
+
+            {/* 右上角：叉叉 */}
+            <div className="absolute top-4 right-4 z-20 flex items-center h-[44px]">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose();
+                }}
+                className="touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="關閉"
+              >
+                <X size={24} className="text-white" />
+              </button>
+            </div>
+
+            {/* 左右點擊區域（僅覆蓋圖片區） */}
+            <div className="absolute inset-0 flex">
+              <div className="flex-1" />
+              <div className="flex-1" />
+            </div>
           </div>
 
-          {/* 右上角：叉叉 */}
-          <div className="absolute top-4 right-4 z-20 flex items-center h-[44px]">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              className="touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-label="關閉"
-            >
-              <X size={24} className="text-white" />
-            </button>
-          </div>
-
-          {/* 左右點擊區域 */}
-          <div className="absolute inset-0 flex">
-            <div className="flex-1" />
-            <div className="flex-1" />
+          {/* 下方：傳送訊息區塊（純黑底）；愛心可點擊切換紅/白 */}
+          <div
+            className="flex items-center gap-3 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-black flex-shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex-1 min-w-0 rounded-full border border-white/30 bg-white/5 py-2.5 px-4 pointer-events-none">
+              <span className="text-white/80 text-sm font-sans">傳送訊息......</span>
+            </div>
+            <div className="flex items-center gap-5 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setHeartLiked((prev) => !prev)}
+                className="p-1 touch-manipulation flex items-center justify-center min-w-[44px] min-h-[44px]"
+                aria-label={heartLiked ? "取消喜歡" : "喜歡"}
+              >
+                <Heart
+                  size={26}
+                  className={heartLiked ? "text-red-500 stroke-[2]" : "text-white stroke-[2]"}
+                  fill={heartLiked ? "currentColor" : "none"}
+                />
+              </button>
+              <Send size={24} className="text-white stroke-[2] pointer-events-none" />
+            </div>
           </div>
         </div>
       )}
 
-      {/* 求婚視窗 */}
+      {/* 彩蛋視窗 */}
     </div>
   );
 };
@@ -2073,7 +2220,6 @@ function App() {
   const [showFood, setShowFood] = useState(false);
   const [showEmergency, setShowEmergency] = useState(false);
   const [showProposal, setShowProposal] = useState(false);
-  const [shoppingTab, setShoppingTab] = useState("sapporo");
   const [infoScrollTarget, setInfoScrollTarget] = useState(null);
 
   // Proposal Easter Egg - Day 4 Click Counter
@@ -2101,7 +2247,7 @@ function App() {
     }
     setLastDay4ClickTime(now);
 
-    // 點擊 9 次後觸發求婚模態框
+    // 點擊 9 次後觸發彩蛋模態框
     if (day4ClickCount + 1 >= 9) {
       setIsDay4Activated(true);
       setDay4ClickCount(0);
@@ -2346,14 +2492,6 @@ function App() {
         isOpen={!!selectedActivity}
         activity={selectedActivity}
         onClose={() => setSelectedActivity(null)}
-        onOpenShopping={(tab) => {
-          setShoppingTab(tab);
-          setShowShopping(true);
-        }}
-        onOpenInfo={(target) => {
-          setInfoScrollTarget(target);
-          setShowInfo(true);
-        }}
       />
 
       <InfoModal
@@ -2375,7 +2513,7 @@ function App() {
       <ShoppingModal
         isOpen={showShopping}
         onClose={() => setShowShopping(false)}
-        initialTab={shoppingTab}
+        initialTab="sapporo"
       />
 
       <FoodModal isOpen={showFood} onClose={() => setShowFood(false)} />
