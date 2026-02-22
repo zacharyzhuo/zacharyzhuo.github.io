@@ -1332,6 +1332,9 @@ const PROPOSAL_PHOTOS = [
   `${process.env.PUBLIC_URL || ''}/proposal-photos/20.MOV`,
   `${process.env.PUBLIC_URL || ''}/proposal-photos/21.JPG`,
   `${process.env.PUBLIC_URL || ''}/proposal-photos/22.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/23.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/24.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/25.JPG`,
   // 可加入影片：`${process.env.PUBLIC_URL || ''}/proposal-photos/VID_001.mov`
 ];
 
