@@ -1,7 +1,7 @@
-// Service Worker for Hokkaido Trip PWA
-// 更新版本號以強制清除舊快取
-const CACHE_NAME = "hokkaido-trip-v1";
-const RUNTIME_CACHE = "hokkaido-runtime-v1";
+// Service Worker for Tokyo & Hokkaido Trip PWA
+// 版本號會在 build 時自動替換，無需手動修改
+const CACHE_NAME = "tokyo-hokkaido-trip-v1771778971044";
+const RUNTIME_CACHE = "tokyo-hokkaido-runtime-v1771778971044";
 
 // 需要快取的靜態資源
 const STATIC_CACHE_URLS = [
@@ -42,7 +42,8 @@ self.addEventListener("activate", (event) => {
               return (
                 cacheName !== CACHE_NAME &&
                 cacheName !== RUNTIME_CACHE &&
-                cacheName.startsWith("fukuoka-")
+                (cacheName.startsWith("tokyo-hokkaido-") || 
+                 cacheName.startsWith("fukuoka-"))
               );
             })
             .map((cacheName) => {
