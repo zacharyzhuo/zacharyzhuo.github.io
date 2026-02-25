@@ -1335,6 +1335,12 @@ const PROPOSAL_PHOTOS = [
   `${process.env.PUBLIC_URL || ''}/proposal-photos/23.JPG`,
   `${process.env.PUBLIC_URL || ''}/proposal-photos/24.JPG`,
   `${process.env.PUBLIC_URL || ''}/proposal-photos/25.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/26.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/27.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/28.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/29.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/30.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/31.JPG`,
   // 可加入影片：`${process.env.PUBLIC_URL || ''}/proposal-photos/VID_001.mov`
 ];
 
