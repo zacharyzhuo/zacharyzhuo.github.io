@@ -3,13 +3,13 @@
   "name": "2026 Tokyo & Hokkaido Trip",
   "icons": [
     {
-      "src": "proposal-photos/gokigen_panda_icon.png",
+      "src": "gokigen_panda_icon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "proposal-photos/gokigen_panda_icon.png",
+      "src": "gokigen_panda_icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

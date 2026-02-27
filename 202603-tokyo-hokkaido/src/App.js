@@ -584,7 +584,7 @@ const DetailModal = ({ isOpen, activity, onClose }) => {
                     <BookOpen size={14} />
                     關於此處
                   </h3>
-                  <p className="text-jp-text leading-relaxed font-serif text-base opacity-90">
+                  <p className="text-jp-text leading-relaxed font-serif text-base opacity-90 whitespace-pre-line">
                     {currentActivity.about}
                   </p>
                 </div>
@@ -931,7 +931,7 @@ const ChecklistModal = ({ isOpen, onClose, checkedItems, onToggle }) => {
 
 // 8. Shopping Modal
 const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
-  const [activeTab, setActiveTab] = useState("sapporo"); // sapporo or hakodate
+  const [activeTab, setActiveTab] = useState("shinjuku");
   const [lastTap, setLastTap] = useState(0);
   const scrollContainerRef = React.useRef(null);
 
@@ -993,10 +993,12 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
 
     // Only trigger if horizontal movement is significantly greater than vertical movement
     if (Math.abs(distanceX) > Math.abs(distanceY) * 2) {
-      if (distanceX > minSwipeDistance && activeTab === "sapporo")
-        setActiveTab("hakodate");
-      if (distanceX < -minSwipeDistance && activeTab === "hakodate")
-        setActiveTab("sapporo");
+      const tabs = ["shinjuku", "shibuya", "nakameguro", "daikanyama"];
+      const i = tabs.indexOf(activeTab);
+      if (distanceX > minSwipeDistance && i < tabs.length - 1)
+        setActiveTab(tabs[i + 1]);
+      if (distanceX < -minSwipeDistance && i > 0)
+        setActiveTab(tabs[i - 1]);
     }
   };
 
@@ -1049,7 +1051,12 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
             </h2>
 
             {/* List */}
-            {currentList.map((item, idx) => (
+            {currentList.length === 0 ? (
+              <p className="text-stone-500 font-serif text-sm py-6 text-center">
+                尚無清單
+              </p>
+            ) : (
+            currentList.map((item, idx) => (
               <div
                 key={idx}
                 className="bg-white rounded-xl p-5 border border-stone-100"
@@ -1124,42 +1131,67 @@ const ShoppingModal = ({ isOpen, onClose, initialTab }) => {
                 )}
 
                 {/* Details for Standalone */}
-                {!item.isBuilding && (
+                {!item.isBuilding && (item.floor || item.hours) && (
                   <div className="mt-2 flex items-center gap-3 text-xs text-stone-500 font-serif pl-11">
-                    <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-600 font-medium">
-                      {item.floor}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock size={12} /> {item.hours}
-                    </span>
+                    {item.floor && (
+                      <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-600 font-medium">
+                        {item.floor}
+                      </span>
+                    )}
+                    {item.hours && (
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} /> {item.hours}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
-            ))}
+            ))
+            )}
           </div>
 
           {/* Floating Tabs (Bottom) */}
           <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
             <div className="liquid-tab-track pointer-events-auto shadow-2xl">
               <button
-                onClick={() => handleTap("sapporo")}
-                className={`liquid-tab-btn px-8 ${
-                  activeTab === "sapporo" ? "active" : ""
+                onClick={() => handleTap("shinjuku")}
+                className={`liquid-tab-btn px-5 ${
+                  activeTab === "shinjuku" ? "active" : ""
                 }`}
-                aria-label="札幌逛街清單"
-                aria-pressed={activeTab === "sapporo"}
+                aria-label="新宿逛街清單"
+                aria-pressed={activeTab === "shinjuku"}
               >
-                札幌
+                新宿
               </button>
               <button
-                onClick={() => handleTap("hakodate")}
-                className={`liquid-tab-btn px-8 ${
-                  activeTab === "hakodate" ? "active" : ""
+                onClick={() => handleTap("shibuya")}
+                className={`liquid-tab-btn px-5 ${
+                  activeTab === "shibuya" ? "active" : ""
                 }`}
-                aria-label="函館逛街清單"
-                aria-pressed={activeTab === "hakodate"}
+                aria-label="澀谷逛街清單"
+                aria-pressed={activeTab === "shibuya"}
               >
-                函館
+                澀谷
+              </button>
+              <button
+                onClick={() => handleTap("nakameguro")}
+                className={`liquid-tab-btn px-5 ${
+                  activeTab === "nakameguro" ? "active" : ""
+                }`}
+                aria-label="中目黑逛街清單"
+                aria-pressed={activeTab === "nakameguro"}
+              >
+                中目黑
+              </button>
+              <button
+                onClick={() => handleTap("daikanyama")}
+                className={`liquid-tab-btn px-5 ${
+                  activeTab === "daikanyama" ? "active" : ""
+                }`}
+                aria-label="代官山逛街清單"
+                aria-pressed={activeTab === "daikanyama"}
+              >
+                代官山
               </button>
             </div>
           </div>
@@ -1341,6 +1373,13 @@ const PROPOSAL_PHOTOS = [
   `${process.env.PUBLIC_URL || ''}/proposal-photos/29.JPG`,
   `${process.env.PUBLIC_URL || ''}/proposal-photos/30.JPG`,
   `${process.env.PUBLIC_URL || ''}/proposal-photos/31.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/32.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/33.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/34.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/35.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/36.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/37.JPG`,
+  `${process.env.PUBLIC_URL || ''}/proposal-photos/38.MOV`,
   // 可加入影片：`${process.env.PUBLIC_URL || ''}/proposal-photos/VID_001.mov`
 ];
 
@@ -1471,7 +1510,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     if (!currentIsVideo || !v) return;
     if (isPaused) v.pause();
     else v.play().catch(() => {});
-  }, [currentIsVideo, isPaused, visibleLayer]);
+  }, [currentIsVideo, isPaused, visibleLayer, visibleVideoRef]);
 
   // 影片進度條：每 50ms 輪詢，只讀取目前可見層的 video
   useEffect(() => {
@@ -1483,7 +1522,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       setProgress(p);
     }, 50);
     return () => clearInterval(interval);
-  }, [isOpen, showTransition, currentIsVideo, isPaused, currentPhotoIndex, visibleLayer]);
+  }, [isOpen, showTransition, currentIsVideo, isPaused, currentPhotoIndex, visibleLayer, visibleVideoRef]);
 
   const handlePhotoClick = (e) => {
     // 如果點擊到按鈕，不處理
@@ -1748,7 +1787,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
             <div className="absolute top-4 left-4 z-20 flex items-center gap-2 h-[44px]">
               <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center overflow-hidden flex-shrink-0">
                 <img
-                  src={`${process.env.PUBLIC_URL || ''}/proposal-photos/gokigen_panda.png`}
+                  src={`${process.env.PUBLIC_URL || ''}/gokigen_panda_icon.png`}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
@@ -2332,8 +2371,7 @@ function App() {
       date: "03/01 (週日)",
       title: "行程規劃中",
       location: "北海道",
-      weather: "",
-      image: "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=800&q=80",
+      image: "",
       activities: []
     };
 
@@ -2522,7 +2560,7 @@ function App() {
       <ShoppingModal
         isOpen={showShopping}
         onClose={() => setShowShopping(false)}
-        initialTab="sapporo"
+        initialTab="shinjuku"
       />
 
       <FoodModal isOpen={showFood} onClose={() => setShowFood(false)} />

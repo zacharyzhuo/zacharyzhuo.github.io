@@ -26,270 +26,66 @@ export const tripData = {
     },
   ],
   shopping: {
-    sapporo: [
+    shinjuku: [
       {
-        name: "HOKA Fukuoka Tenjin",
-        building: "Standalone",
-        floor: "1F",
-        hours: "11:00 - 20:00",
-        link: "https://maps.app.goo.gl/AhT9FQU2SYxCUhDA8",
+        name: "LUMINE EST新宿",
+        floor: "B2～8F",
+        hours: "平日 11:00～21:00 / 土日祝 10:30～21:00",
+        link: "https://maps.app.goo.gl/gGehBqdLvvwf1EPX7",
       },
       {
-        name: "Super Sports Xebio Fukuoka Tenjin",
-        building: "Standalone",
-        floor: "1F",
-        hours: "10:00 - 21:00",
-        link: "https://maps.app.goo.gl/eDGBA2UK6RQuneh87",
-      },
-      {
-        name: "Mina Tenjin",
-        isBuilding: true,
-        hours: "10:00 - 20:00",
-        shops: [
-          {
-            name: "3COINS＋",
-            floor: "B1F",
-            link: "https://maps.app.goo.gl/CU5TtzJ3RE9v4tnY7",
-          },
-          {
-            name: "UNIQLO",
-            floor: "1F-2F",
-            link: "https://maps.app.goo.gl/oiVDfiSjVvLoyRmk8",
-          },
-          {
-            name: "GU",
-            floor: "3F",
-            link: "https://maps.app.goo.gl/o4hrRNPQzuM9d6Ni8",
-          },
-          {
-            name: "LOFT",
-            floor: "4F",
-            link: "https://maps.app.goo.gl/67iMaH4ygF64y7xX8",
-          },
-        ],
-      },
-      {
-        name: "天神地下街",
-        building: "Underground",
-        hours: "10:00 - 20:00",
-        link: "https://maps.app.goo.gl/6wAuWeLaQ7m6FnHN8",
-      },
-      {
-        name: "PARCO Fukuoka",
-        isBuilding: true,
-        hours: "10:00 - 20:30",
-        shops: [
-          {
-            name: "Onitsuka Tiger",
-            floor: "Main Bldg 3F",
-            link: "https://maps.app.goo.gl/PKJcnZVR1Fb1w2rQA",
-          },
-          {
-            name: "9090",
-            floor: "Main Bldg 3F",
-            link: "https://maps.app.goo.gl/ydb4n1qR4r4DadsHA",
-          },
-          {
-            name: "Lui’s",
-            floor: "Main Bldg 3F",
-            link: "https://maps.app.goo.gl/5NbbUX4bjui2iu9u9",
-          },
-          {
-            name: "ABC-MART Grand Stage",
-            floor: "Main Bldg 3F",
-            link: "https://maps.app.goo.gl/JfzZ8zZUNoo3xBRGA",
-          },
-          {
-            name: "SNIDEL",
-            floor: "Main Bldg 4F",
-            link: "https://maps.app.goo.gl/cPGyvz7BgK8tWZ52A",
-          },
-          {
-            name: "Francfranc",
-            floor: "Main Bldg 5F",
-            link: "https://maps.app.goo.gl/C3fXMNXPqefDycyL6",
-          },
-          {
-            name: "BEAMS",
-            floor: "New Bldg 1F-2F",
-            link: "https://maps.app.goo.gl/AJSXxSANUdLgE1ah8",
-          },
-          {
-            name: "HARE",
-            floor: "New Bldg 3F",
-            link: "https://maps.app.goo.gl/3vrmV18mAawmVqw1A",
-          },
-          {
-            name: "FREAK’S STORE",
-            floor: "New Bldg 4F",
-            link: "https://maps.app.goo.gl/7tgNznxC4pkZjikk9",
-          },
-        ],
-      },
-      {
-        name: "ABC-MART Grand Stage Tenjin",
-        building: "Standalone",
-        floor: "1F-3F",
-        hours: "11:00 - 21:00",
-        link: "https://maps.app.goo.gl/tp7eAykqyWW9T78BA",
-      },
-      {
-        name: "Adidas Originals Shop",
-        building: "Standalone",
-        floor: "1F",
-        hours: "11:00 - 20:00",
-        link: "https://maps.app.goo.gl/pmogb8QkuJvjLonv8",
-      },
-      {
-        name: "Factory",
-        building: "Standalone",
-        floor: "1F",
-        hours: "13:00 - 18:00",
-        link: "https://maps.app.goo.gl/RvSJVkHfFkSYMyMf8",
-      },
-      {
-        name: "Dice & Dice",
-        building: "Standalone",
-        floor: "1F",
-        hours: "13:00 - 18:00",
-        link: "https://maps.app.goo.gl/Ua9n4WMQmYXZCYay8",
-      },
-      {
-        name: "ZARA Tenjin Nishi-dori",
-        building: "Standalone",
-        floor: "1F-3F",
-        hours: "11:00 - 21:00",
-        link: "https://maps.app.goo.gl/Xrxwm1MxqdareXKo8",
-      },
-      {
-        name: "大賀藥局 (Oga Pharmacy)",
-        building: "Standalone",
-        floor: "1F",
-        hours: "10:00 - 22:00",
-        link: "https://maps.app.goo.gl/VeBCd8cwSFmkfXfE8",
+        name: "Beams japan",
+        floor: "B1F～5F",
+        hours: "11:00～20:00",
+        link: "https://maps.app.goo.gl/ce7Gq8GwySsuCn5s7",
       },
     ],
-    hakodate: [
+    shibuya: [
       {
-        name: "AMU PLAZA Hakata",
-        isBuilding: true,
-        hours: "10:00 - 20:00",
-        shops: [
-          {
-            name: "Le Dome (Édifice/Iéna)",
-            floor: "3F",
-            link: "https://maps.app.goo.gl/jzqbSAUmET3wF4NQ9",
-          },
-          {
-            name: "BEAMS",
-            floor: "3F",
-            link: "https://maps.app.goo.gl/iCcZZhPZq8ejruLW6",
-          },
-          {
-            name: "FREAK’S STORE",
-            floor: "4F",
-            link: "https://maps.app.goo.gl/b1izKYHJ4yMRgwDe9",
-          },
-          {
-            name: "atmos",
-            floor: "5F",
-            link: "https://maps.app.goo.gl/n4Vs7cBi3YLRdhxQ6",
-          },
-          {
-            name: "MUJI",
-            floor: "6F",
-            link: "https://maps.app.goo.gl/Gakfdg8VufxCiBU26",
-          },
-          {
-            name: "ABC-MART",
-            floor: "7F",
-            link: "https://maps.app.goo.gl/2coZLK3pjuuhAiqB7",
-          },
-        ],
+        name: "niko and ... TOKYO",
+        floor: "1F・2F",
+        hours: "11:00～21:00",
+        link: "https://maps.app.goo.gl/LyskAo9oSNLDCYa56",
       },
       {
-        name: "AMU EST",
-        isBuilding: true,
-        hours: "10:00 - 20:00",
-        shops: [
-          {
-            name: "LOWRYS FARM",
-            floor: "B1F",
-            link: "https://maps.app.goo.gl/jeEdzq12MYoiFoeW7",
-          },
-          {
-            name: "UNIQLO",
-            floor: "1F",
-            link: "https://maps.app.goo.gl/3BvK8xANZNywev6a7",
-          },
-        ],
+        name: "HARE",
+        floor: "1F",
+        hours: "平日 12:00～20:00 / 土日祝 11:00～20:00",
+        link: "https://maps.app.goo.gl/Msij3cYXSbJVBZX7A",
       },
       {
-        name: "KITTE Hakata",
-        isBuilding: true,
-        hours: "10:00 - 21:00",
-        shops: [
-          {
-            name: "UNIQLO",
-            floor: "8F",
-            hours: "10:00 - 21:00",
-            link: "https://maps.app.goo.gl/vpc2qq8bh7DoTbUN8",
-          },
-        ],
+        name: "FREAK'S STORE",
+        floor: "1F",
+        hours: "11:00～21:00",
+        link: "https://maps.app.goo.gl/qnsq6EaxZX8tHXiN9",
       },
       {
-        name: "CANAL CITY Hakata",
-        isBuilding: true,
-        hours: "10:00 - 21:00",
-        shops: [
-          {
-            name: "RAGEBLUE",
-            floor: "North Bldg 2F",
-            link: "https://maps.app.goo.gl/xFkdyyTTst84dLzy8",
-          },
-          {
-            name: "MUJI",
-            floor: "North Bldg 3F-4F",
-            link: "https://maps.app.goo.gl/VLNEuqq8FgtDWhLW9",
-          },
-          {
-            name: "Adidas Originals",
-            floor: "Center Walk 1F",
-            link: "https://maps.app.goo.gl/3odaPqBG6DA15sf39",
-          },
-          {
-            name: "MOUSSY",
-            floor: "Center Walk 2F",
-            link: "https://maps.app.goo.gl/QxHoaxJfeXue31ng9",
-          },
-          {
-            name: "Asics",
-            floor: "Center Walk 2F",
-            link: "https://maps.app.goo.gl/7UzytRJtTVGMkVbc8",
-          },
-          {
-            name: "Levi’s",
-            floor: "Center Walk 2F",
-            link: "https://maps.app.goo.gl/Xiz2YmqPAR5d7fLy5",
-          },
-          {
-            name: "ABC-MART Grand Stage",
-            floor: "Center Walk 3F",
-            link: "https://maps.app.goo.gl/R48HbE8Jj1mmJNZb9",
-          },
-          {
-            name: "Alpen Fukuoka",
-            floor: "South Bldg 1F-3F",
-            link: "https://maps.app.goo.gl/ThnejdLYkkYmfB5H7",
-          },
-          {
-            name: "Onitsuka Tiger",
-            floor: "South Bldg 2F",
-            link: "https://maps.app.goo.gl/3MKG63X1FCaWU94D9",
-          },
-        ],
+        name: "RAGEBLUE",
+        floor: "1F",
+        hours: "11:00～21:00",
+        link: "https://maps.app.goo.gl/Hb89UjoGYNg4JjRH7",
+      },
+      {
+        name: "mizuno",
+        floor: "1F",
+        hours: "10:00～21:00",
+        link: "https://maps.app.goo.gl/CtTQtoNdzmxSs8d6A",
+      },
+      {
+        name: "ABC-MART GRAND STAGE",
+        floor: "B1F",
+        hours: "10:00～21:00",
+        link: "https://maps.app.goo.gl/haTSzwVNuUGQ8V6q6",
+      },
+      {
+        name: "澀谷 PARCO",
+        floor: "B1F～7F",
+        hours: "物販 11:00～21:00 / 飲食 11:30～23:00",
+        link: "https://maps.app.goo.gl/9Sbx1wuiwd2KdhAw5",
       },
     ],
+    nakameguro: [],
+    daikanyama: [],
   },
   food: {
     sapporo: [
@@ -515,51 +311,154 @@ export const tripData = {
     {
       day: 1,
       date: "03/01 (週日)",
-      title: "行程規劃中",
-      location: "北海道",
-      weather: "",
+      title: "成田入境・東京・鶯谷",
+      location: "東京",
       image:
-        "https://images.unsplash.com/photo-1623310073404-fe9953eadb04?auto=format&fit=crop&w=1200&q=80",
-      activities: [],
+        "banner/D1.jpg",
+      activities: [
+        {
+          time: "19:55",
+          type: "交通",
+          title: "成田機場",
+          desc: "抵達成田機場",
+          about: "成田國際機場（NRT），從桃園搭乘 Peach MM 628 抵達。",
+          nav: "https://maps.app.goo.gl/GaGa6ZAqwHCVqP1G8",
+        },
+        {
+          time: "20:30",
+          type: "交通",
+          title: "SKYLINER → 日暮里 → 山手線 → 鶯谷",
+          desc: "搭 SKYLINER 到日暮里，轉山手線到鶯谷站",
+          about: "成田機場可搭乘京成 SKYLINER 至日暮里站（約 41 分鐘），再轉 JR 山手線至鶯谷站。",
+          nav: "https://maps.app.goo.gl/s8f6id1d54QoEYX3A",
+        },
+        {
+          time: "21:30",
+          type: "住宿",
+          title: "LANDABOUT TOKYO",
+          desc: "回飯店 check in",
+          about: "位於鶯谷站附近的飯店。",
+          nav: "https://maps.app.goo.gl/LoCEGcwt8JWx4JNZ8",
+        },
+        {
+          time: "晚上",
+          type: "景點",
+          title: "萩之湯",
+          desc: "錢湯／澡堂",
+          about: "鶯谷一帶的錢湯，可放鬆一天的疲勞。",
+          nav: "https://maps.app.goo.gl/X82L9xMEcy8MxLqs9",
+        },
+      ],
     },
     {
       day: 2,
       date: "03/02 (週一)",
-      title: "行程規劃中",
-      location: "北海道",
+      title: "谷根千・新宿",
+      location: "東京",
       weather: "",
       image:
-        "https://images.unsplash.com/photo-1623310073404-fe9953eadb04?auto=format&fit=crop&w=1200&q=80",
-      activities: [],
+        "banner/D2.jpg",
+      activities: [
+        {
+          time: "上午",
+          type: "景點",
+          title: "谷根千（谷中・根津・千駄木）",
+          desc: "散步、古民家咖啡、寺社、貓街等",
+          about: "谷根千是谷中、根津、千駄木的合稱，保留下町風情，適合散步與喫茶。",
+          nav: "谷中銀座",
+        },
+        {
+          time: "下午",
+          type: "景點",
+          title: "新宿",
+          desc: "逛街、用餐（可搭配逛街清單・新宿）",
+          about: "新宿站周邊百貨與商圈，可逛 LUMINE EST、BEAMS JAPAN 等。",
+          nav: "新宿駅",
+        },
+      ],
     },
     {
       day: 3,
       date: "03/03 (週二)",
-      title: "行程規劃中",
-      location: "北海道",
+      title: "中目黑・代官山・渋谷",
+      location: "東京",
       weather: "",
       image:
-        "https://images.unsplash.com/photo-1623310073404-fe9953eadb04?auto=format&fit=crop&w=1200&q=80",
-      activities: [],
+        "banner/D3.png",
+      activities: [
+        {
+          time: "上午",
+          type: "景點",
+          title: "中目黑",
+          desc: "目黑川沿線、咖啡與選物店",
+          about: "中目黑站與目黑川周邊，櫻花季以外也適合散步與咖啡巡禮。",
+          nav: "中目黒駅",
+        },
+        {
+          time: "中午",
+          type: "景點",
+          title: "代官山",
+          desc: "蔦屋書店、複合設施、雜貨・服飾",
+          about: "代官山站周邊，可逛蔦屋書店、複合設施與特色小店。",
+          nav: "代官山駅",
+        },
+        {
+          time: "下午",
+          type: "景點",
+          title: "渋谷",
+          desc: "逛街、用餐（可搭配逛街清單・澀谷）",
+          about: "渋谷站周邊，可逛 niko and ...、PARCO、HARE 等（見逛街清單）。",
+          nav: "渋谷駅",
+        },
+      ],
     },
     {
       day: 4,
       date: "03/04 (週三)",
-      title: "行程規劃中",
-      location: "北海道",
-      weather: "",
+      title: "Tokyo Disney Sea",
+      location: "東京",
       image:
-        "https://images.unsplash.com/photo-1623310073404-fe9953eadb04?auto=format&fit=crop&w=1200&q=80",
-      activities: [],
+        "banner/D4.webp",
+      activities: [
+        {
+          time: "全日",
+          type: "景點",
+          title: "Tokyo Disney Sea",
+          desc: "今天是皖淩的生日！請好好享受迪士尼海洋的世界吧！",
+          about: `【遊樂設施】
+                  ・長髮公主遊船
+                  ・茉莉公主飛天魔毯
+                  ・小胖的飛魚雲霄飛車
+                  ・長髮公主餐廳
+                  ・美人魚礁石區
+                  ・小飛俠夢幻島歷險記
+                  ・驚魂古塔
+                  ・地心探險之旅
+                  ・印第安納瓊斯冒險旅程：水晶骷髏頭魔宮
+                  ・翱翔：夢幻奇航
+                  ・玩具總動員瘋狂遊戲屋 Toy Story Mania！
+
+                  【美食】
+                  ・壽司捲（鮮蝦雞條）— 海濱小吃亭
+                  ・熱狗堡 — 德倫西餐車
+                  ・救生圈包子（鮮蝦）— 海邊小吃
+
+                  【遊行・表演】
+                  ・Duffy：11:30、14:10
+                  ・晚間遊行：19:30
+                  ・煙火：20:45
+                  ・Dance the globe：12:50、14:35、16:55、18:40`,
+          nav: "https://maps.app.goo.gl/7USkcdGR7SbW8p5n6",
+        },
+      ],
     },
     {
       day: 5,
       date: "03/05 (週四)",
       title: "函館",
       location: "函館",
-      weather: "",
       image:
-        "https://images.unsplash.com/photo-1623310073404-fe9953eadb04?auto=format&fit=crop&w=1200&q=80",
+        "banner/D5.jpg",
       activities: [
         {
           time: "11:00",
@@ -632,9 +531,8 @@ export const tripData = {
       date: "03/06 (週五)",
       title: "洞爺湖、小樽",
       location: "洞爺湖→小樽",
-      weather: "",
       image:
-        "https://images.unsplash.com/photo-1623310073404-fe9953eadb04?auto=format&fit=crop&w=1200&q=80",
+        "banner/D6.jpg",
       activities: [
         {
           time: "07:00",
@@ -699,9 +597,8 @@ export const tripData = {
       date: "03/07 (週六)",
       title: "旭川、美瑛",
       location: "旭川→美瑛→富良野",
-      weather: "",
       image:
-        "https://images.unsplash.com/photo-1623310073404-fe9953eadb04?auto=format&fit=crop&w=1200&q=80",
+        "banner/D7.webp",
       activities: [
         {
           time: "07:00",
@@ -774,9 +671,8 @@ export const tripData = {
       date: "03/08 (週日)",
       title: "富良野、札幌",
       location: "富良野→札幌",
-      weather: "",
       image:
-        "https://images.unsplash.com/photo-1623310073404-fe9953eadb04?auto=format&fit=crop&w=1200&q=80",
+        "banner/D8.jpg",
       activities: [
         {
           time: "10:00",
@@ -841,9 +737,8 @@ export const tripData = {
       date: "03/09 (週一)",
       title: "札幌",
       location: "札幌→新千歲機場",
-      weather: "",
       image:
-        "https://images.unsplash.com/photo-1623310073404-fe9953eadb04?auto=format&fit=crop&w=1200&q=80",
+        "banner/D9.jpg",
       activities: [
         {
           time: "12:00",
@@ -874,12 +769,29 @@ export const tripData = {
         {
       day: 10,
       date: "03/10 (週二)",
-      title: "行程規劃中",
+      title: "新千歲機場・返台",
       location: "北海道",
       weather: "",
       image:
-        "https://images.unsplash.com/photo-1623310073404-fe9953eadb04?auto=format&fit=crop&w=1200&q=80",
-      activities: [],
+        "banner/D10.webp",
+      activities: [
+        {
+          time: "上午",
+          type: "交通",
+          title: "新千歲機場",
+          desc: "辦理登機、托運、出境。建議起飛前 2～3 小時抵達。",
+          about: "新千歲機場（CTS）國際線航廈。可預留時間逛機場賣店、用餐。",
+          nav: "新千歳空港",
+        },
+        {
+          time: "11:55",
+          type: "交通",
+          title: "Tigerair IT 235｜CTS → TPE",
+          desc: "11:55 新千歲起飛 → 15:35 抵達桃園",
+          about: "虎航 IT 235。手提行李合計兩件共 10kg、托運不限件數總重 20kg。",
+          nav: "新千歳空港",
+        },
+      ],
     },
   ],
 };
