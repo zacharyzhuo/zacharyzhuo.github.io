@@ -1,7 +1,7 @@
 // Service Worker for Tokyo & Hokkaido Trip PWA
 // 版本號會在 build 時自動替換，無需手動修改
-const CACHE_NAME = "tokyo-hokkaido-trip-v1772210598974";
-const RUNTIME_CACHE = "tokyo-hokkaido-runtime-v1772210598974";
+const CACHE_NAME = "tokyo-hokkaido-trip-v1772215555366";
+const RUNTIME_CACHE = "tokyo-hokkaido-runtime-v1772215555366";
 
 // 需要快取的靜態資源
 const STATIC_CACHE_URLS = [
