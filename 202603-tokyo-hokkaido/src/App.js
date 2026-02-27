@@ -1787,7 +1787,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
             <div className="absolute top-4 left-4 z-20 flex items-center gap-2 h-[44px]">
               <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center overflow-hidden flex-shrink-0">
                 <img
-                  src={`${process.env.PUBLIC_URL || ''}/gokigen_panda_icon.png`}
+                  src={`${process.env.PUBLIC_URL || ''}/proposal-photos/gokigen_panda.png`}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
