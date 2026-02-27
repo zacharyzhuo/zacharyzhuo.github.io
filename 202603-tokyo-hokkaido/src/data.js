@@ -433,7 +433,7 @@ export const tripData = {
           time: "全日",
           type: "景點",
           title: "Tokyo Disney Sea",
-          desc: "今天是皖淩的生日！請好好享受迪士尼海洋的世界吧！",
+          desc: "東京迪士尼海洋（Tokyo DisneySea）是全世界唯一以海洋為主題的迪士尼樂園，結合七大主題海港與原創故事，適合大人與情侶悠閒探索。",
           about: `【遊樂設施】
                   ・長髮公主遊船
                   ・茉莉公主飛天魔毯
