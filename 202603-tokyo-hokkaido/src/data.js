@@ -477,7 +477,7 @@ export const tripData = {
           desc: "抵達函館機場（淩、卓 11:00／華、腸、昕、婷 11:10）",
           about: "函館機場是北海道南部的主要機場，距離函館市區約20分鐘車程。",
           address: "北海道函館市高松町511",
-          nav: "函館機場",
+          nav: "https://maps.app.goo.gl/x4hXUNJfDWaXzRQE8",
         },
         {
           time: "13:00",
@@ -486,7 +486,7 @@ export const tripData = {
           desc: "約 13:00 抵達 check in",
           about: "OMO5 函館 by 星野集團位於函館市中心，距離 JR 函館車站步行約5分鐘。飯店提供溫泉、OMO Base 公共空間等設施。",
           address: "北海道函館市若松町14-10",
-          nav: "OMO5 函館 by 星野集團",
+          nav: "https://maps.app.goo.gl/S9t1am97onepnjgMA",
         },
         {
           time: "13:30",
@@ -495,7 +495,7 @@ export const tripData = {
           desc: "午餐：村上海膽 Uni Murakami Hakodate station store／幸運小丑漢堡",
           about: "函館朝市是北海道最著名的海鮮市場之一。可至村上海膽或幸運小丑漢堡用餐。",
           address: "北海道函館市若松町9-19",
-          nav: "函館朝市",
+          nav: "https://maps.app.goo.gl/mYjStQtZ83zRFViF7",
         },
         {
           time: "14:30",
@@ -504,7 +504,7 @@ export const tripData = {
           desc: "約 14:30 抵達，停留 1～1.5 小時。五稜郭展望台 ¥1200／人。附近道立函館美術館（付費）。停車：1 小時內 ¥200，之後每 30 分鐘加 ¥100",
           about: "五稜郭是日本第一座西式星形要塞。可登上五稜郭展望台俯瞰星形全景。可順訪六花亭五稜郭店。",
           address: "北海道函館市五稜郭町44",
-          nav: "五稜郭公園",
+          nav: "https://maps.app.goo.gl/ufBxf8vVNVifaaky8",
         },
         {
           time: "16:30",
@@ -513,7 +513,7 @@ export const tripData = {
           desc: "約 16:30 抵達，停留約半小時。去紅磚倉庫前可先順路去根室花丸抽號碼牌",
           about: "金森紅磚倉庫是函館港邊的歷史建築群，已改建為購物中心、餐廳和咖啡廳。",
           address: "北海道函館市末広町14-12",
-          nav: "金森紅磚倉庫",
+          nav: "https://maps.app.goo.gl/umaRj8LyCLXsiHjE8",
         },
         {
           time: "16:45",
@@ -522,7 +522,7 @@ export const tripData = {
           desc: "打卡八幡坂",
           about: "八幡坂是函館著名的坡道景點，可眺望港灣與街景。",
           address: "北海道函館市末広町",
-          nav: "八幡坂",
+          nav: "https://maps.app.goo.gl/4xBfb9QqYgHXdH1A7",
         },
         {
           time: "18:00",
@@ -531,7 +531,7 @@ export const tripData = {
           desc: "晚餐：根室花丸迴轉壽司",
           about: "根室花丸是北海道知名的迴轉壽司連鎖店，以新鮮海鮮與合理價格著稱。建議提早抽號碼牌。",
           address: "北海道函館市若松町11-4",
-          nav: "根室花丸迴轉壽司",
+          nav: "https://maps.app.goo.gl/HdMioSLM9vxt46bJ6",
         },
         {
           time: "19:00",
@@ -540,7 +540,7 @@ export const tripData = {
           desc: "搭乘函館市電至「十字街站」，再步行約 10 分鐘至纜車站。纜車營運 10:00–21:00（約 10–15 分鐘一班）",
           about: "函館山夜景被譽為世界三大夜景之一，可俯瞰函館市區與港灣燈火。",
           address: "北海道函館市元町19-7",
-          nav: "函館山觀景台",
+          nav: "https://maps.app.goo.gl/6UkUrdin8vWHvTzZ7",
         },
       ],
     },
@@ -559,7 +559,7 @@ export const tripData = {
           desc: "飯店早餐，8 點出發 check out",
           about: "從函館出發，開始今天的旅程。",
           address: "北海道函館市若松町14-10",
-          nav: "OMO5 函館 by 星野集團",
+          nav: "https://maps.app.goo.gl/UyHbbQHmB77HFu91A",
         },
         {
           time: "10:30",
@@ -568,7 +568,7 @@ export const tripData = {
           desc: "預計 10:30 抵達，停留約 1 小時。洞爺湖噴泉廣場／筒倉展望台（有停車場）",
           about: "洞爺湖是北海道著名的火山口湖，可至噴泉廣場或筒倉展望台欣賞湖光山色。",
           address: "北海道虻田郡洞爺湖町洞爺湖温泉",
-          nav: "洞爺湖",
+          nav: "https://maps.app.goo.gl/utSPDs9ExoC92D3u8",
         },
         {
           time: "12:00",
@@ -577,7 +577,7 @@ export const tripData = {
           desc: "Lake Hill Farm 午餐，約 12 點離開",
           about: "Lake Hill Farm 為農場與花園景觀餐廳，可享用午餐並選購農場產品。",
           address: "北海道有珠郡壮瞥町字滝之町291-5",
-          nav: "Lake Hill Farm",
+          nav: "https://maps.app.goo.gl/8Hw5K77t1J6zoEGX7",
         },
         {
           time: "13:00",
@@ -586,7 +586,7 @@ export const tripData = {
           desc: "預計 13 點抵達，停留約半小時。登別地獄谷駐車場：¥500（計次）",
           about: "地獄谷是登別溫泉的著名景點，火山口遺跡不斷冒出硫磺蒸汽，形成獨特的地熱景觀。",
           address: "北海道登別市登別温泉町",
-          nav: "地獄谷",
+          nav: "https://maps.app.goo.gl/QJjYmJci62psSQbM9",
         },
         {
           time: "16:30",
@@ -595,7 +595,7 @@ export const tripData = {
           desc: "預計 16:30 抵達。小樽停車可考慮北一硝子附近 Kitaichigarasu Tokuyaku Parking Lot，第 1 小時 ¥300，之後每 20 分 ¥100",
           about: "小樽運河兩旁保留明治時代倉庫建築，已改建為商店與餐廳，夜晚點燈景色浪漫。",
           address: "北海道小樽市港町",
-          nav: "小樽運河",
+          nav: "https://maps.app.goo.gl/jzkRgzkDFRYxjs7Y6",
         },
         {
           time: "17:00",
@@ -604,7 +604,7 @@ export const tripData = {
           desc: "check in",
           about: "小樽格里茲頂級飯店位於小樽市中心，交通便利。",
           address: "北海道小樽市堺町1-2-15",
-          nav: "小樽格里茲頂級飯店",
+          nav: "https://maps.app.goo.gl/KUahNhDZormojLe5A",
         },
         {
           time: "19:00",
@@ -613,7 +613,7 @@ export const tripData = {
           desc: "19 點用餐",
           about: "小樽倉庫 No.1 啤酒釀造所可參觀釀造過程，並在餐廳品嚐啤酒與美食。",
           address: "北海道小樽市港町5-4",
-          nav: "小樽倉庫No.1啤酒釀造所",
+          nav: "https://maps.app.goo.gl/E9tEB4tJdBhwXGfs7",
         },
       ],
         },
@@ -632,7 +632,7 @@ export const tripData = {
           desc: "check out，出發",
           about: "從小樽出發，前往旭川、美瑛。",
           address: "北海道小樽市堺町1-2-15",
-          nav: "小樽格里茲頂級飯店",
+          nav: "https://maps.app.goo.gl/KUahNhDZormojLe5A",
         },
         {
           time: "10:30",
@@ -641,7 +641,7 @@ export const tripData = {
           desc: "預計 10:30 抵達，13:00 離開。冬期営業 10:30–15:30（最終入園 15:00）。企鵝散步 11:00。正門停車場免費",
           about: "旭山動物園是日本最北端的動物園，以獨特展示方式聞名。企鵝散步與北極熊展示非常受歡迎。",
           address: "北海道旭川市東旭川町倉沼",
-          nav: "旭山動物園",
+          nav: "https://maps.app.goo.gl/voi5uEaxTgHE2n42A",
         },
         {
           time: "13:30",
@@ -650,7 +650,7 @@ export const tripData = {
           desc: "午餐 13:30，用餐約 1 小時",
           about: "KINGBEAR 旭川綠町店提供日式料理，位於旭川市中心。",
           address: "北海道旭川市緑町2-1-1",
-          nav: "KINGBEAR 旭川緑町店",
+          nav: "https://maps.app.goo.gl/QmT4cSwqD75de7Mw5",
         },
         {
           time: "15:30",
@@ -659,7 +659,7 @@ export const tripData = {
           desc: "預計 15:30 抵達",
           about: "Mild seven hills 是富良野地區的著名景點，可欣賞山丘與自然風光。",
           address: "北海道富良野市字中御料",
-          nav: "Mild seven hills",
+          nav: "https://maps.app.goo.gl/nAEWDPGQ7RGkpyYJ7",
         },
         {
           time: "16:30",
@@ -668,7 +668,7 @@ export const tripData = {
           desc: "預計 16:30 抵達",
           about: "Christmas Tree 是富良野著名地標，雪地中孤立的聖誕樹，為熱門拍照景點。",
           address: "北海道富良野市字中御料",
-          nav: "Christmas tree",
+          nav: "https://maps.app.goo.gl/f8Kf5mpgYUHPkkyc6",
         },
         {
           time: "18:00",
@@ -677,7 +677,7 @@ export const tripData = {
           desc: "預計 18:00 抵達",
           about: "森林精靈露台（Ningle Terrace）由多間小木屋組成的手工藝品商店區，夜晚點燈浪漫。",
           address: "北海道富良野市字中御料",
-          nav: "森林精靈露台",
+          nav: "https://maps.app.goo.gl/Jx3ieZPwaw8kzLxv6",
         },
         {
           time: "18:30",
@@ -686,7 +686,7 @@ export const tripData = {
           desc: "check in",
           about: "THE ARBANO 為富良野住宿（Airbnb），詳細資訊請參考旅程資訊中的住宿。",
           address: "北海道富良野市北の峰町",
-          nav: "THE ARBANO",
+          nav: "https://maps.app.goo.gl/9vH6xausqp2NPrGA7",
         },
         {
           time: "19:30",
@@ -695,7 +695,7 @@ export const tripData = {
           desc: "19:30 用餐",
           about: "Kumagera 是富良野地區知名餐廳，提供日式料理與宴會服務。",
           address: "北海道富良野市朝日町1-22",
-          nav: "Kumagera",
+          nav: "https://maps.app.goo.gl/3BKMu3xMF19CUfmx8",
         },
       ],
         },
@@ -714,7 +714,7 @@ export const tripData = {
           desc: "check out",
           about: "THE ARBANO 為富良野住宿（Airbnb），退房後前往札幌。",
           address: "北海道富良野市北の峰町",
-          nav: "THE ARBANO",
+          nav: "https://maps.app.goo.gl/9vH6xausqp2NPrGA7",
         },
         {
           time: "10:40",
@@ -723,7 +723,7 @@ export const tripData = {
           desc: "10:40 用餐，之後前往札幌",
           about: "迴轉壽司 Topical 提供新鮮海鮮壽司，用餐後出發往札幌。",
           address: "北海道富良野市朝日町14-1",
-          nav: "迴轉壽司 Topical",
+          nav: "https://maps.app.goo.gl/evHxcx5TWUULVQQ77",
         },
         {
           time: "14:00",
@@ -732,7 +732,7 @@ export const tripData = {
           desc: "check in",
           about: "札幌格蘭貝爾酒店位於札幌市中心，從地鐵すすきの駅步行約 8 分鐘。",
           address: "北海道札幌市中央区南3条西4-1",
-          nav: "札幌格蘭貝爾酒店",
+          nav: "https://maps.app.goo.gl/dWeCwfmfp65NpHCB6",
         },
         {
           time: "15:00",
@@ -741,7 +741,7 @@ export const tripData = {
           desc: "狸小路商店街",
           about: "狸小路商店街是札幌最著名的購物街，全長約 1 公里，商店、餐廳與藥妝店林立。",
           address: "北海道札幌市中央区南2条西1～7丁目",
-          nav: "狸小路商店街",
+          nav: "https://maps.app.goo.gl/dyZw3zmyz6oBXtWK8",
         },
         {
           time: "16:00",
@@ -750,7 +750,7 @@ export const tripData = {
           desc: "大通公園",
           about: "大通公園是札幌市中心大型公園，全長約 1.5 公里，冬季會舉辦雪祭。",
           address: "北海道札幌市中央区大通西1～12丁目",
-          nav: "大通公園",
+          nav: "https://maps.app.goo.gl/Xo3B9Vj1iEB1RmnC7",
         },
         {
           time: "17:00",
@@ -759,7 +759,7 @@ export const tripData = {
           desc: "札幌啤酒博物館",
           about: "札幌啤酒博物館展示啤酒歷史與釀造過程，可了解日本啤酒文化。",
           address: "北海道札幌市東区北7条東9丁目1-1",
-          nav: "札幌啤酒博物館",
+          nav: "https://maps.app.goo.gl/LCQRvQ9rAdxasEsP7",
         },
         {
           time: "19:00",
@@ -768,7 +768,7 @@ export const tripData = {
           desc: "19:00 用餐（札幌啤酒園開拓使館）",
           about: "開拓使館提供成吉思汗烤肉與啤酒，是體驗北海道美食的熱門餐廳。",
           address: "北海道札幌市東区北7条東9丁目1-1",
-          nav: "サッポロビール園 開拓使館",
+          nav: "https://maps.app.goo.gl/SFY7eBeMf8Lk1Gd77",
         },
       ],
         },
@@ -787,7 +787,7 @@ export const tripData = {
           desc: "午餐：湯咖哩",
           about: "Rojiura Curry SAMURAI 是札幌知名的湯咖哩餐廳，提供多種口味湯咖哩。",
           address: "北海道札幌市中央区南3条西3",
-          nav: "Rojiura Curry SAMURAI",
+          nav: "https://maps.app.goo.gl/crBn6YN4x6ubVgxbA",
         },
         {
           time: "14:00",
@@ -796,7 +796,7 @@ export const tripData = {
           desc: "參觀白色戀人公園",
           about: "白色戀人公園以白色戀人餅乾聞名，可參觀製作過程、體驗甜點繪畫並選購伴手禮。",
           address: "北海道札幌市西区宮の沢2-2-11-36",
-          nav: "白色戀人公園",
+          nav: "https://maps.app.goo.gl/FomtVck54UFPx9vc8",
         },
         {
           time: "17:00",
@@ -805,7 +805,7 @@ export const tripData = {
           desc: "前往新千歲機場",
           about: "新千歲機場為北海道主要國際機場，建議預留充足時間辦理登機與出境。",
           address: "北海道千歳市美々",
-          nav: "新千歲機場",
+          nav: "https://maps.app.goo.gl/VKjQjaqHa6iV4vzj7",
         },
       ],
         },
@@ -825,7 +825,7 @@ export const tripData = {
           desc: "辦理登機、托運、出境。建議起飛前 2～3 小時抵達。",
           about: "新千歲機場（CTS）國際線航廈。可預留時間逛機場賣店、用餐。",
           address: "北海道千歳市美々",
-          nav: "新千歳空港",
+          nav: "https://maps.app.goo.gl/VKjQjaqHa6iV4vzj7",
         },
         {
           time: "11:55",
