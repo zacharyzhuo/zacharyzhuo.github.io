@@ -84,8 +84,28 @@ export const tripData = {
         link: "https://maps.app.goo.gl/9Sbx1wuiwd2KdhAw5",
       },
     ],
-    nakameguro: [],
-    daikanyama: [],
+    nakameguro: [
+      {
+        name: "1LDK apartments.",
+        floor: "1F",
+        hours: "平日 13:00～19:00 / 土日祝 12:00～19:00",
+        link: "https://maps.app.goo.gl/dsJjzZ8DToZw4qnL9",
+      },
+    ],
+    daikanyama: [
+      {
+        name: "A.P.C.",
+        floor: "1F",
+        hours: "11:00～19:00",
+        link: "https://maps.app.goo.gl/fwoD279v3pQciSr69",
+      },
+      {
+        name: "Forestgate代官山 TENOHA棟",
+        floor: "1F",
+        hours: "依各店・施設而定（代官山駅徒歩約1分）",
+        link: "https://maps.app.goo.gl/qL5icDjHiJAPGWJUA",
+      },
+    ],
   },
   food: {
     sapporo: [
@@ -352,6 +372,15 @@ export const tripData = {
           address: "東京都台東区根岸1-2-11",
           nav: "https://maps.app.goo.gl/X82L9xMEcy8MxLqs9",
         },
+        {
+          time: "晚上",
+          type: "美食",
+          title: "Kimihan Sohonten",
+          desc: "宵夜拉麵",
+          about: "鶯谷一帶拉麵店 Kimihan Sohonten（きみはん総本店），泡完湯後可順道用餐。",
+          address: "東京都台東区根岸3-3-18",
+          nav: "https://maps.app.goo.gl/8zZ2qKdDbgSLMwDCA",
+        },
       ],
     },
     {
@@ -366,11 +395,29 @@ export const tripData = {
         {
           time: "上午",
           type: "景點",
-          title: "谷根千（谷中・根津・千駄木）",
-          desc: "散步、古民家咖啡、寺社、貓街等",
-          about: "谷根千是谷中、根津、千駄木的合稱，保留下町風情，適合散步與喫茶。",
+          title: "夕やけだんだん",
+          desc: "谷根千經典階梯",
+          about: "谷根千經典階梯，可以拍「背影牽手走下階梯」那種日劇感照片。",
+          address: "東京都荒川区西日暮里3-10",
+          nav: "https://maps.app.goo.gl/88JwuNbRio4rR2JT7",
+        },
+        {
+          time: "上午",
+          type: "景點",
+          title: "谷中銀座商店街",
+          desc: "下町商店街、貓街",
+          about: "谷中銀座商店街，保留下町風情，適合散步與喫茶。",
           address: "東京都台東区谷中3-13-1",
-          nav: "谷中銀座",
+          nav: "https://maps.app.goo.gl/Y2CNMvkMN2JfA2K49",
+        },
+        {
+          time: "下午",
+          type: "景點",
+          title: "根津神社",
+          desc: "神社、杜鵑花、千本鳥居",
+          about: "根津神社，以杜鵑花與千本鳥居聞名，可順道參拜。",
+          address: "東京都文京区根津1-28-9",
+          nav: "https://maps.app.goo.gl/jDndKQxknqPTkih9A",
         },
         {
           time: "下午",
@@ -394,30 +441,110 @@ export const tripData = {
       activities: [
         {
           time: "上午",
+          type: "美食",
+          title: "I'm donut ? Nakameguro",
+          desc: "甜甜圈",
+          about: "中目黑人氣甜甜圈店。",
+          address: "東京都目黒区上目黒1-22-10",
+        },
+        {
+          time: "上午",
           type: "景點",
-          title: "中目黑",
-          desc: "目黑川沿線、咖啡與選物店",
-          about: "中目黑站與目黑川周邊，櫻花季以外也適合散步與咖啡巡禮。",
-          address: "東京都目黒区上目黒2-1-3",
-          nav: "中目黒駅",
+          title: "1LDK apartments.",
+          desc: "選物・雜貨",
+          about: "中目黑一帶的選物店／複合空間。",
+          address: "東京都目黒区上目黒1-7-13",
+          nav: "https://maps.app.goo.gl/dsJjzZ8DToZw4qnL9",
+        },
+        {
+          time: "上午",
+          type: "美食",
+          title: "neel",
+          desc: "咖啡",
+          about: "中目黑知名咖啡店。",
+          address: "東京都目黒区青葉台1-25-9",
+          nav: "https://maps.app.goo.gl/caTchAX1iVgs7i2z7",
         },
         {
           time: "中午",
           type: "景點",
-          title: "代官山",
-          desc: "蔦屋書店、複合設施、雜貨・服飾",
-          about: "代官山站周邊，可逛蔦屋書店、複合設施與特色小店。",
+          title: "蔦屋書店（TSUTAYA）",
+          desc: "代官山蔦屋書店",
+          about: "代官山蔦屋書店，複合式書店與生活風格空間。",
           address: "東京都渋谷区代官山町17-5",
-          nav: "代官山駅",
+          nav: "https://maps.app.goo.gl/i6UFUR8mtTxLgi9U9",
+        },
+        {
+          time: "中午",
+          type: "美食",
+          title: "Caffè Michelangelo",
+          desc: "咖啡・已故首相安倍晉三的愛店",
+          about: "代官山 Caffè Michelangelo，已故首相安倍晉三的愛店。",
+          address: "東京都渋谷区猿楽町29-3",
+          nav: "https://maps.app.goo.gl/ryJjD6tjdM4CZ7QaA",
         },
         {
           time: "下午",
           type: "景點",
-          title: "渋谷",
-          desc: "逛街、用餐（可搭配逛街清單・澀谷）",
-          about: "渋谷站周邊，可逛 niko and ...、PARCO、HARE 等（見逛街清單）。",
+          title: "A.P.C.",
+          desc: "服飾",
+          about: "代官山 A.P.C. 門市。",
+          address: "東京都渋谷区猿楽町",
+          nav: "https://maps.app.goo.gl/fwoD279v3pQciSr69",
+        },
+        {
+          time: "下午",
+          type: "景點",
+          title: "Forestgate代官山 TENOHA棟",
+          desc: "複合設施",
+          about: "代官山 Forestgate TENOHA 棟，複合式空間。",
+          address: "東京都渋谷区代官山町20-12",
+          nav: "https://maps.app.goo.gl/qL5icDjHiJAPGWJUA",
+        },
+        {
+          time: "14:40",
+          type: "景點",
+          title: "Shibuya Sky",
+          desc: "已買票・觀景台",
+          about: "渋谷 Sky 觀景台，14:40 已買票，可眺望東京市景。",
           address: "東京都渋谷区渋谷2-24-12",
-          nav: "渋谷駅",
+          nav: "https://maps.app.goo.gl/Dj6ZwS1qBsWUDQuk8",
+        },
+        {
+          time: "下午",
+          type: "美食",
+          title: "Kenyan Shibuya",
+          desc: "咖啡・用餐",
+          about: "渋谷 Kenyan Shibuya。",
+          address: "東京都渋谷区",
+          nav: "https://maps.app.goo.gl/enqFyAK5YYHYnykF9",
+        },
+        {
+          time: "下午",
+          type: "景點",
+          title: "Theatre Products 表参道店",
+          desc: "シアタープロダクツ・雜貨・服飾",
+          about: "Theatre Products 表参道店。",
+          address: "東京都渋谷区神宮前",
+          nav: "https://maps.app.goo.gl/7zmTLKnx5qf3Ckp29",
+        },
+        {
+          time: "下午",
+          type: "美食",
+          title: "Chavaty",
+          desc: "奶茶",
+          about: "Chavaty 奶茶。",
+          address: "東京都渋谷区",
+          nav: "https://maps.app.goo.gl/SwdaDd3yzV7TDmEM6",
+        },
+        {
+          time: "下午",
+          type: "景點",
+          title: "H BEAUTY & YOUTH",
+          desc: "服飾・選物",
+          about: "表参道 H BEAUTY & YOUTH。",
+          address: "東京都渋谷区神宮前",
+          nav: "https://maps.app.goo.gl/n2jrwVBXMe4pnMUv9",
         },
       ],
     },
@@ -434,28 +561,75 @@ export const tripData = {
           type: "景點",
           title: "Tokyo Disney Sea",
           desc: "東京迪士尼海洋（Tokyo DisneySea）是全世界唯一以海洋為主題的迪士尼樂園，結合七大主題海港與原創故事，適合大人與情侶悠閒探索。",
-          about: `【遊樂設施】
-                  ・長髮公主遊船
-                  ・茉莉公主飛天魔毯
-                  ・小胖的飛魚雲霄飛車
-                  ・長髮公主餐廳
-                  ・美人魚礁石區
-                  ・小飛俠夢幻島歷險記
-                  ・驚魂古塔
-                  ・地心探險之旅
-                  ・印第安納瓊斯冒險旅程：水晶骷髏頭魔宮
-                  ・翱翔：夢幻奇航
-                  ・玩具總動員瘋狂遊戲屋 Toy Story Mania！
+          about: `🆕 ① Fantasy Springs（目前全園最熱門）— 建議一入園優先處理
 
-                  【美食】
-                  ・壽司捲（鮮蝦雞條）— 海濱小吃亭
-                  ・熱狗堡 — 德倫西餐車
-                  ・救生圈包子（鮮蝦）— 海邊小吃
+                  ✨ Rapunzel's Lantern Festival（樂佩公主燈籠節遊船）
+                  ・類型：室內沉浸式遊船｜刺激度：⭐｜必完成度：🔥🔥🔥🔥🔥｜✅ 必優先
+                  ・情侶浪漫首選
 
-                  【遊行・表演】
+                  🧚 Peter Pan's Never Land Adventure（小飛俠夢幻島歷險記）
+                  ・類型：3D飛行冒險｜刺激度：⭐⭐⭐｜必完成度：🔥🔥🔥🔥🔥｜✅ 建議優先
+                  ・這區最刺激
+
+                  ❄️ Anna and Elsa's Frozen Journey（安娜與艾莎的冰雪之旅）
+                  ・類型：室內遊船｜刺激度：⭐｜必完成度：🔥🔥🔥🔥｜⚠ 視時間
+                  ・畫面漂亮但偏溫和
+
+                  🍽 Snuggly Duckling（長髮公主主題餐廳）
+                  ・類型：主題餐廳｜必完成度：⭐⭐⭐｜需 App 預約
+
+                  🌋 ② Mysterious Island（神秘島）
+
+                  🌋 Journey to the Center of the Earth（地心探險之旅）
+                  ・類型：室內高速冒險｜刺激度：⭐⭐⭐｜必完成度：🔥🔥🔥🔥🔥｜✅ 推薦下午或晚上
+
+                  🐚 20,000 Leagues Under the Sea（海底兩萬哩）
+                  ・類型：潛水艇探險｜刺激度：⭐｜必完成度：⭐⭐⭐｜時間多可玩
+                  ・冷門但很有氛圍
+
+                  🗽 ③ American Waterfront（美國海濱）
+
+                  ✈️ Soaring: Fantastic Flight（翱翔：夢幻奇航）
+                  ・類型：飛行模擬｜刺激度：⭐｜必完成度：🔥🔥🔥🔥🔥🔥（全園最高）｜🚨 一開園就衝
+
+                  🗼 Tower of Terror（驚魂古塔）
+                  ・類型：自由落體｜刺激度：⭐⭐⭐⭐｜必完成度：🔥🔥🔥🔥｜視膽量
+
+                  🤠 Toy Story Mania!（玩具總動員瘋狂遊戲屋）
+                  ・類型：互動射擊｜刺激度：⭐｜必完成度：🔥🔥🔥🔥🔥｜熱門，建議早玩或買PA
+
+                  🌴 ④ Lost River Delta（失落河三角洲）
+
+                  🐍 Indiana Jones Adventure（印第安納瓊斯冒險旅程：水晶骷髏魔宮）
+                  ・類型：室內探險型過山車｜刺激度：⭐⭐⭐｜必完成度：🔥🔥🔥🔥🔥｜下午排
+
+                  🔥 Raging Spirits（忿怒雙神）
+                  ・類型：翻轉雲霄飛車｜刺激度：⭐⭐⭐⭐｜必完成度：🔥🔥🔥｜看時間
+
+                  🧜‍♀️ ⑤ Mermaid Lagoon（美人魚礁湖）
+
+                  🐟 Flounder's Flying Fish Coaster（小胖的飛魚雲霄飛車）
+                  ・類型：小型過山車｜刺激度：⭐⭐｜必完成度：⭐⭐⭐
+                  ・整區是室內冷氣區，適合中午休息
+
+                  🕌 ⑥ Arabian Coast（阿拉伯海岸）
+
+                  🧞 Jasmine's Flying Carpets（茉莉公主飛天魔毯）
+                  ・類型：旋轉飛行｜刺激度：⭐｜必完成度：⭐⭐
+
+                  🧞‍♂️ Sinbad's Storybook Voyage（辛巴達傳奇之旅）
+                  ・類型：室內遊船｜刺激度：⭐｜必完成度：🔥🔥🔥（放鬆神作）｜幾乎不用排
+
+                  🎯 全園「必完成清單」濃縮版（只玩 8 個）：
+                  1️⃣ Soaring 2️⃣ Rapunzel 3️⃣ Peter Pan 4️⃣ Journey 5️⃣ Toy Story 6️⃣ Indiana Jones 7️⃣ Tower of Terror 8️⃣ Sinbad（休息用）
+
+                  🛍 必買：Duffy & Friends（McDuck's Department Store 美國海濱・DisneySea限定）｜Fantasy Springs 限定（樂佩燈籠、冰雪奇緣）｜髮箍入園先買（季節／Duffy）｜餅乾鐵盒伴手禮。DisneySea 不排動線真的會差很多 😆
+
+                  🍽 美食：壽司捲（鮮蝦雞條）— 海濱小吃亭｜熱狗堡 — 德倫西餐車｜救生圈包子（鮮蝦）— 海邊小吃
+
+                  🎪 遊行・表演（位置：Mediterranean Harbor 火山前水域）
                   ・Duffy：11:30、14:10
-                  ・晚間遊行：19:30
-                  ・煙火：20:45
+                  ・晚間遊行：19:30｜煙火：20:45
                   ・Dance the globe：12:50、14:35、16:55、18:40`,
           address: "千葉県浦安市舞浜1-13",
           nav: "https://maps.app.goo.gl/7USkcdGR7SbW8p5n6",
@@ -781,16 +955,16 @@ export const tripData = {
         "banner/D9.jpg",
       activities: [
         {
-          time: "12:00",
-          type: "美食",
-          title: "Rojiura Curry SAMURAI",
-          desc: "午餐：湯咖哩",
-          about: "Rojiura Curry SAMURAI 是札幌知名的湯咖哩餐廳，提供多種口味湯咖哩。",
-          address: "北海道札幌市中央区南3条西3",
-          nav: "https://maps.app.goo.gl/crBn6YN4x6ubVgxbA",
+          time: "09:00",
+          type: "景點",
+          title: "北海道神宮",
+          desc: "參觀北海道神宮",
+          about: "北海道神宮是札幌著名的神社，可參觀神社、神社祭典等。",
+          address: "北海道札幌市中央区宮ヶ丘474",
+          nav: "https://maps.app.goo.gl/EKeAvzzBnngUNRPy9",
         },
         {
-          time: "14:00",
+          time: "10:00",
           type: "景點",
           title: "白色戀人公園",
           desc: "參觀白色戀人公園",
@@ -799,13 +973,31 @@ export const tripData = {
           nav: "https://maps.app.goo.gl/FomtVck54UFPx9vc8",
         },
         {
+          time: "11:30",
+          type: "美食",
+          title: "Rojiura Curry SAMURAI",
+          desc: "午餐：湯咖哩",
+          about: "Rojiura Curry SAMURAI 是札幌知名的湯咖哩餐廳，提供多種口味湯咖哩。",
+          address: "北海道札幌市中央区南3条西3",
+          nav: "https://maps.app.goo.gl/crBn6YN4x6ubVgxbA",
+        },
+        {
           time: "17:00",
           type: "交通",
           title: "新千歲機場",
-          desc: "前往新千歲機場",
+          desc: "先還車，再前往新千歲機場",
           about: "新千歲機場為北海道主要國際機場，建議預留充足時間辦理登機與出境。",
           address: "北海道千歳市美々",
           nav: "https://maps.app.goo.gl/VKjQjaqHa6iV4vzj7",
+        },
+        {
+          time: "晚上",
+          type: "住宿",
+          title: "新千歲機場航站飯店",
+          desc: "回新千歲機場航站飯店",
+          about: "入住機場航站內或周邊飯店，方便隔日一早辦理登機返台。",
+          address: "北海道千歳市美々",
+          nav: "https://maps.app.goo.gl/j3sX2Zwry3K8YdaM7",
         },
       ],
         },
@@ -819,23 +1011,23 @@ export const tripData = {
         "banner/D10.webp",
       activities: [
         {
-          time: "上午",
-          type: "交通",
-          title: "新千歲機場",
-          desc: "辦理登機、托運、出境。建議起飛前 2～3 小時抵達。",
-          about: "新千歲機場（CTS）國際線航廈。可預留時間逛機場賣店、用餐。",
+          time: "10:00",
+          type: "住宿",
+          title: "新千歲機場航站飯店",
+          desc: "check out",
+          about: "check out",
           address: "北海道千歳市美々",
-          nav: "https://maps.app.goo.gl/VKjQjaqHa6iV4vzj7",
+          nav: "https://maps.app.goo.gl/j3sX2Zwry3K8YdaM7",
         },
         {
           time: "11:55",
           type: "交通",
-          title: "Tigerair IT 235｜CTS → TPE",
-          desc: "11:55 新千歲起飛 → 15:35 抵達桃園",
-          about: "虎航 IT 235。手提行李合計兩件共 10kg、托運不限件數總重 20kg。",
+          title: "新千歲機場",
+          desc: "辦理登機、托運、出境。11:55 新千歲起飛 → 15:35 抵達桃園。建議起飛前 2～3 小時抵達。",
+          about: "虎航 IT 235。新千歲機場（CTS）國際線航廈，可預留時間逛機場賣店、用餐。手提行李：合計兩件總共 10kg；托運行李：不限件數，總重 20kg。",
           address: "北海道千歳市美々",
-          nav: "新千歳空港",
-        },
+          nav: "https://maps.app.goo.gl/VKjQjaqHa6iV4vzj7",
+        }
       ],
     },
   ],
