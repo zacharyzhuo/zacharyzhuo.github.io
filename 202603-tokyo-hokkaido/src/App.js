@@ -27,6 +27,7 @@ import {
   Building2,
   Heart,
   Send,
+  Music,
 } from "lucide-react";
 
 // --- DATA ---
@@ -1396,8 +1397,10 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
   const [elapsedBeforePause, setElapsedBeforePause] = useState(0);
   const [pauseStartTime, setPauseStartTime] = useState(null);
   const [heartLiked, setHeartLiked] = useState(false);
+  const [bgmStarted, setBgmStarted] = useState(false);
   const videoRef0 = React.useRef(null);
   const videoRef1 = React.useRef(null);
+  const bgmRef = React.useRef(null);
 
   const photos = PROPOSAL_PHOTOS;
   const PHOTO_DURATION = 6000; // 6秒
@@ -1465,6 +1468,31 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     }
   }, [isOpen, heartPosition]);
 
+  // 背景音樂：Instagram 頁面顯示時嘗試播放「好きだから。」；若被瀏覽器阻擋，需使用者點擊「播放音樂」或點一下畫面
+  const tryPlayBGM = React.useCallback(() => {
+    const audio = bgmRef.current;
+    if (!audio || bgmStarted) return;
+    audio.play().then(() => setBgmStarted(true)).catch(() => {});
+  }, [bgmStarted]);
+
+  useEffect(() => {
+    const audio = bgmRef.current;
+    if (!audio) return;
+    if (isOpen && hasStartedTransition && !showTransition) {
+      audio.play()
+        .then(() => setBgmStarted(true))
+        .catch(() => {
+          // 瀏覽器阻擋自動播放時，不報錯；使用者可點「播放音樂」或點擊畫面
+        });
+    } else {
+      audio.pause();
+      if (!isOpen) {
+        audio.currentTime = 0;
+        setBgmStarted(false);
+      }
+    }
+  }, [isOpen, hasStartedTransition, showTransition]);
+
   // 自動播放和進度條（僅圖片；影片由 video 的 onTimeUpdate / onEnded 驅動）
   useEffect(() => {
     if (!isOpen || showTransition || currentIsVideo) return;
@@ -1527,6 +1555,9 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
   const handlePhotoClick = (e) => {
     // 如果點擊到按鈕，不處理
     if (e.target.closest('button')) return;
+
+    // 第一次點擊畫面時嘗試播放背景音樂（因瀏覽器可能阻擋自動播放）
+    tryPlayBGM();
 
     // 如果是長按後鬆開（有暫停記錄），不處理點擊切換
     if (pauseStartTime && Date.now() - pauseStartTime > 200) {
@@ -1637,6 +1668,13 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
         visibility: (showTransition || hasStartedTransition) ? 'visible' : 'hidden'
       }}
     >
+      {/* 背景音樂：好きだから。（Instagram 頁面顯示時播放） */}
+      <audio
+        ref={bgmRef}
+        src={`${process.env.PUBLIC_URL || ''}/audio/sukidakara.mp3`}
+        loop
+        preload="auto"
+      />
       {/* 白色背景過渡層：在愛心動畫後期逐漸顯示 */}
       {showTransition && (
         <div 
@@ -1798,7 +1836,21 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
             </div>
 
             {/* 右上角：叉叉 */}
-            <div className="absolute top-4 right-4 z-20 flex items-center h-[44px]">
+            <div className="absolute top-4 right-4 z-20 flex items-center h-[44px] gap-1">
+              {!bgmStarted && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    tryPlayBGM();
+                  }}
+                  className="touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center gap-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-medium"
+                  aria-label="播放音樂"
+                >
+                  <Music size={18} />
+                  <span>播放</span>
+                </button>
+              )}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
