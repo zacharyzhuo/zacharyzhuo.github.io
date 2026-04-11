@@ -1,25 +1,33 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Check } from 'lucide-react'
 
 /**
  * @param {{ rows: Array<{ category: string, item: string }> }} props
  */
 export default function ChecklistSection({ rows }) {
-  const [checked, setChecked] = useState(new Set())
+  const [checkedItems, setCheckedItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem('trip-checklist')
+      return saved ? JSON.parse(saved) : {}
+    } catch {
+      return {}
+    }
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('trip-checklist', JSON.stringify(checkedItems))
+    } catch { /* ignore */ }
+  }, [checkedItems])
 
   if (rows.length === 0) {
-    return <p className="text-center text-jp-sub font-sans text-sm mt-12">尚無打包清單</p>
+    return <p className="text-center text-stone-500 font-serif text-sm mt-12">尚無行李清單</p>
   }
 
   const toggle = (key) => {
-    setChecked(prev => {
-      const next = new Set(prev)
-      next.has(key) ? next.delete(key) : next.add(key)
-      return next
-    })
+    setCheckedItems(prev => ({ ...prev, [key]: !prev[key] }))
   }
 
-  // Group by category
   const byCategory = rows.reduce((acc, row) => {
     const cat = row.category || '其他'
     if (!acc[cat]) acc[cat] = []
@@ -28,34 +36,48 @@ export default function ChecklistSection({ rows }) {
   }, {})
 
   return (
-    <div className="px-4 py-6 space-y-6">
+    <div className="grid grid-cols-1 gap-6">
       {Object.entries(byCategory).map(([category, items]) => (
         <div key={category}>
-          <h3 className="font-serif font-bold text-jp-text text-base px-1 mb-3">{category}</h3>
-          <div className="bg-white/60 rounded-2xl border border-stone-100 divide-y divide-stone-100">
+          <h3 className="text-sm font-bold uppercase tracking-widest mb-3 pb-1">
+            {category}
+          </h3>
+          <ul className="space-y-3">
             {items.map((item, i) => {
-              const key = `${category}:${item}`
-              const isChecked = checked.has(key)
+              const uniqueKey = `${category}-${item}`
+              const isChecked = checkedItems[uniqueKey] || false
+
               return (
-                <button
-                  key={i}
-                  onClick={() => toggle(key)}
-                  className="w-full flex items-center gap-4 px-5 py-4 text-left touch-manipulation"
+                <li
+                  key={uniqueKey}
+                  className="flex items-center gap-3 group cursor-pointer touch-manipulation py-0.5"
+                  onClick={() => toggle(uniqueKey)}
+                  role="checkbox"
+                  aria-checked={isChecked}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      toggle(uniqueKey)
+                    }
+                  }}
                 >
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                    isChecked ? 'bg-jp-green border-jp-green' : 'border-stone-300'
+                  <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all flex-shrink-0 ${
+                    isChecked
+                      ? 'bg-jp-green border-jp-green text-white'
+                      : 'border-stone-300 text-transparent hover:border-stone-400'
                   }`}>
-                    {isChecked && <Check size={12} className="text-white" strokeWidth={3} />}
+                    <Check size={12} strokeWidth={3} />
                   </div>
-                  <span className={`font-sans text-sm transition-colors ${
-                    isChecked ? 'line-through text-stone-400' : 'text-jp-text'
+                  <span className={`text-base font-serif transition-all leading-tight ${
+                    isChecked ? 'text-stone-400 line-through' : 'text-jp-text'
                   }`}>
                     {item}
                   </span>
-                </button>
+                </li>
               )
             })}
-          </div>
+          </ul>
         </div>
       ))}
     </div>

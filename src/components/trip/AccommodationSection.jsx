@@ -5,7 +5,7 @@ import { Hotel, ExternalLink, Clock } from 'lucide-react'
  */
 export default function AccommodationSection({ rows }) {
   if (rows.length === 0) {
-    return <p className="text-center text-jp-sub font-sans text-sm mt-12">尚無住宿資料</p>
+    return <p className="text-center text-jp-sub font-serif text-sm mt-12">尚無住宿資料</p>
   }
 
   return (
@@ -17,19 +17,19 @@ export default function AccommodationSection({ rows }) {
               <Hotel size={18} className="text-purple-500" />
             </div>
             <div className="flex-1">
-              <p className="text-xs text-stone-400 font-sans mb-1">Day {row.day}</p>
+              <p className="text-xs text-stone-400 font-serif mb-1">Day {row.day}</p>
               <p className="font-serif font-bold text-jp-text text-base">{row.name}</p>
               {row.address && (
-                <p className="text-xs text-jp-sub font-sans mt-1">{row.address}</p>
+                <p className="text-xs text-jp-sub font-serif mt-1">{row.address}</p>
               )}
               <div className="flex items-center gap-4 mt-2">
                 {row.check_in && (
-                  <span className="flex items-center gap-1 text-xs text-stone-400 font-sans">
+                  <span className="flex items-center gap-1 text-xs text-stone-400 font-serif">
                     <Clock size={11} /> IN {row.check_in}
                   </span>
                 )}
                 {row.check_out && (
-                  <span className="flex items-center gap-1 text-xs text-stone-400 font-sans">
+                  <span className="flex items-center gap-1 text-xs text-stone-400 font-serif">
                     <Clock size={11} /> OUT {row.check_out}
                   </span>
                 )}
@@ -39,7 +39,7 @@ export default function AccommodationSection({ rows }) {
                   href={row.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 mt-2 text-xs text-jp-green font-sans touch-manipulation"
+                  className="inline-flex items-center gap-1 mt-2 text-xs text-jp-green font-serif touch-manipulation"
                 >
                   <ExternalLink size={11} />
                   查看地圖

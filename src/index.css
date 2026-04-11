@@ -2,28 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import Google Fonts: Noto Serif JP & Noto Sans JP with font-display swap */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600;700&display=swap');
-
-/* Preload critical fonts */
-@font-face {
-  font-family: "Noto Serif JP";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Noto Sans JP";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
 body {
   background-color: #F9F8F4;
   color: #2C2C2C;
-  font-family: "Noto Serif JP", serif;
+  font-family: "Noto Serif JP", "Hiragino Mincho ProN", serif;
   /* 預設改為襯線體以符合雜誌風 */
   -webkit-font-smoothing: antialiased;
   /* Improve scrolling on iOS */
@@ -526,24 +508,23 @@ body {
 /* Liquid Glass Tab Switcher */
 .liquid-tab-track {
   background: rgba(255, 255, 255, 0.1);
-  /* 提升透明度 */
   backdrop-filter: blur(12px) saturate(120%);
-  /* 增加模糊，防止文字干擾 */
   -webkit-backdrop-filter: blur(12px) saturate(120%);
   border-radius: 9999px;
   padding: 6px;
   box-shadow:
     inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
-    /* 頂部微光 */
     0 4px 12px rgba(0, 0, 0, 0.05);
-  /* 輕微投影 */
   display: flex;
   gap: 8px;
-  /* 增加按鈕間距 */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
 }
 
 .liquid-tab-btn {
-  flex: 1;
+  flex: none;
+  white-space: nowrap;
   border-radius: 9999px;
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   /* 彈性動畫 */
@@ -551,7 +532,7 @@ body {
   overflow: hidden;
   color: #9ca3af;
   /* stone-400 */
-  font-family: "Noto Serif JP", serif;
+  font-family: "Noto Serif JP", "Hiragino Mincho ProN", serif;
   font-weight: 700;
   font-size: 0.875rem;
   min-height: 44px;

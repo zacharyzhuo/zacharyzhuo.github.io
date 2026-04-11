@@ -4,44 +4,44 @@ import { Heart, X, Send, Music } from 'lucide-react'
 // 彩蛋照片/影片列表：請將檔案放在 proposal-photos/（靜態根目錄）
 // 圖片：JPEG 或 WebP（勿用 HEIC）。影片：.mov 或 .mp4（.mov 在 Safari 支援佳，Chrome 建議 .mp4）。
 const PROPOSAL_PHOTOS = [
-  `${import.meta.env.BASE_URL || ''}proposal-photos/1.MOV`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/2.MOV`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/3.MOV`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/4.MOV`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/5.MOV`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/6.MOV`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/7.MOV`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/8.MOV`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/9.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/10.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/11.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/12.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/13.MOV`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/14.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/15.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/16.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/17.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/18.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/19.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/20.MOV`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/21.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/22.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/23.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/24.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/25.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/26.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/27.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/28.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/29.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/30.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/31.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/32.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/33.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/34.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/35.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/36.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/37.JPG`,
-  `${import.meta.env.BASE_URL || ''}proposal-photos/38.MOV`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/1.MOV`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/2.MOV`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/3.MOV`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/4.MOV`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/5.MOV`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/6.MOV`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/7.MOV`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/8.MOV`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/9.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/10.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/11.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/12.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/13.MOV`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/14.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/15.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/16.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/17.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/18.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/19.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/20.MOV`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/21.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/22.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/23.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/24.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/25.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/26.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/27.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/28.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/29.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/30.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/31.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/32.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/33.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/34.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/35.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/36.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/37.JPG`,
+  `${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/38.MOV`,
   // 可加入影片：`${import.meta.env.BASE_URL || ''}proposal-photos/VID_001.mov`
 ]
 
@@ -331,7 +331,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       {/* 背景音樂：好きだから。（Instagram 頁面顯示時播放） */}
       <audio
         ref={bgmRef}
-        src={`${import.meta.env.BASE_URL || ''}audio/sukidakara.mp3`}
+        src={`${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/sukidakara.mp3`}
         loop
         preload="auto"
       />
@@ -482,7 +482,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
             <div className="absolute top-4 left-4 z-20 flex items-center gap-2 h-[44px]">
               <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center overflow-hidden flex-shrink-0">
                 <img
-                  src={`${import.meta.env.BASE_URL || ''}proposal-photos/gokigen_panda.png`}
+                  src={`${import.meta.env.BASE_URL || ''}src/trips/tokyo-hokkaido-2026-03/proposal-photos/gokigen_panda.png`}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
@@ -533,7 +533,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex-1 min-w-0 rounded-full border border-white/30 bg-white/5 py-2.5 px-4 pointer-events-none">
-              <span className="text-white/80 text-sm font-sans">傳送訊息......</span>
+              <span className="text-white/80 text-sm font-serif">傳送訊息......</span>
             </div>
             <div className="flex items-center gap-5 flex-shrink-0">
               <button

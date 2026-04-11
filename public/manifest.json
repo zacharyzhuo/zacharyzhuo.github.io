@@ -1,0 +1,23 @@
+{
+  "short_name": "Trip Diaries",
+  "name": "Trip Diaries",
+  "icons": [
+    {
+      "src": "gokigen_panda_icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "gokigen_panda_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#F9F8F4",
+  "background_color": "#F9F8F4"
+}

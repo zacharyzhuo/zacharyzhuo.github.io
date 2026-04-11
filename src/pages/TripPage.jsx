@@ -1,46 +1,92 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { Menu, ArrowLeft, Info, Plane, Hotel, ShoppingBag, ClipboardList } from 'lucide-react'
+import { useParams } from 'react-router-dom'
+import { Menu, Info, ClipboardList, ShoppingBag, Utensils, Phone } from 'lucide-react'
 import { useTrips } from '../hooks/useTrips.js'
 import { useSheetData } from '../hooks/useSheetData.js'
 import LoadingSpinner from '../components/ui/LoadingSpinner.jsx'
 import Sidebar from '../components/layout/Sidebar.jsx'
+import BottomSheet from '../components/layout/BottomSheet.jsx'
 import DayNav from '../components/trip/DayNav.jsx'
-import FlightSection from '../components/trip/FlightSection.jsx'
+import DayBanner from '../components/trip/DayBanner.jsx'
+import TripInfoSection from '../components/trip/TripInfoSection.jsx'
 import ItinerarySection from '../components/trip/ItinerarySection.jsx'
-import AccommodationSection from '../components/trip/AccommodationSection.jsx'
 import ShoppingSection from '../components/trip/ShoppingSection.jsx'
 import ChecklistSection from '../components/trip/ChecklistSection.jsx'
+import FoodSection from '../components/trip/FoodSection.jsx'
 
-const SECTIONS = [
-  { key: 'info', label: '旅程資訊', subLabel: 'Flight & Info', icon: <Info size={20} /> },
-  { key: 'itinerary', label: '每日行程', subLabel: 'Itinerary', icon: <Plane size={20} /> },
-  { key: 'accommodation', label: '住宿', subLabel: 'Accommodation', icon: <Hotel size={20} /> },
-  { key: 'shopping', label: '購物清單', subLabel: 'Shopping', icon: <ShoppingBag size={20} /> },
-  { key: 'checklist', label: '打包清單', subLabel: 'Checklist', icon: <ClipboardList size={20} /> },
+const MENU_ITEMS = [
+  {
+    key: 'info',
+    label: '旅程資訊',
+    subLabel: 'Flight & Info',
+    icon: <Info size={20} />,
+    color: 'bg-blue-50/80 text-blue-600',
+  },
+  {
+    key: 'checklist',
+    label: '行李清單',
+    subLabel: 'Packing List',
+    icon: <ClipboardList size={22} />,
+    color: 'bg-green-50/80 text-green-600',
+  },
+  {
+    key: 'shopping',
+    label: '逛街清單',
+    subLabel: 'Shopping Map',
+    icon: <ShoppingBag size={22} />,
+    color: 'bg-pink-50/80 text-pink-600',
+  },
+  {
+    key: 'food',
+    label: '美食清單',
+    subLabel: 'Food List',
+    icon: <Utensils size={22} />,
+    color: 'bg-orange-50/80 text-orange-600',
+  },
+  {
+    key: 'emergency',
+    label: '緊急聯絡',
+    subLabel: 'Emergency',
+    icon: <Phone size={22} />,
+    color: 'bg-red-50/80 text-red-600',
+    isEmergency: true,
+  },
 ]
+
+function getYearMonth(dates) {
+  return dates?.match(/^(\d{4}\/\d{2})/)?.[1] ?? ''
+}
+
+function slugToEnglish(slug) {
+  // "tokyo-hokkaido-2026-03" → "TOKYO HOKKAIDO TRIP"
+  // "fukuoka-2026-01" → "FUKUOKA TRIP"
+  const base = slug.replace(/-\d{4}-\d{2}$/, '').replace(/-/g, ' ')
+  return base.toUpperCase() + ' TRIP'
+}
 
 export default function TripPage() {
   const { slug } = useParams()
-  const navigate = useNavigate()
   const { trips, loading: tripsLoading } = useTrips()
   const trip = trips.find(t => t.slug === slug)
 
-  const [activeSection, setActiveSection] = useState('itinerary')
   const [activeDay, setActiveDay] = useState(1)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [activeModal, setActiveModal] = useState(null)
   const [extras, setExtras] = useState(null)
   const [easterEggOpen, setEasterEggOpen] = useState(false)
   const [heartPosition, setHeartPosition] = useState(null)
   const [easterEggActivated, setEasterEggActivated] = useState(false)
+  const [eggClickCount, setEggClickCount] = useState(0)
+  const [lastEggClickTime, setLastEggClickTime] = useState(0)
 
   const { data: flights, loading: flightsLoading } = useSheetData(trip?.sheet_id, 'flights')
   const { data: itinerary, loading: itineraryLoading } = useSheetData(trip?.sheet_id, 'itinerary')
   const { data: accommodation } = useSheetData(trip?.sheet_id, 'accommodation')
   const { data: shopping } = useSheetData(trip?.sheet_id, 'shopping')
   const { data: checklist } = useSheetData(trip?.sheet_id, 'checklist')
+  const { data: food } = useSheetData(trip?.sheet_id, 'food')
+  const { data: daysData } = useSheetData(trip?.sheet_id, 'days')
 
-  // Dynamic import of trip-specific extras
   useEffect(() => {
     if (!slug) return
     import(`../trips/${slug}/extras.jsx`)
@@ -48,13 +94,23 @@ export default function TripPage() {
       .catch(() => setExtras(null))
   }, [slug])
 
-  // Build day list from itinerary data
+  // Prevent background scroll when any modal/sidebar is open
+  useEffect(() => {
+    const isAnyOpen = sidebarOpen || activeModal || easterEggOpen
+    document.body.style.overflow = isAnyOpen ? 'hidden' : 'unset'
+    return () => { document.body.style.overflow = 'unset' }
+  }, [sidebarOpen, activeModal, easterEggOpen])
+
   const days = [...new Set(itinerary.map(r => Number(r.day)))]
     .sort((a, b) => a - b)
     .map(day => {
       const row = itinerary.find(r => Number(r.day) === day)
       return { day, date: row?.date ?? '' }
     })
+
+  const activeDayMeta = daysData.find(r => Number(r.day) === activeDay)
+  const dayItinerary = itinerary.filter(r => Number(r.day) === activeDay)
+  const foodItems = food.length > 0 ? food : itinerary.filter(r => r.type === 'food')
 
   if (tripsLoading || flightsLoading || itineraryLoading) {
     return <div className="bg-jp-bg min-h-screen safe-area-inset"><LoadingSpinner /></div>
@@ -63,88 +119,163 @@ export default function TripPage() {
   if (!trip) {
     return (
       <div className="bg-jp-bg min-h-screen safe-area-inset flex flex-col items-center justify-center gap-4">
-        <p className="text-jp-sub font-sans">找不到此行程</p>
-        <button onClick={() => navigate('/')} className="text-jp-green font-sans text-sm underline">
-          返回首頁
-        </button>
+        <p className="text-jp-sub font-serif">找不到此行程</p>
       </div>
     )
   }
 
+  const yearMonth = getYearMonth(trip.dates)
+  const tripNameEn = slugToEnglish(slug)
+
   return (
-    <div className="bg-jp-bg min-h-screen safe-area-inset">
-      {/* Top Bar */}
-      <div className="sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-jp-bg/80 backdrop-blur-sm border-b border-stone-100">
-        <button
-          onClick={() => navigate('/')}
-          className="p-2 touch-manipulation"
-          aria-label="返回"
-        >
-          <ArrowLeft size={20} className="text-jp-text" />
-        </button>
-        <h1 className="font-serif font-bold text-jp-text">{trip.name}</h1>
+    <div className="min-h-screen bg-jp-bg text-jp-text font-serif pb-12 safe-area-inset">
+      {/* Header: centered multi-line, hamburger absolute-left */}
+      <div className="relative pt-8 pb-4 px-6 flex items-center justify-between">
         <button
           onClick={() => setSidebarOpen(true)}
-          className="p-2 touch-manipulation"
+          className="p-3 text-stone-400 hover:text-jp-text transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
           aria-label="開啟選單"
         >
-          <Menu size={20} className="text-jp-text" />
+          <Menu size={24} />
         </button>
+        <div className="flex flex-col items-center flex-1 px-4">
+          {yearMonth && (
+            <p className="text-[11px] tracking-[0.3em] uppercase text-stone-400 mb-2 font-serif font-medium">{yearMonth}</p>
+          )}
+          <p className="text-xs tracking-[0.15em] uppercase text-stone-400 mb-3 font-serif font-medium">
+            {tripNameEn.replace(' TRIP', ' Trip')}
+          </p>
+          <h1 className="text-2xl font-bold tracking-[0.1em] text-jp-text leading-tight">{trip.name}旅行</h1>
+        </div>
+        <div className="w-10" />
       </div>
 
-      {/* Day Nav — only in itinerary section */}
-      {activeSection === 'itinerary' && days.length > 0 && (
+      {/* Day Nav */}
+      {days.length > 0 && (
         <DayNav
           days={days}
           activeDay={activeDay}
           onSelect={(day) => {
             setActiveDay(day)
-            if (extras && day === extras.easterEggDay) {
+
+            if (!extras || day !== extras.easterEggDay) return
+
+            if (activeDay !== day) {
+              setEggClickCount(0)
+              setLastEggClickTime(0)
+              return
+            }
+
+            const now = Date.now()
+            const newCount = (now - lastEggClickTime > 2000) ? 1 : eggClickCount + 1
+            setEggClickCount(newCount)
+            setLastEggClickTime(now)
+
+            if (newCount >= 9) {
               setEasterEggActivated(true)
+              setEggClickCount(0)
+              const btn = document.querySelector(`[data-day="${day}"]`)
+              if (btn) {
+                const rect = btn.getBoundingClientRect()
+                setHeartPosition({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
+              }
+              setEasterEggOpen(true)
             }
           }}
           easterEggDay={extras?.easterEggDay}
           easterEggIcon={
-            extras && easterEggActivated ? (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setHeartPosition({ x: e.clientX, y: e.clientY })
-                  setEasterEggOpen(true)
-                }}
-              >
-                <extras.HeartIcon activated />
-              </button>
+            easterEggActivated && extras ? (
+              <extras.HeartIcon activated />
             ) : null
           }
         />
       )}
 
-      {/* Section Content */}
-      <main className="pb-8">
-        {activeSection === 'info' && <FlightSection flights={flights} trip={trip} />}
-        {activeSection === 'itinerary' && (
-          <ItinerarySection
-            rows={itinerary.filter(r => Number(r.day) === activeDay)}
-          />
-        )}
-        {activeSection === 'accommodation' && <AccommodationSection rows={accommodation} />}
-        {activeSection === 'shopping' && <ShoppingSection rows={shopping} />}
-        {activeSection === 'checklist' && <ChecklistSection rows={checklist} />}
-      </main>
+      {/* Day Banner */}
+      <DayBanner
+        bannerUrl={activeDayMeta?.banner_url}
+        title={activeDayMeta?.title}
+        subtitle={activeDayMeta?.subtitle}
+      />
 
+      <div className="h-8" />
+
+      {/* Daily Itinerary */}
+      <div className="mt-2">
+        <ItinerarySection rows={dayItinerary} />
+      </div>
+
+      {/* Trip Menu Sidebar */}
       <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
-        onSelect={setActiveSection}
-        sections={SECTIONS}
+        onSelect={(key) => { setActiveModal(key); setSidebarOpen(false) }}
+        sections={MENU_ITEMS}
+        trip={trip}
+        tripNameEn={tripNameEn}
       />
+
+      {/* Section Modals */}
+      <BottomSheet
+        isOpen={activeModal === 'info'}
+        onClose={() => setActiveModal(null)}
+        title="旅程資訊"
+        noScroll
+      >
+        <TripInfoSection flights={flights} accommodation={accommodation} trip={trip} />
+      </BottomSheet>
+
+      <BottomSheet
+        isOpen={activeModal === 'checklist'}
+        onClose={() => setActiveModal(null)}
+        title="行李清單"
+      >
+        <ChecklistSection rows={checklist} />
+      </BottomSheet>
+
+      <BottomSheet
+        isOpen={activeModal === 'shopping'}
+        onClose={() => setActiveModal(null)}
+        title="逛街清單"
+        noScroll
+      >
+        <ShoppingSection rows={shopping} />
+      </BottomSheet>
+
+      <BottomSheet
+        isOpen={activeModal === 'food'}
+        onClose={() => setActiveModal(null)}
+        title="美食清單"
+        noScroll
+      >
+        <FoodSection rows={foodItems} />
+      </BottomSheet>
+
+      <BottomSheet
+        isOpen={activeModal === 'emergency'}
+        onClose={() => setActiveModal(null)}
+        title="緊急聯絡"
+      >
+        {extras?.EmergencySection ? (
+          <extras.EmergencySection />
+        ) : (
+          <div className="px-6 py-8 text-center space-y-2">
+            <p className="text-jp-sub font-serif text-sm">尚無緊急聯絡資訊</p>
+            <p className="text-stone-400 font-serif text-xs">請在行程設定中加入緊急聯絡人</p>
+          </div>
+        )}
+      </BottomSheet>
 
       {/* Easter Egg Modal */}
       {extras?.ProposalModal && (
         <extras.ProposalModal
           isOpen={easterEggOpen}
-          onClose={() => setEasterEggOpen(false)}
+          onClose={() => {
+            setEasterEggOpen(false)
+            setEggClickCount(0)
+            setEasterEggActivated(false)
+            setHeartPosition(null)
+          }}
           heartPosition={heartPosition}
         />
       )}

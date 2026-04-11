@@ -33,7 +33,7 @@ export default function TripCard({ trip }) {
           </div>
           <div className="flex items-center gap-2">
             <Calendar size={12} className="text-stone-400 flex-shrink-0" />
-            <span className="text-xs text-stone-500 font-sans">{trip.dates}</span>
+            <span className="text-xs text-stone-500 font-serif">{trip.dates}</span>
           </div>
         </div>
       </div>
