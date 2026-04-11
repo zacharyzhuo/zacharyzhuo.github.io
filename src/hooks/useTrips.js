@@ -8,6 +8,11 @@ export function useTrips() {
 
   useEffect(() => {
     const indexSheetId = import.meta.env.VITE_INDEX_SHEET_ID
+    if (!indexSheetId) {
+      setError(new Error('VITE_INDEX_SHEET_ID not configured'))
+      setLoading(false)
+      return
+    }
 
     fetch(sheetURL(indexSheetId, 'trips'))
       .then(r => {

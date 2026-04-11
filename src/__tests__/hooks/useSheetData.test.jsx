@@ -39,8 +39,10 @@ describe('useSheetData', () => {
     expect(result.current.data).toEqual([])
   })
 
-  it('does nothing when sheetId is empty', () => {
+  it('returns loading=false immediately when sheetId is empty', () => {
     const { result } = renderHook(() => useSheetData('', 'flights'))
-    expect(result.current.loading).toBe(true)
+    expect(result.current.loading).toBe(false)
+    expect(result.current.data).toEqual([])
+    expect(result.current.error).toBeNull()
   })
 })

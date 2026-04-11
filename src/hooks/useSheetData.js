@@ -7,7 +7,7 @@ export function useSheetData(sheetId, tabName) {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!sheetId || !tabName) return
+    if (!sheetId || !tabName) { setLoading(false); return }
     setLoading(true)
     setError(null)
 

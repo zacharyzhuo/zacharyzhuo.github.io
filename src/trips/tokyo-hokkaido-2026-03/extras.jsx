@@ -439,7 +439,6 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
                         }
                       }}
                       onError={(e) => {
-                        console.error("Failed to load video:", photos[idx])
                         e.target.style.display = 'none'
                       }}
                     />
@@ -450,7 +449,6 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
                       className="absolute inset-0 w-full h-full object-cover pointer-events-none"
                       draggable="false"
                       onError={(e) => {
-                        console.error("Failed to load image:", photos[idx])
                         e.target.style.display = 'none'
                       }}
                     />
