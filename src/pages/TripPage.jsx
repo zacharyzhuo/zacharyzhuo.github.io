@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { Menu, Info, ClipboardList, ShoppingBag, Utensils, Phone } from 'lucide-react'
+import { Menu, Info, ClipboardList, ShoppingBag, Utensils } from 'lucide-react'
 import { useTrips } from '../hooks/useTrips.js'
 import { useSheetData } from '../hooks/useSheetData.js'
 import LoadingSpinner from '../components/ui/LoadingSpinner.jsx'
@@ -42,14 +42,6 @@ const MENU_ITEMS = [
     subLabel: 'Food List',
     icon: <Utensils size={22} />,
     color: 'bg-orange-50/80 text-orange-600',
-  },
-  {
-    key: 'emergency',
-    label: '緊急聯絡',
-    subLabel: 'Emergency',
-    icon: <Phone size={22} />,
-    color: 'bg-red-50/80 text-red-600',
-    isEmergency: true,
   },
 ]
 
@@ -249,21 +241,6 @@ export default function TripPage() {
         noScroll
       >
         <FoodSection rows={foodItems} />
-      </BottomSheet>
-
-      <BottomSheet
-        isOpen={activeModal === 'emergency'}
-        onClose={() => setActiveModal(null)}
-        title="緊急聯絡"
-      >
-        {extras?.EmergencySection ? (
-          <extras.EmergencySection />
-        ) : (
-          <div className="px-6 py-8 text-center space-y-2">
-            <p className="text-jp-sub font-serif text-sm">尚無緊急聯絡資訊</p>
-            <p className="text-stone-400 font-serif text-xs">請在行程設定中加入緊急聯絡人</p>
-          </div>
-        )}
       </BottomSheet>
 
       {/* Easter Egg Modal */}
