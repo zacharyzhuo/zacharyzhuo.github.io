@@ -1,38 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# macOS
-.DS_Store
-**/.DS_Store
-proposal-photos/.DS_Store
-
-# dependencies (for any subproject without its own .gitignore)
+.worktrees/
 node_modules/
-
-# production / build output
-build/
-dist/
-
-# env and secrets
 .env
-.env.*
-!.env.example
-*.local
-
-# logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# editor / OS
-.idea/
-.vscode/
-*.swp
-*.swo
-Thumbs.db
-ehthumbs.db
-
-# cache
-.cache
-.eslintcache
+dist/
