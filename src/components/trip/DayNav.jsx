@@ -33,7 +33,7 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
   }, [activeDay])
 
   return (
-    <div className="border-b border-stone-200/50 bg-jp-bg sticky top-0 z-20 overflow-hidden">
+    <div className="glass-day-nav sticky top-0 z-20 overflow-hidden">
       <div
         ref={scrollRef}
         className="flex items-center justify-center px-6 py-4 overflow-x-auto scrollbar-hide"

@@ -39,7 +39,7 @@ export default function FoodSection({ rows }) {
     <div className="flex flex-col relative h-full">
       <div
         ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-8 pb-32 space-y-6 pt-2"
+        className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-8 pb-24 space-y-6 pt-2"
       >
         <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">美食清單</h2>
         <div className="space-y-8">
@@ -54,7 +54,7 @@ export default function FoodSection({ rows }) {
                 {items.map((row, i) => (
                   <div
                     key={`${activeArea}-${category}-${i}`}
-                    className="bg-white rounded-xl p-5 border border-stone-100 group"
+                    className="glass-card relative rounded-xl p-5 group overflow-hidden"
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
@@ -70,7 +70,7 @@ export default function FoodSection({ rows }) {
                           href={row.link}
                           target="_blank"
                           rel="noreferrer"
-                          className="p-3 bg-stone-50 rounded-full text-stone-400 hover:text-jp-green hover:bg-green-50 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+                          className="p-3 liquid-glass-button rounded-full text-stone-500 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
                           onClick={e => e.stopPropagation()}
                         >
                           <Navigation size={16} />
@@ -91,7 +91,7 @@ export default function FoodSection({ rows }) {
       </div>
 
       {areas.length > 1 && (
-        <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
+        <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
           <div className="liquid-tab-track scrollbar-hide pointer-events-auto shadow-2xl">
             {areas.map(area => (
               <button

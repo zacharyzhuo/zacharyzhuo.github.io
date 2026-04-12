@@ -45,7 +45,7 @@ function FlightsTab({ flights }) {
           const { dep, arr } = parseTime(f.time)
 
           return (
-            <div key={i} className="bg-white p-5 rounded-2xl border border-stone-100">
+            <div key={i} className="glass-card relative p-5 rounded-2xl overflow-hidden">
               <div className="flex justify-between items-center mb-4 border-b border-stone-50 pb-2">
                 <span className="text-sm font-bold border border-blue-200 text-blue-700 bg-blue-50 px-2 py-1 rounded font-serif">
                   {f.date}
@@ -138,7 +138,7 @@ function HotelTab({ accommodation }) {
             {h.region && (
               <h4 className="text-sm font-bold text-stone-500 mb-3 pl-1 font-serif">{h.region}</h4>
             )}
-            <div className="bg-white p-6 rounded-2xl border border-stone-100 relative overflow-hidden">
+            <div className="glass-card p-6 rounded-2xl relative overflow-hidden">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <span className={`text-sm font-bold border px-2 py-1 rounded mb-3 inline-block font-serif ${
@@ -156,7 +156,7 @@ function HotelTab({ accommodation }) {
                   )}
 
                   {(h.check_in || h.check_out) && (
-                    <div className="flex gap-6 mb-4 text-sm font-serif text-stone-600 bg-stone-50/50 p-3 rounded-lg border border-stone-100">
+                    <div className="flex gap-6 mb-4 text-sm font-serif text-stone-600 bg-white/30 p-3 rounded-lg border border-white/40">
                       {h.check_in && (
                         <div>
                           <span className="block text-sm text-stone-500 uppercase font-serif tracking-wider mb-1">Check-in</span>
@@ -211,7 +211,7 @@ export default function TripInfoSection({ flights, accommodation, trip }) {
     <div className="flex flex-col relative h-full">
       <div
         ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-8 pb-32 pt-2 space-y-8"
+        className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-8 pb-24 pt-2 space-y-8"
       >
         <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">旅程資訊</h2>
         {activeTab === 'flights' && <FlightsTab flights={flights} />}
@@ -219,7 +219,7 @@ export default function TripInfoSection({ flights, accommodation, trip }) {
         {activeTab === 'hotel' && <HotelTab accommodation={accommodation} />}
       </div>
 
-      <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
+      <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
         <div className="liquid-tab-track scrollbar-hide pointer-events-auto shadow-2xl">
           {INFO_TABS.map(tab => (
             <button

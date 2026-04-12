@@ -1,16 +1,80 @@
+import { useState, useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 
-/**
- * @param {{
- *   isOpen: boolean,
- *   onClose: () => void,
- *   onSelect: (key: string) => void,
- *   sections: Array<{ key: string, label: string, subLabel: string, icon: React.ReactNode, color?: string, isEmergency?: boolean }>,
- *   trip?: { name: string, dates: string },
- *   tripNameEn?: string
- * }} props
- */
 export default function Sidebar({ isOpen, onClose, onSelect, sections, trip, tripNameEn }) {
+  const [dragX, setDragX] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const touchStartX = useRef(null)
+  const touchStartY = useRef(null)
+  const touchStartTime = useRef(null)
+  const dragXRef = useRef(0)
+  const isHorizontal = useRef(null)
+  const onCloseRef = useRef(onClose)
+  const sidebarRef = useRef(null)
+
+  useEffect(() => { onCloseRef.current = onClose }, [onClose])
+
+  useEffect(() => {
+    if (isOpen) { setDragX(0); dragXRef.current = 0; setIsDragging(false) }
+  }, [isOpen])
+
+  useEffect(() => {
+    const el = sidebarRef.current
+    if (!el) return
+
+    const onMove = (e) => {
+      if (touchStartX.current === null) return
+      const dx = e.touches[0].clientX - touchStartX.current
+      const dy = e.touches[0].clientY - touchStartY.current
+
+      // 第一次移動時判斷方向
+      if (isHorizontal.current === null) {
+        isHorizontal.current = Math.abs(dx) > Math.abs(dy)
+      }
+
+      if (!isHorizontal.current) return
+
+      // 只允許向左滑（負值）
+      if (dx < 0) {
+        e.preventDefault()
+        dragXRef.current = dx
+        setDragX(dx)
+      }
+    }
+
+    el.addEventListener('touchmove', onMove, { passive: false })
+    return () => el.removeEventListener('touchmove', onMove)
+  }, [])
+
+  const onTouchStart = (e) => {
+    if (!isOpen) return
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+    touchStartTime.current = Date.now()
+    isHorizontal.current = null
+    setIsDragging(true)
+  }
+
+  const onTouchEnd = () => {
+    if (touchStartX.current === null) return
+    const elapsed = Math.max(1, Date.now() - touchStartTime.current)
+    const velocity = Math.abs(dragXRef.current) / elapsed
+    const captured = dragXRef.current
+    touchStartX.current = null
+    touchStartY.current = null
+    isHorizontal.current = null
+    setIsDragging(false)
+    setDragX(0)
+    dragXRef.current = 0
+    if (captured < -80 || velocity > 0.5) onCloseRef.current()
+  }
+
+  const sidebarClass = [
+    'fixed inset-y-0 left-0 w-64 z-50 transform',
+    isDragging ? '' : 'transition-transform duration-300 ease-out',
+    dragX === 0 ? (isOpen ? 'translate-x-0' : '-translate-x-full') : '',
+  ].filter(Boolean).join(' ')
+
   return (
     <>
       <div
@@ -20,9 +84,11 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, trip, tri
         onClick={onClose}
       />
       <div
-        className={`fixed inset-y-0 left-0 w-64 z-50 transform transition-transform duration-300 ease-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        ref={sidebarRef}
+        className={sidebarClass}
+        style={dragX < 0 ? { transform: `translateX(${dragX}px)` } : undefined}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
       >
         <div className="h-full w-full glass-sidebar flex flex-col">
           <div className="p-6 flex justify-between items-center">

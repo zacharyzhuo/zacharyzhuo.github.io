@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Menu, Info, ClipboardList, ShoppingBag, Utensils } from 'lucide-react'
 import { useTrips } from '../hooks/useTrips.js'
 import { useSheetData } from '../hooks/useSheetData.js'
@@ -58,8 +58,12 @@ function slugToEnglish(slug) {
 
 export default function TripPage() {
   const { slug } = useParams()
+  const navigate = useNavigate()
   const { trips, loading: tripsLoading } = useTrips()
   const trip = trips.find(t => t.slug === slug)
+
+  const edgeSwipeRef = useRef(null)
+  const daySwipeRef = useRef(null)
 
   const [activeDay, setActiveDay] = useState(1)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -104,6 +108,41 @@ export default function TripPage() {
   const dayItinerary = itinerary.filter(r => Number(r.day) === activeDay)
   const foodItems = food.length > 0 ? food : itinerary.filter(r => r.type === 'food')
 
+  // 右滑返回首頁（限左緣 30px 內起始）
+  const handleEdgeTouchStart = (e) => {
+    if (sidebarOpen || activeModal) return
+    const t = e.touches[0]
+    if (t.clientX > 30) return
+    edgeSwipeRef.current = { x: t.clientX, y: t.clientY }
+  }
+  const handleEdgeTouchEnd = (e) => {
+    if (!edgeSwipeRef.current) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - edgeSwipeRef.current.x
+    const dy = t.clientY - edgeSwipeRef.current.y
+    edgeSwipeRef.current = null
+    if (Math.abs(dy) > Math.abs(dx) || dx < 60) return
+    navigate(-1)
+  }
+
+  // 左右滑動切換日期（掛在 DayBanner + ItinerarySection 區域，避開 DayNav 橫向捲動）
+  const handleDaySwipeTouchStart = (e) => {
+    if (sidebarOpen || activeModal || days.length <= 1) return
+    const t = e.touches[0]
+    daySwipeRef.current = { x: t.clientX, y: t.clientY }
+  }
+  const handleDaySwipeTouchEnd = (e) => {
+    if (!daySwipeRef.current) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - daySwipeRef.current.x
+    const dy = t.clientY - daySwipeRef.current.y
+    daySwipeRef.current = null
+    if (Math.abs(dy) > Math.abs(dx) || Math.abs(dx) < 50) return
+    const idx = days.findIndex(d => d.day === activeDay)
+    if (dx < 0 && idx < days.length - 1) setActiveDay(days[idx + 1].day)
+    if (dx > 0 && idx > 0) setActiveDay(days[idx - 1].day)
+  }
+
   if (tripsLoading || flightsLoading || itineraryLoading) {
     return <div className="bg-jp-bg min-h-screen safe-area-inset"><LoadingSpinner /></div>
   }
@@ -120,12 +159,16 @@ export default function TripPage() {
   const tripNameEn = slugToEnglish(slug)
 
   return (
-    <div className="min-h-screen bg-jp-bg text-jp-text font-serif pb-12 safe-area-inset">
+    <div
+      className="min-h-screen bg-jp-bg text-jp-text font-serif pb-12 safe-area-inset"
+      onTouchStart={handleEdgeTouchStart}
+      onTouchEnd={handleEdgeTouchEnd}
+    >
       {/* Header: centered multi-line, hamburger absolute-left */}
       <div className="relative pt-8 pb-4 px-6 flex items-center justify-between">
         <button
           onClick={() => setSidebarOpen(true)}
-          className="p-3 text-stone-400 hover:text-jp-text transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+          className="p-3 liquid-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
           aria-label="開啟選單"
         >
           <Menu size={24} />
@@ -183,18 +226,22 @@ export default function TripPage() {
         />
       )}
 
-      {/* Day Banner */}
-      <DayBanner
-        bannerUrl={activeDayMeta?.banner_url}
-        title={activeDayMeta?.title}
-        subtitle={activeDayMeta?.subtitle}
-      />
+      {/* Day swipe zone：Banner + Itinerary，刻意不包含 DayNav 避免橫向捲動衝突 */}
+      <div
+        onTouchStart={handleDaySwipeTouchStart}
+        onTouchEnd={handleDaySwipeTouchEnd}
+      >
+        <DayBanner
+          bannerUrl={activeDayMeta?.banner_url}
+          title={activeDayMeta?.title}
+          subtitle={activeDayMeta?.subtitle}
+        />
 
-      <div className="h-8" />
+        <div className="h-8" />
 
-      {/* Daily Itinerary */}
-      <div className="mt-2">
-        <ItinerarySection rows={dayItinerary} />
+        <div className="mt-2">
+          <ItinerarySection rows={dayItinerary} />
+        </div>
       </div>
 
       {/* Trip Menu Sidebar */}

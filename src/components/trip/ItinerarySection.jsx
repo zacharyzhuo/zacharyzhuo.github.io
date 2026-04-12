@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Camera, Utensils, ShoppingBag, Train, Hotel,
   ChevronRight, X, Navigation, BookOpen, Clock, MapPin
@@ -66,6 +66,15 @@ function SpotItem({ spot }) {
 function DetailModal({ row, spots, onClose }) {
   const [displayRow, setDisplayRow] = useState(null)
   const [displaySpots, setDisplaySpots] = useState([])
+  const [dragY, setDragY] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const pillRef = useRef(null)
+  const touchStartY = useRef(null)
+  const touchStartTime = useRef(null)
+  const dragYRef = useRef(0)
+  const onCloseRef = useRef(onClose)
+
+  useEffect(() => { onCloseRef.current = onClose }, [onClose])
 
   useEffect(() => {
     if (row) { setDisplayRow(row); setDisplaySpots(spots) }
@@ -74,9 +83,57 @@ function DetailModal({ row, spots, onClose }) {
   const isOpen = !!row
 
   useEffect(() => {
+    if (isOpen) { setDragY(0); dragYRef.current = 0; setIsDragging(false) }
+  }, [isOpen])
+
+  useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : 'unset'
     return () => { document.body.style.overflow = 'unset' }
   }, [isOpen])
+
+  // Non-passive touchmove on pill so preventDefault blocks page scroll.
+  // 依賴 isOpen：首次 mount 時 return null（無選取項目），pillRef.current 為 null，
+  // 需等到 modal 開啟、元素實際渲染後才能掛上 listener。
+  useEffect(() => {
+    if (!isOpen) return
+    const el = pillRef.current
+    if (!el) return
+    const onMove = (e) => {
+      if (touchStartY.current === null) return
+      const delta = e.touches[0].clientY - touchStartY.current
+      if (delta > 0) {
+        e.preventDefault()
+        dragYRef.current = delta
+        setDragY(delta)
+      }
+    }
+    el.addEventListener('touchmove', onMove, { passive: false })
+    return () => el.removeEventListener('touchmove', onMove)
+  }, [isOpen])
+
+  const onPillTouchStart = (e) => {
+    touchStartY.current = e.touches[0].clientY
+    touchStartTime.current = Date.now()
+    setIsDragging(true)
+  }
+
+  const onPillTouchEnd = () => {
+    if (touchStartY.current === null) return
+    const elapsed = Math.max(1, Date.now() - touchStartTime.current)
+    const velocity = dragYRef.current / elapsed
+    const captured = dragYRef.current
+    touchStartY.current = null
+    setIsDragging(false)
+    setDragY(0)
+    dragYRef.current = 0
+    if (captured > 120 || velocity > 0.5) onCloseRef.current()
+  }
+
+  const sheetClass = [
+    'fixed inset-x-0 bottom-0 z-50 transform',
+    isDragging ? '' : 'transition-transform duration-300 ease-out',
+    dragY === 0 ? (isOpen ? 'translate-y-0' : 'translate-y-full') : '',
+  ].filter(Boolean).join(' ')
 
   const current = row || displayRow
   const currentSpots = row ? spots : displaySpots
@@ -95,20 +152,30 @@ function DetailModal({ row, spots, onClose }) {
         onClick={onClose}
       />
       <div
-        className={`fixed inset-x-0 bottom-0 z-50 transform transition-transform duration-300 ease-out ${
-          isOpen ? 'translate-y-0' : 'translate-y-full'
-        }`}
+        className={sheetClass}
+        style={dragY > 0 ? { transform: `translateY(${dragY}px)` } : undefined}
       >
         <div className="glass-bottom-sheet min-h-[60vh] max-h-[79vh] flex flex-col relative overflow-hidden">
+
+          {/* Drag pill handle */}
+          <div
+            ref={pillRef}
+            className="flex justify-center pt-3 pb-2 touch-manipulation select-none flex-shrink-0"
+            onTouchStart={onPillTouchStart}
+            onTouchEnd={onPillTouchEnd}
+          >
+            <div className="w-10 h-1 rounded-full bg-stone-300/60" />
+          </div>
+
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 z-20 p-3 liquid-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="absolute top-8 right-6 z-20 p-3 liquid-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="關閉詳情"
           >
             <X size={20} />
           </button>
 
-          <div className="overflow-y-auto px-8 pb-10 flex-1 pt-8">
+          <div className="overflow-y-auto px-8 pb-24 flex-1 pt-4">
             <div className="flex items-center gap-3 mb-2">
               <span className={`px-3 py-1 border text-xs tracking-widest font-bold font-serif uppercase rounded ${border}`}>
                 {label}
@@ -160,16 +227,16 @@ function DetailModal({ row, spots, onClose }) {
             </div>
           </div>
 
-          <div className="sticky bottom-4 mt-12 pt-4 pb-4 px-8 safe-area-bottom">
+          <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
             <button
               onClick={() => window.open(navUrl, '_blank')}
-              className="w-full liquid-glass-button text-stone-600 py-4 rounded-xl font-serif tracking-wide flex items-center justify-center gap-2 touch-manipulation min-h-[48px]"
+              className="liquid-tab-track pointer-events-auto shadow-2xl font-serif text-stone-600 flex items-center gap-2"
+              style={{ padding: '12px 32px' }}
               aria-label={`開啟 ${current.name} 的 Google Maps 導航`}
             >
               <Navigation size={16} />
               Google Maps 導航
             </button>
-            <div className="h-4" />
           </div>
         </div>
       </div>
@@ -214,13 +281,13 @@ export default function ItinerarySection({ rows }) {
               className="flex gap-4 px-6 group cursor-pointer"
               onClick={() => setSelected({ row, spots })}
             >
-              <div className="w-16 shrink-0 flex flex-col items-center pt-1">
-                <span className="text-lg font-serif font-bold text-jp-text leading-none">{row.time}</span>
+              <div className="w-12 shrink-0 flex flex-col items-center pt-1">
+                <span className="text-sm font-serif font-bold text-jp-text leading-none">{row.time}</span>
                 {!isLast && <div className="w-[1px] bg-stone-200 flex-1 my-2" />}
               </div>
 
               <div className="flex-1 pb-8">
-                <div className="bg-white rounded-lg p-4 border border-stone-100 active:scale-[0.98] transition-transform duration-200 h-full flex flex-col touch-manipulation">
+                <div className="glass-card relative rounded-2xl p-4 active:scale-[0.98] transition-transform duration-200 h-full flex flex-col touch-manipulation overflow-hidden">
                   <div className="flex justify-between items-start mb-2">
                     <span className={`text-xs tracking-wider uppercase px-2 py-0.5 rounded border font-serif font-bold ${border}`}>
                       {label}
@@ -235,7 +302,7 @@ export default function ItinerarySection({ rows }) {
                   )}
 
                   {row.hours && (
-                    <div className="flex items-center gap-1.5 text-xs text-stone-500 font-serif mb-3 bg-stone-50 w-fit px-2 py-1 rounded">
+                    <div className="flex items-center gap-1.5 text-xs text-stone-500 font-serif mb-3 bg-white/40 backdrop-blur-sm border border-white/50 w-fit px-2 py-1 rounded-full">
                       <Clock size={12} />
                       <span>{row.hours}</span>
                     </div>
@@ -247,7 +314,7 @@ export default function ItinerarySection({ rows }) {
                       {row.address || '查看地圖位置'}
                     </span>
                     {spots.length > 0 && (
-                      <span className="text-xs text-stone-400 font-serif shrink-0 bg-stone-50 px-2 py-0.5 rounded-full border border-stone-100">
+                      <span className="text-xs text-amber-600 font-bold font-serif shrink-0 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
                         {spots.length} 個亮點
                       </span>
                     )}

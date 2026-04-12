@@ -43,7 +43,7 @@ function groupItems(rows) {
 
 function StandaloneCard({ item }) {
   return (
-    <div className="bg-white rounded-xl p-5 border border-stone-100">
+    <div className="glass-card relative rounded-xl p-5 overflow-hidden">
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center gap-2">
           <div className="p-2 bg-pink-50 text-pink-500 rounded-full shrink-0">
@@ -56,7 +56,7 @@ function StandaloneCard({ item }) {
             href={item.link}
             target="_blank"
             rel="noreferrer"
-            className="p-3 bg-stone-50 rounded-full text-stone-400 hover:text-jp-green hover:bg-green-50 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center ml-2 shrink-0"
+            className="p-3 liquid-glass-button rounded-full text-stone-500 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center ml-2 shrink-0"
             onClick={e => e.stopPropagation()}
             aria-label={`查看 ${item.name} 的位置`}
           >
@@ -83,7 +83,7 @@ function StandaloneCard({ item }) {
 
 function BuildingCard({ building }) {
   return (
-    <div className="bg-white rounded-xl p-5 border border-stone-100">
+    <div className="glass-card relative rounded-xl p-5 overflow-hidden">
       {/* Building header */}
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center gap-2">
@@ -104,7 +104,7 @@ function BuildingCard({ building }) {
             href={building.link}
             target="_blank"
             rel="noreferrer"
-            className="p-3 bg-stone-50 rounded-full text-stone-400 hover:text-jp-green hover:bg-green-50 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center ml-2 shrink-0"
+            className="p-3 liquid-glass-button rounded-full text-stone-500 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center ml-2 shrink-0"
             onClick={e => e.stopPropagation()}
             aria-label={`查看 ${building.name} 的位置`}
           >
@@ -177,7 +177,7 @@ export default function ShoppingSection({ rows }) {
     <div className="flex flex-col relative h-full">
       <div
         ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-8 pb-32 space-y-4 pt-2"
+        className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-8 pb-24 space-y-4 pt-2"
       >
         <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">逛街清單</h2>
         {grouped.length === 0 ? (
@@ -192,7 +192,7 @@ export default function ShoppingSection({ rows }) {
       </div>
 
       {areas.length > 1 && (
-        <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
+        <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
           <div className="liquid-tab-track scrollbar-hide pointer-events-auto shadow-2xl">
             {areas.map(area => (
               <button
