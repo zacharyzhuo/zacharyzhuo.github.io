@@ -213,6 +213,7 @@ export default function TripInfoSection({ flights, accommodation, trip }) {
         ref={scrollRef}
         className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-8 pb-32 pt-2 space-y-8"
       >
+        <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">旅程資訊</h2>
         {activeTab === 'flights' && <FlightsTab flights={flights} />}
         {activeTab === 'prepare' && <PrepareTab />}
         {activeTab === 'hotel' && <HotelTab accommodation={accommodation} />}

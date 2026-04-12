@@ -2,7 +2,157 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { ShoppingBag, Clock, Navigation } from 'lucide-react'
 
 /**
- * @param {{ rows: Array<{ area: string, building: string, name: string, floor: string, hours: string, link: string, is_building: string }> }} props
+ * Flat CSV rows → grouped display units.
+ *
+ * Row rules (from Google Sheets):
+ *  - building === ''  : standalone shop → own card
+ *  - building !== ''  : belongs to that building → grouped under one card
+ *
+ * The first row that introduces a new building name becomes the building header
+ * (its name/hours/link represent the building itself; floor is ignored).
+ * Subsequent rows with the same building name are sub-shops.
+ */
+function groupItems(rows) {
+  const groups = []
+  const buildingMap = {}
+
+  rows.forEach(row => {
+    if (!row.building) {
+      // Standalone shop
+      groups.push({ type: 'standalone', ...row })
+    } else {
+      if (!buildingMap[row.building]) {
+        // First time we see this building — create the group
+        const g = {
+          type: 'building',
+          name: row.building,
+          hours: row.hours,
+          link: row.link,
+          shops: [],
+        }
+        buildingMap[row.building] = g
+        groups.push(g)
+      }
+      // Add this row as a shop inside the building
+      buildingMap[row.building].shops.push(row)
+    }
+  })
+
+  return groups
+}
+
+function StandaloneCard({ item }) {
+  return (
+    <div className="bg-white rounded-xl p-5 border border-stone-100">
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-pink-50 text-pink-500 rounded-full shrink-0">
+            <ShoppingBag size={16} />
+          </div>
+          <h3 className="font-bold text-jp-text font-serif text-lg leading-none">{item.name}</h3>
+        </div>
+        {item.link && (
+          <a
+            href={item.link}
+            target="_blank"
+            rel="noreferrer"
+            className="p-3 bg-stone-50 rounded-full text-stone-400 hover:text-jp-green hover:bg-green-50 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center ml-2 shrink-0"
+            onClick={e => e.stopPropagation()}
+            aria-label={`查看 ${item.name} 的位置`}
+          >
+            <Navigation size={16} />
+          </a>
+        )}
+      </div>
+
+      {(item.floor || item.hours) && (
+        <div className="mt-2 flex items-center gap-3 text-xs text-stone-500 font-serif pl-11">
+          {item.floor && (
+            <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-600 font-medium">{item.floor}</span>
+          )}
+          {item.hours && (
+            <span className="flex items-center gap-1">
+              <Clock size={12} /> {item.hours}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function BuildingCard({ building }) {
+  return (
+    <div className="bg-white rounded-xl p-5 border border-stone-100">
+      {/* Building header */}
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-pink-50 text-pink-500 rounded-full shrink-0">
+            <ShoppingBag size={16} />
+          </div>
+          <div>
+            <h3 className="font-bold text-jp-text font-serif text-lg leading-none">{building.name}</h3>
+            {building.hours && (
+              <span className="text-xs text-stone-500 font-serif mt-1 flex items-center gap-1">
+                <Clock size={12} /> {building.hours}
+              </span>
+            )}
+          </div>
+        </div>
+        {building.link && (
+          <a
+            href={building.link}
+            target="_blank"
+            rel="noreferrer"
+            className="p-3 bg-stone-50 rounded-full text-stone-400 hover:text-jp-green hover:bg-green-50 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center ml-2 shrink-0"
+            onClick={e => e.stopPropagation()}
+            aria-label={`查看 ${building.name} 的位置`}
+          >
+            <Navigation size={16} />
+          </a>
+        )}
+      </div>
+
+      {/* Sub-shops with left border accent */}
+      {building.shops.length > 0 && (
+        <div className="mt-4 space-y-3 pl-2 border-l-2 border-stone-100">
+          {building.shops.map((shop, i) => (
+            <div key={i} className="flex justify-between items-center group">
+              <div>
+                <p className="font-bold text-sm text-stone-700 font-serif">{shop.name}</p>
+                <div className="flex items-center gap-2 text-xs text-stone-500 font-serif mt-0.5">
+                  {shop.floor && (
+                    <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-600 font-medium">{shop.floor}</span>
+                  )}
+                  {shop.hours && (
+                    <span className="flex items-center gap-1">
+                      <Clock size={12} /> {shop.hours}
+                    </span>
+                  )}
+                </div>
+              </div>
+              {shop.link && (
+                <a
+                  href={shop.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="opacity-40 group-hover:opacity-100 group-hover:text-jp-green transition-all p-2 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center ml-2 shrink-0"
+                  onClick={e => e.stopPropagation()}
+                  aria-label={`查看 ${shop.name} 的位置`}
+                >
+                  <Navigation size={14} />
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * @param {{ rows: Array<{ area: string, building: string, name: string, floor: string, hours: string, link: string }> }} props
  */
 export default function ShoppingSection({ rows }) {
   const areas = useMemo(
@@ -12,7 +162,8 @@ export default function ShoppingSection({ rows }) {
   const [activeArea, setActiveArea] = useState(() => areas[0] ?? '')
   const scrollRef = useRef(null)
 
-  const items = activeArea ? rows.filter(r => r.area === activeArea) : rows
+  const filtered = activeArea ? rows.filter(r => r.area === activeArea) : rows
+  const grouped = useMemo(() => groupItems(filtered), [filtered])
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTo({ top: 0 })
@@ -28,52 +179,15 @@ export default function ShoppingSection({ rows }) {
         ref={scrollRef}
         className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-8 pb-32 space-y-4 pt-2"
       >
-        {items.length === 0 ? (
+        <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">逛街清單</h2>
+        {grouped.length === 0 ? (
           <p className="text-stone-500 font-serif text-sm py-6 text-center">尚無清單</p>
         ) : (
-          items.map((item, i) => (
-            <div key={`${activeArea}-${i}`} className="bg-white rounded-xl p-5 border border-stone-100">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-pink-50 text-pink-500 rounded-full">
-                    <ShoppingBag size={16} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-jp-text font-serif text-lg leading-none">{item.name}</h3>
-                    {item.is_building === 'TRUE' && item.hours && (
-                      <span className="text-xs text-stone-500 font-serif mt-1 flex items-center gap-1">
-                        <Clock size={12} /> {item.hours}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {item.is_building !== 'TRUE' && item.link && (
-                  <a
-                    href={item.link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-3 bg-stone-50 rounded-full text-stone-400 hover:text-jp-green hover:bg-green-50 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
-                    onClick={e => e.stopPropagation()}
-                  >
-                    <Navigation size={16} />
-                  </a>
-                )}
-              </div>
-
-              {item.is_building !== 'TRUE' && (item.floor || item.hours) && (
-                <div className="mt-2 flex items-center gap-3 text-xs text-stone-500 font-serif pl-11">
-                  {item.floor && (
-                    <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-600 font-medium">{item.floor}</span>
-                  )}
-                  {item.hours && (
-                    <span className="flex items-center gap-1">
-                      <Clock size={12} /> {item.hours}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          ))
+          grouped.map((g, i) =>
+            g.type === 'building'
+              ? <BuildingCard key={`b-${i}`} building={g} />
+              : <StandaloneCard key={`s-${i}`} item={g} />
+          )
         )}
       </div>
 

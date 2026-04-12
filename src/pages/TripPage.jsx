@@ -213,6 +213,7 @@ export default function TripPage() {
         onClose={() => setActiveModal(null)}
         title="旅程資訊"
         noScroll
+        noStickyTitle
       >
         <TripInfoSection flights={flights} accommodation={accommodation} trip={trip} />
       </BottomSheet>
@@ -230,6 +231,7 @@ export default function TripPage() {
         onClose={() => setActiveModal(null)}
         title="逛街清單"
         noScroll
+        noStickyTitle
       >
         <ShoppingSection rows={shopping} />
       </BottomSheet>
@@ -239,6 +241,7 @@ export default function TripPage() {
         onClose={() => setActiveModal(null)}
         title="美食清單"
         noScroll
+        noStickyTitle
       >
         <FoodSection rows={foodItems} />
       </BottomSheet>

@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react'
 import {
-  MapPin, Camera, Utensils, ShoppingBag, Train, Hotel,
-  ChevronRight, X, Navigation, BookOpen, Clock
+  Camera, Utensils, ShoppingBag, Train, Hotel,
+  ChevronRight, X, Navigation, BookOpen, Clock, MapPin
 } from 'lucide-react'
 
 const TYPE_MAP = {
-  transport: { label: '交通', icon: Train, border: 'border-blue-200 text-blue-700 bg-blue-50' },
-  flight:    { label: '航班', icon: Train, border: 'border-blue-200 text-blue-700 bg-blue-50' },
-  food:      { label: '美食', icon: Utensils, border: 'border-orange-200 text-orange-700 bg-orange-50' },
-  sightseeing: { label: '景點', icon: Camera, border: 'border-emerald-200 text-emerald-700 bg-emerald-50' },
-  shopping:  { label: '購物', icon: ShoppingBag, border: 'border-pink-200 text-pink-700 bg-pink-50' },
-  hotel:     { label: '住宿', icon: Hotel, border: 'border-purple-200 text-purple-700 bg-purple-50' },
-  activity:  { label: '活動', icon: MapPin, border: 'border-stone-200 text-stone-500 bg-stone-50' },
+  transport:  { label: '交通', icon: Train, border: 'border-blue-200 text-blue-700 bg-blue-50' },
+  food:       { label: '美食', icon: Utensils, border: 'border-orange-200 text-orange-700 bg-orange-50' },
+  attraction: { label: '景點', icon: Camera, border: 'border-emerald-200 text-emerald-700 bg-emerald-50' },
+  shopping:   { label: '購物', icon: ShoppingBag, border: 'border-pink-200 text-pink-700 bg-pink-50' },
+  hotel:      { label: '住宿', icon: Hotel, border: 'border-purple-200 text-purple-700 bg-purple-50' },
 }
 
+const SPOT_TYPE_ORDER = { food: 0, attraction: 1, shopping: 2 }
+
 function getTypeInfo(type) {
-  return TYPE_MAP[type] || { label: type || '其他', icon: MapPin, border: 'border-stone-200 text-stone-500 bg-stone-50' }
+  return TYPE_MAP[type] || TYPE_MAP['attraction']
 }
 
 function buildGoogleMapsUrl(address, name) {
@@ -23,12 +23,53 @@ function buildGoogleMapsUrl(address, name) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
 }
 
-function DetailModal({ row, onClose }) {
+function sortSpots(spots) {
+  return [...spots].sort(
+    (a, b) => (SPOT_TYPE_ORDER[a.type] ?? 99) - (SPOT_TYPE_ORDER[b.type] ?? 99)
+  )
+}
+
+function SpotItem({ spot }) {
+  const { label, border } = getTypeInfo(spot.type)
+  const url = spot.link?.startsWith('http')
+    ? spot.link
+    : buildGoogleMapsUrl(spot.address, spot.name)
+
+  return (
+    <div className="flex items-start gap-3 py-2.5 border-b border-stone-100 last:border-0">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className={`text-[10px] px-1.5 py-0.5 border rounded font-serif font-bold shrink-0 ${border}`}>
+            {label}
+          </span>
+          <span className="font-serif font-bold text-jp-text text-sm leading-snug truncate">
+            {spot.name}
+          </span>
+        </div>
+        {spot.description && (
+          <p className="text-xs text-stone-500 font-serif leading-relaxed line-clamp-1 pl-[2px]">
+            {spot.description}
+          </p>
+        )}
+      </div>
+      <button
+        onClick={(e) => { e.stopPropagation(); window.open(url, '_blank') }}
+        className="shrink-0 p-2 liquid-glass-button rounded-lg text-stone-500 touch-manipulation min-w-[36px] min-h-[36px] flex items-center justify-center"
+        aria-label={`${spot.name} Google Maps`}
+      >
+        <Navigation size={14} />
+      </button>
+    </div>
+  )
+}
+
+function DetailModal({ row, spots, onClose }) {
   const [displayRow, setDisplayRow] = useState(null)
+  const [displaySpots, setDisplaySpots] = useState([])
 
   useEffect(() => {
-    if (row) setDisplayRow(row)
-  }, [row])
+    if (row) { setDisplayRow(row); setDisplaySpots(spots) }
+  }, [row, spots])
 
   const isOpen = !!row
 
@@ -38,6 +79,7 @@ function DetailModal({ row, onClose }) {
   }, [isOpen])
 
   const current = row || displayRow
+  const currentSpots = row ? spots : displaySpots
   if (!current) return null
   const { label, border } = getTypeInfo(current.type)
   const navUrl = current.link?.startsWith('http')
@@ -95,6 +137,26 @@ function DetailModal({ row, onClose }) {
                   </p>
                 </div>
               )}
+
+              {currentSpots.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-[1px] w-3 bg-stone-300" />
+                    <h3 className="font-bold text-jp-text text-sm font-serif tracking-wide shrink-0">
+                      街道亮點
+                    </h3>
+                    <span className="text-xs text-stone-400 font-serif shrink-0">
+                      {currentSpots.length} 個
+                    </span>
+                    <div className="h-[1px] flex-1 bg-stone-200" />
+                  </div>
+                  <div>
+                    {currentSpots.map((spot, i) => (
+                      <SpotItem key={i} spot={spot} />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -116,12 +178,23 @@ function DetailModal({ row, onClose }) {
 }
 
 /**
- * @param {{ rows: Array<{ time: string, name: string, type: string, address: string, link: string, note: string }> }} props
+ * @param {{ rows: Array }} props
+ * rows 包含主行程 row（無 parent）以及子項目 row（有 parent = 父 row 的 name）
  */
 export default function ItinerarySection({ rows }) {
-  const [selectedRow, setSelectedRow] = useState(null)
+  const [selected, setSelected] = useState(null)
 
-  if (rows.length === 0) {
+  const mainRows = rows.filter(r => !r.parent)
+
+  const spotsByParent = rows
+    .filter(r => r.parent)
+    .reduce((acc, r) => {
+      if (!acc[r.parent]) acc[r.parent] = []
+      acc[r.parent].push(r)
+      return acc
+    }, {})
+
+  if (mainRows.length === 0) {
     return (
       <p className="text-center text-jp-sub font-serif text-sm mt-12">此天尚無行程資料</p>
     )
@@ -130,12 +203,17 @@ export default function ItinerarySection({ rows }) {
   return (
     <>
       <div className="mt-2">
-        {rows.map((row, i) => {
+        {mainRows.map((row, i) => {
           const { label, icon: Icon, border } = getTypeInfo(row.type)
-          const isLast = i === rows.length - 1
+          const isLast = i === mainRows.length - 1
+          const spots = sortSpots(spotsByParent[row.name] ?? [])
 
           return (
-            <div key={i} className="flex gap-4 px-6 group cursor-pointer" onClick={() => setSelectedRow(row)}>
+            <div
+              key={i}
+              className="flex gap-4 px-6 group cursor-pointer"
+              onClick={() => setSelected({ row, spots })}
+            >
               <div className="w-16 shrink-0 flex flex-col items-center pt-1">
                 <span className="text-lg font-serif font-bold text-jp-text leading-none">{row.time}</span>
                 {!isLast && <div className="w-[1px] bg-stone-200 flex-1 my-2" />}
@@ -150,9 +228,9 @@ export default function ItinerarySection({ rows }) {
                   </div>
 
                   <h4 className="text-lg font-serif font-bold text-jp-text mb-1 leading-snug">{row.name}</h4>
-                  {row.note && (
+                  {row.description && (
                     <p className="text-sm text-stone-500 line-clamp-3 font-serif mb-2 leading-relaxed opacity-80">
-                      {row.note}
+                      {row.description}
                     </p>
                   )}
 
@@ -168,7 +246,12 @@ export default function ItinerarySection({ rows }) {
                     <span className="truncate text-stone-500 opacity-70 flex-1">
                       {row.address || '查看地圖位置'}
                     </span>
-                    <ChevronRight size={12} className="ml-auto shrink-0 opacity-50" />
+                    {spots.length > 0 && (
+                      <span className="text-xs text-stone-400 font-serif shrink-0 bg-stone-50 px-2 py-0.5 rounded-full border border-stone-100">
+                        {spots.length} 個亮點
+                      </span>
+                    )}
+                    <ChevronRight size={12} className="ml-1 shrink-0 opacity-50" />
                   </div>
                 </div>
               </div>
@@ -177,7 +260,11 @@ export default function ItinerarySection({ rows }) {
         })}
       </div>
 
-      <DetailModal row={selectedRow} onClose={() => setSelectedRow(null)} />
+      <DetailModal
+        row={selected?.row ?? null}
+        spots={selected?.spots ?? []}
+        onClose={() => setSelected(null)}
+      />
     </>
   )
 }

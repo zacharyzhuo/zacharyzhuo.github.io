@@ -21,7 +21,7 @@ export function useTrips() {
       })
       .then(text => {
         const rows = parseCSV(text)
-        setTrips(rows.filter(r => r.status === 'published'))
+        setTrips(rows.filter(r => r.status === 'published').reverse())
       })
       .catch(err => setError(err))
       .finally(() => setLoading(false))

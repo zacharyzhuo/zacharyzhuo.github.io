@@ -9,7 +9,7 @@ import { X } from 'lucide-react'
  *   noScroll?: boolean
  * }} props
  */
-export default function BottomSheet({ isOpen, onClose, title, children, noScroll = false }) {
+export default function BottomSheet({ isOpen, onClose, title, children, noScroll = false, noStickyTitle = false }) {
   return (
     <>
       <div
@@ -38,9 +38,11 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
 
           {noScroll ? (
             <>
-              <div className="px-8 pt-8 pb-4 flex-shrink-0">
-                <h2 className="text-2xl font-serif font-bold text-jp-text pr-12">{title}</h2>
-              </div>
+              {!noStickyTitle && (
+                <div className="px-8 pt-8 pb-4 flex-shrink-0">
+                  <h2 className="text-2xl font-serif font-bold text-jp-text pr-12">{title}</h2>
+                </div>
+              )}
               <div className="flex-1 min-h-0">
                 {children}
               </div>

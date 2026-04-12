@@ -41,6 +41,7 @@ export default function FoodSection({ rows }) {
         ref={scrollRef}
         className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-8 pb-32 space-y-6 pt-2"
       >
+        <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">美食清單</h2>
         <div className="space-y-8">
           {Object.entries(byCategory).map(([category, items]) => (
             <div key={category}>
@@ -76,9 +77,9 @@ export default function FoodSection({ rows }) {
                         </a>
                       )}
                     </div>
-                    {(row.note || row.address) && (
+                    {(row.note || row.desc || row.address) && (
                       <p className="text-sm text-stone-500 leading-relaxed font-serif">
-                        {row.note || row.address}
+                        {row.note || row.desc || row.address}
                       </p>
                     )}
                   </div>
