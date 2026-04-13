@@ -1,77 +1,215 @@
-import React, { useState, useEffect } from 'react'
-import { Heart, X, Send, Music } from 'lucide-react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { Heart, X, Send, Music, Search } from 'lucide-react'
 
 // 彩蛋照片/影片列表：請將檔案放在 proposal-photos/（靜態根目錄）
 // 圖片：JPEG 或 WebP（勿用 HEIC）。影片：.mov 或 .mp4（.mov 在 Safari 支援佳，Chrome 建議 .mp4）。
+const BASE = import.meta.env.BASE_URL || ''
 const PROPOSAL_PHOTOS = [
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/1.MOV`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/2.MOV`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/3.MOV`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/4.MOV`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/5.MOV`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/6.MOV`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/7.MOV`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/8.MOV`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/9.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/10.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/11.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/12.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/13.MOV`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/14.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/15.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/16.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/17.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/18.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/19.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/20.MOV`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/21.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/22.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/23.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/24.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/25.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/26.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/27.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/28.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/29.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/30.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/31.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/32.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/33.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/34.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/35.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/36.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/37.JPG`,
-  `${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/38.MOV`,
-  // 可加入影片：`${import.meta.env.BASE_URL || ''}proposal-photos/VID_001.mov`
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/1.MOV`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/2.MOV`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/3.MOV`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/4.MOV`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/5.MOV`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/6.MOV`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/7.MOV`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/8.MOV`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/9.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/10.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/11.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/12.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/13.MOV`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/14.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/15.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/16.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/17.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/18.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/19.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/20.MOV`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/21.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/22.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/23.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/24.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/25.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/26.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/27.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/28.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/29.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/30.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/31.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/32.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/33.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/34.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/35.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/36.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/37.JPG`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/38.MOV`,
 ]
 
 const isVideoUrl = (url) => /\.(mov|mp4|webm)(\?|$)/i.test(url || '')
 
+// 分享對象：大頭貼請放置對應圖片檔案
+const SHARE_CONTACTS = [
+  {
+    name: 'Angelet Y.',
+    avatar: `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/angelet.jpg`,
+  },
+]
+
+// Share Sheet 元件（Instagram 分享面板，支援手勢下滑關閉）
+const ShareSheet = ({ isOpen, onClose }) => {
+  const sheetRef = useRef(null)
+  const overlayRef = useRef(null)
+  const dragRef = useRef(null)
+
+  const handleDragStart = (e) => {
+    e.stopPropagation()
+    dragRef.current = { startY: e.touches[0].clientY, dy: 0 }
+    if (sheetRef.current) {
+      // 先把 CSS animation 清除，才能讓 JS style.transform 生效
+      sheetRef.current.style.animation = 'none'
+      sheetRef.current.style.transition = 'none'
+      sheetRef.current.style.transform = 'translateY(0)'
+    }
+  }
+
+  const handleDragMove = (e) => {
+    e.stopPropagation()
+    if (!dragRef.current) return
+    const dy = Math.max(0, e.touches[0].clientY - dragRef.current.startY)
+    dragRef.current.dy = dy
+    if (sheetRef.current) {
+      sheetRef.current.style.transform = `translateY(${dy}px)`
+    }
+    if (overlayRef.current) {
+      const opacity = Math.max(0, 0.4 * (1 - dy / 300))
+      overlayRef.current.style.backgroundColor = `rgba(0,0,0,${opacity})`
+    }
+  }
+
+  const handleDragEnd = (e) => {
+    e.stopPropagation()
+    if (!dragRef.current) return
+    const dy = dragRef.current.dy
+    dragRef.current = null
+
+    if (dy > 80) {
+      if (sheetRef.current) {
+        sheetRef.current.style.transition = 'transform 0.25s ease'
+        sheetRef.current.style.transform = 'translateY(100%)'
+      }
+      setTimeout(onClose, 250)
+    } else {
+      if (sheetRef.current) {
+        sheetRef.current.style.transition = 'transform 0.3s ease'
+        sheetRef.current.style.transform = 'translateY(0)'
+      }
+      if (overlayRef.current) {
+        overlayRef.current.style.transition = 'background-color 0.3s ease'
+        overlayRef.current.style.backgroundColor = 'rgba(0,0,0,0.4)'
+      }
+    }
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div
+      ref={overlayRef}
+      className="absolute inset-0 z-50 flex flex-col justify-end"
+      onClick={onClose}
+      style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+    >
+      <div
+        ref={sheetRef}
+        className="relative rounded-t-2xl overflow-hidden animate-share-slide-up"
+        style={{ backgroundColor: '#262626' }}
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={handleDragStart}
+        onTouchMove={handleDragMove}
+        onTouchEnd={handleDragEnd}
+      >
+        {/* 拖曳把手 */}
+        <div className="flex justify-center pt-3 pb-4">
+          <div className="w-10 h-1 rounded-full bg-white/30" />
+        </div>
+
+        {/* 搜尋列 */}
+        <div className="px-4 pb-4">
+          <div
+            className="flex items-center gap-2 rounded-xl px-3 py-2.5"
+            style={{ backgroundColor: '#363636' }}
+          >
+            <Search size={16} className="text-white/50 flex-shrink-0" />
+            <span className="text-white/50 text-sm font-sans">搜尋</span>
+            <div className="flex-1" />
+            <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ backgroundColor: '#4a4a4a' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60">
+                <circle cx="8" cy="8" r="3" /><circle cx="16" cy="8" r="3" /><circle cx="8" cy="16" r="3" /><circle cx="16" cy="16" r="3" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* 聯絡人 */}
+        <div className="px-6 pb-6">
+          <div className="flex flex-wrap gap-6">
+            {SHARE_CONTACTS.map((contact) => (
+              <div key={contact.name} className="flex flex-col items-center gap-2 w-[72px]">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/10 bg-white/5 flex items-center justify-center">
+                  <img
+                    src={contact.avatar}
+                    alt={contact.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none'
+                      e.target.parentElement.innerHTML = `<span class="text-white/30 text-2xl font-sans">${contact.name[0]}</span>`
+                    }}
+                  />
+                </div>
+                <span className="text-white text-xs font-sans text-center leading-tight">{contact.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="pb-[max(0.5rem,env(safe-area-inset-bottom))]" />
+      </div>
+    </div>
+  )
+}
+
 // Proposal Modal (彩蛋 - Instagram 限時動態風格)
 const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
-  const [visibleLayer, setVisibleLayer] = useState(0) // 0 或 1，哪一層正在顯示（雙層預載，下一則已在另一層載好）
+  const [visibleLayer, setVisibleLayer] = useState(0)
   const [showTransition, setShowTransition] = useState(false)
-  const [hasStartedTransition, setHasStartedTransition] = useState(false) // 追蹤是否已經開始過渡動畫
+  const [hasStartedTransition, setHasStartedTransition] = useState(false)
   const [progress, setProgress] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [elapsedBeforePause, setElapsedBeforePause] = useState(0)
   const [pauseStartTime, setPauseStartTime] = useState(null)
   const [heartLiked, setHeartLiked] = useState(false)
+  const [heartBounce, setHeartBounce] = useState(false)
   const [bgmStarted, setBgmStarted] = useState(false)
-  const videoRef0 = React.useRef(null)
-  const videoRef1 = React.useRef(null)
-  const bgmRef = React.useRef(null)
+  const [inputFocused, setInputFocused] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
+  const [swipeY, setSwipeY] = useState(0)
+  const videoRef0 = useRef(null)
+  const videoRef1 = useRef(null)
+  const bgmRef = useRef(null)
+  const inputRef = useRef(null)
+  const swipeRef = useRef(null)
+  const isSwipingRef = useRef(false)
+  const justSwipedRef = useRef(false)
 
   const photos = PROPOSAL_PHOTOS
-  const PHOTO_DURATION = 6000 // 6秒
+  const PHOTO_DURATION = 6000
   const currentIsVideo = isVideoUrl(photos[currentPhotoIndex])
-  // 每層顯示的內容索引：當前層顯示 currentPhotoIndex，另一層顯示下一則（預載）
   const getLayerIndex = (layer) =>
     layer === visibleLayer ? currentPhotoIndex : Math.min(currentPhotoIndex + 1, photos.length - 1)
   const visibleVideoRef = visibleLayer === 0 ? videoRef0 : videoRef1
 
-  // 預載下一張與前一張（僅圖片；影片不預載）
+  // 預載下一張與前一張（僅圖片）
   useEffect(() => {
     if (!isOpen || !photos.length) return
     const preload = (index) => {
@@ -89,29 +227,29 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       setCurrentPhotoIndex(0)
       setVisibleLayer(0)
       setProgress(0)
-      setShowTransition(false) // 初始不顯示動畫
-      setHasStartedTransition(false) // 重置過渡狀態
-      setHeartLiked(false) // 每次打開彩蛋時愛心重置為未按
+      setShowTransition(false)
+      setHasStartedTransition(false)
+      setHeartLiked(false)
+      setHeartBounce(false)
+      setInputFocused(false)
+      setShareOpen(false)
+      setSwipeY(0)
 
-      // 如果 heartPosition 已設置（表示是從搖晃觸發的），等待搖晃完成後開始動畫
       if (heartPosition) {
-        // 等待搖晃完成（1.2秒）後立即開始動畫
         const shakeTimer = setTimeout(() => {
           setShowTransition(true)
           setHasStartedTransition(true)
         }, 1200)
 
-        // 過場動畫在開始後 2.5 秒開始淡入照片（與動畫時長一致）
         const transitionTimer = setTimeout(() => {
           setShowTransition(false)
-        }, 3700) // 1.2秒搖晃 + 2.5秒動畫
+        }, 3700)
 
         return () => {
           clearTimeout(shakeTimer)
           clearTimeout(transitionTimer)
         }
       } else {
-        // 如果沒有 heartPosition，立即開始（備用方案）
         setShowTransition(true)
         setHasStartedTransition(true)
         const transitionTimer = setTimeout(() => {
@@ -123,14 +261,16 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
         }
       }
     } else {
-      // 關閉時重置
       setShowTransition(false)
       setHasStartedTransition(false)
+      setInputFocused(false)
+      setShareOpen(false)
+      setSwipeY(0)
     }
   }, [isOpen, heartPosition])
 
-  // 背景音樂：Instagram 頁面顯示時嘗試播放「好きだから。」；若被瀏覽器阻擋，需使用者點擊「播放音樂」或點一下畫面
-  const tryPlayBGM = React.useCallback(() => {
+  // BGM
+  const tryPlayBGM = useCallback(() => {
     const audio = bgmRef.current
     if (!audio || bgmStarted) return
     audio.play().then(() => setBgmStarted(true)).catch(() => {})
@@ -142,9 +282,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     if (isOpen && hasStartedTransition && !showTransition) {
       audio.play()
         .then(() => setBgmStarted(true))
-        .catch(() => {
-          // 瀏覽器阻擋自動播放時，不報錯；使用者可點「播放音樂」或點擊畫面
-        })
+        .catch(() => {})
     } else {
       audio.pause()
       if (!isOpen) {
@@ -154,17 +292,42 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     }
   }, [isOpen, hasStartedTransition, showTransition])
 
-  // 自動播放和進度條（僅圖片；影片由 video 的 onTimeUpdate / onEnded 驅動）
+  // Safari theme-color + html 背景：Instagram 期間改黑色，關閉時恢復
+  useEffect(() => {
+    if (!isOpen || !hasStartedTransition || showTransition) return
+
+    const html = document.documentElement
+    html.style.backgroundColor = '#000000'
+    document.body.style.backgroundColor = '#000000'
+
+    // 刪掉舊 meta 再插新的，強制 Safari 重新讀取
+    const oldMeta = document.querySelector('meta[name="theme-color"]')
+    if (oldMeta) oldMeta.remove()
+    const newMeta = document.createElement('meta')
+    newMeta.name = 'theme-color'
+    newMeta.content = '#000000'
+    document.head.appendChild(newMeta)
+
+    return () => {
+      html.style.backgroundColor = ''
+      document.body.style.backgroundColor = ''
+      const m = document.querySelector('meta[name="theme-color"]')
+      if (m) m.remove()
+      const restored = document.createElement('meta')
+      restored.name = 'theme-color'
+      restored.content = '#F9F8F4'
+      document.head.appendChild(restored)
+    }
+  }, [isOpen, hasStartedTransition, showTransition])
+
+  // 自動播放和進度條（僅圖片）
   useEffect(() => {
     if (!isOpen || showTransition || currentIsVideo) return
-
     if (isPaused) return
 
     const startTime = Date.now() - elapsedBeforePause
-
     const interval = setInterval(() => {
       if (isPaused) return
-
       const elapsed = Date.now() - startTime
       const newProgress = (elapsed / PHOTO_DURATION) * 100
 
@@ -184,14 +347,14 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     return () => clearInterval(interval)
   }, [isOpen, currentPhotoIndex, showTransition, isPaused, elapsedBeforePause, photos.length, currentIsVideo])
 
-  // 當照片/影片切換時，重置已過時間
+  // 切換照片時重置進度
   useEffect(() => {
     if (!isOpen || showTransition) return
     setElapsedBeforePause(0)
     setProgress(0)
   }, [currentPhotoIndex, isOpen, showTransition])
 
-  // 影片：只播放可見層、暫停另一層；長按暫停/放開播放
+  // 影片播放控制
   useEffect(() => {
     const otherRef = visibleLayer === 0 ? videoRef1 : videoRef0
     otherRef.current?.pause()
@@ -201,7 +364,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     else v.play().catch(() => {})
   }, [currentIsVideo, isPaused, visibleLayer, visibleVideoRef])
 
-  // 影片進度條：每 50ms 輪詢，只讀取目前可見層的 video
+  // 影片進度條
   useEffect(() => {
     if (!isOpen || showTransition || !currentIsVideo || isPaused) return
     const interval = setInterval(() => {
@@ -213,15 +376,19 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     return () => clearInterval(interval)
   }, [isOpen, showTransition, currentIsVideo, isPaused, currentPhotoIndex, visibleLayer, visibleVideoRef])
 
-  const handlePhotoClick = (e) => {
-    // 如果點擊到按鈕，不處理
-    if (e.target.closest('button')) return
+  // --- 事件處理 ---
 
-    // 第一次點擊畫面時嘗試播放背景音樂（因瀏覽器可能阻擋自動播放）
+  const handlePhotoClick = (e) => {
+    if (e.target.closest('button') || e.target.closest('input')) return
+    if (justSwipedRef.current) return
+
     tryPlayBGM()
 
-    // 如果是長按後鬆開（有暫停記錄），不處理點擊切換
-    if (pauseStartTime && Date.now() - pauseStartTime > 200) {
+    if (pauseStartTime && Date.now() - pauseStartTime > 200) return
+
+    // 輸入框聚焦時，點擊照片區域先取消焦點
+    if (inputFocused) {
+      inputRef.current?.blur()
       return
     }
 
@@ -229,90 +396,133 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     const clickX = e.clientX - rect.left
     const isLeftHalf = clickX < rect.width / 2
 
-    // 只處理左右點擊
     if (isLeftHalf) {
-      // 點擊左半邊，上一張
       if (currentPhotoIndex > 0) {
         setVisibleLayer((v) => 1 - v)
         setCurrentPhotoIndex(currentPhotoIndex - 1)
-        setProgress(0) // 重置進度
+        setProgress(0)
         setElapsedBeforePause(0)
       }
     } else {
-      // 點擊右半邊，下一張（翻到已預載的層，無載入延遲）
       if (currentPhotoIndex < photos.length - 1) {
         setVisibleLayer((v) => 1 - v)
         setCurrentPhotoIndex(currentPhotoIndex + 1)
-        setProgress(0) // 重置進度
+        setProgress(0)
         setElapsedBeforePause(0)
       } else {
-        // 最後一張後保持顯示
         setProgress(100)
       }
     }
   }
 
-  // 處理觸摸/點擊暫停
+  // 觸控：整合暫停 + 下滑關閉
   const handleTouchStart = (e) => {
-    // 如果點擊到按鈕，不處理
-    if (e.target.closest('button')) return
+    if (e.target.closest('button') || e.target.closest('input')) return
 
-    const currentProgress = progress
-    const currentElapsed = (currentProgress / 100) * PHOTO_DURATION
+    const touch = e.touches[0]
+    swipeRef.current = { x: touch.clientX, y: touch.clientY }
+    isSwipingRef.current = false
+
+    const currentElapsed = (progress / 100) * PHOTO_DURATION
     setElapsedBeforePause(currentElapsed)
     setIsPaused(true)
     setPauseStartTime(Date.now())
   }
 
+  const handleTouchMove = (e) => {
+    if (!swipeRef.current || e.target.closest('button') || e.target.closest('input')) return
+
+    const touch = e.touches[0]
+    const dy = touch.clientY - swipeRef.current.y
+    const dx = Math.abs(touch.clientX - swipeRef.current.x)
+
+    if (dy > 10 && dy > dx * 1.5) {
+      isSwipingRef.current = true
+      setSwipeY(Math.max(0, dy))
+    }
+  }
+
   const handleTouchEnd = (e) => {
-    // 如果點擊到按鈕，不處理
-    if (e.target.closest('button')) return
+    if (e.target.closest('button') || e.target.closest('input')) return
+
+    // 下滑關閉
+    if (isSwipingRef.current) {
+      if (swipeY > 120) {
+        onClose()
+      }
+      setSwipeY(0)
+      isSwipingRef.current = false
+      swipeRef.current = null
+      setIsPaused(false)
+      setPauseStartTime(null)
+      justSwipedRef.current = true
+      setTimeout(() => { justSwipedRef.current = false }, 100)
+      return
+    }
 
     const pauseDuration = pauseStartTime ? Date.now() - pauseStartTime : 0
     setPauseStartTime(null)
 
-    // 如果暫停時間很短（< 200ms），視為點擊，不恢復進度條
     if (pauseDuration < 200) {
       setIsPaused(false)
       return
     }
 
-    // 恢復進度條
     setIsPaused(false)
   }
 
-  // 處理滑鼠按下/放開暫停（桌面端）
+  // 桌面端滑鼠暫停
   const handleMouseDown = (e) => {
-    // 如果點擊到按鈕，不處理
-    if (e.target.closest('button')) return
-
-    const currentProgress = progress
-    const currentElapsed = (currentProgress / 100) * PHOTO_DURATION
+    if (e.target.closest('button') || e.target.closest('input')) return
+    const currentElapsed = (progress / 100) * PHOTO_DURATION
     setElapsedBeforePause(currentElapsed)
     setIsPaused(true)
     setPauseStartTime(Date.now())
   }
 
   const handleMouseUp = (e) => {
-    // 如果點擊到按鈕，不處理
-    if (e.target.closest('button')) return
-
+    if (e.target.closest('button') || e.target.closest('input')) return
     const pauseDuration = pauseStartTime ? Date.now() - pauseStartTime : 0
     setPauseStartTime(null)
-
-    // 如果暫停時間很短（< 200ms），視為點擊，不恢復進度條
     if (pauseDuration < 200) {
       setIsPaused(false)
       return
     }
-
-    // 恢復進度條
     setIsPaused(false)
   }
 
+  // 愛心彈跳
+  const handleHeartClick = useCallback(() => {
+    setHeartLiked((prev) => !prev)
+    setHeartBounce(true)
+    setTimeout(() => setHeartBounce(false), 500)
+  }, [])
+
+  // 輸入框焦點 → 暫停故事
+  const handleInputFocus = useCallback(() => {
+    setInputFocused(true)
+    setIsPaused(true)
+  }, [])
+
+  const handleInputBlur = useCallback(() => {
+    setInputFocused(false)
+    if (!shareOpen) setIsPaused(false)
+  }, [shareOpen])
+
+  // 分享面板
+  const handleShareOpen = useCallback(() => {
+    inputRef.current?.blur()
+    setShareOpen(true)
+    setIsPaused(true)
+  }, [])
+
+  const handleShareClose = useCallback(() => {
+    setShareOpen(false)
+    setIsPaused(false)
+  }, [])
+
   if (!isOpen) return null
 
-  // 如果沒有 heartPosition，使用螢幕中心作為 fallback
   const displayPosition = heartPosition || {
     x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0,
     y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0
@@ -323,30 +533,30 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       className="fixed inset-0 z-[100] overflow-hidden"
       style={{
         pointerEvents: showTransition ? 'none' : 'auto',
-        backgroundColor: 'transparent',
+        backgroundColor: (hasStartedTransition && !showTransition) ? 'black' : 'transparent',
         opacity: (showTransition || hasStartedTransition) ? 1 : 0,
         visibility: (showTransition || hasStartedTransition) ? 'visible' : 'hidden'
       }}
     >
-      {/* 背景音樂：好きだから。（Instagram 頁面顯示時播放） */}
+      {/* BGM */}
       <audio
         ref={bgmRef}
-        src={`${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/sukidakara.mp3`}
+        src={`${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/sukidakara.mp3`}
         loop
         preload="auto"
       />
-      {/* 白色背景過渡層：在愛心動畫後期逐漸顯示 */}
-      {showTransition && (
-        <div
-          className="absolute inset-0 animate-bg-fade-in"
-          style={{
-            backgroundColor: 'white',
-            zIndex: 9998
-          }}
-        />
-      )}
 
-      {/* 過場動畫：愛心放大填滿螢幕 */}
+      {/* 統一背景層：過場期間白色 → Instagram 期間黑色，平滑過渡 */}
+      <div
+        className={showTransition ? 'absolute inset-0 animate-bg-fade-in' : 'absolute inset-0'}
+        style={{
+          backgroundColor: (hasStartedTransition && !showTransition) ? 'black' : 'white',
+          transition: 'background-color 0.4s ease',
+          zIndex: showTransition ? 9998 : 0,
+        }}
+      />
+
+      {/* 過場動畫：愛心放大 */}
       {showTransition && displayPosition && (
         <div
           key={`heart-transition-${isOpen}`}
@@ -382,30 +592,35 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
         </div>
       )}
 
-      {/* 當 showTransition 為 false 時，確保背景是白色 */}
-      {!showTransition && (
+      {/* Safari 頂部 safe-area 黑色覆蓋（狀態列區域） */}
+      {!showTransition && hasStartedTransition && (
         <div
-          className="absolute inset-0"
-          style={{
-            backgroundColor: 'white',
-            zIndex: 0
-          }}
+          className="fixed top-0 left-0 right-0 bg-black z-[99]"
+          style={{ height: 'env(safe-area-inset-top)' }}
         />
       )}
 
-      {/* Instagram 限時動態風格：圖片只顯示到傳送訊息區塊上方，整體黑底 */}
+      {/* Instagram 限時動態 */}
       {!showTransition && hasStartedTransition && (
         <div
           className="flex flex-col w-full h-full bg-black cursor-pointer animate-photo-fade-in select-none"
           onClick={handlePhotoClick}
           onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
-          style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+          style={{
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            transform: swipeY > 0 ? `translateY(${swipeY}px) scale(${Math.max(0.9, 1 - swipeY * 0.0008)})` : undefined,
+            transition: swipeY === 0 ? 'transform 0.3s ease' : undefined,
+            borderRadius: swipeY > 0 ? '16px' : undefined,
+            overflow: 'hidden',
+          }}
         >
-          {/* 上方：雙層預載（層 0 / 層 1），下一則已在另一層載好，切換只翻層不重載 */}
+          {/* 雙層預載 */}
           <div className="flex-1 min-h-0 relative overflow-hidden bg-black">
             {[0, 1].map((layer) => {
               const idx = getLayerIndex(layer)
@@ -457,7 +672,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
               )
             })}
 
-            {/* 進度條（Instagram 風格 - 動態進度） */}
+            {/* 進度條 */}
             <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 px-2 pt-2">
               {photos.map((_, index) => (
                 <div
@@ -478,11 +693,11 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
               ))}
             </div>
 
-            {/* 左上角：Profile 圖片 + 帳號名稱 */}
+            {/* 左上角：Profile + 帳號 */}
             <div className="absolute top-4 left-4 z-20 flex items-center gap-2 h-[44px]">
               <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center overflow-hidden flex-shrink-0">
                 <img
-                  src={`${import.meta.env.BASE_URL || ''}trips/tokyo-hokkaido-2026-03/proposal-photos/gokigen_panda.png`}
+                  src={`${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/gokigen_panda.png`}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
@@ -492,7 +707,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
               </span>
             </div>
 
-            {/* 右上角：叉叉 */}
+            {/* 右上角：播放音樂 + 關閉 */}
             <div className="absolute top-4 right-4 z-20 flex items-center h-[44px] gap-1">
               {!bgmStarted && (
                 <button
@@ -520,41 +735,57 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
               </button>
             </div>
 
-            {/* 左右點擊區域（僅覆蓋圖片區） */}
+            {/* 左右點擊區域 */}
             <div className="absolute inset-0 flex">
               <div className="flex-1" />
               <div className="flex-1" />
             </div>
           </div>
 
-          {/* 下方：傳送訊息區塊（純黑底）；愛心可點擊切換紅/白 */}
+          {/* 下方：傳送訊息 + 愛心 + 分享 */}
           <div
-            className="flex items-center gap-3 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-black flex-shrink-0"
+            className="flex items-center gap-2 px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] bg-black flex-shrink-0"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex-1 min-w-0 rounded-full border border-white/30 bg-white/5 py-2.5 px-4 pointer-events-none">
-              <span className="text-white/80 text-sm font-serif">傳送訊息......</span>
+            <div className="flex-1 min-w-0 rounded-full border border-white/40 py-2 px-4 flex items-center">
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="傳送訊息......"
+                className="w-full bg-transparent text-white font-sans outline-none placeholder:text-white/60 leading-tight"
+                style={{ fontSize: '16px' }}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                autoComplete="off"
+              />
             </div>
-            <div className="flex items-center gap-5 flex-shrink-0">
-              <button
-                type="button"
-                onClick={() => setHeartLiked((prev) => !prev)}
-                className="p-1 touch-manipulation flex items-center justify-center min-w-[44px] min-h-[44px]"
-                aria-label={heartLiked ? "取消喜歡" : "喜歡"}
-              >
-                <Heart
-                  size={26}
-                  className={heartLiked ? "text-red-500 stroke-[2]" : "text-white stroke-[2]"}
-                  fill={heartLiked ? "currentColor" : "none"}
-                />
-              </button>
-              <Send size={24} className="text-white stroke-[2] pointer-events-none" />
-            </div>
+            <button
+              type="button"
+              onClick={handleHeartClick}
+              className={`touch-manipulation flex items-center justify-center w-11 h-11 flex-shrink-0 ${heartBounce ? 'animate-heart-bounce' : ''}`}
+              aria-label={heartLiked ? '取消喜歡' : '喜歡'}
+            >
+              <Heart
+                size={24}
+                className={heartLiked ? 'text-red-500' : 'text-white'}
+                fill={heartLiked ? 'currentColor' : 'none'}
+                strokeWidth={2}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={handleShareOpen}
+              className="touch-manipulation flex items-center justify-center w-11 h-11 flex-shrink-0"
+              aria-label="分享"
+            >
+              <Send size={22} className="text-white" strokeWidth={2} />
+            </button>
           </div>
         </div>
       )}
 
-      {/* 彩蛋視窗 */}
+      {/* Share Sheet */}
+      <ShareSheet isOpen={shareOpen} onClose={handleShareClose} />
     </div>
   )
 }
