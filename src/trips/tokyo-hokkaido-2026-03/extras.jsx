@@ -60,12 +60,12 @@ const ShareSheet = ({ isOpen, onClose }) => {
   const sheetRef = useRef(null)
   const overlayRef = useRef(null)
   const dragRef = useRef(null)
+  const [planePos, setPlanePos] = useState(null) // { x, y } 飛機起始位置
 
   const handleDragStart = (e) => {
     e.stopPropagation()
     dragRef.current = { startY: e.touches[0].clientY, dy: 0 }
     if (sheetRef.current) {
-      // 先把 CSS animation 清除，才能讓 JS style.transform 生效
       sheetRef.current.style.animation = 'none'
       sheetRef.current.style.transition = 'none'
       sheetRef.current.style.transform = 'translateY(0)'
@@ -77,9 +77,7 @@ const ShareSheet = ({ isOpen, onClose }) => {
     if (!dragRef.current) return
     const dy = Math.max(0, e.touches[0].clientY - dragRef.current.startY)
     dragRef.current.dy = dy
-    if (sheetRef.current) {
-      sheetRef.current.style.transform = `translateY(${dy}px)`
-    }
+    if (sheetRef.current) sheetRef.current.style.transform = `translateY(${dy}px)`
     if (overlayRef.current) {
       const opacity = Math.max(0, 0.4 * (1 - dy / 300))
       overlayRef.current.style.backgroundColor = `rgba(0,0,0,${opacity})`
@@ -91,7 +89,6 @@ const ShareSheet = ({ isOpen, onClose }) => {
     if (!dragRef.current) return
     const dy = dragRef.current.dy
     dragRef.current = null
-
     if (dy > 80) {
       if (sheetRef.current) {
         sheetRef.current.style.transition = 'transform 0.25s ease'
@@ -110,71 +107,98 @@ const ShareSheet = ({ isOpen, onClose }) => {
     }
   }
 
+  // 點擊頭像：取得點擊座標 → 觸發飛機動畫 → 關閉
+  const handleContactClick = (e) => {
+    e.stopPropagation()
+    const rect = e.currentTarget.getBoundingClientRect()
+    setPlanePos({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
+    setTimeout(() => {
+      setPlanePos(null)
+      onClose()
+    }, 700)
+  }
+
   if (!isOpen) return null
 
   return (
-    <div
-      ref={overlayRef}
-      className="absolute inset-0 z-50 flex flex-col justify-end"
-      onClick={onClose}
-      style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-    >
-      <div
-        ref={sheetRef}
-        className="relative rounded-t-2xl overflow-hidden animate-share-slide-up"
-        style={{ backgroundColor: '#262626' }}
-        onClick={(e) => e.stopPropagation()}
-        onTouchStart={handleDragStart}
-        onTouchMove={handleDragMove}
-        onTouchEnd={handleDragEnd}
-      >
-        {/* 拖曳把手 */}
-        <div className="flex justify-center pt-3 pb-4">
-          <div className="w-10 h-1 rounded-full bg-white/30" />
+    <>
+      {/* 飛機動畫：fixed 定位在點擊位置，播完就消失 */}
+      {planePos && (
+        <div
+          className="fixed z-[300] pointer-events-none animate-plane-fly"
+          style={{ left: planePos.x - 12, top: planePos.y - 12 }}
+        >
+          <Send size={24} className="text-white" strokeWidth={2} />
         </div>
+      )}
 
-        {/* 搜尋列 */}
-        <div className="px-4 pb-4">
-          <div
-            className="flex items-center gap-2 rounded-xl px-3 py-2.5"
-            style={{ backgroundColor: '#363636' }}
-          >
-            <Search size={16} className="text-white/50 flex-shrink-0" />
-            <span className="text-white/50 text-sm font-sans">搜尋</span>
-            <div className="flex-1" />
-            <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ backgroundColor: '#4a4a4a' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60">
-                <circle cx="8" cy="8" r="3" /><circle cx="16" cy="8" r="3" /><circle cx="8" cy="16" r="3" /><circle cx="16" cy="16" r="3" />
-              </svg>
+      <div
+        ref={overlayRef}
+        className="absolute inset-0 z-50 flex flex-col justify-end"
+        onClick={onClose}
+        style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+      >
+        <div
+          ref={sheetRef}
+          className="relative rounded-t-2xl overflow-hidden animate-share-slide-up"
+          style={{ backgroundColor: '#262626' }}
+          onClick={(e) => e.stopPropagation()}
+          onTouchStart={handleDragStart}
+          onTouchMove={handleDragMove}
+          onTouchEnd={handleDragEnd}
+        >
+          {/* 拖曳把手 */}
+          <div className="flex justify-center pt-3 pb-4">
+            <div className="w-10 h-1 rounded-full bg-white/30" />
+          </div>
+
+          {/* 搜尋列 */}
+          <div className="px-4 pb-4">
+            <div
+              className="flex items-center gap-2 rounded-xl px-3 py-2.5"
+              style={{ backgroundColor: '#363636' }}
+            >
+              <Search size={16} className="text-white/50 flex-shrink-0" />
+              <span className="text-white/50 text-sm font-sans">搜尋</span>
+              <div className="flex-1" />
+              <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ backgroundColor: '#4a4a4a' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60">
+                  <circle cx="8" cy="8" r="3" /><circle cx="16" cy="8" r="3" /><circle cx="8" cy="16" r="3" /><circle cx="16" cy="16" r="3" />
+                </svg>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 聯絡人 */}
-        <div className="px-6 pb-6">
-          <div className="flex flex-wrap gap-6">
-            {SHARE_CONTACTS.map((contact) => (
-              <div key={contact.name} className="flex flex-col items-center gap-2 w-[72px]">
-                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/10 bg-white/5 flex items-center justify-center">
-                  <img
-                    src={contact.avatar}
-                    alt={contact.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.style.display = 'none'
-                      e.target.parentElement.innerHTML = `<span class="text-white/30 text-2xl font-sans">${contact.name[0]}</span>`
-                    }}
-                  />
+          {/* 聯絡人 */}
+          <div className="px-6 pb-6">
+            <div className="flex flex-wrap gap-6">
+              {SHARE_CONTACTS.map((contact) => (
+                <div
+                  key={contact.name}
+                  className="flex flex-col items-center gap-2 w-[72px] cursor-pointer"
+                  onClick={handleContactClick}
+                >
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/10 bg-white/5 flex items-center justify-center active:scale-90 transition-transform">
+                    <img
+                      src={contact.avatar}
+                      alt={contact.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none'
+                        e.target.parentElement.innerHTML = `<span class="text-white/30 text-2xl font-sans">${contact.name[0]}</span>`
+                      }}
+                    />
+                  </div>
+                  <span className="text-white text-xs font-sans text-center leading-tight">{contact.name}</span>
                 </div>
-                <span className="text-white text-xs font-sans text-center leading-tight">{contact.name}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div className="pb-[max(0.5rem,env(safe-area-inset-bottom))]" />
+          <div className="pb-[max(0.5rem,env(safe-area-inset-bottom))]" />
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 
@@ -192,8 +216,12 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
   const [heartBounce, setHeartBounce] = useState(false)
   const [bgmStarted, setBgmStarted] = useState(false)
   const [inputFocused, setInputFocused] = useState(false)
+  const [inputValue, setInputValue] = useState('')
+  const [chatBubble, setChatBubble] = useState(null) // { text, fading }
   const [shareOpen, setShareOpen] = useState(false)
   const [swipeY, setSwipeY] = useState(0)
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
+  const bubbleTimerRef = useRef(null)
   const videoRef0 = useRef(null)
   const videoRef1 = useRef(null)
   const bgmRef = useRef(null)
@@ -264,8 +292,11 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       setShowTransition(false)
       setHasStartedTransition(false)
       setInputFocused(false)
+      setInputValue('')
+      setChatBubble(null)
       setShareOpen(false)
       setSwipeY(0)
+      if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current)
     }
   }, [isOpen, heartPosition])
 
@@ -291,6 +322,27 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       }
     }
   }, [isOpen, hasStartedTransition, showTransition])
+
+  // 鍵盤高度追蹤：inputFocused 時用 visualViewport 取得鍵盤高度
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv || !inputFocused) {
+      setKeyboardHeight(0)
+      return
+    }
+    const onResize = () => {
+      const kh = Math.max(0, window.innerHeight - vv.height - (vv.offsetTop || 0))
+      setKeyboardHeight(kh)
+    }
+    vv.addEventListener('resize', onResize)
+    vv.addEventListener('scroll', onResize)
+    onResize()
+    return () => {
+      vv.removeEventListener('resize', onResize)
+      vv.removeEventListener('scroll', onResize)
+      setKeyboardHeight(0)
+    }
+  }, [inputFocused])
 
   // Safari theme-color + html 背景：Instagram 期間改黑色，關閉時恢復
   useEffect(() => {
@@ -521,6 +573,30 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     setIsPaused(false)
   }, [])
 
+  // 發送訊息 → 顯示對話泡泡
+  const handleSendMessage = useCallback(() => {
+    const text = inputValue.trim()
+    if (!text) return
+
+    setInputValue('')
+    inputRef.current?.blur()
+    setIsPaused(false)
+
+    // 清除舊計時器
+    if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current)
+
+    setChatBubble({ text, fading: false })
+
+    // 3.5 秒後開始淡出
+    bubbleTimerRef.current = setTimeout(() => {
+      setChatBubble((prev) => prev ? { ...prev, fading: true } : null)
+      // 淡出動畫結束後清除
+      bubbleTimerRef.current = setTimeout(() => {
+        setChatBubble(null)
+      }, 350)
+    }, 3500)
+  }, [inputValue])
+
   if (!isOpen) return null
 
   const displayPosition = heartPosition || {
@@ -735,6 +811,28 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
               </button>
             </div>
 
+            {/* 對話泡泡：發送訊息後出現在左下角 */}
+            {chatBubble && (
+              <div
+                className={`absolute bottom-4 left-3 z-20 flex items-end gap-2 max-w-[75%] pointer-events-none ${chatBubble.fading ? 'animate-bubble-out' : 'animate-bubble-in'}`}
+              >
+                <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 border border-white/30">
+                  <img
+                    src={`${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/angelet.jpg`}
+                    alt="Angelet"
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.style.display = 'none' }}
+                  />
+                </div>
+                <div
+                  className="rounded-2xl rounded-bl-sm px-3 py-2"
+                  style={{ backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)' }}
+                >
+                  <p className="text-white text-sm font-sans leading-snug break-words">{chatBubble.text}</p>
+                </div>
+              </div>
+            )}
+
             {/* 左右點擊區域 */}
             <div className="absolute inset-0 flex">
               <div className="flex-1" />
@@ -742,44 +840,81 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
             </div>
           </div>
 
-          {/* 下方：傳送訊息 + 愛心 + 分享 */}
-          <div
-            className="flex items-center gap-2 px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] bg-black flex-shrink-0"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex-1 min-w-0 rounded-full border border-white/40 py-2 px-4 flex items-center">
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="傳送訊息......"
-                className="w-full bg-transparent text-white font-sans outline-none placeholder:text-white/60 leading-tight"
-                style={{ fontSize: '16px' }}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-                autoComplete="off"
-              />
+          {/* 下方：輸入框 + 愛心 + 分享（鍵盤打開時隱藏，改用浮動輸入列） */}
+          {!inputFocused && (
+            <div
+              className="flex items-center gap-2 px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] bg-black flex-shrink-0"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                className="flex-1 min-w-0 rounded-full border border-white/40 py-2 px-4 flex items-center"
+                onClick={() => inputRef.current?.focus()}
+              >
+                <span className="text-white/60 font-sans" style={{ fontSize: '16px' }}>傳送訊息......</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleHeartClick}
+                className={`touch-manipulation flex items-center justify-center w-11 h-11 flex-shrink-0 ${heartBounce ? 'animate-heart-bounce' : ''}`}
+                aria-label={heartLiked ? '取消喜歡' : '喜歡'}
+              >
+                <Heart
+                  size={24}
+                  className={heartLiked ? 'text-red-500' : 'text-white'}
+                  fill={heartLiked ? 'currentColor' : 'none'}
+                  strokeWidth={2}
+                />
+              </button>
+              <button
+                type="button"
+                onClick={handleShareOpen}
+                className="touch-manipulation flex items-center justify-center w-11 h-11 flex-shrink-0"
+                aria-label="分享"
+              >
+                <Send size={22} className="text-white" strokeWidth={2} />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={handleHeartClick}
-              className={`touch-manipulation flex items-center justify-center w-11 h-11 flex-shrink-0 ${heartBounce ? 'animate-heart-bounce' : ''}`}
-              aria-label={heartLiked ? '取消喜歡' : '喜歡'}
+          )}
+
+          {/* 隱藏的 input（聚焦時驅動浮動輸入列） */}
+          <input
+            ref={inputRef}
+            type="text"
+            className="sr-only"
+            style={{ fontSize: '16px', position: 'absolute', opacity: 0, pointerEvents: 'none' }}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSendMessage() } }}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+            autoComplete="off"
+            readOnly={false}
+          />
+        </div>
+      )}
+
+      {/* 鍵盤打開時：黑色背景填滿鍵盤高度區域，消除縫隙 */}
+      {inputFocused && keyboardHeight > 0 && (
+        <div
+          className="fixed left-0 right-0 z-[199] bg-black"
+          style={{ bottom: 0, height: keyboardHeight }}
+        />
+      )}
+
+      {/* 浮動輸入列：貼在黑色填充層上方 */}
+      {inputFocused && keyboardHeight > 0 && (
+        <div
+          className="fixed left-0 right-0 z-[200] flex items-center px-3 py-2 bg-black"
+          style={{ bottom: keyboardHeight }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex-1 min-w-0 rounded-full border border-white/40 py-2 px-4 flex items-center">
+            <span
+              className="flex-1 font-sans leading-tight min-w-0 truncate"
+              style={{ fontSize: '16px', color: inputValue ? 'white' : 'rgba(255,255,255,0.6)' }}
             >
-              <Heart
-                size={24}
-                className={heartLiked ? 'text-red-500' : 'text-white'}
-                fill={heartLiked ? 'currentColor' : 'none'}
-                strokeWidth={2}
-              />
-            </button>
-            <button
-              type="button"
-              onClick={handleShareOpen}
-              className="touch-manipulation flex items-center justify-center w-11 h-11 flex-shrink-0"
-              aria-label="分享"
-            >
-              <Send size={22} className="text-white" strokeWidth={2} />
-            </button>
+              {inputValue || '傳送訊息......'}
+            </span>
           </div>
         </div>
       )}

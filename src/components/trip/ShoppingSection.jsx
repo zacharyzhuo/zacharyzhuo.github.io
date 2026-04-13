@@ -43,40 +43,44 @@ function groupItems(rows) {
 
 function StandaloneCard({ item }) {
   return (
-    <div className="glass-card relative rounded-xl p-5 overflow-hidden">
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-pink-50 text-pink-500 rounded-full shrink-0">
-            <ShoppingBag size={16} />
-          </div>
-          <h3 className="font-bold text-jp-text font-serif text-lg leading-none">{item.name}</h3>
+    <div className="glass-card relative rounded-xl px-4 py-3 overflow-hidden">
+      <div className="flex items-center gap-3">
+        {/* 左側 icon */}
+        <div className="p-1.5 bg-pink-50 text-pink-500 rounded-full shrink-0">
+          <ShoppingBag size={14} />
         </div>
+
+        {/* 中間：名稱 + 樓層/時間 */}
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-jp-text font-serif text-sm leading-snug">{item.name}</p>
+          {(item.floor || item.hours) && (
+            <div className="flex items-center gap-2 text-xs text-stone-500 font-serif mt-1">
+              {item.floor && (
+                <span className="bg-stone-100 px-1.5 py-0.5 rounded text-stone-600 font-medium text-[11px]">{item.floor}</span>
+              )}
+              {item.hours && (
+                <span className="flex items-center gap-1">
+                  <Clock size={11} /> {item.hours}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* 右側導航按鈕 */}
         {item.link && (
           <a
             href={item.link}
             target="_blank"
             rel="noreferrer"
-            className="p-3 liquid-glass-button rounded-full text-stone-500 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center ml-2 shrink-0"
+            className="p-2.5 liquid-glass-button rounded-full text-stone-500 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
             onClick={e => e.stopPropagation()}
             aria-label={`查看 ${item.name} 的位置`}
           >
-            <Navigation size={16} />
+            <Navigation size={15} />
           </a>
         )}
       </div>
-
-      {(item.floor || item.hours) && (
-        <div className="mt-2 flex items-center gap-3 text-xs text-stone-500 font-serif pl-11">
-          {item.floor && (
-            <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-600 font-medium">{item.floor}</span>
-          )}
-          {item.hours && (
-            <span className="flex items-center gap-1">
-              <Clock size={12} /> {item.hours}
-            </span>
-          )}
-        </div>
-      )}
     </div>
   )
 }
@@ -177,7 +181,7 @@ export default function ShoppingSection({ rows }) {
     <div className="flex flex-col relative h-full">
       <div
         ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-8 pb-24 space-y-4 pt-2"
+        className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-8 pb-24 space-y-3 pt-2"
       >
         <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">逛街清單</h2>
         {grouped.length === 0 ? (

@@ -5,7 +5,7 @@
     <link rel="icon" type="image/png" href="/gokigen_panda_icon.png" />
     <link rel="apple-touch-icon" href="/gokigen_panda_icon.png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#F9F8F4" />
     <title>Trip Diaries</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,6 +14,19 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // 禁用雙指放大縮小（iOS Safari 10+ 忽略 user-scalable=no，需 JS 補充）
+      document.addEventListener('touchmove', function(e) {
+        if (e.touches.length > 1) e.preventDefault()
+      }, { passive: false })
+      // 禁用雙擊縮放
+      var lastTouchEnd = 0
+      document.addEventListener('touchend', function(e) {
+        var now = Date.now()
+        if (now - lastTouchEnd < 300) e.preventDefault()
+        lastTouchEnd = now
+      }, { passive: false })
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

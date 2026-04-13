@@ -357,6 +357,43 @@ body {
   animation: shareSlideUp 0.3s ease-out forwards;
 }
 
+@keyframes bubbleFadeIn {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bubbleFadeOut {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(4px); }
+}
+
+.animate-bubble-in {
+  animation: bubbleFadeIn 0.25s ease-out forwards;
+}
+
+.animate-bubble-out {
+  animation: bubbleFadeOut 0.3s ease-in forwards;
+}
+
+@keyframes planeFly {
+  0% {
+    transform: translate(0, 0) rotate(-25deg) scale(1);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(60px, -120px) rotate(-45deg) scale(1.3);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(160px, -320px) rotate(-55deg) scale(0.4);
+    opacity: 0;
+  }
+}
+
+.animate-plane-fly {
+  animation: planeFly 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
 /* DayNav sticky header Liquid Glass */
 .glass-day-nav {
   background: rgba(249, 248, 244, 0.6);

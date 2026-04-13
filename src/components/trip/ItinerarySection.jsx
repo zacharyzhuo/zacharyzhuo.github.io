@@ -229,7 +229,11 @@ function DetailModal({ row, spots, onClose }) {
             <button
               onClick={() => window.open(navUrl, '_blank')}
               className="liquid-tab-track pointer-events-auto shadow-2xl font-serif text-stone-600 flex items-center gap-2"
-              style={{ padding: '12px 32px' }}
+              style={{
+                padding: '12px 32px',
+                background: 'rgba(255, 255, 255, 0.45)',
+                boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.7), 0 8px 24px rgba(0,0,0,0.15)',
+              }}
               aria-label={`開啟 ${current.name} 的 Google Maps 導航`}
             >
               <Navigation size={16} />
