@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { sheetURL, parseCSV } from '../lib/sheets.js'
 
+const cache = new Map()
+
 export function useSheetData(sheetId, tabName) {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
@@ -8,6 +10,14 @@ export function useSheetData(sheetId, tabName) {
 
   useEffect(() => {
     if (!sheetId || !tabName) { setLoading(false); return }
+
+    const key = `${sheetId}:${tabName}`
+    if (cache.has(key)) {
+      setData(cache.get(key))
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
     setError(null)
 
@@ -16,7 +26,11 @@ export function useSheetData(sheetId, tabName) {
         if (!r.ok) throw new Error(`HTTP ${r.status}`)
         return r.text()
       })
-      .then(text => setData(parseCSV(text)))
+      .then(text => {
+        const parsed = parseCSV(text)
+        cache.set(key, parsed)
+        setData(parsed)
+      })
       .catch(err => setError(err))
       .finally(() => setLoading(false))
   }, [sheetId, tabName])

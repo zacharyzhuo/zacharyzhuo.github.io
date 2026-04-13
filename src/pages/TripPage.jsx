@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Menu, Info, ClipboardList, ShoppingBag, Utensils } from 'lucide-react'
 import { useTrips } from '../hooks/useTrips.js'
 import { useSheetData } from '../hooks/useSheetData.js'
+import { useScrollLock } from '../hooks/useScrollLock.js'
 import LoadingSpinner from '../components/ui/LoadingSpinner.jsx'
 import Sidebar from '../components/layout/Sidebar.jsx'
 import BottomSheet from '../components/layout/BottomSheet.jsx'
@@ -72,8 +73,8 @@ export default function TripPage() {
   const [easterEggOpen, setEasterEggOpen] = useState(false)
   const [heartPosition, setHeartPosition] = useState(null)
   const [easterEggActivated, setEasterEggActivated] = useState(false)
-  const [eggClickCount, setEggClickCount] = useState(0)
-  const [lastEggClickTime, setLastEggClickTime] = useState(0)
+  const eggClickCount = useRef(0)
+  const lastEggClickTime = useRef(0)
 
   const { data: flights, loading: flightsLoading } = useSheetData(trip?.sheet_id, 'flights')
   const { data: itinerary, loading: itineraryLoading } = useSheetData(trip?.sheet_id, 'itinerary')
@@ -90,12 +91,7 @@ export default function TripPage() {
       .catch(() => setExtras(null))
   }, [slug])
 
-  // Prevent background scroll when any modal/sidebar is open
-  useEffect(() => {
-    const isAnyOpen = sidebarOpen || activeModal || easterEggOpen
-    document.body.style.overflow = isAnyOpen ? 'hidden' : 'unset'
-    return () => { document.body.style.overflow = 'unset' }
-  }, [sidebarOpen, activeModal, easterEggOpen])
+  useScrollLock(sidebarOpen || !!activeModal || easterEggOpen)
 
   const days = [...new Set(itinerary.map(r => Number(r.day)))]
     .sort((a, b) => a - b)
@@ -196,19 +192,19 @@ export default function TripPage() {
             if (!extras || day !== extras.easterEggDay) return
 
             if (activeDay !== day) {
-              setEggClickCount(0)
-              setLastEggClickTime(0)
+              eggClickCount.current = 0
+              lastEggClickTime.current = 0
               return
             }
 
             const now = Date.now()
-            const newCount = (now - lastEggClickTime > 2000) ? 1 : eggClickCount + 1
-            setEggClickCount(newCount)
-            setLastEggClickTime(now)
+            const newCount = (now - lastEggClickTime.current > 2000) ? 1 : eggClickCount.current + 1
+            eggClickCount.current = newCount
+            lastEggClickTime.current = now
 
             if (newCount >= 9) {
               setEasterEggActivated(true)
-              setEggClickCount(0)
+              eggClickCount.current = 0
               const btn = document.querySelector(`[data-day="${day}"]`)
               if (btn) {
                 const rect = btn.getBoundingClientRect()
@@ -299,7 +295,7 @@ export default function TripPage() {
           isOpen={easterEggOpen}
           onClose={() => {
             setEasterEggOpen(false)
-            setEggClickCount(0)
+            eggClickCount.current = 0
             setEasterEggActivated(false)
             setHeartPosition(null)
           }}

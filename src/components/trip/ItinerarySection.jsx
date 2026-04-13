@@ -3,6 +3,7 @@ import {
   Camera, Utensils, ShoppingBag, Train, Hotel,
   ChevronRight, X, Navigation, BookOpen, Clock, MapPin
 } from 'lucide-react'
+import { useScrollLock } from '../../hooks/useScrollLock.js'
 
 const TYPE_MAP = {
   transport:  { label: '交通', icon: Train, border: 'border-blue-200 text-blue-700 bg-blue-50' },
@@ -86,10 +87,7 @@ function DetailModal({ row, spots, onClose }) {
     if (isOpen) { setDragY(0); dragYRef.current = 0; setIsDragging(false) }
   }, [isOpen])
 
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : 'unset'
-    return () => { document.body.style.overflow = 'unset' }
-  }, [isOpen])
+  useScrollLock(isOpen)
 
   // Non-passive touchmove on pill so preventDefault blocks page scroll.
   // 依賴 isOpen：首次 mount 時 return null（無選取項目），pillRef.current 為 null，
@@ -218,8 +216,8 @@ function DetailModal({ row, spots, onClose }) {
                     <div className="h-[1px] flex-1 bg-stone-200" />
                   </div>
                   <div>
-                    {currentSpots.map((spot, i) => (
-                      <SpotItem key={i} spot={spot} />
+                    {currentSpots.map((spot) => (
+                      <SpotItem key={`${spot.type}:${spot.name}`} spot={spot} />
                     ))}
                   </div>
                 </div>
@@ -277,7 +275,7 @@ export default function ItinerarySection({ rows }) {
 
           return (
             <div
-              key={i}
+              key={`${row.time}:${row.name}`}
               className="flex gap-4 px-6 group cursor-pointer"
               onClick={() => setSelected({ row, spots })}
             >
