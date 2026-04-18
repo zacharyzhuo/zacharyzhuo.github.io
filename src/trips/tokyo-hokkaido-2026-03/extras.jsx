@@ -344,15 +344,10 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     }
   }, [inputFocused])
 
-  // Safari theme-color + html 背景：Instagram 期間改黑色，關閉時恢復
+  // Safari chrome 顏色：Instagram 出現後用 CSS animation 白→黑觸發 Safari 重新採色
   useEffect(() => {
     if (!isOpen || !hasStartedTransition || showTransition) return
 
-    const html = document.documentElement
-    html.style.backgroundColor = '#000000'
-    document.body.style.backgroundColor = '#000000'
-
-    // 刪掉舊 meta 再插新的，強制 Safari 重新讀取
     const oldMeta = document.querySelector('meta[name="theme-color"]')
     if (oldMeta) oldMeta.remove()
     const newMeta = document.createElement('meta')
@@ -361,8 +356,6 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     document.head.appendChild(newMeta)
 
     return () => {
-      html.style.backgroundColor = ''
-      document.body.style.backgroundColor = ''
       const m = document.querySelector('meta[name="theme-color"]')
       if (m) m.remove()
       const restored = document.createElement('meta')
@@ -627,7 +620,6 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
         className={showTransition ? 'absolute inset-0 animate-bg-fade-in' : 'absolute inset-0'}
         style={{
           backgroundColor: (hasStartedTransition && !showTransition) ? 'black' : 'white',
-          transition: 'background-color 0.4s ease',
           zIndex: showTransition ? 9998 : 0,
         }}
       />

@@ -286,17 +286,10 @@ body {
 }
 
 @keyframes bgFadeIn {
-  0% {
-    opacity: 0;
-  }
-
-  55% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 1;
-  }
+  0%   { opacity: 0;      background-color: white; }
+  55%  { opacity: 1;      background-color: white; }
+  90%  { opacity: 1;      background-color: white; animation-timing-function: ease-in; }
+  100% { opacity: 0.9999; background-color: black; }
 }
 
 @keyframes photoFadeIn {
