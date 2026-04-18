@@ -1,19 +1,30 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Menu, Info, ClipboardList, ShoppingBag, Utensils } from 'lucide-react'
 import { useTrips } from '../hooks/useTrips.js'
 import { useSheetData } from '../hooks/useSheetData.js'
 import { useScrollLock } from '../hooks/useScrollLock.js'
+import { pickInitialDay } from '../lib/tripDate.js'
+import { bump } from '../lib/haptic.js'
+import { usePageMeta } from '../hooks/usePageMeta.js'
+import { useDays, useFoodItems } from '../hooks/useTripDerived.js'
+
+const LAST_TRIP_KEY = 'lastTripSlug'
+// 切換日期手勢的閾值：拖曳超過 50px 或速度超過 0.5px/ms 就 commit
+const SWIPE_DISTANCE_THRESHOLD = 50
+const SWIPE_VELOCITY_THRESHOLD = 0.5
 import LoadingSpinner from '../components/ui/LoadingSpinner.jsx'
+import ErrorState from '../components/ui/ErrorState.jsx'
 import Sidebar from '../components/layout/Sidebar.jsx'
 import BottomSheet from '../components/layout/BottomSheet.jsx'
 import DayNav from '../components/trip/DayNav.jsx'
 import DayBanner from '../components/trip/DayBanner.jsx'
-import TripInfoSection from '../components/trip/TripInfoSection.jsx'
 import ItinerarySection from '../components/trip/ItinerarySection.jsx'
-import ShoppingSection from '../components/trip/ShoppingSection.jsx'
-import ChecklistSection from '../components/trip/ChecklistSection.jsx'
-import FoodSection from '../components/trip/FoodSection.jsx'
+// 各 modal section 體積較大且初始畫面看不到 → 用 React.lazy + 條件渲染做 code split
+const TripInfoSection = lazy(() => import('../components/trip/TripInfoSection.jsx'))
+const ShoppingSection = lazy(() => import('../components/trip/ShoppingSection.jsx'))
+const ChecklistSection = lazy(() => import('../components/trip/ChecklistSection.jsx'))
+const FoodSection = lazy(() => import('../components/trip/FoodSection.jsx'))
 
 const MENU_ITEMS = [
   {
@@ -57,18 +68,45 @@ function slugToEnglish(slug) {
   return base.toUpperCase() + ' TRIP'
 }
 
+/**
+ * 優先用 CMS 提供的 name_en（人為編輯），fallback 到 slug 解析。
+ * 接收物件而非字串，方便日後擴充其他欄位。
+ */
+function getTripNameEn(trip, slug) {
+  const fromCms = trip?.name_en?.trim()
+  if (fromCms) return fromCms.toUpperCase().endsWith(' TRIP')
+    ? fromCms.toUpperCase()
+    : `${fromCms.toUpperCase()} TRIP`
+  return slugToEnglish(slug)
+}
+
 export default function TripPage() {
   const { slug } = useParams()
   const navigate = useNavigate()
   const { trips, loading: tripsLoading } = useTrips()
   const trip = trips.find(t => t.slug === slug)
 
-  const edgeSwipeRef = useRef(null)
-  const daySwipeRef = useRef(null)
+  const edgeContainerRef = useRef(null)
+  const edgeStartRef = useRef(null)
+  const edgeDragXRef = useRef(0)
+  const edgeHorizontalRef = useRef(null)
+  const [edgeDragX, setEdgeDragX] = useState(0)
+  const [isEdgeDragging, setIsEdgeDragging] = useState(false)
+  const daySwipeContainerRef = useRef(null)
 
   const [activeDay, setActiveDay] = useState(1)
+  const initialDayPickedRef = useRef(false)
+
+  // 日期切換手勢：dragX 跟手位移；isDragging=true 時關閉 transition 達到 1:1 跟手
+  const [dragX, setDragX] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragXRef = useRef(0)
+  const dragStartRef = useRef(null)
+  const dragHorizontalRef = useRef(null)
+
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [activeModal, setActiveModal] = useState(null)
+  const [isCarouselAnimating, setIsCarouselAnimating] = useState(false)
   const [extras, setExtras] = useState(null)
   const [easterEggOpen, setEasterEggOpen] = useState(false)
   const [heartPosition, setHeartPosition] = useState(null)
@@ -85,58 +123,244 @@ export default function TripPage() {
   const { data: daysData } = useSheetData(trip?.sheet_id, 'days')
 
   useEffect(() => {
-    if (!slug) return
+    if (!slug) {
+      setExtras(null)
+      return
+    }
+    let cancelled = false
     import(`../trips/${slug}/extras.jsx`)
-      .then(m => setExtras(m.default))
-      .catch(() => setExtras(null))
+      .then(m => { if (!cancelled) setExtras(m.default) })
+      .catch(() => { if (!cancelled) setExtras(null) })
+    return () => { cancelled = true }
+  }, [slug])
+
+  // 切換 trip 時記下「最後造訪行程」，PWA 啟動時 HomePage 會用來判斷是否自動跳轉
+  useEffect(() => {
+    if (!slug) return
+    initialDayPickedRef.current = false
+    try { localStorage.setItem(LAST_TRIP_KEY, slug) } catch { /* ignore */ }
   }, [slug])
 
   useScrollLock(sidebarOpen || !!activeModal || easterEggOpen)
 
-  const days = [...new Set(itinerary.map(r => Number(r.day)))]
-    .sort((a, b) => a - b)
-    .map(day => {
-      const row = itinerary.find(r => Number(r.day) === day)
-      return { day, date: row?.date ?? '' }
-    })
+  usePageMeta({
+    title: trip ? `${trip.name}｜${trip.dates || ''}`.replace(/｜$/, '') : '行程',
+    description: trip ? `${trip.name} ${trip.dates || ''} 旅行記錄`.trim() : undefined,
+    image: trip?.cover_image_url || undefined,
+  })
 
-  const activeDayMeta = daysData.find(r => Number(r.day) === activeDay)
-  const dayItinerary = itinerary.filter(r => Number(r.day) === activeDay)
-  const foodItems = food.length > 0 ? food : itinerary.filter(r => r.type === 'food')
+  const days = useDays(itinerary)
 
-  // 右滑返回首頁（限左緣 30px 內起始）
+  // 第一次拿到 itinerary 資料時自動跳到「今天」對應的 day。
+  // 用 ref 確保 user 手動切過之後不會被覆蓋；切換 trip 時 ref 會被 reset。
+  useEffect(() => {
+    if (initialDayPickedRef.current || days.length === 0) return
+    setActiveDay(pickInitialDay(days))
+    initialDayPickedRef.current = true
+  }, [days])
+
+  const activeDayMeta = useMemo(
+    () => daysData.find(r => Number(r.day) === activeDay),
+    [daysData, activeDay]
+  )
+  const dayItinerary = useMemo(
+    () => itinerary.filter(r => Number(r.day) === activeDay),
+    [itinerary, activeDay]
+  )
+  const foodItems = useFoodItems(food, itinerary)
+
+  // 輪播三欄：前一天 / 當天 / 後一天
+  const activeDayIdx = useMemo(() => days.findIndex(d => d.day === activeDay), [days, activeDay])
+  const prevDayObj = activeDayIdx > 0 ? days[activeDayIdx - 1] : null
+  const nextDayObj = activeDayIdx < days.length - 1 ? days[activeDayIdx + 1] : null
+  const prevDayMeta = useMemo(
+    () => prevDayObj ? daysData.find(r => Number(r.day) === prevDayObj.day) : null,
+    [daysData, prevDayObj]
+  )
+  const nextDayMeta = useMemo(
+    () => nextDayObj ? daysData.find(r => Number(r.day) === nextDayObj.day) : null,
+    [daysData, nextDayObj]
+  )
+  const prevDayItinerary = useMemo(
+    () => prevDayObj ? itinerary.filter(r => Number(r.day) === prevDayObj.day) : [],
+    [itinerary, prevDayObj]
+  )
+  const nextDayItinerary = useMemo(
+    () => nextDayObj ? itinerary.filter(r => Number(r.day) === nextDayObj.day) : [],
+    [itinerary, nextDayObj]
+  )
+
+  // 右滑返回首頁（限左緣 30px 內起始）— 跟手位移 + commit 動畫
   const handleEdgeTouchStart = (e) => {
     if (sidebarOpen || activeModal) return
     const t = e.touches[0]
     if (t.clientX > 30) return
-    edgeSwipeRef.current = { x: t.clientX, y: t.clientY }
-  }
-  const handleEdgeTouchEnd = (e) => {
-    if (!edgeSwipeRef.current) return
-    const t = e.changedTouches[0]
-    const dx = t.clientX - edgeSwipeRef.current.x
-    const dy = t.clientY - edgeSwipeRef.current.y
-    edgeSwipeRef.current = null
-    if (Math.abs(dy) > Math.abs(dx) || dx < 60) return
-    navigate(-1)
+    edgeStartRef.current = { x: t.clientX, y: t.clientY, time: Date.now() }
+    edgeHorizontalRef.current = null
+    edgeDragXRef.current = 0
+    setIsEdgeDragging(true)
+    setEdgeDragX(0)
   }
 
-  // 左右滑動切換日期（掛在 DayBanner + ItinerarySection 區域，避開 DayNav 橫向捲動）
+  // 邊緣手勢的 touchmove 也要 non-passive 才能 preventDefault
+  useEffect(() => {
+    const el = edgeContainerRef.current
+    if (!el) return
+
+    const onMove = (e) => {
+      if (!edgeStartRef.current) return
+      const dx = e.touches[0].clientX - edgeStartRef.current.x
+      const dy = e.touches[0].clientY - edgeStartRef.current.y
+
+      if (edgeHorizontalRef.current === null) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return
+        edgeHorizontalRef.current = Math.abs(dx) > Math.abs(dy) && dx > 0
+        if (!edgeHorizontalRef.current) {
+          edgeStartRef.current = null
+          setIsEdgeDragging(false)
+          return
+        }
+      }
+
+      e.preventDefault()
+      const clamped = Math.max(0, dx)
+      edgeDragXRef.current = clamped
+      setEdgeDragX(clamped)
+    }
+
+    el.addEventListener('touchmove', onMove, { passive: false })
+    return () => el.removeEventListener('touchmove', onMove)
+  }, [sidebarOpen, activeModal])
+
+  const handleEdgeTouchEnd = () => {
+    if (!edgeStartRef.current) {
+      setIsEdgeDragging(false)
+      setEdgeDragX(0)
+      return
+    }
+    const dx = edgeDragXRef.current
+    const elapsed = Math.max(1, Date.now() - edgeStartRef.current.time)
+    const velocity = dx / elapsed
+
+    edgeStartRef.current = null
+    edgeHorizontalRef.current = null
+
+    const commit = dx >= 100 || (velocity >= 0.5 && dx > 30)
+
+    if (commit) {
+      bump()
+      // 先把內容滑到右側、再 navigate，避免 page 切換時的視覺斷層
+      setIsEdgeDragging(false)
+      setEdgeDragX(window.innerWidth)
+      setTimeout(() => {
+        navigate('/?home=1')
+      }, 200)
+      return
+    }
+
+    setIsEdgeDragging(false)
+    setEdgeDragX(0)
+    edgeDragXRef.current = 0
+  }
+
+  // 左右滑動切換日期：跟手位移 + commit 時順勢回彈過場
   const handleDaySwipeTouchStart = (e) => {
     if (sidebarOpen || activeModal || days.length <= 1) return
     const t = e.touches[0]
-    daySwipeRef.current = { x: t.clientX, y: t.clientY }
+    dragStartRef.current = { x: t.clientX, y: t.clientY, time: Date.now() }
+    dragHorizontalRef.current = null
+    dragXRef.current = 0
+    setIsDragging(true)
+    setDragX(0)
   }
-  const handleDaySwipeTouchEnd = (e) => {
-    if (!daySwipeRef.current) return
-    const t = e.changedTouches[0]
-    const dx = t.clientX - daySwipeRef.current.x
-    const dy = t.clientY - daySwipeRef.current.y
-    daySwipeRef.current = null
-    if (Math.abs(dy) > Math.abs(dx) || Math.abs(dx) < 50) return
+
+  // 非 passive 的 touchmove 才能 preventDefault 阻止頁面捲動
+  useEffect(() => {
+    const el = daySwipeContainerRef.current
+    if (!el) return
+
+    const onMove = (e) => {
+      if (!dragStartRef.current) return
+      const dx = e.touches[0].clientX - dragStartRef.current.x
+      const dy = e.touches[0].clientY - dragStartRef.current.y
+
+      // 第一次明顯的移動決定方向；垂直拖則放棄手勢，讓頁面正常捲動
+      if (dragHorizontalRef.current === null) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return
+        dragHorizontalRef.current = Math.abs(dx) > Math.abs(dy)
+        if (!dragHorizontalRef.current) {
+          // 確認是垂直滑動 → 取消手勢追蹤
+          dragStartRef.current = null
+          setIsDragging(false)
+          return
+        }
+      }
+
+      e.preventDefault()
+
+      // 邊界阻尼：第一天往右拉、最後一天往左拉時施加 0.3x damping
+      const idx = days.findIndex(d => d.day === activeDay)
+      let damped = dx
+      if ((idx === 0 && dx > 0) || (idx === days.length - 1 && dx < 0)) {
+        damped = dx * 0.3
+      }
+      dragXRef.current = damped
+      setDragX(damped)
+    }
+
+    el.addEventListener('touchmove', onMove, { passive: false })
+    return () => el.removeEventListener('touchmove', onMove)
+  }, [days, activeDay, sidebarOpen, activeModal])
+
+  const handleDaySwipeTouchEnd = () => {
+    if (!dragStartRef.current) {
+      setIsDragging(false)
+      setDragX(0)
+      return
+    }
+    const dx = dragXRef.current
+    const elapsed = Math.max(1, Date.now() - dragStartRef.current.time)
+    const velocity = Math.abs(dx) / elapsed
     const idx = days.findIndex(d => d.day === activeDay)
-    if (dx < 0 && idx < days.length - 1) setActiveDay(days[idx + 1].day)
-    if (dx > 0 && idx > 0) setActiveDay(days[idx - 1].day)
+
+    dragStartRef.current = null
+    dragHorizontalRef.current = null
+    dragXRef.current = 0
+
+    const passDistance = Math.abs(dx) >= SWIPE_DISTANCE_THRESHOLD
+    const passVelocity = velocity >= SWIPE_VELOCITY_THRESHOLD && Math.abs(dx) > 10
+
+    if (passDistance || passVelocity) {
+      if (dx < 0 && idx < days.length - 1) {
+        bump()
+        // Phase 1：把動畫跑完（滑到 -100vw）
+        setIsDragging(false)
+        setDragX(-window.innerWidth)
+        // Phase 2：動畫結束後瞬間換內容 + 歸零（無 transition）
+        setTimeout(() => {
+          setIsCarouselAnimating(true)
+          setActiveDay(days[idx + 1].day)
+          setDragX(0)
+          requestAnimationFrame(() => requestAnimationFrame(() => setIsCarouselAnimating(false)))
+        }, 300)
+        return
+      } else if (dx > 0 && idx > 0) {
+        bump()
+        setIsDragging(false)
+        setDragX(window.innerWidth)
+        setTimeout(() => {
+          setIsCarouselAnimating(true)
+          setActiveDay(days[idx - 1].day)
+          setDragX(0)
+          requestAnimationFrame(() => requestAnimationFrame(() => setIsCarouselAnimating(false)))
+        }, 300)
+        return
+      }
+    }
+
+    // 未達閾值：彈回中心
+    setIsDragging(false)
+    setDragX(0)
   }
 
   if (tripsLoading || flightsLoading || itineraryLoading) {
@@ -145,21 +369,33 @@ export default function TripPage() {
 
   if (!trip) {
     return (
-      <div className="bg-jp-bg min-h-screen safe-area-inset flex flex-col items-center justify-center gap-4">
-        <p className="text-jp-sub font-serif">找不到此行程</p>
+      <div className="bg-jp-bg min-h-screen safe-area-inset flex flex-col items-center justify-center">
+        <ErrorState
+          title="找不到此行程"
+          message="可能網址有誤或行程已下架"
+          actionLabel="回行程列表"
+          onAction={() => navigate('/?home=1')}
+        />
       </div>
     )
   }
 
   const yearMonth = getYearMonth(trip.dates)
-  const tripNameEn = slugToEnglish(slug)
+  const tripNameEn = getTripNameEn(trip, slug)
 
   return (
     <div
+      ref={edgeContainerRef}
       className="min-h-screen bg-jp-bg text-jp-text font-serif pb-12 safe-area-inset"
       onTouchStart={handleEdgeTouchStart}
       onTouchEnd={handleEdgeTouchEnd}
+      onTouchCancel={handleEdgeTouchEnd}
     >
+      {/* 內容容器：可被 edge swipe 整體向右拖移；modals/sidebar 不在內，避免被 transform 影響 fixed positioning */}
+      <div
+        style={edgeDragX > 0 ? { transform: `translate3d(${edgeDragX}px, 0, 0)` } : undefined}
+        className={isEdgeDragging ? '' : 'transition-transform duration-200 ease-out'}
+      >
       {/* Header: centered multi-line, hamburger absolute-left */}
       <div className="relative pt-8 pb-4 px-6 flex items-center justify-between">
         <button
@@ -222,23 +458,73 @@ export default function TripPage() {
         />
       )}
 
-      {/* Day swipe zone：Banner + Itinerary，刻意不包含 DayNav 避免橫向捲動衝突 */}
+      {/* Day swipe zone：三欄輪播（prev｜current｜next），拖動時看到隔壁內容 */}
       <div
+        ref={daySwipeContainerRef}
         onTouchStart={handleDaySwipeTouchStart}
         onTouchEnd={handleDaySwipeTouchEnd}
+        onTouchCancel={handleDaySwipeTouchEnd}
+        className="overflow-hidden"
       >
-        <DayBanner
-          bannerUrl={activeDayMeta?.banner_url}
-          title={activeDayMeta?.title}
-          subtitle={activeDayMeta?.subtitle}
-        />
+        {/* 寬 300%、每欄 33.333%；基礎偏移 -33.333%（顯示中間欄），拖動時加 dragX */}
+        <div
+          style={{
+            display: 'flex',
+            width: '300%',
+            transform: `translateX(calc(-33.333% + ${dragX}px))`,
+            willChange: 'transform',
+          }}
+          className={(!isDragging && !isCarouselAnimating) ? 'transition-transform duration-300 ease-out' : ''}
+        >
+          {/* Prev panel */}
+          <div style={{ width: '33.333%', flexShrink: 0 }}>
+            {prevDayObj && (
+              <>
+                <DayBanner
+                  bannerUrl={prevDayMeta?.banner_url}
+                  title={prevDayMeta?.title}
+                  subtitle={prevDayMeta?.subtitle}
+                />
+                <div className="h-8" />
+                <div className="mt-2">
+                  <ItinerarySection rows={prevDayItinerary} />
+                </div>
+              </>
+            )}
+          </div>
 
-        <div className="h-8" />
+          {/* Current panel */}
+          <div style={{ width: '33.333%', flexShrink: 0 }}>
+            <DayBanner
+              bannerUrl={activeDayMeta?.banner_url}
+              title={activeDayMeta?.title}
+              subtitle={activeDayMeta?.subtitle}
+            />
+            <div className="h-8" />
+            <div className="mt-2">
+              <ItinerarySection rows={dayItinerary} />
+            </div>
+          </div>
 
-        <div className="mt-2">
-          <ItinerarySection rows={dayItinerary} />
+          {/* Next panel */}
+          <div style={{ width: '33.333%', flexShrink: 0 }}>
+            {nextDayObj && (
+              <>
+                <DayBanner
+                  bannerUrl={nextDayMeta?.banner_url}
+                  title={nextDayMeta?.title}
+                  subtitle={nextDayMeta?.subtitle}
+                />
+                <div className="h-8" />
+                <div className="mt-2">
+                  <ItinerarySection rows={nextDayItinerary} />
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
+      </div>{/* /content wrapper */}
 
       {/* Trip Menu Sidebar */}
       <Sidebar
@@ -246,10 +532,8 @@ export default function TripPage() {
         onClose={() => setSidebarOpen(false)}
         onSelect={(key) => { setActiveModal(key); setSidebarOpen(false) }}
         sections={MENU_ITEMS}
-        trip={trip}
         tripNameEn={tripNameEn}
       />
-
       {/* Section Modals */}
       <BottomSheet
         isOpen={activeModal === 'info'}
@@ -258,15 +542,25 @@ export default function TripPage() {
         noScroll
         noStickyTitle
       >
-        <TripInfoSection flights={flights} accommodation={accommodation} trip={trip} />
+        {activeModal === 'info' && (
+          <Suspense fallback={<div className="p-8 text-stone-400">載入中…</div>}>
+            <TripInfoSection flights={flights} accommodation={accommodation} destinationCountry={trip?.destination_country} />
+          </Suspense>
+        )}
       </BottomSheet>
 
       <BottomSheet
         isOpen={activeModal === 'checklist'}
         onClose={() => setActiveModal(null)}
         title="行李清單"
+        noScroll
+        noStickyTitle
       >
-        <ChecklistSection rows={checklist} />
+        {activeModal === 'checklist' && (
+          <Suspense fallback={<div className="p-8 text-stone-400">載入中…</div>}>
+            <ChecklistSection key={`checklist-${slug}`} rows={checklist} slug={slug} />
+          </Suspense>
+        )}
       </BottomSheet>
 
       <BottomSheet
@@ -276,7 +570,11 @@ export default function TripPage() {
         noScroll
         noStickyTitle
       >
-        <ShoppingSection rows={shopping} />
+        {activeModal === 'shopping' && (
+          <Suspense fallback={<div className="p-8 text-stone-400">載入中…</div>}>
+            <ShoppingSection rows={shopping} />
+          </Suspense>
+        )}
       </BottomSheet>
 
       <BottomSheet
@@ -286,7 +584,11 @@ export default function TripPage() {
         noScroll
         noStickyTitle
       >
-        <FoodSection rows={foodItems} />
+        {activeModal === 'food' && (
+          <Suspense fallback={<div className="p-8 text-stone-400">載入中…</div>}>
+            <FoodSection rows={foodItems} />
+          </Suspense>
+        )}
       </BottomSheet>
 
       {/* Easter Egg Modal */}

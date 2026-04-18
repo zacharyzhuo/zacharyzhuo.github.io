@@ -6,17 +6,37 @@ body {
   background-color: #F9F8F4;
   color: #2C2C2C;
   font-family: "Noto Serif JP", "Hiragino Mincho ProN", serif;
-  /* 預設改為襯線體以符合雜誌風 */
   -webkit-font-smoothing: antialiased;
-  /* Improve scrolling on iOS */
   -webkit-overflow-scrolling: touch;
-  /* Prevent text size adjustment on iOS */
   -webkit-text-size-adjust: 100%;
-  /* 禁用文字選取 */
+  /* 全站關閉長按反白 / iOS callout 選單，避免互動時跳出選字 UI */
   -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
+  -webkit-touch-callout: none;
+  /* 點擊高亮也一併關掉，讓 tap 更乾淨 */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 例外：表單輸入框與顯式標記為可選取的內容仍要能反白 / 複製 */
+input,
+textarea,
+[contenteditable="true"],
+.allow-select {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+/* 全站關閉 button / 連結的 focus outline（Safari 預設藍框）。
+   表單輸入框維持原樣，使用者打字時還是看得到聚焦位置。
+   卡片若需要 focus 提示，已用 Tailwind focus-visible:ring-* 自行 opt-in。 */
+button:focus,
+button:focus-visible,
+a:focus,
+a:focus-visible,
+[role="button"]:focus,
+[role="button"]:focus-visible {
+  outline: none;
 }
 
 /* Safe Area Insets for iPhone X and newer */
@@ -544,12 +564,12 @@ body {
   box-shadow:
     /* 右側銳利高光 */
     inset -1px 0 0 0 rgba(255, 255, 255, 0.9),
-    /* 右側折射暗帶 (微微的陰影) */
+    /* 右側折射暗帶 */
     inset -3px 0 8px -1px rgba(0, 0, 0, 0.12),
-    /* 邊緣寬光暈 (扭曲感) */
+    /* 邊緣寬光暈 */
     inset -4px 0 20px 2px rgba(255, 255, 255, 0.2),
-    /* 內部體積光 */
-    inset -10px 0 30px rgba(255, 255, 255, 0.2),
+    /* 頂部/底部聚光 */
+    inset -10px 0 10px rgba(255, 255, 255, 0.3),
     /* 上下微光 */
     inset 0 1px 5px rgba(255, 255, 255, 0.2),
     inset 0 -1px 5px rgba(255, 255, 255, 0.2);

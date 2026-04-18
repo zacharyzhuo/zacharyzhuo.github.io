@@ -1,12 +1,75 @@
+import { useEffect, useRef } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { RefreshCw } from 'lucide-react'
 import { useTrips } from '../hooks/useTrips.js'
+import { usePullToRefresh } from '../hooks/usePullToRefresh.js'
+import { usePageMeta } from '../hooks/usePageMeta.js'
+import { pickActiveTrip } from '../lib/tripDate.js'
 import TripCard from '../components/home/TripCard.jsx'
 import LoadingSpinner from '../components/ui/LoadingSpinner.jsx'
+import ErrorState from '../components/ui/ErrorState.jsx'
+
+const LAST_TRIP_KEY = 'lastTripSlug'
 
 export default function HomePage() {
-  const { trips, loading, error } = useTrips()
+  const { trips, loading, error, refresh } = useTrips()
+  const { pullY, refreshing } = usePullToRefresh(refresh)
+  const navigate = useNavigate()
+  const location = useLocation()
+  const redirectedRef = useRef(false)
+
+  usePageMeta({ title: '行程列表' })
+
+  // PWA / 直接訪問首頁時，根據「最後造訪」或「即將出發」的行程自動跳轉。
+  // 帶 ?home=1 的進入點（從 trip page 主動返回）會跳過這個邏輯。
+  useEffect(() => {
+    if (redirectedRef.current) return
+    if (loading || error) return
+
+    const params = new URLSearchParams(location.search)
+    if (params.get('home') === '1') {
+      redirectedRef.current = true
+      return
+    }
+
+    const lastSlug = (() => {
+      try { return localStorage.getItem(LAST_TRIP_KEY) } catch { return null }
+    })()
+
+    const targetSlug =
+      (lastSlug && trips.some(t => t.slug === lastSlug) ? lastSlug : null) ??
+      pickActiveTrip(trips)
+
+    if (targetSlug) {
+      redirectedRef.current = true
+      navigate(`/trip/${targetSlug}`, { replace: true })
+    }
+  }, [trips, loading, error, location.search, navigate])
+
+  const showIndicator = pullY > 0 || refreshing
+  const indicatorOpacity = refreshing ? 1 : Math.min(1, pullY / 80)
+  const indicatorRotation = refreshing ? 'animate-spin' : ''
 
   return (
-    <div className="bg-jp-bg min-h-screen safe-area-inset">
+    <div className="bg-jp-bg min-h-screen safe-area-inset relative overflow-x-hidden">
+      {/* Pull-to-refresh indicator：覆蓋在頂端，隨拉動距離淡入 */}
+      {showIndicator && (
+        <div
+          className="absolute left-0 right-0 top-0 flex justify-center pointer-events-none z-10"
+          style={{
+            transform: `translateY(${refreshing ? 24 : Math.max(0, pullY - 30)}px)`,
+            opacity: indicatorOpacity,
+          }}
+        >
+          <div className="liquid-glass-button rounded-full p-3 text-stone-500">
+            <RefreshCw size={20} className={indicatorRotation} />
+          </div>
+        </div>
+      )}
+      <div
+        style={{ transform: `translateY(${pullY}px)` }}
+        className={pullY === 0 ? 'transition-transform duration-200 ease-out' : ''}
+      >
       {/* Header */}
       <header className="px-6 pt-8 pb-6">
         <h1 className="text-3xl font-serif font-bold text-jp-text">Trip Diaries</h1>
@@ -18,15 +81,12 @@ export default function HomePage() {
         {loading && <LoadingSpinner />}
 
         {error && (
-          <div className="flex flex-col items-center gap-4 mt-12 text-center px-6">
-            <p className="text-jp-sub font-serif text-sm">無法載入行程資料</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-jp-green text-white rounded-xl font-serif text-sm touch-manipulation"
-            >
-              重試
-            </button>
-          </div>
+          <ErrorState
+            title="無法載入行程"
+            message="請檢查網路連線，或下拉重新整理"
+            actionLabel="重試"
+            onAction={refresh}
+          />
         )}
 
         {!loading && !error && (
@@ -40,6 +100,7 @@ export default function HomePage() {
           </div>
         )}
       </main>
+      </div>
     </div>
   )
 }

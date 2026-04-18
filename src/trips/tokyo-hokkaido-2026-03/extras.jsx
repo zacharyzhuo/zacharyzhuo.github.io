@@ -1,30 +1,31 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useReducer } from 'react'
 import { Heart, X, Send, Music, Search } from 'lucide-react'
 
 // 彩蛋照片/影片列表：請將檔案放在 proposal-photos/（靜態根目錄）
 // 圖片：JPEG 或 WebP（勿用 HEIC）。影片：.mov 或 .mp4（.mov 在 Safari 支援佳，Chrome 建議 .mp4）。
-const BASE = import.meta.env.BASE_URL || ''
+import { env } from '../../lib/env.js'
+const BASE = env.BASE_URL
 const PROPOSAL_PHOTOS = [
-  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/1.MOV`,
-  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/2.MOV`,
-  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/3.MOV`,
-  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/4.MOV`,
-  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/5.MOV`,
-  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/6.MOV`,
-  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/7.MOV`,
-  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/8.MOV`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/1.mp4`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/2.mp4`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/3.mp4`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/4.mp4`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/5.mp4`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/6.mp4`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/7.mp4`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/8.mp4`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/9.JPG`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/10.JPG`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/11.JPG`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/12.JPG`,
-  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/13.MOV`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/13.mp4`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/14.JPG`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/15.JPG`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/16.JPG`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/17.JPG`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/18.JPG`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/19.JPG`,
-  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/20.MOV`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/20.mp4`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/21.JPG`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/22.JPG`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/23.JPG`,
@@ -42,7 +43,7 @@ const PROPOSAL_PHOTOS = [
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/35.JPG`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/36.JPG`,
   `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/37.JPG`,
-  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/38.MOV`,
+  `${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/38.mp4`,
 ]
 
 const isVideoUrl = (url) => /\.(mov|mp4|webm)(\?|$)/i.test(url || '')
@@ -229,26 +230,76 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
   const swipeRef = useRef(null)
   const isSwipingRef = useRef(false)
   const justSwipedRef = useRef(false)
+  // iOS Safari 不會 preload hidden video，用 fetch 下載 blob 後轉成 blob URL
+  const videoBlobCache = useRef(new Map())
+  // 用 state 觸發 re-render，讓播放 effect 在 blob 就緒後能取用新 src
+  const [blobReadyCount, setBlobReadyCount] = useState(0)
 
   const photos = PROPOSAL_PHOTOS
   const PHOTO_DURATION = 6000
   const currentIsVideo = isVideoUrl(photos[currentPhotoIndex])
-  const getLayerIndex = (layer) =>
-    layer === visibleLayer ? currentPhotoIndex : Math.min(currentPhotoIndex + 1, photos.length - 1)
   const visibleVideoRef = visibleLayer === 0 ? videoRef0 : videoRef1
 
-  // 預載下一張與前一張（僅圖片）
+  // 每層的「已提交內容 idx」，只有在淡出完成後才更新非可見層，
+  // 避免 iOS Safari 在 src 改變瞬間清空畫面造成閃爍
+  const layerCommittedIdx = useRef([0, Math.min(1, photos.length - 1)])
+  layerCommittedIdx.current[visibleLayer] = currentPhotoIndex
+  const [, triggerLayerUpdate] = useReducer((n) => n + 1, 0)
+  const getLayerIndex = (layer) => layerCommittedIdx.current[layer]
+
+  // 預載：圖片往前看 3 張
   useEffect(() => {
     if (!isOpen || !photos.length) return
-    const preload = (index) => {
-      if (index >= 0 && index < photos.length && !isVideoUrl(photos[index])) {
+    for (let i = 1; i <= 3; i++) {
+      const idx = currentPhotoIndex + i
+      if (idx < photos.length && !isVideoUrl(photos[idx])) {
         const img = new Image()
-        img.src = photos[index]
+        img.src = photos[idx]
       }
     }
-    preload(currentPhotoIndex + 1)
-    preload(currentPhotoIndex - 1)
   }, [isOpen, currentPhotoIndex, photos])
+
+  // 影片預載：iOS Safari 會忽略 hidden video 的 preload="auto"，
+  // 改用 fetch 下載成 blob 後存 cache，避免顯示時才開始下載
+  useEffect(() => {
+    if (!isOpen || !photos.length) return
+    const cache = videoBlobCache.current
+    const controllers = []
+
+    // 找出接下來 5 個位置內的影片，提前 fetch
+    for (let i = 1; i <= 5; i++) {
+      const idx = currentPhotoIndex + i
+      if (idx >= photos.length) break
+      const src = photos[idx]
+      if (!isVideoUrl(src) || cache.has(src)) continue
+
+      const controller = new AbortController()
+      controllers.push(controller)
+
+      fetch(src, { signal: controller.signal })
+        .then((res) => res.blob())
+        .then((blob) => {
+          if (!cache.has(src)) {
+            cache.set(src, URL.createObjectURL(blob))
+            setBlobReadyCount((n) => n + 1)
+          }
+        })
+        .catch(() => {})
+    }
+
+    return () => {
+      controllers.forEach((c) => c.abort())
+    }
+  }, [isOpen, currentPhotoIndex, photos])
+
+  // modal 關閉時釋放 blob URL，避免記憶體洩漏
+  useEffect(() => {
+    if (isOpen) return
+    const cache = videoBlobCache.current
+    cache.forEach((blobUrl) => URL.revokeObjectURL(blobUrl))
+    cache.clear()
+    setBlobReadyCount(0)
+  }, [isOpen])
 
   useEffect(() => {
     if (isOpen) {
@@ -399,15 +450,23 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     setProgress(0)
   }, [currentPhotoIndex, isOpen, showTransition])
 
-  // 影片播放控制
+  // 影片播放控制：播放前先確認 src 使用已快取的 blob URL（iOS Safari 才能即時播放）
   useEffect(() => {
     const otherRef = visibleLayer === 0 ? videoRef1 : videoRef0
     otherRef.current?.pause()
     const v = visibleVideoRef.current
     if (!currentIsVideo || !v) return
+
+    const originalSrc = photos[currentPhotoIndex]
+    const cachedSrc = videoBlobCache.current.get(originalSrc)
+    if (cachedSrc && v.src !== cachedSrc) {
+      v.src = cachedSrc
+      v.load()
+    }
+
     if (isPaused) v.pause()
     else v.play().catch(() => {})
-  }, [currentIsVideo, isPaused, visibleLayer, visibleVideoRef])
+  }, [currentIsVideo, isPaused, visibleLayer, visibleVideoRef, currentPhotoIndex, photos, blobReadyCount])
 
   // 影片進度條
   useEffect(() => {
@@ -590,6 +649,19 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     }, 3500)
   }, [inputValue])
 
+  // ESC 關閉（不做 focus trap 以免影響原有複雜手勢/輸入流程）
+  useEffect(() => {
+    if (!isOpen) return
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [isOpen, onClose])
+
   if (!isOpen) return null
 
   const displayPosition = heartPosition || {
@@ -599,6 +671,9 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="求婚彩蛋"
       className="fixed inset-0 z-[100] overflow-hidden"
       style={{
         pointerEvents: showTransition ? 'none' : 'auto',
@@ -701,7 +776,18 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
                   style={{
                     opacity: isVisible ? 1 : 0,
                     pointerEvents: isVisible ? 'auto' : 'none',
-                    zIndex: isVisible ? 1 : 0,
+                    zIndex: isVisible ? 2 : 1,
+                    transition: 'opacity 200ms ease',
+                  }}
+                  onTransitionEnd={() => {
+                    // 淡出完成後才更新 buffer 層的 src，避免 iOS Safari 在 src 改變時清空畫面
+                    if (!isVisible) {
+                      const bufferIdx = Math.min(currentPhotoIndex + 1, photos.length - 1)
+                      if (layerCommittedIdx.current[layer] !== bufferIdx) {
+                        layerCommittedIdx.current[layer] = bufferIdx
+                        triggerLayerUpdate()
+                      }
+                    }
                   }}
                 >
                   {isVideo ? (
@@ -711,6 +797,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
                       className="absolute inset-0 w-full h-full object-cover pointer-events-none"
                       playsInline
                       muted
+                      preload="auto"
                       autoPlay={isVisible}
                       onEnded={() => {
                         if (currentPhotoIndex < photos.length - 1) {

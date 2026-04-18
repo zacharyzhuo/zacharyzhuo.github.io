@@ -1,38 +1,82 @@
 import { useState, useEffect } from 'react'
 import { sheetURL, parseCSV } from '../lib/sheets.js'
+import { getCached, setCached } from '../lib/swrCache.js'
 
-const cache = new Map()
+// key -> Promise<rows>。同一 sheet+tab 的並行 request 共用同一個 Promise，避免重複 fetch
+const promiseCache = new Map()
+
+/** 清空 in-memory cache，主要供測試使用 */
+export function __clearSheetCache() {
+  promiseCache.clear()
+}
+
+export function fetchSheet(sheetId, tabName) {
+  const key = `${sheetId}:${tabName}`
+  if (!promiseCache.has(key)) {
+    const p = fetch(sheetURL(sheetId, tabName))
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.text()
+      })
+      .then(parseCSV)
+      .then(rows => {
+        setCached(key, rows)
+        return rows
+      })
+      .catch(err => {
+        // 失敗時清掉 cache，下次 hook 重跑時能重試
+        promiseCache.delete(key)
+        throw err
+      })
+    promiseCache.set(key, p)
+  }
+  return promiseCache.get(key)
+}
+
+/**
+ * 預先 fetch 但不等待（用於 hover/touchstart prefetch）
+ */
+export function prefetchSheet(sheetId, tabName) {
+  if (!sheetId || !tabName) return
+  fetchSheet(sheetId, tabName).catch(() => { /* prefetch 失敗無聲忽略 */ })
+}
 
 export function useSheetData(sheetId, tabName) {
-  const [data, setData] = useState([])
-  const [loading, setLoading] = useState(true)
+  // 啟動時嘗試從 localStorage 讀上次 fetch 結果，達成 stale-while-revalidate
+  const cacheKey = sheetId && tabName ? `${sheetId}:${tabName}` : null
+
+  const [data, setData] = useState(() => (cacheKey && getCached(cacheKey)) || [])
+  const [loading, setLoading] = useState(() => {
+    if (!cacheKey) return false
+    return !getCached(cacheKey)
+  })
   const [error, setError] = useState(null)
 
   useEffect(() => {
     if (!sheetId || !tabName) { setLoading(false); return }
 
-    const key = `${sheetId}:${tabName}`
-    if (cache.has(key)) {
-      setData(cache.get(key))
-      setLoading(false)
-      return
-    }
-
-    setLoading(true)
+    let cancelled = false
     setError(null)
 
-    fetch(sheetURL(sheetId, tabName))
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`)
-        return r.text()
+    // 有快取就不顯示 loading（避免 flicker），背景 revalidate
+    const cached = getCached(`${sheetId}:${tabName}`)
+    if (!cached) setLoading(true)
+
+    fetchSheet(sheetId, tabName)
+      .then(rows => {
+        if (cancelled) return
+        setData(rows)
       })
-      .then(text => {
-        const parsed = parseCSV(text)
-        cache.set(key, parsed)
-        setData(parsed)
+      .catch(err => {
+        if (cancelled) return
+        setError(err)
       })
-      .catch(err => setError(err))
-      .finally(() => setLoading(false))
+      .finally(() => {
+        if (cancelled) return
+        setLoading(false)
+      })
+
+    return () => { cancelled = true }
   }, [sheetId, tabName])
 
   return { data, loading, error }

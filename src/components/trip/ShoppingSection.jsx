@@ -46,15 +46,15 @@ function StandaloneCard({ item }) {
     <div className="glass-card relative rounded-xl px-4 py-3 overflow-hidden">
       <div className="flex items-center gap-3">
         {/* 左側 icon */}
-        <div className="p-1.5 bg-pink-50 text-pink-500 rounded-full shrink-0">
-          <ShoppingBag size={14} />
+        <div className="p-2 bg-pink-50 text-pink-500 rounded-full shrink-0">
+          <ShoppingBag size={16} />
         </div>
 
         {/* 中間：名稱 + 樓層/時間 */}
         <div className="flex-1 min-w-0">
-          <p className="font-bold text-jp-text font-serif text-sm leading-snug">{item.name}</p>
+          <p className="font-bold text-jp-text font-serif text-base leading-snug">{item.name}</p>
           {(item.floor || item.hours) && (
-            <div className="flex items-center gap-2 text-xs text-stone-500 font-serif mt-1">
+            <div className="flex items-center gap-2 text-xs text-stone-600 font-serif mt-1">
               {item.floor && (
                 <span className="bg-stone-100 px-1.5 py-0.5 rounded text-stone-600 font-medium text-[11px]">{item.floor}</span>
               )}
@@ -73,7 +73,7 @@ function StandaloneCard({ item }) {
             href={item.link}
             target="_blank"
             rel="noreferrer"
-            className="p-2.5 liquid-glass-button rounded-full text-stone-500 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
+            className="p-2.5 liquid-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
             onClick={e => e.stopPropagation()}
             aria-label={`查看 ${item.name} 的位置`}
           >
@@ -87,17 +87,17 @@ function StandaloneCard({ item }) {
 
 function BuildingCard({ building }) {
   return (
-    <div className="glass-card relative rounded-xl p-5 overflow-hidden">
+    <div className="glass-card relative rounded-xl px-4 py-3 overflow-hidden">
       {/* Building header */}
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex justify-between items-center mb-3">
+        <div className="flex items-center gap-3">
           <div className="p-2 bg-pink-50 text-pink-500 rounded-full shrink-0">
             <ShoppingBag size={16} />
           </div>
           <div>
-            <h3 className="font-bold text-jp-text font-serif text-lg leading-none">{building.name}</h3>
+            <h3 className="font-bold text-jp-text font-serif text-base leading-snug">{building.name}</h3>
             {building.hours && (
-              <span className="text-xs text-stone-500 font-serif mt-1 flex items-center gap-1">
+              <span className="text-xs text-stone-600 font-serif mt-1 flex items-center gap-1">
                 <Clock size={12} /> {building.hours}
               </span>
             )}
@@ -108,23 +108,23 @@ function BuildingCard({ building }) {
             href={building.link}
             target="_blank"
             rel="noreferrer"
-            className="p-3 liquid-glass-button rounded-full text-stone-500 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center ml-2 shrink-0"
+            className="p-2.5 liquid-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center ml-2 shrink-0"
             onClick={e => e.stopPropagation()}
             aria-label={`查看 ${building.name} 的位置`}
           >
-            <Navigation size={16} />
+            <Navigation size={15} />
           </a>
         )}
       </div>
 
       {/* Sub-shops with left border accent */}
       {building.shops.length > 0 && (
-        <div className="mt-4 space-y-3 pl-2 border-l-2 border-stone-100">
+        <div className="mt-4 space-y-3">
           {building.shops.map((shop, i) => (
-            <div key={i} className="flex justify-between items-center group">
+            <div key={i} className="flex justify-between items-center">
               <div>
                 <p className="font-bold text-sm text-stone-700 font-serif">{shop.name}</p>
-                <div className="flex items-center gap-2 text-xs text-stone-500 font-serif mt-0.5">
+                <div className="flex items-center gap-2 text-xs text-stone-600 font-serif mt-0.5">
                   {shop.floor && (
                     <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-600 font-medium">{shop.floor}</span>
                   )}
@@ -140,11 +140,11 @@ function BuildingCard({ building }) {
                   href={shop.link}
                   target="_blank"
                   rel="noreferrer"
-                  className="opacity-40 group-hover:opacity-100 group-hover:text-jp-green transition-all p-2 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center ml-2 shrink-0"
+                  className="p-2.5 liquid-glass-button rounded-full text-stone-600 touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center ml-2 shrink-0"
                   onClick={e => e.stopPropagation()}
                   aria-label={`查看 ${shop.name} 的位置`}
                 >
-                  <Navigation size={14} />
+                  <Navigation size={15} />
                 </a>
               )}
             </div>
@@ -166,6 +166,13 @@ export default function ShoppingSection({ rows }) {
   const [activeArea, setActiveArea] = useState(() => areas[0] ?? '')
   const scrollRef = useRef(null)
 
+  // 資料非同步載入後，若尚未選中任何 tab 則自動選中第一個
+  useEffect(() => {
+    if (!activeArea && areas.length > 0) {
+      setActiveArea(areas[0])
+    }
+  }, [areas, activeArea])
+
   const filtered = activeArea ? rows.filter(r => r.area === activeArea) : rows
   const grouped = useMemo(() => groupItems(filtered), [filtered])
 
@@ -173,8 +180,14 @@ export default function ShoppingSection({ rows }) {
     if (scrollRef.current) scrollRef.current.scrollTo({ top: 0 })
   }, [activeArea])
 
+  function handleTabClick(e, area) {
+    e.stopPropagation()
+    setActiveArea(area)
+    e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+  }
+
   if (rows.length === 0) {
-    return <p className="text-center text-stone-500 font-serif text-sm py-6">尚無購物清單</p>
+    return <p className="text-center text-stone-600 font-serif text-sm py-6">尚無購物清單</p>
   }
 
   return (
@@ -185,7 +198,7 @@ export default function ShoppingSection({ rows }) {
       >
         <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">逛街清單</h2>
         {grouped.length === 0 ? (
-          <p className="text-stone-500 font-serif text-sm py-6 text-center">尚無清單</p>
+          <p className="text-stone-600 font-serif text-sm py-6 text-center">尚無清單</p>
         ) : (
           grouped.map((g, i) =>
             g.type === 'building'
@@ -201,10 +214,7 @@ export default function ShoppingSection({ rows }) {
             {areas.map(area => (
               <button
                 key={area}
-                onClick={e => {
-                  e.stopPropagation()
-                  setActiveArea(area)
-                }}
+                onClick={e => handleTabClick(e, area)}
                 className={`liquid-tab-btn font-serif px-5 ${activeArea === area ? 'active' : ''}`}
               >
                 {area}

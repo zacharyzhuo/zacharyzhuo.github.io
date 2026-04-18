@@ -2,7 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
-import { useSheetData } from '../../hooks/useSheetData.js'
+import { useSheetData, __clearSheetCache } from '../../hooks/useSheetData.js'
 
 const SHEET_ID = 'test-sheet-123'
 const CSV = '"name","time"\n"福岡","12:00"'
@@ -13,7 +13,10 @@ const server = setupServer(
 )
 
 beforeAll(() => server.listen())
-afterEach(() => server.resetHandlers())
+afterEach(() => {
+  server.resetHandlers()
+  __clearSheetCache()
+})
 afterAll(() => server.close())
 
 describe('useSheetData', () => {

@@ -31,12 +31,12 @@ function parseTime(time) {
 
 function FlightsTab({ flights }) {
   if (flights.length === 0) {
-    return <p className="text-center text-stone-500 font-serif text-sm mt-12">尚無航班資訊</p>
+    return <p className="text-center text-stone-600 font-serif text-sm mt-12">尚無航班資訊</p>
   }
 
   return (
     <div>
-      <h3 className="text-base font-bold text-stone-500 uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
+      <h3 className="text-base font-bold text-stone-600 uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
         <Plane size={18} /> 航班資訊
       </h3>
       <div className="space-y-4">
@@ -46,7 +46,7 @@ function FlightsTab({ flights }) {
 
           return (
             <div key={i} className="glass-card relative p-5 rounded-2xl overflow-hidden">
-              <div className="flex justify-between items-center mb-4 border-b border-stone-50 pb-2">
+              <div className="flex justify-between items-center mb-4 border-b border-[#5C6E58]/20 pb-2">
                 <span className="text-sm font-bold border border-blue-200 text-blue-700 bg-blue-50 px-2 py-1 rounded font-serif">
                   {f.date}
                 </span>
@@ -55,28 +55,28 @@ function FlightsTab({ flights }) {
               <div className="flex justify-between items-center mb-4">
                 <div className="text-center">
                   <div className="text-2xl font-serif font-bold text-jp-text">{dep}</div>
-                  <div className="text-sm text-stone-400 font-serif">
+                  <div className="text-sm text-stone-600 font-serif">
                     {from} {AIRPORT_NAMES[from] || ''}
                   </div>
                 </div>
-                <div className="flex flex-col items-center text-stone-300">
+                <div className="flex flex-col items-center text-stone-400">
                   <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full border border-stone-300" />
-                    <div className="w-12 h-[1px] bg-stone-300" />
+                    <div className="w-3 h-3 rounded-full border border-stone-400" />
+                    <div className="w-12 h-[1px] bg-stone-400" />
                     <Plane size={18} className="rotate-90 text-stone-400" />
-                    <div className="w-12 h-[1px] bg-stone-300" />
-                    <div className="w-3 h-3 rounded-full bg-stone-300" />
+                    <div className="w-12 h-[1px] bg-stone-400" />
+                    <div className="w-3 h-3 rounded-full bg-stone-400" />
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-serif font-bold text-jp-text">{arr}</div>
-                  <div className="text-sm text-stone-400 font-serif">
+                  <div className="text-sm text-stone-600 font-serif">
                     {to} {AIRPORT_NAMES[to] || ''}
                   </div>
                 </div>
               </div>
               {(f.carry_on || f.checked_bag) && (
-                <div className="mt-4 pt-4 border-t border-stone-100">
+                <div className="mt-4 pt-4 border-t border-[#5C6E58]/20">
                   <div className="flex items-start gap-2">
                     <Luggage size={16} className="text-stone-500 mt-0.5 flex-shrink-0" />
                     <div className="text-sm text-stone-600 leading-relaxed whitespace-pre-line font-serif">
@@ -96,10 +96,23 @@ function FlightsTab({ flights }) {
   )
 }
 
-function PrepareTab() {
+function PrepareTab({ destinationCountry }) {
+  const isJapan = destinationCountry === 'JP'
+
+  if (!isJapan) {
+    return (
+      <div>
+        <h3 className="text-base font-bold text-stone-600 uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
+          <ClipboardList size={18} /> 行前準備
+        </h3>
+        <p className="text-center text-stone-600 font-serif text-sm mt-12">尚無行前準備項目</p>
+      </div>
+    )
+  }
+
   return (
     <div>
-      <h3 className="text-base font-bold text-stone-500 uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
+      <h3 className="text-base font-bold text-stone-600 uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
         <ClipboardList size={18} /> 行前準備
       </h3>
       <button
@@ -124,19 +137,19 @@ function PrepareTab() {
 
 function HotelTab({ accommodation }) {
   if (accommodation.length === 0) {
-    return <p className="text-center text-stone-500 font-serif text-sm mt-12">尚無住宿資訊</p>
+    return <p className="text-center text-stone-600 font-serif text-sm mt-12">尚無住宿資訊</p>
   }
 
   return (
     <div>
-      <h3 className="text-base font-bold text-stone-500 uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
+      <h3 className="text-base font-bold text-stone-600 uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
         <Hotel size={18} /> 住宿資訊
       </h3>
       <div className="space-y-6">
         {accommodation.map((h, i) => (
           <div key={i}>
             {h.region && (
-              <h4 className="text-sm font-bold text-stone-500 mb-3 pl-1 font-serif">{h.region}</h4>
+              <h4 className="text-sm font-bold text-stone-600 mb-3 pl-1 font-serif">{h.region}</h4>
             )}
             <div className="glass-card p-6 rounded-2xl relative overflow-hidden">
               <div className="flex items-start justify-between">
@@ -146,28 +159,28 @@ function HotelTab({ accommodation }) {
                       ? 'border-purple-200 text-purple-700 bg-purple-50'
                       : h.type === 'airbnb'
                       ? 'border-pink-200 text-pink-700 bg-pink-50'
-                      : 'border-stone-200 text-stone-500 bg-stone-50'
+                      : 'border-stone-200 text-stone-600 bg-stone-50'
                   }`}>
                     {h.type === 'hotel' ? '飯店' : h.type === 'airbnb' ? 'Airbnb' : '住宿'}
                   </span>
                   <h5 className="font-serif font-bold text-jp-text text-xl leading-tight mb-2">{h.name}</h5>
                   {h.address && (
-                    <p className="text-sm text-stone-500 font-serif mb-4">{h.address}</p>
+                    <p className="text-sm text-stone-600 font-serif mb-4">{h.address}</p>
                   )}
 
                   {(h.check_in || h.check_out) && (
                     <div className="flex gap-6 mb-4 text-sm font-serif text-stone-600 bg-white/30 p-3 rounded-lg border border-white/40">
                       {h.check_in && (
                         <div>
-                          <span className="block text-sm text-stone-500 uppercase font-serif tracking-wider mb-1">Check-in</span>
-                          <span className="text-sm text-stone-500 font-serif">{h.check_in}</span>
+                          <span className="block text-sm text-stone-600 uppercase font-serif tracking-wider mb-1">Check-in</span>
+                          <span className="text-sm text-stone-600 font-serif">{h.check_in}</span>
                         </div>
                       )}
                       {h.check_in && h.check_out && <div className="w-[1px] bg-stone-200" />}
                       {h.check_out && (
                         <div>
-                          <span className="block text-sm text-stone-500 uppercase font-serif tracking-wider mb-1">Check-out</span>
-                          <span className="text-sm text-stone-500 font-serif">{h.check_out}</span>
+                          <span className="block text-sm text-stone-600 uppercase font-serif tracking-wider mb-1">Check-out</span>
+                          <span className="text-sm text-stone-600 font-serif">{h.check_out}</span>
                         </div>
                       )}
                     </div>
@@ -199,7 +212,7 @@ function HotelTab({ accommodation }) {
   )
 }
 
-export default function TripInfoSection({ flights, accommodation, trip }) {
+export default function TripInfoSection({ flights, accommodation, destinationCountry }) {
   const [activeTab, setActiveTab] = useState('flights')
   const scrollRef = useRef(null)
 
@@ -215,7 +228,7 @@ export default function TripInfoSection({ flights, accommodation, trip }) {
       >
         <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">旅程資訊</h2>
         {activeTab === 'flights' && <FlightsTab flights={flights} />}
-        {activeTab === 'prepare' && <PrepareTab />}
+        {activeTab === 'prepare' && <PrepareTab destinationCountry={destinationCountry} />}
         {activeTab === 'hotel' && <HotelTab accommodation={accommodation} />}
       </div>
 

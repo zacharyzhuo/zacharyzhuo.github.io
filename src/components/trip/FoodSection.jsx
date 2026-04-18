@@ -12,13 +12,26 @@ export default function FoodSection({ rows }) {
   const [activeArea, setActiveArea] = useState(() => areas[0] ?? '')
   const scrollRef = useRef(null)
 
+  // 資料非同步載入後，若尚未選中任何 tab 則自動選中第一個
+  useEffect(() => {
+    if (!activeArea && areas.length > 0) {
+      setActiveArea(areas[0])
+    }
+  }, [areas, activeArea])
+
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTo({ top: 0 })
   }, [activeArea])
 
+  function handleTabClick(e, area) {
+    e.stopPropagation()
+    setActiveArea(area)
+    e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+  }
+
   if (rows.length === 0) {
     return (
-      <p className="text-center text-stone-500 font-serif text-sm py-6 px-4">尚無美食清單</p>
+      <p className="text-center text-stone-600 font-serif text-sm py-6 px-4">尚無美食清單</p>
     )
   }
 
@@ -60,7 +73,7 @@ export default function FoodSection({ rows }) {
                       <div>
                         <h4 className="font-bold text-jp-text font-serif text-lg leading-tight">{row.name}</h4>
                         {(row.hours || row.time) && (
-                          <span className="text-xs text-stone-500 font-serif mt-1 flex items-center gap-1">
+                          <span className="text-xs text-stone-600 font-serif mt-1 flex items-center gap-1">
                             <Clock size={12} /> {row.hours || row.time}
                           </span>
                         )}
@@ -70,15 +83,15 @@ export default function FoodSection({ rows }) {
                           href={row.link}
                           target="_blank"
                           rel="noreferrer"
-                          className="p-3 liquid-glass-button rounded-full text-stone-500 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+                          className="p-2.5 liquid-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center"
                           onClick={e => e.stopPropagation()}
                         >
-                          <Navigation size={16} />
+                          <Navigation size={15} />
                         </a>
                       )}
                     </div>
                     {(row.note || row.desc || row.address) && (
-                      <p className="text-sm text-stone-500 leading-relaxed font-serif">
+                      <p className="text-sm text-stone-600 leading-relaxed font-serif">
                         {row.note || row.desc || row.address}
                       </p>
                     )}
@@ -96,10 +109,7 @@ export default function FoodSection({ rows }) {
             {areas.map(area => (
               <button
                 key={area}
-                onClick={e => {
-                  e.stopPropagation()
-                  setActiveArea(area)
-                }}
+                onClick={e => handleTabClick(e, area)}
                 className={`liquid-tab-btn font-serif px-8 ${activeArea === area ? 'active' : ''}`}
               >
                 {area}

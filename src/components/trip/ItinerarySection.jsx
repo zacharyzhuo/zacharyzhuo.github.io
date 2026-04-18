@@ -1,9 +1,12 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, useId } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Camera, Utensils, ShoppingBag, Train, Hotel,
   ChevronRight, X, Navigation, BookOpen, Clock, MapPin
 } from 'lucide-react'
 import { useScrollLock } from '../../hooks/useScrollLock.js'
+import { useModalA11y } from '../../hooks/useModalA11y.js'
+import { tap } from '../../lib/haptic.js'
 
 const TYPE_MAP = {
   transport:  { label: '交通', icon: Train, border: 'border-blue-200 text-blue-700 bg-blue-50' },
@@ -70,10 +73,12 @@ function DetailModal({ row, spots, onClose }) {
   const [dragY, setDragY] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const pillRef = useRef(null)
+  const sheetRef = useRef(null)
   const touchStartY = useRef(null)
   const touchStartTime = useRef(null)
   const dragYRef = useRef(0)
   const onCloseRef = useRef(onClose)
+  const titleId = useId()
 
   useEffect(() => { onCloseRef.current = onClose }, [onClose])
 
@@ -82,6 +87,8 @@ function DetailModal({ row, spots, onClose }) {
   }, [row, spots])
 
   const isOpen = !!row
+
+  useModalA11y(isOpen, onClose, sheetRef)
 
   useEffect(() => {
     if (isOpen) { setDragY(0); dragYRef.current = 0; setIsDragging(false) }
@@ -135,25 +142,39 @@ function DetailModal({ row, spots, onClose }) {
 
   const current = row || displayRow
   const currentSpots = row ? spots : displaySpots
-  if (!current) return null
-  const { label, border } = getTypeInfo(current.type)
-  const navUrl = current.link?.startsWith('http')
-    ? current.link
-    : buildGoogleMapsUrl(current.address, current.name)
+  // 注意：不能在這裡早 return null，否則第一次點開時 sheet div 直接 mount 在 translate-y-0，
+  // 沒有「translate-y-full → translate-y-0」的起點可以動，CSS transition 不會觸發。
+  // 改為：殼永遠 render（預設 translate-y-full 藏在畫面外），內容才依 current 條件渲染。
+  const typeInfo = current ? getTypeInfo(current.type) : null
+  const navUrl = current
+    ? (current.link?.startsWith('http')
+        ? current.link
+        : buildGoogleMapsUrl(current.address, current.name))
+    : ''
 
-  return (
+  // Portal 到 body 以跳過祖先 transform（day swipe 容器永遠掛 translate3d，
+  // 會讓 fixed 元素改成相對該容器，導致 modal 被切掉 / 看起來高度很低）。
+  return createPortal(
     <>
       <div
+        aria-hidden="true"
         className={`fixed inset-0 bg-transparent z-40 transition-opacity duration-300 ${
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
       />
       <div
+        ref={sheetRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-hidden={!isOpen}
         className={sheetClass}
         style={dragY > 0 ? { transform: `translateY(${dragY}px)` } : undefined}
       >
-        <div className="glass-bottom-sheet min-h-[60vh] max-h-[79vh] flex flex-col relative overflow-hidden">
+        <div className="glass-bottom-sheet min-h-[40vh] max-h-[85vh] flex flex-col relative overflow-hidden">
+        {current && (
+          <>
 
           {/* Drag pill handle */}
           <div
@@ -175,13 +196,13 @@ function DetailModal({ row, spots, onClose }) {
 
           <div className="overflow-y-auto px-8 pb-24 flex-1 pt-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className={`px-3 py-1 border text-xs tracking-widest font-bold font-serif uppercase rounded ${border}`}>
-                {label}
+              <span className={`px-3 py-1 border text-xs tracking-widest font-bold font-serif uppercase rounded ${typeInfo.border}`}>
+                {typeInfo.label}
               </span>
               <span className="font-serif text-xl text-stone-600">{current.time}</span>
             </div>
 
-            <h2 className="text-2xl font-serif font-bold text-jp-text mb-2 leading-tight mt-2 pr-12">
+            <h2 id={titleId} className="text-2xl font-serif font-bold text-jp-text mb-2 leading-tight mt-2 pr-12">
               {current.name}
             </h2>
 
@@ -240,9 +261,12 @@ function DetailModal({ row, spots, onClose }) {
               Google Maps 導航
             </button>
           </div>
+          </>
+        )}
         </div>
       </div>
-    </>
+    </>,
+    document.body
   )
 }
 
@@ -253,15 +277,19 @@ function DetailModal({ row, spots, onClose }) {
 export default function ItinerarySection({ rows }) {
   const [selected, setSelected] = useState(null)
 
-  const mainRows = rows.filter(r => !r.parent)
+  const mainRows = useMemo(() => rows.filter(r => !r.parent), [rows])
 
-  const spotsByParent = rows
-    .filter(r => r.parent)
-    .reduce((acc, r) => {
-      if (!acc[r.parent]) acc[r.parent] = []
-      acc[r.parent].push(r)
-      return acc
-    }, {})
+  const spotsByParent = useMemo(
+    () =>
+      rows
+        .filter(r => r.parent)
+        .reduce((acc, r) => {
+          if (!acc[r.parent]) acc[r.parent] = []
+          acc[r.parent].push(r)
+          return acc
+        }, {}),
+    [rows]
+  )
 
   if (mainRows.length === 0) {
     return (
@@ -280,8 +308,7 @@ export default function ItinerarySection({ rows }) {
           return (
             <div
               key={`${row.time}:${row.name}`}
-              className="flex gap-4 px-6 group cursor-pointer"
-              onClick={() => setSelected({ row, spots })}
+              className="flex gap-4 px-6 group"
             >
               <div className="w-12 shrink-0 flex flex-col items-center pt-1">
                 <span className="text-sm font-serif font-bold text-jp-text leading-none">{row.time}</span>
@@ -289,7 +316,12 @@ export default function ItinerarySection({ rows }) {
               </div>
 
               <div className="flex-1 pb-8">
-                <div className="glass-card relative rounded-2xl p-4 active:scale-[0.98] transition-transform duration-200 h-full flex flex-col touch-manipulation overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => { tap(); setSelected({ row, spots }) }}
+                  aria-label={`${row.time} ${row.name} 詳情`}
+                  className="glass-card relative rounded-2xl p-4 active:scale-[0.98] transition-transform duration-200 h-full w-full flex flex-col text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
+                >
                   <div className="flex justify-between items-start mb-2">
                     <span className={`text-xs tracking-wider uppercase px-2 py-0.5 rounded border font-serif font-bold ${border}`}>
                       {label}
@@ -322,7 +354,7 @@ export default function ItinerarySection({ rows }) {
                     )}
                     <ChevronRight size={12} className="ml-1 shrink-0 opacity-50" />
                   </div>
-                </div>
+                </button>
               </div>
             </div>
           )

@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react'
+import { tap } from '../../lib/haptic.js'
 
 function getDayOfWeek(dateStr) {
   if (!dateStr) return ''
@@ -29,15 +30,16 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
   useEffect(() => {
     if (!scrollRef.current) return
     const activeBtn = scrollRef.current.querySelector('[data-active="true"]')
-    activeBtn?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+    if (!activeBtn) return
+    activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
   }, [activeDay])
 
   return (
     <div className="glass-day-nav sticky top-0 z-20 overflow-hidden">
       <div
         ref={scrollRef}
-        className="flex items-center justify-center px-6 py-4 overflow-x-auto scrollbar-hide"
-        style={{ WebkitOverflowScrolling: 'touch' }}
+        className="flex items-center justify-center px-6 py-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+        style={{ WebkitOverflowScrolling: 'touch', scrollPaddingInline: '50%' }}
       >
         {days.map(({ day, date }) => {
           const isActive = activeDay === day
@@ -50,8 +52,8 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
               key={day}
               data-active={isActive}
               data-day={day}
-              onClick={() => onSelect(day)}
-              className="flex flex-col items-center gap-1 min-w-[4rem] flex-shrink-0 min-h-[44px] justify-center touch-manipulation px-2 relative"
+              onClick={() => { if (!isActive) tap(); onSelect(day) }}
+              className="flex flex-col items-center gap-1 min-w-[4rem] flex-shrink-0 min-h-[44px] justify-center touch-manipulation px-2 relative snap-center"
               aria-label={`選擇第 ${day} 天`}
             >
               {isEasterDay && easterEggIcon ? (

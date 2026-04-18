@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
-import { X } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { X, Home } from 'lucide-react'
+import { tap } from '../../lib/haptic.js'
 
-export default function Sidebar({ isOpen, onClose, onSelect, sections, trip, tripNameEn }) {
+export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameEn }) {
+  const navigate = useNavigate()
   const [dragX, setDragX] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const touchStartX = useRef(null)
@@ -95,7 +98,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, trip, tri
             <h2 className="text-xl font-serif font-bold text-jp-text">Trip Menu</h2>
             <button
               onClick={onClose}
-              className="p-3 liquid-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="p-3 liquid-glass-button rounded-full text-stone-600 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="關閉選單"
             >
               <X size={18} />
@@ -104,20 +107,20 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, trip, tri
 
           <div className="flex-1 overflow-y-auto py-4">
             <nav className="space-y-2 px-4">
-              {sections.map(({ key, label, subLabel, icon, color, isEmergency }) => (
+              {sections.map(({ key, label, subLabel, icon, color }) => (
                 <button
                   key={key}
-                  onClick={() => { onSelect(key); onClose() }}
+                  onClick={() => { tap(); onSelect(key); onClose() }}
                   className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/20 transition-all text-left group"
                 >
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${color ?? 'bg-white/30 text-jp-green'}`}>
                     {icon}
                   </div>
                   <div>
-                    <span className={`block font-serif font-bold text-base ${isEmergency ? 'text-red-700' : 'text-jp-text'}`}>
+                    <span className="block font-serif font-bold text-base text-jp-text">
                       {label}
                     </span>
-                    <span className={`block text-xs font-serif tracking-wide ${isEmergency ? 'text-red-400' : 'text-stone-500'}`}>
+                    <span className="block text-xs font-serif tracking-wide text-stone-500">
                       {subLabel}
                     </span>
                   </div>
@@ -126,8 +129,23 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, trip, tri
             </nav>
           </div>
 
-          <div className="p-6">
-            <p className="text-xs text-stone-500 text-center font-serif tracking-widest uppercase opacity-70">
+          <div className="px-4 pb-2">
+            <button
+              onClick={() => {
+                onClose()
+                // ?home=1 告訴 HomePage 略過自動跳轉，避免無限循環
+                navigate('/?home=1')
+              }}
+              className="w-full flex items-center justify-center gap-2 p-3 rounded-xl liquid-glass-button text-stone-600 font-serif text-sm touch-manipulation min-h-[44px]"
+              aria-label="返回行程列表"
+            >
+              <Home size={16} />
+              <span>回行程列表</span>
+            </button>
+          </div>
+
+          <div className="px-6 pb-6 pt-2">
+            <p className="text-xs text-stone-600 text-center font-serif tracking-widest uppercase opacity-70">
               {tripNameEn || 'Trip'}
             </p>
           </div>
