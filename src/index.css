@@ -670,3 +670,26 @@ a:focus-visible,
   border-radius: 9999px 9999px 100% 100%;
   opacity: 0.8;
 }
+
+/* 清單 category 完成慶祝動畫 */
+@keyframes bar-complete {
+  0%   { transform: scaleX(1);   filter: brightness(1); }
+  30%  { transform: scaleX(1.01); filter: brightness(1.35); }
+  60%  { transform: scaleX(1);   filter: brightness(1.15); }
+  100% { transform: scaleX(1);   filter: brightness(1); }
+}
+
+@keyframes check-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  60%  { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+.bar-celebrate {
+  animation: bar-complete 0.6s ease-out forwards;
+}
+
+.check-pop {
+  display: inline-block;
+  animation: check-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}

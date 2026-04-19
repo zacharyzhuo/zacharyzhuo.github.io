@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, Home } from 'lucide-react'
-import { tap } from '../../lib/haptic.js'
 
 export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameEn }) {
   const navigate = useNavigate()
@@ -110,7 +109,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
               {sections.map(({ key, label, subLabel, icon, color }) => (
                 <button
                   key={key}
-                  onClick={() => { tap(); onSelect(key); onClose() }}
+                  onClick={() => { onSelect(key); onClose() }}
                   className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/20 transition-all text-left group"
                 >
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${color ?? 'bg-white/30 text-jp-green'}`}>

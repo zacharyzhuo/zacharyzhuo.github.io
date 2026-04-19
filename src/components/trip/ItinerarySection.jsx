@@ -6,8 +6,6 @@ import {
 } from 'lucide-react'
 import { useScrollLock } from '../../hooks/useScrollLock.js'
 import { useModalA11y } from '../../hooks/useModalA11y.js'
-import { tap } from '../../lib/haptic.js'
-
 const TYPE_MAP = {
   transport:  { label: '交通', icon: Train, border: 'border-blue-200 text-blue-700 bg-blue-50' },
   food:       { label: '美食', icon: Utensils, border: 'border-orange-200 text-orange-700 bg-orange-50' },
@@ -318,7 +316,7 @@ export default function ItinerarySection({ rows }) {
               <div className="flex-1 pb-8">
                 <button
                   type="button"
-                  onClick={() => { tap(); setSelected({ row, spots }) }}
+                  onClick={() => { setSelected({ row, spots }) }}
                   aria-label={`${row.time} ${row.name} 詳情`}
                   className="glass-card relative rounded-2xl p-4 active:scale-[0.98] transition-transform duration-200 h-full w-full flex flex-col text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
                 >

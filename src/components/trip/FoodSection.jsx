@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Navigation, Clock } from 'lucide-react'
+import { tap } from '../../lib/haptic.js'
 
 /**
  * @param {{ rows: Array<{ name: string, area?: string, category?: string, hours?: string, note?: string, link?: string, time?: string, address?: string }> }} props
@@ -25,6 +26,7 @@ export default function FoodSection({ rows }) {
 
   function handleTabClick(e, area) {
     e.stopPropagation()
+    if (area !== activeArea) tap()
     setActiveArea(area)
     e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
   }

@@ -93,6 +93,7 @@ export default function TripPage() {
   const [edgeDragX, setEdgeDragX] = useState(0)
   const [isEdgeDragging, setIsEdgeDragging] = useState(false)
   const daySwipeContainerRef = useRef(null)
+  const carouselInnerRef = useRef(null)
 
   const [activeDay, setActiveDay] = useState(1)
   const initialDayPickedRef = useRef(false)
@@ -305,7 +306,10 @@ export default function TripPage() {
         damped = dx * 0.3
       }
       dragXRef.current = damped
-      setDragX(damped)
+      // 直接操作 DOM，不走 React state — 避免每幀 re-render 造成卡頓
+      if (carouselInnerRef.current) {
+        carouselInnerRef.current.style.transform = `translateX(calc(-33.333% + ${damped}px))`
+      }
     }
 
     el.addEventListener('touchmove', onMove, { passive: false })
@@ -315,7 +319,6 @@ export default function TripPage() {
   const handleDaySwipeTouchEnd = () => {
     if (!dragStartRef.current) {
       setIsDragging(false)
-      setDragX(0)
       return
     }
     const dx = dragXRef.current
@@ -359,8 +362,19 @@ export default function TripPage() {
     }
 
     // 未達閾值：彈回中心
-    setIsDragging(false)
-    setDragX(0)
+    // dragX React state 在拖動中始終是 0（直接操作 DOM），setDragX(0) 不會觸發 DOM 更新。
+    // 改為直接操作 DOM 加 transition 做回彈，動畫結束後再讓 React 接管。
+    const snapEl = carouselInnerRef.current
+    if (snapEl && dx !== 0) {
+      snapEl.style.transition = 'transform 300ms ease-out'
+      snapEl.style.transform = 'translateX(-33.333%)'
+      setTimeout(() => {
+        if (carouselInnerRef.current) carouselInnerRef.current.style.transition = ''
+        setIsDragging(false)
+      }, 300)
+    } else {
+      setIsDragging(false)
+    }
   }
 
   if (tripsLoading || flightsLoading || itineraryLoading) {
@@ -468,6 +482,7 @@ export default function TripPage() {
       >
         {/* 寬 300%、每欄 33.333%；基礎偏移 -33.333%（顯示中間欄），拖動時加 dragX */}
         <div
+          ref={carouselInnerRef}
           style={{
             display: 'flex',
             width: '300%',

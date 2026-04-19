@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { ShoppingBag, Clock, Navigation } from 'lucide-react'
+import { tap } from '../../lib/haptic.js'
 
 /**
  * Flat CSV rows → grouped display units.
@@ -182,6 +183,7 @@ export default function ShoppingSection({ rows }) {
 
   function handleTabClick(e, area) {
     e.stopPropagation()
+    if (area !== activeArea) tap()
     setActiveArea(area)
     e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
   }

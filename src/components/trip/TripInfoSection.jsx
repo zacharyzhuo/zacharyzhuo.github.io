@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Plane, Luggage, ExternalLink, Hotel, ClipboardList, Navigation } from 'lucide-react'
+import { tap } from '../../lib/haptic.js'
 
 const INFO_TABS = [
   { key: 'flights', label: '航班資訊' },
@@ -239,6 +240,7 @@ export default function TripInfoSection({ flights, accommodation, destinationCou
               key={tab.key}
               onClick={e => {
                 e.stopPropagation()
+                if (tab.key !== activeTab) tap()
                 setActiveTab(tab.key)
               }}
               className={`liquid-tab-btn font-serif px-5 ${activeTab === tab.key ? 'active' : ''}`}
