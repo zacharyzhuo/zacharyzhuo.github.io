@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { Menu, Info, ClipboardList, ShoppingBag, Utensils } from 'lucide-react'
 import { useTrips } from '../hooks/useTrips.js'
 import { useSheetData } from '../hooks/useSheetData.js'
@@ -82,16 +82,9 @@ function getTripNameEn(trip, slug) {
 
 export default function TripPage() {
   const { slug } = useParams()
-  const navigate = useNavigate()
   const { trips, loading: tripsLoading } = useTrips()
   const trip = trips.find(t => t.slug === slug)
 
-  const edgeContainerRef = useRef(null)
-  const edgeStartRef = useRef(null)
-  const edgeDragXRef = useRef(0)
-  const edgeHorizontalRef = useRef(null)
-  const [edgeDragX, setEdgeDragX] = useState(0)
-  const [isEdgeDragging, setIsEdgeDragging] = useState(false)
   const daySwipeContainerRef = useRef(null)
   const carouselInnerRef = useRef(null)
 
@@ -190,79 +183,6 @@ export default function TripPage() {
     () => nextDayObj ? itinerary.filter(r => Number(r.day) === nextDayObj.day) : [],
     [itinerary, nextDayObj]
   )
-
-  // 右滑返回首頁（限左緣 30px 內起始）— 跟手位移 + commit 動畫
-  const handleEdgeTouchStart = (e) => {
-    if (sidebarOpen || activeModal) return
-    const t = e.touches[0]
-    if (t.clientX > 30) return
-    edgeStartRef.current = { x: t.clientX, y: t.clientY, time: Date.now() }
-    edgeHorizontalRef.current = null
-    edgeDragXRef.current = 0
-    setIsEdgeDragging(true)
-    setEdgeDragX(0)
-  }
-
-  // 邊緣手勢的 touchmove 也要 non-passive 才能 preventDefault
-  useEffect(() => {
-    const el = edgeContainerRef.current
-    if (!el) return
-
-    const onMove = (e) => {
-      if (!edgeStartRef.current) return
-      const dx = e.touches[0].clientX - edgeStartRef.current.x
-      const dy = e.touches[0].clientY - edgeStartRef.current.y
-
-      if (edgeHorizontalRef.current === null) {
-        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return
-        edgeHorizontalRef.current = Math.abs(dx) > Math.abs(dy) && dx > 0
-        if (!edgeHorizontalRef.current) {
-          edgeStartRef.current = null
-          setIsEdgeDragging(false)
-          return
-        }
-      }
-
-      e.preventDefault()
-      const clamped = Math.max(0, dx)
-      edgeDragXRef.current = clamped
-      setEdgeDragX(clamped)
-    }
-
-    el.addEventListener('touchmove', onMove, { passive: false })
-    return () => el.removeEventListener('touchmove', onMove)
-  }, [sidebarOpen, activeModal])
-
-  const handleEdgeTouchEnd = () => {
-    if (!edgeStartRef.current) {
-      setIsEdgeDragging(false)
-      setEdgeDragX(0)
-      return
-    }
-    const dx = edgeDragXRef.current
-    const elapsed = Math.max(1, Date.now() - edgeStartRef.current.time)
-    const velocity = dx / elapsed
-
-    edgeStartRef.current = null
-    edgeHorizontalRef.current = null
-
-    const commit = dx >= 100 || (velocity >= 0.5 && dx > 30)
-
-    if (commit) {
-      bump()
-      // 先把內容滑到右側、再 navigate，避免 page 切換時的視覺斷層
-      setIsEdgeDragging(false)
-      setEdgeDragX(window.innerWidth)
-      setTimeout(() => {
-        navigate('/?home=1')
-      }, 200)
-      return
-    }
-
-    setIsEdgeDragging(false)
-    setEdgeDragX(0)
-    edgeDragXRef.current = 0
-  }
 
   // 左右滑動切換日期：跟手位移 + commit 時順勢回彈過場
   const handleDaySwipeTouchStart = (e) => {
@@ -399,17 +319,9 @@ export default function TripPage() {
 
   return (
     <div
-      ref={edgeContainerRef}
       className="min-h-screen bg-jp-bg text-jp-text font-serif pb-12 safe-area-inset"
-      onTouchStart={handleEdgeTouchStart}
-      onTouchEnd={handleEdgeTouchEnd}
-      onTouchCancel={handleEdgeTouchEnd}
     >
-      {/* 內容容器：可被 edge swipe 整體向右拖移；modals/sidebar 不在內，避免被 transform 影響 fixed positioning */}
-      <div
-        style={edgeDragX > 0 ? { transform: `translate3d(${edgeDragX}px, 0, 0)` } : undefined}
-        className={isEdgeDragging ? '' : 'transition-transform duration-200 ease-out'}
-      >
+      <div>
       {/* Header: centered multi-line, hamburger absolute-left */}
       <div className="relative pt-8 pb-4 px-6 flex items-center justify-between">
         <button
