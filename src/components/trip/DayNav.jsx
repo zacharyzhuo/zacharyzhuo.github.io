@@ -38,9 +38,11 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
     <div className="glass-day-nav sticky top-0 z-20 overflow-hidden">
       <div
         ref={scrollRef}
-        className="flex items-center justify-center px-6 py-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+        className="overflow-x-auto scrollbar-hide snap-x snap-mandatory"
         style={{ WebkitOverflowScrolling: 'touch', scrollPaddingInline: '50%' }}
       >
+        {/* inline-flex + min-w-full：天數少時 justify-center 置中；天數多溢出時 inner div 自然展開，兩側都能捲到 */}
+        <div className="inline-flex items-center justify-center min-w-full box-border px-6 py-4">
         {days.map(({ day, date }) => {
           const isActive = activeDay === day
           const isEasterDay = easterEggDay !== undefined && day === easterEggDay
@@ -76,6 +78,7 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
             </button>
           )
         })}
+        </div>
       </div>
     </div>
   )
