@@ -13,7 +13,7 @@ const LAST_TRIP_KEY = 'lastTripSlug'
 
 export default function HomePage() {
   const { trips, loading, error, refresh } = useTrips()
-  const { pullY, refreshing } = usePullToRefresh(refresh)
+  const { pullY, refreshing, triggerThreshold } = usePullToRefresh(refresh)
   const navigate = useNavigate()
   const location = useLocation()
   const redirectedRef = useRef(false)
@@ -47,7 +47,7 @@ export default function HomePage() {
   }, [trips, loading, error, location.search, navigate])
 
   const showIndicator = pullY > 0 || refreshing
-  const indicatorOpacity = refreshing ? 1 : Math.min(1, pullY / 80)
+  const indicatorOpacity = refreshing ? 1 : Math.min(1, pullY / triggerThreshold)
   const indicatorRotation = refreshing ? 'animate-spin' : ''
 
   return (

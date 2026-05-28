@@ -94,7 +94,10 @@ export default function TripPage() {
     flightsHook.refresh, itineraryHook.refresh, accommodationHook.refresh,
     shoppingHook.refresh, checklistHook.refresh, foodHook.refresh, daysHook.refresh,
   ])
-  const { pullY, refreshing } = usePullToRefresh(refreshAllSheets)
+  const { pullY, refreshing, triggerThreshold } = usePullToRefresh(refreshAllSheets, {
+    // sidebar / modal / 彩蛋打開時停掉 pull-to-refresh，避免跟拖曳關閉手勢衝突
+    enabled: !sidebarOpen && !activeModal,
+  })
 
   // Trip-specific extras（求婚彩蛋）lazy load
   useEffect(() => {
@@ -194,7 +197,7 @@ export default function TripPage() {
   const yearMonth = getYearMonth(trip.dates)
   const tripNameEn = getTripNameEn(trip, slug)
   const showPullIndicator = pullY > 0 || refreshing
-  const pullIndicatorOpacity = refreshing ? 1 : Math.min(1, pullY / 80)
+  const pullIndicatorOpacity = refreshing ? 1 : Math.min(1, pullY / triggerThreshold)
 
   return (
     <div className="min-h-screen bg-jp-bg text-jp-text font-serif pb-12 safe-area-inset relative">

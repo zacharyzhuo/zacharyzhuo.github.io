@@ -60,7 +60,7 @@ export default function FoodSection({ rows }) {
           {Object.entries(byCategory).map(([category, items]) => (
             <div key={category}>
               {category && (
-                <h3 className="text-xs font-bold text-stone-600 font-sans uppercase tracking-widest mb-4 pb-2">
+                <h3 className="text-xs font-bold text-stone-600 font-serif uppercase tracking-widest mb-4 pb-2">
                   {category}
                 </h3>
               )}
@@ -74,7 +74,7 @@ export default function FoodSection({ rows }) {
                       <div>
                         <h4 className="font-bold text-jp-text font-serif text-lg leading-tight">{row.name}</h4>
                         {(row.hours || row.time) && (
-                          <span className="text-xs text-stone-600 font-sans mt-1 flex items-center gap-1 tabular-nums">
+                          <span className="text-xs text-stone-600 font-serif mt-1 flex items-center gap-1 tabular-nums">
                             <Clock size={12} /> {row.hours || row.time}
                           </span>
                         )}

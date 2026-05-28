@@ -41,11 +41,11 @@ export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripN
         style={{ textShadow: '0 1px 3px rgba(0,0,0,0.45)' }}
       >
         {dateLabel && (
-          <p className="text-[10px] font-sans tracking-[0.3em] uppercase opacity-80 mb-1 tabular-nums">
+          <p className="text-[10px] font-serif tracking-[0.3em] uppercase opacity-80 mb-1 tabular-nums">
             {dateLabel}
           </p>
         )}
-        <div className="flex items-center gap-2 text-[11px] tracking-[0.2em] uppercase opacity-90 mb-1.5 font-sans">
+        <div className="flex items-center gap-2 text-[11px] tracking-[0.2em] uppercase opacity-90 mb-1.5 font-serif">
           <span className="w-5 h-[1px] bg-white" />
           <span>今日行程</span>
           <span className="w-5 h-[1px] bg-white" />
@@ -56,7 +56,7 @@ export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripN
           </h2>
         )}
         {showSubtitle && (
-          <p className="text-xs font-sans opacity-95 tracking-widest mt-0.5">
+          <p className="text-xs font-serif opacity-95 tracking-widest mt-0.5">
             {subtitle}
           </p>
         )}

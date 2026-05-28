@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback, useReducer } from 'react'
 import { Heart, X, Music, Send } from 'lucide-react'
+import { env } from '../../lib/env.js'
 import { PROPOSAL_PHOTOS, isVideoUrl } from './extras/data.js'
 import ShareSheet from './extras/ShareSheet.jsx'
 import HeartIcon from './extras/HeartIcon.jsx'
+
+const BASE = env.BASE_URL
 
 
 // Proposal Modal (彩蛋 - Instagram 限時動態風格)

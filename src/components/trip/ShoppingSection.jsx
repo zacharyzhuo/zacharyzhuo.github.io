@@ -56,7 +56,7 @@ function StandaloneCard({ item }) {
         <div className="flex-1 min-w-0">
           <p className="font-bold text-jp-text font-serif text-base leading-snug">{item.name}</p>
           {(item.floor || item.hours) && (
-            <div className="flex items-center gap-2 text-xs text-stone-600 font-sans mt-1 tabular-nums">
+            <div className="flex items-center gap-2 text-xs text-stone-600 font-serif mt-1 tabular-nums">
               {item.floor && (
                 <span className="bg-stone-100 px-1.5 py-0.5 rounded text-stone-600 font-medium text-[11px]">{item.floor}</span>
               )}
@@ -99,7 +99,7 @@ function BuildingCard({ building }) {
           <div>
             <h3 className="font-bold text-jp-text font-serif text-base leading-snug">{building.name}</h3>
             {building.hours && (
-              <span className="text-xs text-stone-600 font-sans mt-1 flex tabular-nums items-center gap-1">
+              <span className="text-xs text-stone-600 font-serif mt-1 flex tabular-nums items-center gap-1">
                 <Clock size={12} /> {building.hours}
               </span>
             )}
@@ -126,7 +126,7 @@ function BuildingCard({ building }) {
             <div key={i} className="flex justify-between items-center">
               <div>
                 <p className="font-bold text-sm text-stone-700 font-serif">{shop.name}</p>
-                <div className="flex items-center gap-2 text-xs text-stone-600 font-sans mt-0.5 tabular-nums">
+                <div className="flex items-center gap-2 text-xs text-stone-600 font-serif mt-0.5 tabular-nums">
                   {shop.floor && (
                     <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-600 font-medium">{shop.floor}</span>
                   )}

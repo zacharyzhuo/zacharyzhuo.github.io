@@ -19,12 +19,12 @@ function NowMarker({ time, innerRef }) {
   return (
     <div ref={innerRef} className="flex gap-4 px-6 -mt-2 mb-4">
       <div className="w-12 shrink-0 flex flex-col items-center">
-        <span className="text-[11px] font-sans font-bold text-jp-red leading-none tabular-nums tracking-tight">
+        <span className="text-[11px] font-serif font-bold text-jp-red leading-none tabular-nums tracking-tight">
           {time}
         </span>
       </div>
       <div className="flex-1 min-w-0 flex items-center gap-2">
-        <span className="text-[10px] font-sans font-bold text-jp-red uppercase tracking-[0.2em] shrink-0">
+        <span className="text-[10px] font-serif font-bold text-jp-red uppercase tracking-[0.2em] shrink-0">
           現在
         </span>
         <div className="flex-1 h-[1px] bg-jp-red/40" />
@@ -68,7 +68,7 @@ function SpotItem({ spot }) {
     <div className="flex items-start gap-3 py-2.5 border-b border-stone-100 last:border-0">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className={`text-[10px] px-1.5 py-0.5 border rounded font-sans font-bold shrink-0 uppercase tracking-wider ${border}`}>
+          <span className={`text-[10px] px-1.5 py-0.5 border rounded font-serif font-bold shrink-0 uppercase tracking-wider ${border}`}>
             {label}
           </span>
           <span className="font-serif font-bold text-jp-text text-sm leading-snug truncate">
@@ -221,10 +221,10 @@ function DetailModal({ row, spots, onClose }) {
 
           <div className="overflow-y-auto px-8 pb-10 flex-1 pt-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className={`px-3 py-1 border text-xs tracking-widest font-bold font-sans uppercase rounded ${typeInfo.border}`}>
+              <span className={`px-3 py-1 border text-xs tracking-widest font-bold font-serif uppercase rounded ${typeInfo.border}`}>
                 {typeInfo.label}
               </span>
-              <span className="font-sans text-xl text-stone-600 tabular-nums">{current.time}</span>
+              <span className="font-serif text-xl text-stone-600 tabular-nums">{current.time}</span>
             </div>
 
             <h2 id={titleId} className="text-2xl font-serif font-bold text-jp-text mb-3 leading-tight mt-2 pr-12">
@@ -239,7 +239,7 @@ function DetailModal({ row, spots, onClose }) {
               aria-label={`開啟 ${current.name} 的 Google Maps 導航`}
             >
               <MapPin size={14} className="text-jp-green shrink-0" />
-              <span className="text-sm text-stone-600 font-sans flex-1 leading-relaxed">
+              <span className="text-sm text-stone-600 font-serif flex-1 leading-relaxed">
                 {current.address || '查看地圖位置'}
               </span>
               <Navigation size={14} className="text-stone-400 shrink-0 group-active:text-jp-green" />
@@ -262,10 +262,10 @@ function DetailModal({ row, spots, onClose }) {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="h-[1px] w-3 bg-stone-300" />
-                    <h3 className="font-bold text-jp-text text-sm font-sans tracking-widest uppercase shrink-0">
+                    <h3 className="font-bold text-jp-text text-sm font-serif tracking-widest uppercase shrink-0">
                       街道亮點
                     </h3>
-                    <span className="text-xs text-stone-400 font-sans shrink-0 tabular-nums">
+                    <span className="text-xs text-stone-400 font-serif shrink-0 tabular-nums">
                       {currentSpots.length} 個
                     </span>
                     <div className="h-[1px] flex-1 bg-stone-200" />
@@ -358,7 +358,7 @@ export default function ItinerarySection({ rows, dayDate }) {
               className={`flex gap-4 px-6 group ${isPastRow ? 'opacity-50' : ''}`}
             >
               <div className="w-12 shrink-0 flex flex-col items-center pt-1">
-                <span className="text-sm font-sans font-medium text-jp-text leading-none tabular-nums tracking-tight">{row.time}</span>
+                <span className="text-sm font-serif font-medium text-jp-text leading-none tabular-nums tracking-tight">{row.time}</span>
                 {!isLast && <div className="w-[1px] bg-stone-200 flex-1 my-2" />}
               </div>
 
@@ -370,7 +370,7 @@ export default function ItinerarySection({ rows, dayDate }) {
                   className="glass-card relative rounded-2xl p-4 active:scale-[0.98] transition-transform duration-200 h-full w-full flex flex-col text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <span className={`text-xs tracking-wider uppercase px-2 py-0.5 rounded border font-sans font-bold ${border}`}>
+                    <span className={`text-xs tracking-wider uppercase px-2 py-0.5 rounded border font-serif font-bold ${border}`}>
                       {label}
                     </span>
                   </div>
@@ -383,19 +383,19 @@ export default function ItinerarySection({ rows, dayDate }) {
                   )}
 
                   {row.hours && (
-                    <div className="flex items-center gap-1.5 text-xs text-stone-500 font-sans mb-3 bg-white/40 backdrop-blur-sm border border-white/50 w-fit px-2 py-1 rounded-full tabular-nums">
+                    <div className="flex items-center gap-1.5 text-xs text-stone-500 font-serif mb-3 bg-white/40 backdrop-blur-sm border border-white/50 w-fit px-2 py-1 rounded-full tabular-nums">
                       <Clock size={12} />
                       <span>{row.hours}</span>
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2 text-xs text-stone-400 font-sans mt-auto pt-2 min-w-0">
+                  <div className="flex items-center gap-2 text-xs text-stone-400 font-serif mt-auto pt-2 min-w-0">
                     <Icon size={16} />
                     <span className="truncate text-stone-500 opacity-70 flex-1 min-w-0">
                       {row.address || '查看地圖位置'}
                     </span>
                     {spots.length > 0 && (
-                      <span className="text-xs text-amber-600 font-bold font-sans shrink-0 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                      <span className="text-xs text-amber-600 font-bold font-serif shrink-0 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
                         {spots.length} 個亮點
                       </span>
                     )}

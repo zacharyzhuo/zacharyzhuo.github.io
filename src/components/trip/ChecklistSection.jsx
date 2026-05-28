@@ -121,18 +121,18 @@ export default function ChecklistSection({ rows, slug }) {
               return (
                 <div key={category}>
                   <div className="flex items-baseline justify-between mb-2">
-                    <h3 className="text-sm font-bold uppercase tracking-widest font-sans">
+                    <h3 className="text-sm font-bold uppercase tracking-widest font-serif">
                       {category}
                     </h3>
                     {isComplete ? (
                       <span
                         key={`${category}-check`}
-                        className="check-pop text-xs font-sans text-jp-green font-bold"
+                        className="check-pop text-xs font-serif text-jp-green font-bold"
                       >
                         ✓
                       </span>
                     ) : (
-                      <span className="text-xs font-sans text-stone-400 tabular-nums">
+                      <span className="text-xs font-serif text-stone-400 tabular-nums">
                         {done} / {total}
                       </span>
                     )}
