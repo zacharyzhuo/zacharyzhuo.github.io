@@ -42,6 +42,41 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
 
   const photos = PROPOSAL_PHOTOS
   const PHOTO_DURATION = 6000
+
+  // Edge-cache warm-up：在使用者點開彩蛋之前，把所有照片 / 影片悄悄塞進
+  //   - HTTP cache（Fastly edge）
+  //   - SW trip-assets cache（30 天 CacheFirst）
+  // 一旦這趟 trip extras 載入過一次，後續開彩蛋就是熱的。
+  // 流量考量：省流量模式 / 2G 直接跳過；其餘交給瀏覽器 idle queue 排隊。
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const conn = navigator.connection
+    if (conn?.saveData) return
+    if (conn && ['slow-2g', '2g'].includes(conn.effectiveType)) return
+
+    const schedule = window.requestIdleCallback || ((cb) => setTimeout(cb, 500))
+    let cancelled = false
+    const handle = schedule(() => {
+      if (cancelled) return
+      for (const url of PROPOSAL_PHOTOS) {
+        if (isVideoUrl(url)) {
+          // 影片用 fetch 觸發 SW caching；不等回應，失敗就算了
+          fetch(url, { cache: 'force-cache', mode: 'no-cors' }).catch(() => {})
+        } else {
+          // 圖片用 Image() 最簡單，所有瀏覽器都支援
+          const img = new Image()
+          img.src = url
+        }
+      }
+    }, { timeout: 3000 })
+
+    return () => {
+      cancelled = true
+      if (window.cancelIdleCallback && typeof handle === 'number') {
+        try { window.cancelIdleCallback(handle) } catch { /* ignore */ }
+      }
+    }
+  }, [])
   const currentIsVideo = isVideoUrl(photos[currentPhotoIndex])
   const visibleVideoRef = visibleLayer === 0 ? videoRef0 : videoRef1
 
