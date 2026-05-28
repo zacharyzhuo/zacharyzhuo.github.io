@@ -134,20 +134,6 @@ export default function TripPage() {
     initialDayPickedRef.current = true
   }, [days])
 
-  // 一次性 swipe 教學：第一次造訪有 ≥ 2 天的 trip 時 peek 一下下個 panel
-  const SWIPE_HINT_KEY = 'swipeHintShown:v1'
-  useEffect(() => {
-    if (days.length <= 1) return
-    let alreadyShown = false
-    try { alreadyShown = localStorage.getItem(SWIPE_HINT_KEY) === '1' } catch { /* ignore */ }
-    if (alreadyShown) return
-    const id = setTimeout(() => {
-      swipe.peek()
-      try { localStorage.setItem(SWIPE_HINT_KEY, '1') } catch { /* ignore */ }
-    }, 800)
-    return () => clearTimeout(id)
-  }, [days.length, swipe])
-
   // 三欄輪播：prev / current / next 的 metadata + itinerary
   const activeDayIdx = useMemo(() => days.findIndex(d => d.day === activeDay), [days, activeDay])
   const prevDayObj = activeDayIdx > 0 ? days[activeDayIdx - 1] : null
@@ -172,6 +158,21 @@ export default function TripPage() {
     setActiveDay,
     enabled: !sidebarOpen && !activeModal,
   })
+
+  // 一次性 swipe 教學：第一次造訪有 ≥ 2 天的 trip 時 peek 一下下個 panel
+  // 必須放在 const swipe 宣告之後，否則 minified bundle 會 TDZ
+  const SWIPE_HINT_KEY = 'swipeHintShown:v1'
+  useEffect(() => {
+    if (days.length <= 1) return
+    let alreadyShown = false
+    try { alreadyShown = localStorage.getItem(SWIPE_HINT_KEY) === '1' } catch { /* ignore */ }
+    if (alreadyShown) return
+    const id = setTimeout(() => {
+      swipe.peek()
+      try { localStorage.setItem(SWIPE_HINT_KEY, '1') } catch { /* ignore */ }
+    }, 800)
+    return () => clearTimeout(id)
+  }, [days.length, swipe])
 
   if (tripsLoading || flightsLoading || itineraryLoading) {
     return <div className="bg-jp-bg min-h-screen safe-area-inset"><LoadingSpinner /></div>
