@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
-import { Navigation, Clock } from 'lucide-react'
+import { Navigation, Clock, Utensils } from 'lucide-react'
 import { tap } from '../../lib/haptic.js'
+import EmptyState from '../ui/EmptyState.jsx'
 
 /**
  * @param {{ rows: Array<{ name: string, area?: string, category?: string, hours?: string, note?: string, link?: string, time?: string, address?: string }> }} props
@@ -32,9 +33,7 @@ export default function FoodSection({ rows }) {
   }
 
   if (rows.length === 0) {
-    return (
-      <p className="text-center text-stone-600 font-serif text-sm py-6 px-4">尚無美食清單</p>
-    )
+    return <EmptyState icon={Utensils} title="尚無美食清單" hint="填好 food tab，或在 itinerary 標 type=food 也會自動帶過來。" />
   }
 
   const hasAreas = areas.length > 0
@@ -61,7 +60,7 @@ export default function FoodSection({ rows }) {
           {Object.entries(byCategory).map(([category, items]) => (
             <div key={category}>
               {category && (
-                <h3 className="text-xs font-bold text-stone-600 uppercase tracking-widest mb-4 pb-2">
+                <h3 className="text-xs font-bold text-stone-600 font-sans uppercase tracking-widest mb-4 pb-2">
                   {category}
                 </h3>
               )}
@@ -75,7 +74,7 @@ export default function FoodSection({ rows }) {
                       <div>
                         <h4 className="font-bold text-jp-text font-serif text-lg leading-tight">{row.name}</h4>
                         {(row.hours || row.time) && (
-                          <span className="text-xs text-stone-600 font-serif mt-1 flex items-center gap-1">
+                          <span className="text-xs text-stone-600 font-sans mt-1 flex items-center gap-1 tabular-nums">
                             <Clock size={12} /> {row.hours || row.time}
                           </span>
                         )}

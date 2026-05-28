@@ -112,6 +112,21 @@ export function parseTripDates(dates) {
 }
 
 /**
+ * 'YYYY/MM/DD' → 'MM/DD · 週X' 給 DayBanner 用。
+ *
+ * @param {string} fullDate
+ * @returns {string}
+ */
+export function formatDayLabel(fullDate) {
+  if (!fullDate) return ''
+  const parts = fullDate.split('/').map(Number)
+  if (parts.length !== 3 || parts.some(n => !Number.isFinite(n))) return ''
+  const [y, m, d] = parts
+  const dow = ['日', '一', '二', '三', '四', '五', '六'][new Date(y, m - 1, d).getDay()]
+  return `${String(m).padStart(2, '0')}/${String(d).padStart(2, '0')} · 週${dow}`
+}
+
+/**
  * 根據今日日期決定預設選中的 day。
  *   - 今天剛好是某一天 → 那一天
  *   - 否則（旅程未開始 / 已結束 / 中間缺日）→ Day 1
@@ -125,6 +140,35 @@ export function pickInitialDay(days) {
   const todayStr = formatToday()
   const exact = days.find(d => d.date === todayStr)
   return exact ? exact.day : days[0].day
+}
+
+/**
+ * 計算一個 trip 的狀態：active（進行中）/ upcoming（即將出發）/ past（已結束）。
+ * 同時回傳跟「今天」的天數差（upcoming = 距出發；past = 距結束；active = 0）。
+ *
+ * @param {string} dates 'YYYY/MM/DD - MM/DD'
+ * @returns {{ status: 'active'|'upcoming'|'past', daysToStart: number, daysFromEnd: number }}
+ */
+export function getTripStatus(dates) {
+  const { start, end } = parseTripDates(dates)
+  if (!start || !end) return { status: 'past', daysToStart: 0, daysFromEnd: 0 }
+
+  const today = formatToday()
+  const [ty, tm, td] = today.split('/').map(Number)
+  const [sy, sm, sd] = start.split('/').map(Number)
+  const [ey, em, ed] = end.split('/').map(Number)
+
+  const todayMs = new Date(ty, tm - 1, td).getTime()
+  const startMs = new Date(sy, sm - 1, sd).getTime()
+  const endMs = new Date(ey, em - 1, ed).getTime()
+
+  const DAY = 86400000
+  const daysToStart = Math.round((startMs - todayMs) / DAY)
+  const daysFromEnd = Math.round((todayMs - endMs) / DAY)
+
+  if (todayMs >= startMs && todayMs <= endMs) return { status: 'active', daysToStart: 0, daysFromEnd: 0 }
+  if (todayMs < startMs) return { status: 'upcoming', daysToStart, daysFromEnd: 0 }
+  return { status: 'past', daysToStart: 0, daysFromEnd }
 }
 
 /**

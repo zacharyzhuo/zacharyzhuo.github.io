@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Plane, Luggage, ExternalLink, Hotel, ClipboardList, Navigation } from 'lucide-react'
 import { tap } from '../../lib/haptic.js'
+import EmptyState from '../ui/EmptyState.jsx'
 
 const INFO_TABS = [
   { key: 'flights', label: '航班資訊' },
@@ -32,7 +33,7 @@ function parseTime(time) {
 
 function FlightsTab({ flights }) {
   if (flights.length === 0) {
-    return <p className="text-center text-stone-600 font-serif text-sm mt-12">尚無航班資訊</p>
+    return <EmptyState icon={Plane} title="尚無航班資訊" hint="把出發/回程班機填到 flights tab，這裡會自動排好。" />
   }
 
   return (
@@ -48,10 +49,10 @@ function FlightsTab({ flights }) {
           return (
             <div key={i} className="glass-card relative p-5 rounded-2xl overflow-hidden">
               <div className="flex justify-between items-center mb-4 border-b border-[#5C6E58]/20 pb-2">
-                <span className="text-sm font-bold border border-blue-200 text-blue-700 bg-blue-50 px-2 py-1 rounded font-serif">
+                <span className="text-sm font-bold border border-blue-200 text-blue-700 bg-blue-50 px-2 py-1 rounded font-sans tabular-nums">
                   {f.date}
                 </span>
-                <span className="text-sm font-bold text-jp-green font-serif">{f.flight_no}</span>
+                <span className="text-sm font-bold text-jp-green font-sans tracking-wide">{f.flight_no}</span>
               </div>
               <div className="flex justify-between items-center mb-4">
                 <div className="text-center">
@@ -80,7 +81,7 @@ function FlightsTab({ flights }) {
                 <div className="mt-4 pt-4 border-t border-[#5C6E58]/20">
                   <div className="flex items-start gap-2">
                     <Luggage size={16} className="text-stone-500 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm text-stone-600 leading-relaxed whitespace-pre-line font-serif">
+                    <div className="text-sm text-stone-600 leading-relaxed whitespace-pre-line font-sans">
                       {[
                         f.carry_on && `手提行李：${f.carry_on}`,
                         f.checked_bag && `托運行李：${f.checked_bag}`,
@@ -101,14 +102,7 @@ function PrepareTab({ destinationCountry }) {
   const isJapan = destinationCountry === 'JP'
 
   if (!isJapan) {
-    return (
-      <div>
-        <h3 className="text-base font-bold text-stone-600 uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
-          <ClipboardList size={18} /> 行前準備
-        </h3>
-        <p className="text-center text-stone-600 font-serif text-sm mt-12">尚無行前準備項目</p>
-      </div>
-    )
+    return <EmptyState icon={ClipboardList} title="尚無行前準備項目" hint="目前只有日本行程會帶出 Visit Japan Web 提醒。" />
   }
 
   return (
@@ -138,7 +132,7 @@ function PrepareTab({ destinationCountry }) {
 
 function HotelTab({ accommodation }) {
   if (accommodation.length === 0) {
-    return <p className="text-center text-stone-600 font-serif text-sm mt-12">尚無住宿資訊</p>
+    return <EmptyState icon={Hotel} title="尚無住宿資訊" hint="把飯店或 Airbnb 填到 accommodation tab，這裡會列出來。" />
   }
 
   return (
@@ -156,7 +150,7 @@ function HotelTab({ accommodation }) {
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-3">
-                    <span className={`text-sm font-bold border px-2 py-1 rounded font-serif ${
+                    <span className={`text-xs font-bold border px-2 py-1 rounded font-sans uppercase tracking-wider ${
                       h.type === 'hotel'
                         ? 'border-purple-200 text-purple-700 bg-purple-50'
                         : h.type === 'airbnb'
@@ -166,29 +160,29 @@ function HotelTab({ accommodation }) {
                       {h.type === 'hotel' ? '飯店' : h.type === 'airbnb' ? 'Airbnb' : '住宿'}
                     </span>
                     {h.date && (
-                      <span className="text-sm font-bold border border-blue-200 text-blue-700 bg-blue-50 px-2 py-1 rounded font-serif">
+                      <span className="text-sm font-bold border border-blue-200 text-blue-700 bg-blue-50 px-2 py-1 rounded font-sans tabular-nums">
                         {h.date}
                       </span>
                     )}
                   </div>
                   <h5 className="font-serif font-bold text-jp-text text-xl leading-tight mb-2">{h.name}</h5>
                   {h.address && (
-                    <p className="text-sm text-stone-600 font-serif mb-4">{h.address}</p>
+                    <p className="text-sm text-stone-600 font-sans mb-4 leading-relaxed">{h.address}</p>
                   )}
 
                   {(h.check_in || h.check_out) && (
-                    <div className="flex gap-6 mb-4 text-sm font-serif text-stone-600 bg-white/30 p-3 rounded-lg border border-white/40">
+                    <div className="flex gap-6 mb-4 text-sm font-sans text-stone-600 bg-white/30 p-3 rounded-lg border border-white/40">
                       {h.check_in && (
                         <div>
-                          <span className="block text-sm text-stone-600 uppercase font-serif tracking-wider mb-1">Check-in</span>
-                          <span className="text-sm text-stone-600 font-serif">{h.check_in}</span>
+                          <span className="block text-[10px] text-stone-500 uppercase font-sans tracking-widest mb-1">Check-in</span>
+                          <span className="text-sm text-stone-600 font-sans tabular-nums">{h.check_in}</span>
                         </div>
                       )}
                       {h.check_in && h.check_out && <div className="w-[1px] bg-stone-200" />}
                       {h.check_out && (
                         <div>
-                          <span className="block text-sm text-stone-600 uppercase font-serif tracking-wider mb-1">Check-out</span>
-                          <span className="text-sm text-stone-600 font-serif">{h.check_out}</span>
+                          <span className="block text-[10px] text-stone-500 uppercase font-sans tracking-widest mb-1">Check-out</span>
+                          <span className="text-sm text-stone-600 font-sans tabular-nums">{h.check_out}</span>
                         </div>
                       )}
                     </div>

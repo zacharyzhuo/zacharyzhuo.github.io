@@ -147,6 +147,21 @@ export function useDaySwipe({ days, activeDay, setActiveDay, enabled }) {
     }
   }, [])
 
+  // 一次性教學動畫：把 carousel 短暫向左 peek 一下再彈回，暗示「可以左右滑」
+  const peek = useCallback(() => {
+    const el = carouselRef.current
+    if (!el || dragStartRef.current) return // 用戶正在滑就不打擾
+    el.style.transition = 'transform 600ms cubic-bezier(0.34, 1.4, 0.64, 1)'
+    el.style.transform = 'translateX(calc(-33.333% - 56px))'
+    setTimeout(() => {
+      if (!carouselRef.current) return
+      carouselRef.current.style.transform = 'translateX(-33.333%)'
+      setTimeout(() => {
+        if (carouselRef.current) carouselRef.current.style.transition = ''
+      }, 600)
+    }, 700)
+  }, [])
+
   return {
     containerProps: {
       ref: containerRef,
@@ -162,5 +177,6 @@ export function useDaySwipe({ days, activeDay, setActiveDay, enabled }) {
       willChange: 'transform',
     },
     carouselClassName: (!isDragging && !isCarouselAnimating) ? 'transition-transform duration-300 ease-out' : '',
+    peek,
   }
 }

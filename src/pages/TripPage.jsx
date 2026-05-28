@@ -7,7 +7,7 @@ import { useScrollLock } from '../hooks/useScrollLock.js'
 import { usePullToRefresh } from '../hooks/usePullToRefresh.js'
 import { useDaySwipe } from '../hooks/useDaySwipe.js'
 import { useEasterEgg } from '../hooks/useEasterEgg.js'
-import { pickInitialDay } from '../lib/tripDate.js'
+import { pickInitialDay, formatDayLabel } from '../lib/tripDate.js'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 import { useDays, useFoodItems, useNormalizedDays, useNormalizedItinerary } from '../hooks/useTripDerived.js'
 import LoadingSpinner from '../components/ui/LoadingSpinner.jsx'
@@ -134,6 +134,20 @@ export default function TripPage() {
     initialDayPickedRef.current = true
   }, [days])
 
+  // 一次性 swipe 教學：第一次造訪有 ≥ 2 天的 trip 時 peek 一下下個 panel
+  const SWIPE_HINT_KEY = 'swipeHintShown:v1'
+  useEffect(() => {
+    if (days.length <= 1) return
+    let alreadyShown = false
+    try { alreadyShown = localStorage.getItem(SWIPE_HINT_KEY) === '1' } catch { /* ignore */ }
+    if (alreadyShown) return
+    const id = setTimeout(() => {
+      swipe.peek()
+      try { localStorage.setItem(SWIPE_HINT_KEY, '1') } catch { /* ignore */ }
+    }, 800)
+    return () => clearTimeout(id)
+  }, [days.length, swipe])
+
   // 三欄輪播：prev / current / next 的 metadata + itinerary
   const activeDayIdx = useMemo(() => days.findIndex(d => d.day === activeDay), [days, activeDay])
   const prevDayObj = activeDayIdx > 0 ? days[activeDayIdx - 1] : null
@@ -242,9 +256,9 @@ export default function TripPage() {
             style={swipe.carouselStyle}
             className={swipe.carouselClassName}
           >
-            <DayPanel dayObj={prevDayObj} dayMeta={prevDayMeta} itinerary={prevDayItinerary} />
-            <DayPanel dayObj={{ day: activeDay }} dayMeta={activeDayMeta} itinerary={dayItinerary} />
-            <DayPanel dayObj={nextDayObj} dayMeta={nextDayMeta} itinerary={nextDayItinerary} />
+            <DayPanel dayObj={prevDayObj} dayMeta={prevDayMeta} itinerary={prevDayItinerary} tripName={trip.name} />
+            <DayPanel dayObj={{ day: activeDay, date: days.find(d => d.day === activeDay)?.date }} dayMeta={activeDayMeta} itinerary={dayItinerary} tripName={trip.name} />
+            <DayPanel dayObj={nextDayObj} dayMeta={nextDayMeta} itinerary={nextDayItinerary} tripName={trip.name} />
           </div>
         </div>
       </div>
@@ -304,7 +318,7 @@ export default function TripPage() {
 }
 
 // 單一日 panel：banner + itinerary list；dayObj 為 null 時整格不渲染（給三欄第一/末日用）
-function DayPanel({ dayObj, dayMeta, itinerary }) {
+function DayPanel({ dayObj, dayMeta, itinerary, tripName }) {
   return (
     <div style={{ width: '33.333%', flexShrink: 0, overflow: 'hidden' }}>
       {dayObj && (
@@ -313,10 +327,12 @@ function DayPanel({ dayObj, dayMeta, itinerary }) {
             bannerUrl={dayMeta?.banner_url}
             title={dayMeta?.title}
             subtitle={dayMeta?.subtitle}
+            dateLabel={formatDayLabel(dayObj.date)}
+            tripName={tripName}
           />
-          <div className="h-8" />
+          <div className="h-6" />
           <div className="mt-2">
-            <ItinerarySection rows={itinerary} />
+            <ItinerarySection rows={itinerary} dayDate={dayObj.date} />
           </div>
         </>
       )}

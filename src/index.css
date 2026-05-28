@@ -4,6 +4,10 @@
 
 body {
   background-color: #F9F8F4;
+  /* 極淡 SVG 雜訊紋理：保證 backdrop-filter 永遠有東西可 blur，整體質感有「紙」的感覺
+     baseFrequency 高 = 細點；opacity 透過 feColorMatrix 控制（0.06 ≈ 看不到但 glass 摸得到） */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-attachment: fixed;
   color: #2C2C2C;
   font-family: "Noto Serif JP", "Hiragino Mincho ProN", serif;
   -webkit-font-smoothing: antialiased;

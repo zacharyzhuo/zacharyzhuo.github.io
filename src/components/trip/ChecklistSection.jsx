@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { Check } from 'lucide-react'
+import { Check, ClipboardList } from 'lucide-react'
 import { tap, success } from '../../lib/haptic.js'
+import EmptyState from '../ui/EmptyState.jsx'
 
 /**
  * 每趟行程獨立的勾選狀態（透過 storageKey 命名空間隔離）
@@ -107,7 +108,7 @@ export default function ChecklistSection({ rows, slug }) {
         <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">行李清單</h2>
 
         {rows.length === 0 ? (
-          <p className="text-center text-stone-500 font-serif text-sm mt-12">尚無行李清單</p>
+          <EmptyState icon={ClipboardList} title="尚無行李清單" hint="填好 checklist tab，這裡能勾選 + 看完成進度。" />
         ) : (
           <div className="grid grid-cols-1 gap-6 mt-4">
             {Object.entries(byCategory).map(([category, items]) => {
@@ -120,18 +121,18 @@ export default function ChecklistSection({ rows, slug }) {
               return (
                 <div key={category}>
                   <div className="flex items-baseline justify-between mb-2">
-                    <h3 className="text-sm font-bold uppercase tracking-widest">
+                    <h3 className="text-sm font-bold uppercase tracking-widest font-sans">
                       {category}
                     </h3>
                     {isComplete ? (
                       <span
                         key={`${category}-check`}
-                        className="check-pop text-xs font-serif text-jp-green font-bold"
+                        className="check-pop text-xs font-sans text-jp-green font-bold"
                       >
                         ✓
                       </span>
                     ) : (
-                      <span className="text-xs font-serif text-stone-400 tabular-nums">
+                      <span className="text-xs font-sans text-stone-400 tabular-nums">
                         {done} / {total}
                       </span>
                     )}

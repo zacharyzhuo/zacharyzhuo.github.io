@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useId } from 'react'
+import { Fragment, useState, useEffect, useRef, useMemo, useId } from 'react'
 import { createPortal } from 'react-dom'
 import {
   Camera, Utensils, ShoppingBag, Train, Hotel,
@@ -6,6 +6,33 @@ import {
 } from 'lucide-react'
 import { useScrollLock } from '../../hooks/useScrollLock.js'
 import { useModalA11y } from '../../hooks/useModalA11y.js'
+import { formatToday } from '../../lib/tripDate.js'
+import EmptyState from '../ui/EmptyState.jsx'
+
+function formatNowHHMM() {
+  const d = new Date()
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
+// 今日時間軸上「現在 HH:MM」紅線標記
+function NowMarker({ time, innerRef }) {
+  return (
+    <div ref={innerRef} className="flex gap-4 px-6 -mt-2 mb-4">
+      <div className="w-12 shrink-0 flex flex-col items-center">
+        <span className="text-[11px] font-sans font-bold text-jp-red leading-none tabular-nums tracking-tight">
+          {time}
+        </span>
+      </div>
+      <div className="flex-1 min-w-0 flex items-center gap-2">
+        <span className="text-[10px] font-sans font-bold text-jp-red uppercase tracking-[0.2em] shrink-0">
+          現在
+        </span>
+        <div className="flex-1 h-[1px] bg-jp-red/40" />
+        <span className="w-2 h-2 rounded-full bg-jp-red shrink-0 animate-pulse shadow-[0_0_0_4px_rgba(185,54,50,0.15)]" />
+      </div>
+    </div>
+  )
+}
 const TYPE_MAP = {
   transport:  { label: '交通', icon: Train, border: 'border-blue-200 text-blue-700 bg-blue-50' },
   food:       { label: '美食', icon: Utensils, border: 'border-orange-200 text-orange-700 bg-orange-50' },
@@ -41,7 +68,7 @@ function SpotItem({ spot }) {
     <div className="flex items-start gap-3 py-2.5 border-b border-stone-100 last:border-0">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className={`text-[10px] px-1.5 py-0.5 border rounded font-serif font-bold shrink-0 ${border}`}>
+          <span className={`text-[10px] px-1.5 py-0.5 border rounded font-sans font-bold shrink-0 uppercase tracking-wider ${border}`}>
             {label}
           </span>
           <span className="font-serif font-bold text-jp-text text-sm leading-snug truncate">
@@ -192,22 +219,31 @@ function DetailModal({ row, spots, onClose }) {
             <X size={20} />
           </button>
 
-          <div className="overflow-y-auto px-8 pb-24 flex-1 pt-4">
+          <div className="overflow-y-auto px-8 pb-10 flex-1 pt-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className={`px-3 py-1 border text-xs tracking-widest font-bold font-serif uppercase rounded ${typeInfo.border}`}>
+              <span className={`px-3 py-1 border text-xs tracking-widest font-bold font-sans uppercase rounded ${typeInfo.border}`}>
                 {typeInfo.label}
               </span>
-              <span className="font-serif text-xl text-stone-600">{current.time}</span>
+              <span className="font-sans text-xl text-stone-600 tabular-nums">{current.time}</span>
             </div>
 
-            <h2 id={titleId} className="text-2xl font-serif font-bold text-jp-text mb-2 leading-tight mt-2 pr-12">
+            <h2 id={titleId} className="text-2xl font-serif font-bold text-jp-text mb-3 leading-tight mt-2 pr-12">
               {current.name}
             </h2>
 
-            <div className="flex items-center gap-2 text-sm text-stone-600 mb-8 font-serif">
-              <MapPin size={14} />
-              {current.address || '查看地圖位置'}
-            </div>
+            {/* 地址列本身就是導航按鈕；點下去開 Google Maps，不再需要底部浮動 CTA */}
+            <button
+              type="button"
+              onClick={() => window.open(navUrl, '_blank')}
+              className="group flex items-center gap-2 w-full mb-8 -mx-2 px-2 py-2 rounded-lg active:bg-stone-100/60 transition-colors text-left touch-manipulation"
+              aria-label={`開啟 ${current.name} 的 Google Maps 導航`}
+            >
+              <MapPin size={14} className="text-jp-green shrink-0" />
+              <span className="text-sm text-stone-600 font-sans flex-1 leading-relaxed">
+                {current.address || '查看地圖位置'}
+              </span>
+              <Navigation size={14} className="text-stone-400 shrink-0 group-active:text-jp-green" />
+            </button>
 
             <div className="space-y-8">
               {current.note && (
@@ -226,10 +262,10 @@ function DetailModal({ row, spots, onClose }) {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="h-[1px] w-3 bg-stone-300" />
-                    <h3 className="font-bold text-jp-text text-sm font-serif tracking-wide shrink-0">
+                    <h3 className="font-bold text-jp-text text-sm font-sans tracking-widest uppercase shrink-0">
                       街道亮點
                     </h3>
-                    <span className="text-xs text-stone-400 font-serif shrink-0">
+                    <span className="text-xs text-stone-400 font-sans shrink-0 tabular-nums">
                       {currentSpots.length} 個
                     </span>
                     <div className="h-[1px] flex-1 bg-stone-200" />
@@ -243,22 +279,6 @@ function DetailModal({ row, spots, onClose }) {
               )}
             </div>
           </div>
-
-          <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
-            <button
-              onClick={() => window.open(navUrl, '_blank')}
-              className="liquid-tab-track pointer-events-auto shadow-2xl font-serif text-stone-600 flex items-center gap-2"
-              style={{
-                padding: '12px 32px',
-                background: 'rgba(255, 255, 255, 0.45)',
-                boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.7), 0 8px 24px rgba(0,0,0,0.15)',
-              }}
-              aria-label={`開啟 ${current.name} 的 Google Maps 導航`}
-            >
-              <Navigation size={16} />
-              Google Maps 導航
-            </button>
-          </div>
           </>
         )}
         </div>
@@ -269,13 +289,42 @@ function DetailModal({ row, spots, onClose }) {
 }
 
 /**
- * @param {{ rows: Array }} props
+ * @param {{
+ *   rows: Array,
+ *   dayDate?: string  // 此 panel 對應的完整日期 'YYYY/MM/DD'，等於今天時插入「現在」標記
+ * }} props
  * rows 包含主行程 row（無 parent）以及子項目 row（有 parent = 父 row 的 name）
  */
-export default function ItinerarySection({ rows }) {
+export default function ItinerarySection({ rows, dayDate }) {
   const [selected, setSelected] = useState(null)
+  const [now, setNow] = useState(formatNowHHMM)
+  const nowMarkerRef = useRef(null)
+  const isToday = dayDate && dayDate === formatToday()
+
+  // 每分鐘 tick 一次，讓「現在」線會慢慢往下移
+  useEffect(() => {
+    if (!isToday) return
+    const t = setInterval(() => setNow(formatNowHHMM()), 60_000)
+    return () => clearInterval(t)
+  }, [isToday])
 
   const mainRows = useMemo(() => rows.filter(r => !r.parent), [rows])
+
+  // 「現在」標記插在第一個未開始 row 之前；全部都過了就放最後
+  const nowIdx = useMemo(() => {
+    if (!isToday) return -1
+    const idx = mainRows.findIndex(r => r.time && r.time > now)
+    return idx === -1 ? mainRows.length : idx
+  }, [isToday, mainRows, now])
+
+  // 切到今天的當天，自動 scroll 到「現在」標記
+  useEffect(() => {
+    if (!isToday || !nowMarkerRef.current) return
+    const id = setTimeout(() => {
+      nowMarkerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 200)
+    return () => clearTimeout(id)
+  }, [isToday, dayDate])
 
   const spotsByParent = useMemo(
     () =>
@@ -290,9 +339,7 @@ export default function ItinerarySection({ rows }) {
   )
 
   if (mainRows.length === 0) {
-    return (
-      <p className="text-center text-jp-sub font-serif text-sm mt-12">此天尚無行程資料</p>
-    )
+    return <EmptyState icon={Camera} title="此天尚無行程" hint="到 Google Sheets 的 itinerary 加幾筆，這裡就會出現時間軸。" />
   }
 
   return (
@@ -302,14 +349,16 @@ export default function ItinerarySection({ rows }) {
           const { label, icon: Icon, border } = getTypeInfo(row.type)
           const isLast = i === mainRows.length - 1
           const spots = sortSpots(spotsByParent[row.name] ?? [])
+          const isPastRow = isToday && row.time && row.time < now
 
           return (
+            <Fragment key={`${row.time}:${row.name}`}>
+              {nowIdx === i && <NowMarker time={now} innerRef={nowMarkerRef} />}
             <div
-              key={`${row.time}:${row.name}`}
-              className="flex gap-4 px-6 group"
+              className={`flex gap-4 px-6 group ${isPastRow ? 'opacity-50' : ''}`}
             >
               <div className="w-12 shrink-0 flex flex-col items-center pt-1">
-                <span className="text-sm font-serif font-bold text-jp-text leading-none">{row.time}</span>
+                <span className="text-sm font-sans font-medium text-jp-text leading-none tabular-nums tracking-tight">{row.time}</span>
                 {!isLast && <div className="w-[1px] bg-stone-200 flex-1 my-2" />}
               </div>
 
@@ -321,7 +370,7 @@ export default function ItinerarySection({ rows }) {
                   className="glass-card relative rounded-2xl p-4 active:scale-[0.98] transition-transform duration-200 h-full w-full flex flex-col text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <span className={`text-xs tracking-wider uppercase px-2 py-0.5 rounded border font-serif font-bold ${border}`}>
+                    <span className={`text-xs tracking-wider uppercase px-2 py-0.5 rounded border font-sans font-bold ${border}`}>
                       {label}
                     </span>
                   </div>
@@ -334,19 +383,19 @@ export default function ItinerarySection({ rows }) {
                   )}
 
                   {row.hours && (
-                    <div className="flex items-center gap-1.5 text-xs text-stone-500 font-serif mb-3 bg-white/40 backdrop-blur-sm border border-white/50 w-fit px-2 py-1 rounded-full">
+                    <div className="flex items-center gap-1.5 text-xs text-stone-500 font-sans mb-3 bg-white/40 backdrop-blur-sm border border-white/50 w-fit px-2 py-1 rounded-full tabular-nums">
                       <Clock size={12} />
                       <span>{row.hours}</span>
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2 text-xs text-stone-400 font-serif mt-auto pt-2 min-w-0">
+                  <div className="flex items-center gap-2 text-xs text-stone-400 font-sans mt-auto pt-2 min-w-0">
                     <Icon size={16} />
                     <span className="truncate text-stone-500 opacity-70 flex-1 min-w-0">
                       {row.address || '查看地圖位置'}
                     </span>
                     {spots.length > 0 && (
-                      <span className="text-xs text-amber-600 font-bold font-serif shrink-0 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                      <span className="text-xs text-amber-600 font-bold font-sans shrink-0 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
                         {spots.length} 個亮點
                       </span>
                     )}
@@ -355,8 +404,11 @@ export default function ItinerarySection({ rows }) {
                 </button>
               </div>
             </div>
+            </Fragment>
           )
         })}
+        {/* 全部時間都過了 → 把「現在」標記放在最後 */}
+        {isToday && nowIdx === mainRows.length && <NowMarker time={now} innerRef={nowMarkerRef} />}
       </div>
 
       <DetailModal

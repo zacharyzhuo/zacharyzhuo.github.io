@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { ShoppingBag, Clock, Navigation } from 'lucide-react'
 import { tap } from '../../lib/haptic.js'
+import EmptyState from '../ui/EmptyState.jsx'
 
 /**
  * Flat CSV rows → grouped display units.
@@ -55,7 +56,7 @@ function StandaloneCard({ item }) {
         <div className="flex-1 min-w-0">
           <p className="font-bold text-jp-text font-serif text-base leading-snug">{item.name}</p>
           {(item.floor || item.hours) && (
-            <div className="flex items-center gap-2 text-xs text-stone-600 font-serif mt-1">
+            <div className="flex items-center gap-2 text-xs text-stone-600 font-sans mt-1 tabular-nums">
               {item.floor && (
                 <span className="bg-stone-100 px-1.5 py-0.5 rounded text-stone-600 font-medium text-[11px]">{item.floor}</span>
               )}
@@ -98,7 +99,7 @@ function BuildingCard({ building }) {
           <div>
             <h3 className="font-bold text-jp-text font-serif text-base leading-snug">{building.name}</h3>
             {building.hours && (
-              <span className="text-xs text-stone-600 font-serif mt-1 flex items-center gap-1">
+              <span className="text-xs text-stone-600 font-sans mt-1 flex tabular-nums items-center gap-1">
                 <Clock size={12} /> {building.hours}
               </span>
             )}
@@ -125,7 +126,7 @@ function BuildingCard({ building }) {
             <div key={i} className="flex justify-between items-center">
               <div>
                 <p className="font-bold text-sm text-stone-700 font-serif">{shop.name}</p>
-                <div className="flex items-center gap-2 text-xs text-stone-600 font-serif mt-0.5">
+                <div className="flex items-center gap-2 text-xs text-stone-600 font-sans mt-0.5 tabular-nums">
                   {shop.floor && (
                     <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-600 font-medium">{shop.floor}</span>
                   )}
@@ -193,7 +194,7 @@ export default function ShoppingSection({ rows }) {
   }
 
   if (rows.length === 0) {
-    return <p className="text-center text-stone-600 font-serif text-sm py-6">尚無購物清單</p>
+    return <EmptyState icon={ShoppingBag} title="尚無逛街清單" hint="填好 shopping tab（建築 + 樓層 + 店家），這裡會自動分群。" />
   }
 
   return (
@@ -204,7 +205,7 @@ export default function ShoppingSection({ rows }) {
       >
         <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">逛街清單</h2>
         {grouped.length === 0 ? (
-          <p className="text-stone-600 font-serif text-sm py-6 text-center">尚無清單</p>
+          <EmptyState icon={ShoppingBag} title="這個區域還沒有店" hint="切到其他區看看，或回去 shopping tab 加幾筆。" />
         ) : (
           grouped.map((g, i) =>
             g.type === 'building'
