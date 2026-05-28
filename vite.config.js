@@ -10,7 +10,9 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.js',
       registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      // 不用 'auto'：它只注入最簡單的 register，沒有 reload-on-update 邏輯
+      // 改在 main.jsx 用 virtual:pwa-register 手動註冊，新 SW ready 時主動 reload
+      injectRegister: false,
       // 把 plugin 沒掃到的靜態檔（apple-touch-icon、robots.txt 等）一起帶進 precache
       includeAssets: ['gokigen_panda_icon.png', 'robots.txt'],
       manifest: {
