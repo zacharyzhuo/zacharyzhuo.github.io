@@ -313,7 +313,7 @@ export default function ItinerarySection({ rows }) {
                 {!isLast && <div className="w-[1px] bg-stone-200 flex-1 my-2" />}
               </div>
 
-              <div className="flex-1 pb-8">
+              <div className="flex-1 min-w-0 pb-8">
                 <button
                   type="button"
                   onClick={() => { setSelected({ row, spots }) }}
@@ -340,9 +340,9 @@ export default function ItinerarySection({ rows }) {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2 text-xs text-stone-400 font-serif mt-auto pt-2">
+                  <div className="flex items-center gap-2 text-xs text-stone-400 font-serif mt-auto pt-2 min-w-0">
                     <Icon size={16} />
-                    <span className="truncate text-stone-500 opacity-70 flex-1">
+                    <span className="truncate text-stone-500 opacity-70 flex-1 min-w-0">
                       {row.address || '查看地圖位置'}
                     </span>
                     {spots.length > 0 && (

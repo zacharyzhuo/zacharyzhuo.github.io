@@ -154,16 +154,23 @@ function HotelTab({ accommodation }) {
             )}
             <div className="glass-card p-6 rounded-2xl relative overflow-hidden">
               <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <span className={`text-sm font-bold border px-2 py-1 rounded mb-3 inline-block font-serif ${
-                    h.type === 'hotel'
-                      ? 'border-purple-200 text-purple-700 bg-purple-50'
-                      : h.type === 'airbnb'
-                      ? 'border-pink-200 text-pink-700 bg-pink-50'
-                      : 'border-stone-200 text-stone-600 bg-stone-50'
-                  }`}>
-                    {h.type === 'hotel' ? '飯店' : h.type === 'airbnb' ? 'Airbnb' : '住宿'}
-                  </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-3">
+                    <span className={`text-sm font-bold border px-2 py-1 rounded font-serif ${
+                      h.type === 'hotel'
+                        ? 'border-purple-200 text-purple-700 bg-purple-50'
+                        : h.type === 'airbnb'
+                        ? 'border-pink-200 text-pink-700 bg-pink-50'
+                        : 'border-stone-200 text-stone-600 bg-stone-50'
+                    }`}>
+                      {h.type === 'hotel' ? '飯店' : h.type === 'airbnb' ? 'Airbnb' : '住宿'}
+                    </span>
+                    {h.date && (
+                      <span className="text-sm font-bold border border-blue-200 text-blue-700 bg-blue-50 px-2 py-1 rounded font-serif">
+                        {h.date}
+                      </span>
+                    )}
+                  </div>
                   <h5 className="font-serif font-bold text-jp-text text-xl leading-tight mb-2">{h.name}</h5>
                   {h.address && (
                     <p className="text-sm text-stone-600 font-serif mb-4">{h.address}</p>
@@ -188,7 +195,7 @@ function HotelTab({ accommodation }) {
                   )}
 
                   {h.note && (
-                    <p className="text-sm text-stone-600 mb-2 font-serif leading-relaxed">{h.note}</p>
+                    <p className="text-sm text-stone-600 mb-2 font-serif leading-relaxed whitespace-pre-line">{h.note}</p>
                   )}
 
                   {h.link && (

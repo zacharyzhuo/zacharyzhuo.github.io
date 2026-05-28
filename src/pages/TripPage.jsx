@@ -7,7 +7,7 @@ import { useScrollLock } from '../hooks/useScrollLock.js'
 import { pickInitialDay } from '../lib/tripDate.js'
 import { bump } from '../lib/haptic.js'
 import { usePageMeta } from '../hooks/usePageMeta.js'
-import { useDays, useFoodItems } from '../hooks/useTripDerived.js'
+import { useDays, useFoodItems, useNormalizedDays, useNormalizedItinerary } from '../hooks/useTripDerived.js'
 
 const LAST_TRIP_KEY = 'lastTripSlug'
 // 切換日期手勢的閾值：拖曳超過 50px 或速度超過 0.5px/ms 就 commit
@@ -143,7 +143,9 @@ export default function TripPage() {
     image: trip?.cover_image_url || undefined,
   })
 
-  const days = useDays(itinerary)
+  const normalizedItinerary = useNormalizedItinerary(itinerary, trip?.dates)
+  const normalizedDays = useNormalizedDays(daysData, trip?.dates)
+  const days = useDays(normalizedItinerary, trip?.dates)
 
   // 第一次拿到 itinerary 資料時自動跳到「今天」對應的 day。
   // 用 ref 確保 user 手動切過之後不會被覆蓋；切換 trip 時 ref 會被 reset。
@@ -154,12 +156,12 @@ export default function TripPage() {
   }, [days])
 
   const activeDayMeta = useMemo(
-    () => daysData.find(r => Number(r.day) === activeDay),
-    [daysData, activeDay]
+    () => normalizedDays.find(r => r._day === activeDay),
+    [normalizedDays, activeDay]
   )
   const dayItinerary = useMemo(
-    () => itinerary.filter(r => Number(r.day) === activeDay),
-    [itinerary, activeDay]
+    () => normalizedItinerary.filter(r => r._day === activeDay),
+    [normalizedItinerary, activeDay]
   )
   const foodItems = useFoodItems(food, itinerary)
 
@@ -168,20 +170,20 @@ export default function TripPage() {
   const prevDayObj = activeDayIdx > 0 ? days[activeDayIdx - 1] : null
   const nextDayObj = activeDayIdx < days.length - 1 ? days[activeDayIdx + 1] : null
   const prevDayMeta = useMemo(
-    () => prevDayObj ? daysData.find(r => Number(r.day) === prevDayObj.day) : null,
-    [daysData, prevDayObj]
+    () => prevDayObj ? normalizedDays.find(r => r._day === prevDayObj.day) : null,
+    [normalizedDays, prevDayObj]
   )
   const nextDayMeta = useMemo(
-    () => nextDayObj ? daysData.find(r => Number(r.day) === nextDayObj.day) : null,
-    [daysData, nextDayObj]
+    () => nextDayObj ? normalizedDays.find(r => r._day === nextDayObj.day) : null,
+    [normalizedDays, nextDayObj]
   )
   const prevDayItinerary = useMemo(
-    () => prevDayObj ? itinerary.filter(r => Number(r.day) === prevDayObj.day) : [],
-    [itinerary, prevDayObj]
+    () => prevDayObj ? normalizedItinerary.filter(r => r._day === prevDayObj.day) : [],
+    [normalizedItinerary, prevDayObj]
   )
   const nextDayItinerary = useMemo(
-    () => nextDayObj ? itinerary.filter(r => Number(r.day) === nextDayObj.day) : [],
-    [itinerary, nextDayObj]
+    () => nextDayObj ? normalizedItinerary.filter(r => r._day === nextDayObj.day) : [],
+    [normalizedItinerary, nextDayObj]
   )
 
   // 左右滑動切換日期：跟手位移 + commit 時順勢回彈過場
@@ -404,7 +406,7 @@ export default function TripPage() {
           className={(!isDragging && !isCarouselAnimating) ? 'transition-transform duration-300 ease-out' : ''}
         >
           {/* Prev panel */}
-          <div style={{ width: '33.333%', flexShrink: 0 }}>
+          <div style={{ width: '33.333%', flexShrink: 0, overflow: 'hidden' }}>
             {prevDayObj && (
               <>
                 <DayBanner
@@ -421,7 +423,7 @@ export default function TripPage() {
           </div>
 
           {/* Current panel */}
-          <div style={{ width: '33.333%', flexShrink: 0 }}>
+          <div style={{ width: '33.333%', flexShrink: 0, overflow: 'hidden' }}>
             <DayBanner
               bannerUrl={activeDayMeta?.banner_url}
               title={activeDayMeta?.title}
@@ -434,7 +436,7 @@ export default function TripPage() {
           </div>
 
           {/* Next panel */}
-          <div style={{ width: '33.333%', flexShrink: 0 }}>
+          <div style={{ width: '33.333%', flexShrink: 0, overflow: 'hidden' }}>
             {nextDayObj && (
               <>
                 <DayBanner

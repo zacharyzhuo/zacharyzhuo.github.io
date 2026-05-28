@@ -75,7 +75,7 @@ src/
 │   ├── useScrollLock.js             # body scroll lock（reference counting）
 │   ├── useModalA11y.js              # modal a11y：ESC 關閉、focus trap、focus restore
 │   ├── usePageMeta.js               # 動態 document.title + OG meta
-│   ├── useTripDerived.js            # useDays / useFoodItems：itinerary 衍生資料
+│   ├── useTripDerived.js            # useNormalizedItinerary / useNormalizedDays / useDays / useFoodItems
 │   └── usePullToRefresh.js          # 下拉刷新手勢
 ├── lib/
 │   ├── sheets.js                    # CSV 解析工具（parseCSV、sheetURL）
@@ -197,7 +197,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 **`days` tab**
 
-| `day` | `title` | `subtitle` | `banner_url` |
+| `date` | `title` | `subtitle` | `banner_url` |
 |---|---|---|---|
 
 **`flights` tab**
@@ -207,10 +207,11 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 **`accommodation` tab**
 
-| `day` | `name` | `address` | `check_in` | `check_out` | `link` | `region` | `type` | `note` |
+| `date` | `name` | `address` | `check_in` | `check_out` | `link` | `region` | `type` | `note` |
 |---|---|---|---|---|---|---|---|---|
 
 `type` 可選值：`hotel`、`airbnb`
+`date`：check-in 日期，UI 上會以 badge 形式顯示在卡片頂端（同 flight 卡片樣式）。
 
 **`checklist` tab**
 
@@ -221,13 +222,13 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 **`itinerary` tab**
 
-| `day` | `date` | `time` | `name` | `type` | `address` | `link` | `description` | `note` | `hours` | `parent` |
-|---|---|---|---|---|---|---|---|---|---|---|
+| `date` | `time` | `name` | `type` | `address` | `link` | `description` | `note` | `hours` | `parent` |
+|---|---|---|---|---|---|---|---|---|---|
 
 `type` 可選值：`attraction`（預設）、`hotel`、`food`、`shopping`、`transport`
 
 欄位說明：
-- `date`：格式 `YYYY/MM/DD`，作為「今日自動選中該 day」的依據（`pickInitialDay`）
+- `date`：用於將 rows 分組到日。可填短格式 `M/D`（如 `6/4`）或完整 `YYYY/MM/DD`；短格式會用 index sheet 的 `dates` start 補年（跨年 trip 自動處理）。Day 序號由 `(date - tripStart)` 反推，不再需要獨立 `day` 欄。
 - `description`：**卡片外**可直接看到的簡短介紹（line-clamp 三行）
 - `note`：**點開卡片後**才顯示的詳細說明，支援 `\n` 換行
 - `hours`：營業時間，顯示於卡片底部小 badge

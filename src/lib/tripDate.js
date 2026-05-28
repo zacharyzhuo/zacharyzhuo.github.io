@@ -10,6 +10,85 @@ export function formatToday() {
 }
 
 /**
+ * 把 'YYYY/MM/DD' 加上 N 天，回傳新的 'YYYY/MM/DD'。跨月、跨年由 Date 自動處理。
+ *
+ * @param {string} dateStr
+ * @param {number} offset
+ * @returns {string}
+ */
+export function addDaysToDateString(dateStr, offset) {
+  if (!dateStr) return ''
+  const parts = dateStr.split('/').map(Number)
+  if (parts.length < 3 || parts.some(n => !Number.isFinite(n))) return ''
+  const [y, m, d] = parts
+  const date = new Date(y, m - 1, d)
+  date.setDate(date.getDate() + offset)
+  return formatYMD(date)
+}
+
+function formatYMD(d) {
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`
+}
+
+/**
+ * 把 sheet 上常見的日期字串正規化成 'YYYY/MM/DD'。支援：
+ *   '6/4'        → 用 tripDates 的年份補上
+ *   '06/04'      → 同上
+ *   '2026/6/4'   → 補零
+ *   '2026/06/04' → 原樣 echo
+ *
+ * 跨年 trip（例如 12/30 - 1/2）：若 'M/D' 換上 start 年份後比 start 還早，自動 +1 年。
+ *
+ * @param {string} dateStr
+ * @param {string} [tripDates]
+ * @returns {string}
+ */
+export function resolveTripDate(dateStr, tripDates) {
+  if (!dateStr || typeof dateStr !== 'string') return ''
+  const parts = dateStr.trim().split('/').map(s => Number(s.trim()))
+  if (parts.some(n => !Number.isFinite(n))) return ''
+
+  if (parts.length === 3) {
+    const [y, m, d] = parts
+    return formatYMD(new Date(y, m - 1, d))
+  }
+
+  if (parts.length === 2) {
+    const { start } = parseTripDates(tripDates)
+    if (!start) return ''
+    const [m, d] = parts
+    const startSegs = start.split('/').map(Number)
+    const startYear = startSegs[0]
+    const startDate = new Date(startSegs[0], startSegs[1] - 1, startSegs[2])
+    const candidate = new Date(startYear, m - 1, d)
+    if (candidate < startDate) candidate.setFullYear(startYear + 1)
+    return formatYMD(candidate)
+  }
+
+  return ''
+}
+
+/**
+ * 計算某個日期是 trip 的第幾天（1-indexed）。
+ *
+ * @param {string} fullDate 'YYYY/MM/DD'
+ * @param {string} [tripDates]
+ * @returns {number|null}
+ */
+export function computeDayFromDate(fullDate, tripDates) {
+  if (!fullDate) return null
+  const { start } = parseTripDates(tripDates)
+  if (!start) return null
+  const fullSegs = fullDate.split('/').map(Number)
+  const startSegs = start.split('/').map(Number)
+  if (fullSegs.length !== 3 || startSegs.length !== 3) return null
+  if (fullSegs.some(n => !Number.isFinite(n)) || startSegs.some(n => !Number.isFinite(n))) return null
+  const a = new Date(fullSegs[0], fullSegs[1] - 1, fullSegs[2])
+  const b = new Date(startSegs[0], startSegs[1] - 1, startSegs[2])
+  return Math.round((a.getTime() - b.getTime()) / 86400000) + 1
+}
+
+/**
  * 解析行程日期字串：
  *   '2026/01/10 - 01/14' → { start: '2026/01/10', end: '2026/01/14' }
  *   '2026/12/30 - 2027/01/02' → { start: '2026/12/30', end: '2027/01/02' }
