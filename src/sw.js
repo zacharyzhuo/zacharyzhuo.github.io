@@ -23,6 +23,7 @@ registerRoute(
 )
 
 // Google Sheets gviz CSV：優先打網路，5s 內沒回 fallback 到 cache
+// maxAge 設 1 天（原本 7 天）：sheet 編輯頻繁，舊快取卡太久不值得
 registerRoute(
   ({ url }) => url.origin === 'https://docs.google.com' && url.pathname.includes('/gviz/tq'),
   new NetworkFirst({
@@ -30,7 +31,7 @@ registerRoute(
     networkTimeoutSeconds: 5,
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
-      new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 7 }),
+      new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 }),
     ],
   })
 )

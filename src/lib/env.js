@@ -40,4 +40,8 @@ export const env = {
   get IS_PROD() {
     return !!import.meta.env.PROD
   },
+  // CI 在 build 時注入 commit sha；本地 build 時可能為 'dev'
+  get APP_VERSION() {
+    return import.meta.env.VITE_APP_VERSION || 'dev'
+  },
 }

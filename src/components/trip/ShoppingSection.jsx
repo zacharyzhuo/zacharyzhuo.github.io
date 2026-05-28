@@ -73,7 +73,7 @@ function StandaloneCard({ item }) {
           <a
             href={item.link}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="p-2.5 liquid-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
             onClick={e => e.stopPropagation()}
             aria-label={`查看 ${item.name} 的位置`}
@@ -108,7 +108,7 @@ function BuildingCard({ building }) {
           <a
             href={building.link}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="p-2.5 liquid-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center ml-2 shrink-0"
             onClick={e => e.stopPropagation()}
             aria-label={`查看 ${building.name} 的位置`}
@@ -140,7 +140,7 @@ function BuildingCard({ building }) {
                 <a
                   href={shop.link}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="p-2.5 liquid-glass-button rounded-full text-stone-600 touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center ml-2 shrink-0"
                   onClick={e => e.stopPropagation()}
                   aria-label={`查看 ${shop.name} 的位置`}
@@ -174,7 +174,11 @@ export default function ShoppingSection({ rows }) {
     }
   }, [areas, activeArea])
 
-  const filtered = activeArea ? rows.filter(r => r.area === activeArea) : rows
+  // filtered 要 memo，否則每次 render 都是新 array ref，下面的 grouped useMemo 永遠 miss
+  const filtered = useMemo(
+    () => activeArea ? rows.filter(r => r.area === activeArea) : rows,
+    [activeArea, rows]
+  )
   const grouped = useMemo(() => groupItems(filtered), [filtered])
 
   useEffect(() => {

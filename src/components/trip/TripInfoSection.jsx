@@ -202,7 +202,7 @@ function HotelTab({ accommodation }) {
                     <a
                       href={h.link}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="w-full liquid-glass-button text-stone-600 py-3 rounded-xl font-serif tracking-wide flex items-center justify-center gap-2 mt-4 touch-manipulation min-h-[44px]"
                       aria-label="查看住宿位置"
                     >

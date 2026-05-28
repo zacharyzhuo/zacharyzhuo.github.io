@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
-import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
+import { describe, it, expect, beforeAll, beforeEach, afterAll, afterEach } from 'vitest'
 import { useSheetData, __clearSheetCache } from '../../hooks/useSheetData.js'
 
 const SHEET_ID = 'test-sheet-123'
@@ -13,6 +13,12 @@ const server = setupServer(
 )
 
 beforeAll(() => server.listen())
+beforeEach(() => {
+  // SWR localStorage 快取會跨 test 殘留 → 前一個 test 成功寫入後，下一個 test 起手 loading=false
+  // 讓 waitFor 提早通過、assertion 跑在 fetch 完成前。清掉再開始。
+  localStorage.clear()
+  __clearSheetCache()
+})
 afterEach(() => {
   server.resetHandlers()
   __clearSheetCache()

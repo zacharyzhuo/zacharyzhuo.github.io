@@ -84,7 +84,7 @@ export default function FoodSection({ rows }) {
                         <a
                           href={row.link}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           className="p-2.5 liquid-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center"
                           onClick={e => e.stopPropagation()}
                         >

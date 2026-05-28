@@ -114,8 +114,9 @@ export function parseTripDates(dates) {
 /**
  * 根據今日日期決定預設選中的 day。
  *   - 今天剛好是某一天 → 那一天
- *   - 旅程還沒開始 → Day 1
- *   - 旅程已結束 → 最後一天
+ *   - 否則（旅程未開始 / 已結束 / 中間缺日）→ Day 1
+ *
+ * 旅程結束後落在 Day 1 是刻意設計：當作回顧模式，從頭看起比較直覺。
  *
  * @param {Array<{ day: number, date: string }>} days
  */
@@ -123,10 +124,7 @@ export function pickInitialDay(days) {
   if (!days || days.length === 0) return 1
   const todayStr = formatToday()
   const exact = days.find(d => d.date === todayStr)
-  if (exact) return exact.day
-  const firstDate = days[0].date
-  if (firstDate && todayStr < firstDate) return days[0].day
-  return days[days.length - 1].day
+  return exact ? exact.day : days[0].day
 }
 
 /**

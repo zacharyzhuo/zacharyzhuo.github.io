@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { sheetURL, parseCSV } from '../lib/sheets.js'
-import { getCached, setCached } from '../lib/swrCache.js'
+import { getCached, setCached, clearCached } from '../lib/swrCache.js'
 
 // key -> Promise<rows>。同一 sheet+tab 的並行 request 共用同一個 Promise，避免重複 fetch
 const promiseCache = new Map()
@@ -8,6 +8,17 @@ const promiseCache = new Map()
 /** 清空 in-memory cache，主要供測試使用 */
 export function __clearSheetCache() {
   promiseCache.clear()
+}
+
+/**
+ * 主動失效一個 sheet tab 的 cache（in-memory + localStorage 都清）。下次 useSheetData
+ * 重新讀取時會走網路。給 pull-to-refresh 用。
+ */
+export function invalidateSheet(sheetId, tabName) {
+  if (!sheetId || !tabName) return
+  const key = `${sheetId}:${tabName}`
+  promiseCache.delete(key)
+  clearCached(key)
 }
 
 export function fetchSheet(sheetId, tabName) {
@@ -51,6 +62,14 @@ export function useSheetData(sheetId, tabName) {
     return !getCached(cacheKey)
   })
   const [error, setError] = useState(null)
+  // bump 這個 tick 強制重 fetch；refresh() 會呼叫
+  const [refreshTick, setRefreshTick] = useState(0)
+
+  const refresh = useCallback(async () => {
+    if (!sheetId || !tabName) return
+    invalidateSheet(sheetId, tabName)
+    setRefreshTick(t => t + 1)
+  }, [sheetId, tabName])
 
   useEffect(() => {
     if (!sheetId || !tabName) { setLoading(false); return }
@@ -77,7 +96,7 @@ export function useSheetData(sheetId, tabName) {
       })
 
     return () => { cancelled = true }
-  }, [sheetId, tabName])
+  }, [sheetId, tabName, refreshTick])
 
-  return { data, loading, error }
+  return { data, loading, error, refresh }
 }

@@ -29,10 +29,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run tests
+        run: npm test
+
       - name: Build
         run: npm run build
         env:
           VITE_INDEX_SHEET_ID: ${{ secrets.VITE_INDEX_SHEET_ID }}
+          VITE_APP_VERSION: ${{ github.sha }}
+
+      - name: Write version manifest
+        run: |
+          mkdir -p dist
+          printf '{"sha":"%s","builtAt":"%s"}\n' \
+            "$GITHUB_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > dist/version.json
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -46,8 +46,8 @@ export default defineConfig({
         // 不要把 trips/ 圖片塞進 precache（單張就幾百 KB），改走 runtime cache
         globPatterns: ['**/*.{js,css,html,svg,ico,woff,woff2}'],
         globIgnores: ['**/trips/**'],
-        // proposal-photos 內單張可能 > 2 MB，提高上限避免 build 報警
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        // 單檔上限 2 MB；JS chunk 漲過頭時 build 會報警，當作 budget guard
+        maximumFileSizeToCacheInBytes: 2 * 1024 * 1024,
       },
       // 開發時關掉 SW，避免快取干擾本地 hot reload
       devOptions: {
