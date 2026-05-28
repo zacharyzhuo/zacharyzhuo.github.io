@@ -253,16 +253,32 @@ export default function TripPage() {
           />
         )}
 
-        {/* Day swipe zone：三欄輪播 */}
+        {/* Day swipe zone：current 用 relative 撐高度；prev / next 用 absolute 不影響高度 */}
         <div {...swipe.containerProps} className="overflow-hidden">
           <div
             ref={swipe.carouselRef}
             style={swipe.carouselStyle}
             className={swipe.carouselClassName}
           >
-            <DayPanel dayObj={prevDayObj} dayMeta={prevDayMeta} itinerary={prevDayItinerary} tripName={trip.name} />
-            <DayPanel dayObj={{ day: activeDay, date: days.find(d => d.day === activeDay)?.date }} dayMeta={activeDayMeta} itinerary={dayItinerary} tripName={trip.name} />
-            <DayPanel dayObj={nextDayObj} dayMeta={nextDayMeta} itinerary={nextDayItinerary} tripName={trip.name} />
+            {/* Prev panel：absolute 放在左側 (right-full)，不參與高度 */}
+            {prevDayObj && (
+              <div className="absolute top-0 right-full w-full overflow-hidden">
+                <DayPanel dayObj={prevDayObj} dayMeta={prevDayMeta} itinerary={prevDayItinerary} tripName={trip.name} />
+              </div>
+            )}
+            {/* Current panel：normal flow，撐整個 carousel 高度 */}
+            <DayPanel
+              dayObj={{ day: activeDay, date: days.find(d => d.day === activeDay)?.date }}
+              dayMeta={activeDayMeta}
+              itinerary={dayItinerary}
+              tripName={trip.name}
+            />
+            {/* Next panel：absolute 放在右側 (left-full)，不參與高度 */}
+            {nextDayObj && (
+              <div className="absolute top-0 left-full w-full overflow-hidden">
+                <DayPanel dayObj={nextDayObj} dayMeta={nextDayMeta} itinerary={nextDayItinerary} tripName={trip.name} />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -323,23 +339,20 @@ export default function TripPage() {
 
 // 單一日 panel：banner + itinerary list；dayObj 為 null 時整格不渲染（給三欄第一/末日用）
 function DayPanel({ dayObj, dayMeta, itinerary, tripName }) {
+  if (!dayObj) return null
   return (
-    <div style={{ width: '33.333%', flexShrink: 0, overflow: 'hidden' }}>
-      {dayObj && (
-        <>
-          <DayBanner
-            bannerUrl={dayMeta?.banner_url}
-            title={dayMeta?.title}
-            subtitle={dayMeta?.subtitle}
-            dateLabel={formatDayLabel(dayObj.date)}
-            tripName={tripName}
-          />
-          <div className="h-6" />
-          <div className="mt-2">
-            <ItinerarySection rows={itinerary} dayDate={dayObj.date} />
-          </div>
-        </>
-      )}
+    <div className="overflow-hidden">
+      <DayBanner
+        bannerUrl={dayMeta?.banner_url}
+        title={dayMeta?.title}
+        subtitle={dayMeta?.subtitle}
+        dateLabel={formatDayLabel(dayObj.date)}
+        tripName={tripName}
+      />
+      <div className="h-6" />
+      <div className="mt-2">
+        <ItinerarySection rows={itinerary} dayDate={dayObj.date} />
+      </div>
     </div>
   )
 }

@@ -219,7 +219,7 @@ function DetailModal({ row, spots, onClose }) {
             <X size={20} />
           </button>
 
-          <div className="overflow-y-auto px-8 pb-10 flex-1 pt-4">
+          <div className="overflow-y-auto px-8 pb-24 flex-1 pt-4">
             <div className="flex items-center gap-3 mb-2">
               <span className={`px-3 py-1 border text-xs tracking-widest font-bold font-serif uppercase rounded ${typeInfo.border}`}>
                 {typeInfo.label}
@@ -231,21 +231,10 @@ function DetailModal({ row, spots, onClose }) {
               {current.name}
             </h2>
 
-            {/* 地址列本身就是導航按鈕；點下去開 Google Maps，不再需要底部浮動 CTA */}
-            <button
-              type="button"
-              onClick={() => window.open(navUrl, '_blank')}
-              className="group flex items-center gap-2 w-full mb-8 -mx-2 pl-2 pr-1.5 py-2 rounded-lg active:bg-stone-100/60 transition-colors text-left touch-manipulation"
-              aria-label={`開啟 ${current.name} 的 Google Maps 導航`}
-            >
+            <div className="flex items-center gap-2 text-sm text-stone-600 mb-5 font-serif leading-relaxed">
               <MapPin size={14} className="text-jp-green shrink-0" />
-              <span className="text-sm text-stone-600 font-serif flex-1 leading-relaxed">
-                {current.address || '查看地圖位置'}
-              </span>
-              <span className="shrink-0 flex items-center justify-center w-9 h-9 rounded-full bg-jp-green/10 text-jp-green border border-jp-green/20 group-active:bg-jp-green group-active:text-white transition-colors">
-                <Navigation size={16} />
-              </span>
-            </button>
+              {current.address || '查看地圖位置'}
+            </div>
 
             <div className="space-y-8">
               {current.note && (
@@ -264,7 +253,7 @@ function DetailModal({ row, spots, onClose }) {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="h-[1px] w-3 bg-stone-300" />
-                    <h3 className="font-bold text-jp-text text-sm font-serif tracking-widest uppercase shrink-0">
+                    <h3 className="font-bold text-jp-text text-sm font-serif tracking-wide shrink-0">
                       街道亮點
                     </h3>
                     <span className="text-xs text-stone-400 font-serif shrink-0 tabular-nums">
@@ -280,6 +269,23 @@ function DetailModal({ row, spots, onClose }) {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* 底部浮動 Google Maps 導航 CTA */}
+          <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
+            <button
+              onClick={() => window.open(navUrl, '_blank')}
+              className="liquid-tab-track pointer-events-auto shadow-2xl font-serif text-stone-600 flex items-center gap-2"
+              style={{
+                padding: '12px 32px',
+                background: 'rgba(255, 255, 255, 0.45)',
+                boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.7), 0 8px 24px rgba(0,0,0,0.15)',
+              }}
+              aria-label={`開啟 ${current.name} 的 Google Maps 導航`}
+            >
+              <Navigation size={16} />
+              Google Maps 導航
+            </button>
           </div>
           </>
         )}

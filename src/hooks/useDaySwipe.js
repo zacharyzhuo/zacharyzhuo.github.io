@@ -8,6 +8,10 @@ const SWIPE_VELOCITY_THRESHOLD = 0.5
 /**
  * 三欄輪播（prev / current / next）的左右滑動切日手勢。
  *
+ * 結構：current panel 用 relative positioning 撐高度；prev / next 用 absolute
+ * 放在左右兩側（right-full / left-full），不參與父容器高度計算 → 頁面高度永遠
+ * 對齊「當天」內容，不會被最長的那天撐很高。
+ *
  * 重點：
  *   - 拖動中直接操作 DOM transform，不走 state，避免每幀 re-render
  *   - touchmove listener 只掛一次，最新 days/activeDay/enabled 用 ref 拿
@@ -84,7 +88,7 @@ export function useDaySwipe({ days, activeDay, setActiveDay, enabled }) {
       }
       dragXRef.current = damped
       if (carouselRef.current) {
-        carouselRef.current.style.transform = `translateX(calc(-33.333% + ${damped}px))`
+        carouselRef.current.style.transform = `translateX(${damped}px)`
       }
     }
 
@@ -137,7 +141,7 @@ export function useDaySwipe({ days, activeDay, setActiveDay, enabled }) {
     const snapEl = carouselRef.current
     if (snapEl && dx !== 0) {
       snapEl.style.transition = 'transform 300ms ease-out'
-      snapEl.style.transform = 'translateX(-33.333%)'
+      snapEl.style.transform = 'translateX(0)'
       setTimeout(() => {
         if (carouselRef.current) carouselRef.current.style.transition = ''
         setIsDragging(false)
@@ -152,10 +156,10 @@ export function useDaySwipe({ days, activeDay, setActiveDay, enabled }) {
     const el = carouselRef.current
     if (!el || dragStartRef.current) return // 用戶正在滑就不打擾
     el.style.transition = 'transform 600ms cubic-bezier(0.34, 1.4, 0.64, 1)'
-    el.style.transform = 'translateX(calc(-33.333% - 56px))'
+    el.style.transform = 'translateX(-56px)'
     setTimeout(() => {
       if (!carouselRef.current) return
-      carouselRef.current.style.transform = 'translateX(-33.333%)'
+      carouselRef.current.style.transform = 'translateX(0)'
       setTimeout(() => {
         if (carouselRef.current) carouselRef.current.style.transition = ''
       }, 600)
@@ -171,9 +175,8 @@ export function useDaySwipe({ days, activeDay, setActiveDay, enabled }) {
     },
     carouselRef,
     carouselStyle: {
-      display: 'flex',
-      width: '300%',
-      transform: `translateX(calc(-33.333% + ${dragX}px))`,
+      position: 'relative',
+      transform: `translateX(${dragX}px)`,
       willChange: 'transform',
     },
     carouselClassName: (!isDragging && !isCarouselAnimating) ? 'transition-transform duration-300 ease-out' : '',
