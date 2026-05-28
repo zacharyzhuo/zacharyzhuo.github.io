@@ -9,10 +9,6 @@ const INFO_TABS = [
   { key: 'hotel', label: '住宿資訊' },
 ]
 
-const AIRPORT_NAMES = {
-  TPE: '台北', NRT: '成田', HND: '羽田', HKD: '函館', CTS: '新千歲',
-}
-
 function parseRoute(route) {
   if (!route) return { from: '', to: '' }
   const dashIdx = route.indexOf(' -> ')
@@ -57,9 +53,7 @@ function FlightsTab({ flights }) {
               <div className="flex justify-between items-center mb-4">
                 <div className="text-center">
                   <div className="text-2xl font-serif font-bold text-jp-text">{dep}</div>
-                  <div className="text-sm text-stone-600 font-serif">
-                    {from} {AIRPORT_NAMES[from] || ''}
-                  </div>
+                  <div className="text-sm text-stone-600 font-serif">{from}</div>
                 </div>
                 <div className="flex flex-col items-center text-stone-400">
                   <div className="flex items-center">
@@ -72,9 +66,7 @@ function FlightsTab({ flights }) {
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-serif font-bold text-jp-text">{arr}</div>
-                  <div className="text-sm text-stone-600 font-serif">
-                    {to} {AIRPORT_NAMES[to] || ''}
-                  </div>
+                  <div className="text-sm text-stone-600 font-serif">{to}</div>
                 </div>
               </div>
               {(f.carry_on || f.checked_bag) && (
@@ -150,7 +142,7 @@ function HotelTab({ accommodation }) {
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-3">
-                    <span className={`text-xs font-bold border px-2 py-1 rounded font-serif uppercase tracking-wider ${
+                    <span className={`text-sm font-bold border px-2 py-1 rounded font-serif ${
                       h.type === 'hotel'
                         ? 'border-purple-200 text-purple-700 bg-purple-50'
                         : h.type === 'airbnb'

@@ -235,14 +235,16 @@ function DetailModal({ row, spots, onClose }) {
             <button
               type="button"
               onClick={() => window.open(navUrl, '_blank')}
-              className="group flex items-center gap-2 w-full mb-8 -mx-2 px-2 py-2 rounded-lg active:bg-stone-100/60 transition-colors text-left touch-manipulation"
+              className="group flex items-center gap-2 w-full mb-8 -mx-2 pl-2 pr-1.5 py-2 rounded-lg active:bg-stone-100/60 transition-colors text-left touch-manipulation"
               aria-label={`開啟 ${current.name} 的 Google Maps 導航`}
             >
               <MapPin size={14} className="text-jp-green shrink-0" />
               <span className="text-sm text-stone-600 font-serif flex-1 leading-relaxed">
                 {current.address || '查看地圖位置'}
               </span>
-              <Navigation size={14} className="text-stone-400 shrink-0 group-active:text-jp-green" />
+              <span className="shrink-0 flex items-center justify-center w-9 h-9 rounded-full bg-jp-green/10 text-jp-green border border-jp-green/20 group-active:bg-jp-green group-active:text-white transition-colors">
+                <Navigation size={16} />
+              </span>
             </button>
 
             <div className="space-y-8">
