@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, Home } from 'lucide-react'
+import { env } from '../../lib/env.js'
 
 export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameEn }) {
   const navigate = useNavigate()
@@ -143,9 +144,12 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
             </button>
           </div>
 
-          <div className="px-6 pb-6 pt-2">
-            <p className="text-xs text-stone-600 text-center font-serif tracking-widest uppercase opacity-70">
+          <div className="px-6 pb-6 pt-2 text-center">
+            <p className="text-xs text-stone-600 font-serif tracking-widest uppercase opacity-70">
               {tripNameEn || 'Trip'}
+            </p>
+            <p className="text-[10px] text-stone-400 font-mono mt-1 opacity-60" title={env.APP_VERSION}>
+              v{env.APP_VERSION === 'dev' ? 'dev' : env.APP_VERSION.slice(0, 7)}
             </p>
           </div>
         </div>

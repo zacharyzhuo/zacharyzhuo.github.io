@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
-import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeAll, beforeEach, afterAll, afterEach, vi } from 'vitest'
 import { useTrips } from '../../hooks/useTrips.js'
 
 // mock env variable
@@ -17,6 +17,10 @@ const server = setupServer(
 )
 
 beforeAll(() => server.listen())
+beforeEach(() => {
+  // SWR localStorage 跨 test 殘留 → 下個 test 起手就有 cached data，waitFor 提早通過
+  localStorage.clear()
+})
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 

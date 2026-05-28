@@ -2,12 +2,22 @@ import { useNavigate } from 'react-router-dom'
 import { MapPin, Calendar } from 'lucide-react'
 import { prefetchSheet } from '../../hooks/useSheetData.js'
 
-// 進入 TripPage 後實際會 fetch 的所有 tab；hover/touch 時提前打，點擊到 navigate 之間就能完成下載
-const PREFETCH_TABS = ['flights', 'itinerary', 'accommodation', 'shopping', 'checklist', 'food', 'days']
+// Tier 1：主畫面馬上要的（itinerary 排程 + days 標題/banner）→ 立即併發
+const CRITICAL_TABS = ['itinerary', 'days']
+// Tier 2：旅程資訊 modal 預設展示（航班、住宿）→ idle 時抓
+const SECONDARY_TABS = ['flights', 'accommodation']
+// Tier 3：要點 sidebar 才看的（購物 / 美食 / 行李）→ 再 idle 一輪
+const TERTIARY_TABS = ['shopping', 'food', 'checklist']
+
+const scheduleIdle = (typeof window !== 'undefined' && window.requestIdleCallback)
+  ? (cb) => window.requestIdleCallback(cb, { timeout: 1500 })
+  : (cb) => setTimeout(cb, 200)
 
 function prefetchTrip(sheetId) {
   if (!sheetId) return
-  PREFETCH_TABS.forEach(tab => prefetchSheet(sheetId, tab))
+  CRITICAL_TABS.forEach(tab => prefetchSheet(sheetId, tab))
+  scheduleIdle(() => SECONDARY_TABS.forEach(tab => prefetchSheet(sheetId, tab)))
+  scheduleIdle(() => TERTIARY_TABS.forEach(tab => prefetchSheet(sheetId, tab)))
 }
 
 /**
