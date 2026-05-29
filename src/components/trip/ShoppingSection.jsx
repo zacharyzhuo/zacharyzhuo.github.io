@@ -58,7 +58,7 @@ function StandaloneCard({ item }) {
           {(item.floor || item.hours) && (
             <div className="flex items-center gap-2 text-xs text-stone-600 font-serif mt-1 tabular-nums">
               {item.floor && (
-                <span className="bg-stone-100 px-1.5 py-0.5 rounded text-stone-600 font-medium text-[11px]">{item.floor}</span>
+                <span className="bg-stone-100 px-1.5 py-0.5 rounded text-stone-600 font-medium text-2xs">{item.floor}</span>
               )}
               {item.hours && (
                 <span className="flex items-center gap-1">

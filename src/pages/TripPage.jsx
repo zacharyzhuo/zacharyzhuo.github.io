@@ -10,7 +10,7 @@ import { useEasterEgg } from '../hooks/useEasterEgg.js'
 import { pickInitialDay, formatDayLabel } from '../lib/tripDate.js'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 import { useDays, useFoodItems, useNormalizedDays, useNormalizedItinerary } from '../hooks/useTripDerived.js'
-import LoadingSpinner from '../components/ui/LoadingSpinner.jsx'
+import { TripSkeleton } from '../components/ui/Skeletons.jsx'
 import ErrorState from '../components/ui/ErrorState.jsx'
 import Sidebar from '../components/layout/Sidebar.jsx'
 import BottomSheet from '../components/layout/BottomSheet.jsx'
@@ -178,7 +178,7 @@ export default function TripPage() {
   }, [days.length, swipe])
 
   if (tripsLoading || flightsLoading || itineraryLoading) {
-    return <div className="bg-jp-bg min-h-screen safe-area-inset"><LoadingSpinner /></div>
+    return <TripSkeleton />
   }
 
   if (!trip) {
@@ -228,7 +228,7 @@ export default function TripPage() {
           </button>
           <div className="flex flex-col items-center flex-1 px-4">
             {yearMonth && (
-              <p className="text-[11px] tracking-[0.3em] uppercase text-stone-400 mb-2 font-serif font-medium">{yearMonth}</p>
+              <p className="text-2xs tracking-[0.3em] uppercase text-stone-400 mb-2 font-serif font-medium">{yearMonth}</p>
             )}
             <p className="text-xs tracking-[0.15em] uppercase text-stone-400 mb-3 font-serif font-medium">
               {tripNameEn.replace(' TRIP', ' Trip')}

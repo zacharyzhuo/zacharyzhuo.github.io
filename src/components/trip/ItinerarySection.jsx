@@ -19,12 +19,12 @@ function NowMarker({ time, innerRef }) {
   return (
     <div ref={innerRef} className="flex gap-4 px-6 -mt-2 mb-4">
       <div className="w-12 shrink-0 flex flex-col items-center">
-        <span className="text-[11px] font-serif font-bold text-jp-red leading-none tabular-nums tracking-tight">
+        <span className="text-2xs font-serif font-bold text-jp-red leading-none tabular-nums tracking-tight">
           {time}
         </span>
       </div>
       <div className="flex-1 min-w-0 flex items-center gap-2">
-        <span className="text-[10px] font-serif font-bold text-jp-red uppercase tracking-[0.2em] shrink-0">
+        <span className="text-2xs font-serif font-bold text-jp-red uppercase tracking-[0.2em] shrink-0">
           現在
         </span>
         <div className="flex-1 h-[1px] bg-jp-red/40" />
@@ -68,7 +68,7 @@ function SpotItem({ spot }) {
     <div className="flex items-start gap-3 py-2.5 border-b border-stone-100 last:border-0">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className={`text-[10px] px-1.5 py-0.5 border rounded font-serif font-bold shrink-0 uppercase tracking-wider ${border}`}>
+          <span className={`text-2xs px-1.5 py-0.5 border rounded font-serif font-bold shrink-0 uppercase tracking-wider ${border}`}>
             {label}
           </span>
           <span className="font-serif font-bold text-jp-text text-sm leading-snug truncate">

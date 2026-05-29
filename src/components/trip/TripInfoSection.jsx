@@ -166,14 +166,14 @@ function HotelTab({ accommodation }) {
                     <div className="flex gap-6 mb-4 text-sm font-serif text-stone-600 bg-white/30 p-3 rounded-lg border border-white/40">
                       {h.check_in && (
                         <div>
-                          <span className="block text-[10px] text-stone-500 uppercase font-serif tracking-widest mb-1">Check-in</span>
+                          <span className="block text-2xs text-stone-500 uppercase font-serif tracking-widest mb-1">Check-in</span>
                           <span className="text-sm text-stone-600 font-serif tabular-nums">{h.check_in}</span>
                         </div>
                       )}
                       {h.check_in && h.check_out && <div className="w-[1px] bg-stone-200" />}
                       {h.check_out && (
                         <div>
-                          <span className="block text-[10px] text-stone-500 uppercase font-serif tracking-widest mb-1">Check-out</span>
+                          <span className="block text-2xs text-stone-500 uppercase font-serif tracking-widest mb-1">Check-out</span>
                           <span className="text-sm text-stone-600 font-serif tabular-nums">{h.check_out}</span>
                         </div>
                       )}

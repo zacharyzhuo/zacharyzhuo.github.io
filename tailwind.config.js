@@ -15,6 +15,10 @@ export default {
         serif: ['"Noto Serif JP"', '"Hiragino Mincho ProN"', 'serif'],
         sans: ['"Noto Sans JP"', '"Hiragino Kaku Gothic ProN"', 'sans-serif'],
       },
+      fontSize: {
+        // micro eyebrow / 大寫 caps 標籤統一尺寸，取代散落的 text-[10px]/[11px]
+        '2xs': '0.625rem',
+      },
     },
   },
   plugins: [],

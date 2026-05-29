@@ -6,7 +6,7 @@ import { usePullToRefresh } from '../hooks/usePullToRefresh.js'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 import { pickActiveTrip } from '../lib/tripDate.js'
 import TripCard from '../components/home/TripCard.jsx'
-import LoadingSpinner from '../components/ui/LoadingSpinner.jsx'
+import { HomeCardsSkeleton } from '../components/ui/Skeletons.jsx'
 import ErrorState from '../components/ui/ErrorState.jsx'
 
 const LAST_TRIP_KEY = 'lastTripSlug'
@@ -78,7 +78,7 @@ export default function HomePage() {
 
       {/* Content */}
       <main className="px-4 pb-8">
-        {loading && <LoadingSpinner />}
+        {loading && <HomeCardsSkeleton />}
 
         {error && (
           <ErrorState

@@ -24,7 +24,7 @@ function prefetchTrip(sheetId) {
 function StatusPill({ status, daysToStart, daysFromEnd }) {
   if (status === 'active') {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-jp-red/95 text-white text-[10px] font-serif font-bold uppercase tracking-widest shadow-sm">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-jp-red/95 text-white text-2xs font-serif font-bold uppercase tracking-widest shadow-sm">
         <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
         進行中
       </span>
@@ -32,13 +32,13 @@ function StatusPill({ status, daysToStart, daysFromEnd }) {
   }
   if (status === 'upcoming') {
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-amber-100/90 text-amber-800 text-[10px] font-serif font-bold uppercase tracking-widest border border-amber-200/60">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-amber-100/90 text-amber-800 text-2xs font-serif font-bold uppercase tracking-widest border border-amber-200/60">
         {daysToStart === 1 ? '明天出發' : `${daysToStart} 天後出發`}
       </span>
     )
   }
   return (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-stone-200/90 text-stone-700 text-[10px] font-serif font-medium uppercase tracking-widest">
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-stone-200/90 text-stone-700 text-2xs font-serif font-medium uppercase tracking-widest">
       回顧
     </span>
   )

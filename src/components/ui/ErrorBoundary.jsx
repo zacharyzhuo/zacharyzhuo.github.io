@@ -57,7 +57,7 @@ export default class ErrorBoundary extends Component {
           {this.state.error?.message && (
             <details className="mt-6 text-left">
               <summary className="text-xs text-stone-400 font-serif cursor-pointer">技術細節</summary>
-              <pre className="mt-2 text-[11px] text-stone-500 font-mono bg-stone-100/50 p-3 rounded-lg overflow-auto whitespace-pre-wrap">
+              <pre className="mt-2 text-2xs text-stone-500 font-mono bg-stone-100/50 p-3 rounded-lg overflow-auto whitespace-pre-wrap">
                 {this.state.error.message}
               </pre>
             </details>
