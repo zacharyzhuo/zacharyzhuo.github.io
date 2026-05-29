@@ -53,7 +53,7 @@ export default function FoodSection({ rows }) {
     <div className="flex flex-col relative h-full">
       <div
         ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-8 pb-24 space-y-6 pt-2"
+        className="flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-hide px-8 pb-24 space-y-6 pt-2"
       >
         <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">美食清單</h2>
         <div className="space-y-8">

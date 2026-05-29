@@ -63,12 +63,12 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
               ) : (
                 <>
                   <span className={`text-xs tracking-widest uppercase font-serif ${
-                    isActive ? 'text-jp-red font-bold' : 'text-stone-400'
+                    isActive ? 'text-jp-red font-bold' : 'text-stone-500'
                   }`}>
                     {dow ? `週${dow}` : `Day${day}`}
                   </span>
                   <span className={`text-2xl font-serif leading-none tabular-nums ${
-                    isActive ? 'text-jp-text' : 'text-stone-300'
+                    isActive ? 'text-jp-text' : 'text-stone-400'
                   }`}>
                     {dom || String(day).padStart(2, '0')}
                   </span>

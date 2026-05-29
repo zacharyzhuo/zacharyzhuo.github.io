@@ -219,7 +219,7 @@ function DetailModal({ row, spots, onClose }) {
             <X size={20} />
           </button>
 
-          <div className="overflow-y-auto px-8 pb-24 flex-1 pt-4">
+          <div className="overflow-y-auto overscroll-contain px-8 pb-24 flex-1 pt-4">
             <div className="flex items-center gap-3 mb-2">
               <span className={`px-3 py-1 border text-xs tracking-widest font-bold font-serif uppercase rounded ${typeInfo.border}`}>
                 {typeInfo.label}

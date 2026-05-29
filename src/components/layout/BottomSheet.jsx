@@ -172,7 +172,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
           {noScroll ? (
             <div className="flex-1 min-h-0">{children}</div>
           ) : (
-            <div ref={contentScrollRef} className="overflow-y-auto px-8 pb-10 space-y-4 flex-1 pt-2">
+            <div ref={contentScrollRef} className="overflow-y-auto overscroll-contain px-8 pb-10 space-y-4 flex-1 pt-2">
               {children}
             </div>
           )}

@@ -104,7 +104,7 @@ export default function ChecklistSection({ rows, slug }) {
 
   return (
     <div className="flex flex-col relative h-full">
-      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-8 pb-10 pt-2">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-hide px-8 pb-10 pt-2">
         <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">行李清單</h2>
 
         {rows.length === 0 ? (
@@ -161,14 +161,14 @@ export default function ChecklistSection({ rows, slug }) {
                             role="checkbox"
                             aria-checked={isChecked}
                           >
-                            <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all flex-shrink-0 ${
+                            <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors flex-shrink-0 ${
                               isChecked
                                 ? 'bg-jp-green border-jp-green text-white'
                                 : 'border-stone-300 text-transparent hover:border-stone-400'
                             }`}>
                               <Check size={12} strokeWidth={3} />
                             </div>
-                            <span className={`text-base font-serif transition-all leading-tight ${
+                            <span className={`text-base font-serif transition-colors leading-tight ${
                               isChecked ? 'text-stone-400 line-through' : 'text-jp-text'
                             }`}>
                               {item}

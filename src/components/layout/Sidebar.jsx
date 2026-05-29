@@ -114,13 +114,13 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto py-4">
+          <div className="flex-1 overflow-y-auto overscroll-contain py-4">
             <nav className="space-y-2 px-4">
               {sections.map(({ key, label, subLabel, icon, color }) => (
                 <button
                   key={key}
                   onClick={() => { onSelect(key); onClose() }}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/20 transition-all text-left group"
+                  className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/20 transition-colors text-left group"
                 >
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${color ?? 'bg-white/30 text-jp-green'}`}>
                     {icon}

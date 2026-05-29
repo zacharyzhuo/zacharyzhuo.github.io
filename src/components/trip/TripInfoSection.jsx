@@ -104,7 +104,7 @@ function PrepareTab({ destinationCountry }) {
       </h3>
       <button
         onClick={() => window.open('https://vjw-lp.digital.go.jp/zh-hant/', '_blank')}
-        className="w-full bg-[#6B9080] text-white p-6 rounded-2xl hover:brightness-105 transition-all text-left group relative overflow-hidden touch-manipulation min-h-[48px]"
+        className="w-full bg-[#6B9080] text-white p-6 rounded-2xl hover:brightness-105 transition-colors text-left group relative overflow-hidden touch-manipulation min-h-[48px]"
         aria-label="開啟 Visit Japan Web 網站"
       >
         <div className="absolute right-[-10px] top-[-10px] opacity-10 rotate-12">
@@ -218,7 +218,7 @@ export default function TripInfoSection({ flights, accommodation, destinationCou
     <div className="flex flex-col relative h-full">
       <div
         ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-8 pb-24 pt-2 space-y-8"
+        className="flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-hide px-8 pb-24 pt-2 space-y-8"
       >
         <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">旅程資訊</h2>
         {activeTab === 'flights' && <FlightsTab flights={flights} />}
