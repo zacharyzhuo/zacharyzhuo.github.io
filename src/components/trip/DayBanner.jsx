@@ -5,9 +5,10 @@
  *   subtitle?: string,
  *   dateLabel?: string,  // 例：'06/04 · 週四'
  *   tripName?: string,   // 用來判斷 title === tripName 時隱藏 subtitle 避免重複
+ *   eager?: boolean,     // 當前日 panel 設 true：圖片改 eager + fetchpriority high（above-the-fold）
  * }} props
  */
-export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripName }) {
+export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripName, eager = false }) {
   // subtitle 跟 trip 主名稱重複時隱藏（例：subtitle="宿霧" / tripName="宿霧"）
   const showSubtitle = subtitle && subtitle !== tripName && subtitle !== title
 
@@ -19,7 +20,8 @@ export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripN
           alt={title || ''}
           width={1200}
           height={400}
-          loading="lazy"
+          loading={eager ? 'eager' : 'lazy'}
+          fetchPriority={eager ? 'high' : 'auto'}
           decoding="async"
           className="absolute inset-0 w-full h-full object-cover opacity-70"
         />

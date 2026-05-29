@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useId } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, Home } from 'lucide-react'
 import { env } from '../../lib/env.js'
+import { useModalA11y } from '../../hooks/useModalA11y.js'
 
 export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameEn }) {
   const navigate = useNavigate()
@@ -14,8 +15,12 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
   const isHorizontal = useRef(null)
   const onCloseRef = useRef(onClose)
   const sidebarRef = useRef(null)
+  const titleId = useId()
 
   useEffect(() => { onCloseRef.current = onClose }, [onClose])
+
+  // 與 BottomSheet 一致：ESC 關閉 + focus trap + 關閉後還原焦點（scroll-lock 由 TripPage 統一處理）
+  useModalA11y(isOpen, onClose, sidebarRef)
 
   useEffect(() => {
     if (isOpen) { setDragX(0); dragXRef.current = 0; setIsDragging(false) }
@@ -88,6 +93,9 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
       />
       <div
         ref={sidebarRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         aria-hidden={!isOpen}
         className={sidebarClass}
         style={dragX < 0 ? { transform: `translateX(${dragX}px)` } : undefined}
@@ -96,7 +104,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
       >
         <div className="h-full w-full glass-sidebar flex flex-col">
           <div className="p-6 flex justify-between items-center">
-            <h2 className="text-xl font-serif font-bold text-jp-text">Trip Menu</h2>
+            <h2 id={titleId} className="text-xl font-serif font-bold text-jp-text">Trip Menu</h2>
             <button
               onClick={onClose}
               className="p-3 liquid-glass-button rounded-full text-stone-600 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"

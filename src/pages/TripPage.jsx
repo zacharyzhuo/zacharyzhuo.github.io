@@ -272,6 +272,7 @@ export default function TripPage() {
               dayMeta={activeDayMeta}
               itinerary={dayItinerary}
               tripName={trip.name}
+              isCurrent
             />
             {/* Next panel：absolute 放在右側 (left-full)，不參與高度 */}
             {nextDayObj && (
@@ -338,7 +339,7 @@ export default function TripPage() {
 }
 
 // 單一日 panel：banner + itinerary list；dayObj 為 null 時整格不渲染（給三欄第一/末日用）
-function DayPanel({ dayObj, dayMeta, itinerary, tripName }) {
+function DayPanel({ dayObj, dayMeta, itinerary, tripName, isCurrent = false }) {
   if (!dayObj) return null
   return (
     <div className="overflow-hidden">
@@ -348,6 +349,7 @@ function DayPanel({ dayObj, dayMeta, itinerary, tripName }) {
         subtitle={dayMeta?.subtitle}
         dateLabel={formatDayLabel(dayObj.date)}
         tripName={tripName}
+        eager={isCurrent}
       />
       <div className="h-6" />
       <div className="mt-2">
