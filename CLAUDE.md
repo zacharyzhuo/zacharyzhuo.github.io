@@ -64,7 +64,9 @@ src/
 │   │   ├── FoodSection.jsx          # 美食清單（area tabs + category 分組）
 │   │   └── ChecklistSection.jsx     # 打包清單（localStorage 持久化 + 進度條）
 │   └── ui/
-│       ├── LoadingSpinner.jsx
+│       ├── Skeletons.jsx            # 冷啟動載入骨架（TripSkeleton 全頁 / HomeCardsSkeleton 卡片）
+│       ├── EmptyState.jsx           # 共用空狀態（icon + 標題 + hint）
+│       ├── ErrorBoundary.jsx        # React error boundary
 │       └── ErrorState.jsx           # 共用錯誤畫面（icon + 訊息 + action）
 ├── pages/
 │   ├── HomePage.jsx                 # 行程列表頁（PWA 啟動會嘗試自動跳轉）
@@ -261,7 +263,8 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - **Accent**：`#5C6E58`（抹茶綠）
 - **文字色**：`#2C2C2C`（jp-text）、`stone` 系列
 - **字型**：全站 `"Noto Serif JP"`（font-serif），所有文字元素應帶 `font-serif`
-- **Liquid Glass**：BottomSheet、Sidebar、浮動 Tab 使用 `backdrop-filter: blur(16px) saturate(200%) contrast(120%)` + 白色半透明背景
+- **字級**：micro eyebrow / 大寫 caps 標籤用 `text-2xs`（tailwind token，0.625rem），勿再用 `text-[10px]/[11px]` arbitrary value
+- **Liquid Glass**：玻璃 `backdrop-filter` 組合集中在 `index.css` 的 `:root` token，**勿再散寫 blur/saturate/contrast 數值**。語意 token：`--glass-nav`（DayNav）、`--glass-card`（行程卡）、`--glass-overlay`（BottomSheet + Sidebar）、`--glass-button`、`--glass-tab` / `--glass-tab-active`
 - CSS utility classes：`liquid-tab-track`、`liquid-tab-btn`、`liquid-glass-button`、`.safe-area-inset`、`.safe-area-bottom`、`.scrollbar-hide`、`.glass-card`、`.glass-bottom-sheet`、`.glass-sidebar`
 
 ### Accessibility 原則
@@ -270,6 +273,8 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - Modal 都套 `useModalA11y`：`role="dialog"` + `aria-modal="true"` + `aria-labelledby` + ESC 關閉 + focus trap
 - 觸控目標 ≥ 44×44（iOS HIG），按鈕統一加 `touch-manipulation`
 - ChecklistSection 的 `<li>` 是 `role="checkbox"` + `tabIndex=0` + `Enter/Space` 切換
+- **Focus**：`index.css` 只關閉滑鼠 `:focus`，全域保留 `:focus-visible`（jp-green ring，token `--glass-focus-ring`）；勿用 `outline-none` 而不補替代
+- **捲動容器**：modal / section 的 `overflow-y-auto` 一律加 `overscroll-contain`，避免捲動鏈結到背後頁面
 
 ### 觸覺回饋（lib/haptic.js）
 
