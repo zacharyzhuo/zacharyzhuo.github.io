@@ -4,7 +4,9 @@
 
 /* ── Design tokens ──────────────────────────────────────────────
    玻璃材質（backdrop-filter 組合）集中管理，避免 blur/saturate/contrast
-   數值散落各 class 漂移。語意對應實際用途，數值即原本各 class 的值。 */
+   數值散落各 class 漂移。語意對應實際用途。
+   blur 刻意偏低以保留「透光感」（看得穿背後內容），可讀性靠各 class 的
+   背景不透明度補；saturate/contrast 也拉回接近中性，避免把背景糊成霧。 */
 :root {
   --jp-green: #5C6E58;
 
@@ -12,12 +14,12 @@
   --glass-focus-ring: rgba(92, 110, 88, 0.6);
 
   /* 玻璃濾鏡分層（依用途，非依數值） */
-  --glass-nav: blur(16px) saturate(180%);
-  --glass-card: blur(12px) saturate(160%) contrast(110%);
-  --glass-overlay: blur(16px) saturate(200%) contrast(120%);
-  --glass-button: blur(10px) saturate(180%);
-  --glass-tab: blur(12px) saturate(120%);
-  --glass-tab-active: blur(12px) saturate(150%);
+  --glass-nav: blur(5px) saturate(140%);
+  --glass-card: blur(6px) saturate(130%);
+  --glass-overlay: blur(4px) saturate(140%);
+  --glass-button: blur(6px) saturate(150%);
+  --glass-tab: blur(8px) saturate(120%);
+  --glass-tab-active: blur(8px) saturate(140%);
 }
 
 body {
@@ -540,7 +542,9 @@ a:focus-visible,
 .glass-bottom-sheet {
   position: relative;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
+  /* 透光感：blur 由 --glass-overlay token 控（偏低，看得穿背後）；
+     底色 0.42 補足可讀性，這是透光 vs sheet 內文字可讀的取捨點。 */
+  background: rgba(249, 248, 244, 0.42);
   backdrop-filter: var(--glass-overlay);
   -webkit-backdrop-filter: var(--glass-overlay);
   border-radius: 2rem 2rem 0 0;
@@ -577,7 +581,8 @@ a:focus-visible,
 .glass-sidebar {
   position: relative;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
+  /* 底色 0.42：blur 降低後補足選單文字可讀性（背後是頁面內容） */
+  background: rgba(249, 248, 244, 0.42);
   backdrop-filter: var(--glass-overlay);
   -webkit-backdrop-filter: var(--glass-overlay);
   border-radius: 0 2rem 2rem 0;
