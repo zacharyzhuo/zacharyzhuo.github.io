@@ -38,7 +38,7 @@ function StatusPill({ status, daysToStart, daysFromEnd }) {
     )
   }
   return (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-stone-200/80 text-stone-600 text-[10px] font-serif font-medium uppercase tracking-widest">
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-stone-200/90 text-stone-700 text-[10px] font-serif font-medium uppercase tracking-widest">
       回顧
     </span>
   )

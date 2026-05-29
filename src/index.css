@@ -629,8 +629,10 @@ a:focus-visible,
     box-shadow 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
-  color: #9ca3af;
-  /* stone-400 */
+  /* 未選中色階：stone-500 → hover stone-600 → active jp-text。
+     原 #9ca3af（gray-400，≈2:1）對比過低，改 stone-500 維持次級感但讀得到 */
+  color: #78716c;
+  /* stone-500 */
   font-family: "Noto Serif JP", "Hiragino Mincho ProN", serif;
   font-weight: 700;
   font-size: 0.875rem;

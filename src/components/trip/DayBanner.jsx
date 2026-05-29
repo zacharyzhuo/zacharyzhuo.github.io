@@ -23,22 +23,27 @@ export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripN
           loading={eager ? 'eager' : 'lazy'}
           fetchPriority={eager ? 'high' : 'auto'}
           decoding="async"
-          className="absolute inset-0 w-full h-full object-cover opacity-70"
+          className="absolute inset-0 w-full h-full object-cover"
         />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-stone-500 to-stone-700" />
       )}
-      {/* 底部漸層淡入 jp-bg，讓 banner 跟下方 itinerary 自然接縫
-         單條 ease-in-out 線性 fade（3 stop）避免階梯感 */}
+      {/* 文字 scrim：中央柔和暗角，只在文字落點加深，讓照片邊角維持原色透氣（搭配文字 textShadow 即足夠可讀） */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(to bottom, transparent 50%, rgba(249, 248, 244, 0.7) 88%, rgb(249, 248, 244) 100%)',
+            'radial-gradient(ellipse 120% 95% at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.22) 55%, rgba(0,0,0,0) 80%)',
         }}
       />
-      {/* 上半部加深 overlay，白字保持可讀 */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/15 to-transparent" />
+      {/* 底部漸層淡入 jp-bg，與下方 itinerary 自然接縫（功能性，疊在 scrim 之上確保接縫乾淨） */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(to bottom, transparent 55%, rgba(249, 248, 244, 0.7) 88%, rgb(249, 248, 244) 100%)',
+        }}
+      />
       <div
         className="absolute inset-0 flex flex-col justify-center items-center text-white p-6 text-center z-0"
         style={{ textShadow: '0 1px 3px rgba(0,0,0,0.45)' }}
