@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Design tokens ──────────────────────────────────────────────
+   玻璃材質（backdrop-filter 組合）集中管理，避免 blur/saturate/contrast
+   數值散落各 class 漂移。語意對應實際用途，數值即原本各 class 的值。 */
+:root {
+  --jp-green: #5C6E58;
+
+  /* 鍵盤焦點 ring */
+  --glass-focus-ring: rgba(92, 110, 88, 0.6);
+
+  /* 玻璃濾鏡分層（依用途，非依數值） */
+  --glass-nav: blur(16px) saturate(180%);
+  --glass-card: blur(12px) saturate(160%) contrast(110%);
+  --glass-overlay: blur(16px) saturate(200%) contrast(120%);
+  --glass-button: blur(10px) saturate(180%);
+  --glass-tab: blur(12px) saturate(120%);
+  --glass-tab-active: blur(12px) saturate(150%);
+}
+
 body {
   background-color: #F9F8F4;
   color: #2C2C2C;
@@ -27,16 +45,21 @@ textarea,
   -webkit-touch-callout: default;
 }
 
-/* 全站關閉 button / 連結的 focus outline（Safari 預設藍框）。
-   表單輸入框維持原樣，使用者打字時還是看得到聚焦位置。
-   卡片若需要 focus 提示，已用 Tailwind focus-visible:ring-* 自行 opt-in。 */
+/* 只關閉「滑鼠點擊」的 focus 外框（Safari 預設藍框），
+   但保留鍵盤觸發的 :focus-visible，否則 Tab 導航看不到焦點在哪（a11y）。
+   個別元件仍可用 Tailwind focus-visible:ring-* 覆蓋這個預設 ring。 */
 button:focus,
-button:focus-visible,
 a:focus,
-a:focus-visible,
-[role="button"]:focus,
-[role="button"]:focus-visible {
+[role="button"]:focus {
   outline: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--glass-focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Safe Area Insets for iPhone X and newer */
@@ -410,8 +433,8 @@ a:focus-visible,
 /* DayNav sticky header Liquid Glass */
 .glass-day-nav {
   background: rgba(249, 248, 244, 0.6);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: var(--glass-nav);
+  -webkit-backdrop-filter: var(--glass-nav);
   /* 底邊只留一條極淺 hairline 過渡，不要二次白光 */
   border-bottom: 1px solid rgba(120, 113, 108, 0.08);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
@@ -420,8 +443,8 @@ a:focus-visible,
 /* 行程卡片 Liquid Glass */
 .glass-card {
   background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(12px) saturate(160%) contrast(110%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%) contrast(110%);
+  backdrop-filter: var(--glass-card);
+  -webkit-backdrop-filter: var(--glass-card);
   border: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
@@ -444,19 +467,22 @@ a:focus-visible,
 /* Liquid Glass 按鈕效果 */
 .liquid-glass-button {
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px) saturate(180%);
-  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  backdrop-filter: var(--glass-button);
+  -webkit-backdrop-filter: var(--glass-button);
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow:
     0 8px 32px 0 rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* 只動 compositor 友善屬性 + 色彩；不在 hover 改 backdrop-filter（重繪昂貴，且 PWA 無 hover） */
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .liquid-glass-button:hover {
   background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(15px) saturate(200%);
-  -webkit-backdrop-filter: blur(15px) saturate(200%);
   border-color: rgba(255, 255, 255, 0.3);
   box-shadow:
     0 12px 40px 0 rgba(0, 0, 0, 0.15),
@@ -474,19 +500,21 @@ a:focus-visible,
 /* 深色背景的液態玻璃按鈕（用於 Instagram 風格） */
 .liquid-glass-button-dark {
   background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px) saturate(180%);
-  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  backdrop-filter: var(--glass-button);
+  -webkit-backdrop-filter: var(--glass-button);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow:
     0 8px 32px 0 rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .liquid-glass-button-dark:hover {
   background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(15px) saturate(200%);
-  -webkit-backdrop-filter: blur(15px) saturate(200%);
   border-color: rgba(255, 255, 255, 0.2);
   box-shadow:
     0 12px 40px 0 rgba(0, 0, 0, 0.4),
@@ -506,8 +534,8 @@ a:focus-visible,
   position: relative;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(16px) saturate(200%) contrast(120%);
-  -webkit-backdrop-filter: blur(16px) saturate(200%) contrast(120%);
+  backdrop-filter: var(--glass-overlay);
+  -webkit-backdrop-filter: var(--glass-overlay);
   border-radius: 2rem 2rem 0 0;
   /* 邊只留頂部與左右 hairline，避免疊光 */
   border-top: 1px solid rgba(120, 113, 108, 0.08);
@@ -543,8 +571,8 @@ a:focus-visible,
   position: relative;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(16px) saturate(200%) contrast(120%);
-  -webkit-backdrop-filter: blur(16px) saturate(200%) contrast(120%);
+  backdrop-filter: var(--glass-overlay);
+  -webkit-backdrop-filter: var(--glass-overlay);
   border-radius: 0 2rem 2rem 0;
   /* 右側只留一條極淺 hairline，避免疊出白光暈 */
   border-right: 1px solid rgba(120, 113, 108, 0.08);
@@ -575,8 +603,8 @@ a:focus-visible,
 /* Liquid Glass Tab Switcher */
 .liquid-tab-track {
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px) saturate(120%);
-  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  backdrop-filter: var(--glass-tab);
+  -webkit-backdrop-filter: var(--glass-tab);
   border-radius: 9999px;
   padding: 6px;
   box-shadow:
@@ -593,8 +621,12 @@ a:focus-visible,
   flex: none;
   white-space: nowrap;
   border-radius: 9999px;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  /* 彈性動畫 */
+  /* 彈性動畫：只列實際會變的 paint 屬性，不含 backdrop-filter（重繪昂貴）與 all */
+  transition:
+    color 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    border-color 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
   color: #9ca3af;
@@ -623,8 +655,8 @@ a:focus-visible,
   /* jp-text */
   background: rgba(255, 255, 255, 0.2);
   /* 半透明玻璃底色 */
-  backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: var(--glass-tab-active);
+  -webkit-backdrop-filter: var(--glass-tab-active);
   border: 1px solid rgba(255, 255, 255, 0.6);
   /* 玻璃邊框 */
 
