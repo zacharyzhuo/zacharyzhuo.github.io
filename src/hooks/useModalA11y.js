@@ -4,7 +4,11 @@ import { useEffect, useRef } from 'react'
  * Modal 共用 a11y：
  *  1. ESC 關閉
  *  2. 開啟時記住觸發焦點，關閉後還原
- *  3. 開啟時將焦點移入 modal（ref.current 內第一個可聚焦元素，預設第一個 button）
+ *  3. 開啟時將焦點移到 modal 容器本身（containerRef，需帶 tabindex="-1"）。
+ *     不聚焦內部第一個按鈕，避免觸控開啟時關閉鈕被畫上 focus-visible 綠環
+ *     （那顆環對沒在用鍵盤的觸控使用者只是視覺噪音）。聚焦 dialog 容器是
+ *     ARIA 推薦做法，螢幕閱讀器會讀出 dialog 標題；使用者第一次按 Tab 仍會
+ *     正常進入內部 focusable，下方 focus trap 照常運作。
  *  4. 簡易 focus trap：Tab / Shift+Tab 在 modal 內循環
  *
  * @param {boolean} isOpen
@@ -26,10 +30,8 @@ export function useModalA11y(isOpen, onClose, containerRef) {
     const focusTimer = setTimeout(() => {
       const root = containerRef.current
       if (!root) return
-      const focusable = root.querySelector(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      )
-      if (focusable) focusable.focus({ preventScroll: true })
+      // 聚焦 dialog 容器本身（非內部按鈕），不畫出 focus-visible 綠環
+      root.focus({ preventScroll: true })
     }, 50)
 
     const onKeyDown = (e) => {

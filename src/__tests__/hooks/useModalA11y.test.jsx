@@ -8,7 +8,7 @@ function Modal({ isOpen, onClose }) {
   useModalA11y(isOpen, onClose, ref)
   if (!isOpen) return null
   return (
-    <div ref={ref} role="dialog">
+    <div ref={ref} role="dialog" tabIndex={-1}>
       <button>first</button>
       <button>last</button>
     </div>
@@ -55,10 +55,10 @@ describe('useModalA11y', () => {
     document.body.appendChild(trigger)
     trigger.focus()
 
-    const { rerender } = render(<Modal isOpen onClose={onClose} />)
-    // 推進 focusTimer：焦點移入 modal
+    const { rerender, getByRole } = render(<Modal isOpen onClose={onClose} />)
+    // 推進 focusTimer：焦點移到 dialog 容器本身（非內部按鈕）
     act(() => { vi.advanceTimersByTime(60) })
-    expect(document.activeElement).not.toBe(trigger)
+    expect(document.activeElement).toBe(getByRole('dialog'))
 
     // 關閉 → effect cleanup 還原焦點
     rerender(<Modal isOpen={false} onClose={onClose} />)

@@ -84,7 +84,7 @@ export default function FoodSection({ rows }) {
                           href={row.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2.5 liquid-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center"
+                          className="p-2.5 frosted-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center"
                           onClick={e => e.stopPropagation()}
                         >
                           <Navigation size={15} />
@@ -106,12 +106,12 @@ export default function FoodSection({ rows }) {
 
       {areas.length > 1 && (
         <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
-          <div className="liquid-tab-track scrollbar-hide pointer-events-auto shadow-2xl">
+          <div className="frosted-tab-track scrollbar-hide pointer-events-auto shadow-2xl">
             {areas.map(area => (
               <button
                 key={area}
                 onClick={e => handleTabClick(e, area)}
-                className={`liquid-tab-btn font-serif px-8 ${activeArea === area ? 'active' : ''}`}
+                className={`frosted-tab-btn font-serif px-8 ${activeArea === area ? 'active' : ''}`}
               >
                 {area}
               </button>

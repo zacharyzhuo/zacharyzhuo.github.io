@@ -83,7 +83,7 @@ function SpotItem({ spot }) {
       </div>
       <button
         onClick={(e) => { e.stopPropagation(); window.open(url, '_blank') }}
-        className="shrink-0 p-2 liquid-glass-button rounded-lg text-stone-500 touch-manipulation min-w-[36px] min-h-[36px] flex items-center justify-center"
+        className="shrink-0 p-2 frosted-glass-button rounded-lg text-stone-500 touch-manipulation min-w-[36px] min-h-[36px] flex items-center justify-center"
         aria-label={`${spot.name} Google Maps`}
       >
         <Navigation size={14} />
@@ -194,6 +194,7 @@ function DetailModal({ row, spots, onClose }) {
         aria-modal="true"
         aria-labelledby={titleId}
         aria-hidden={!isOpen}
+        tabIndex={-1}
         className={sheetClass}
         style={dragY > 0 ? { transform: `translateY(${dragY}px)` } : undefined}
       >
@@ -213,7 +214,7 @@ function DetailModal({ row, spots, onClose }) {
 
           <button
             onClick={onClose}
-            className="absolute top-8 right-6 z-20 p-3 liquid-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="absolute top-8 right-6 z-20 p-3 frosted-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="關閉詳情"
           >
             <X size={20} />
@@ -275,7 +276,7 @@ function DetailModal({ row, spots, onClose }) {
           <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
             <button
               onClick={() => window.open(navUrl, '_blank')}
-              className="liquid-tab-track pointer-events-auto shadow-2xl font-serif text-stone-600 flex items-center gap-2"
+              className="frosted-tab-track pointer-events-auto shadow-2xl font-serif text-stone-600 flex items-center gap-2"
               style={{
                 padding: '12px 32px',
                 background: 'rgba(255, 255, 255, 0.45)',

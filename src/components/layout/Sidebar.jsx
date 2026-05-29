@@ -107,7 +107,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
             <h2 id={titleId} className="text-xl font-serif font-bold text-jp-text">Trip Menu</h2>
             <button
               onClick={onClose}
-              className="p-3 liquid-glass-button rounded-full text-stone-600 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="p-3 frosted-glass-button rounded-full text-stone-600 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="關閉選單"
             >
               <X size={18} />
@@ -145,7 +145,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
                 // ?home=1 告訴 HomePage 略過自動跳轉，避免無限循環
                 navigate('/?home=1')
               }}
-              className="w-full flex items-center justify-center gap-2 p-3 rounded-xl liquid-glass-button text-stone-600 font-serif text-sm touch-manipulation min-h-[44px]"
+              className="w-full flex items-center justify-center gap-2 p-3 rounded-xl frosted-glass-button text-stone-600 font-serif text-sm touch-manipulation min-h-[44px]"
               aria-label="返回行程列表"
             >
               <Home size={16} />

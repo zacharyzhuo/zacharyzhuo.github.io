@@ -61,7 +61,7 @@ export default function HomePage() {
             opacity: indicatorOpacity,
           }}
         >
-          <div className="liquid-glass-button rounded-full p-3 text-stone-500">
+          <div className="frosted-glass-button rounded-full p-3 text-stone-500">
             <RefreshCw size={20} className={indicatorRotation} />
           </div>
         </div>

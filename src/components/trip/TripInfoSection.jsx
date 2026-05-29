@@ -189,7 +189,7 @@ function HotelTab({ accommodation }) {
                       href={h.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full liquid-glass-button text-stone-600 py-3 rounded-xl font-serif tracking-wide flex items-center justify-center gap-2 mt-4 touch-manipulation min-h-[44px]"
+                      className="w-full frosted-glass-button text-stone-600 py-3 rounded-xl font-serif tracking-wide flex items-center justify-center gap-2 mt-4 touch-manipulation min-h-[44px]"
                       aria-label="查看住宿位置"
                     >
                       <Navigation size={16} />
@@ -227,7 +227,7 @@ export default function TripInfoSection({ flights, accommodation, destinationCou
       </div>
 
       <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
-        <div className="liquid-tab-track scrollbar-hide pointer-events-auto shadow-2xl">
+        <div className="frosted-tab-track scrollbar-hide pointer-events-auto shadow-2xl">
           {INFO_TABS.map(tab => (
             <button
               key={tab.key}
@@ -236,7 +236,7 @@ export default function TripInfoSection({ flights, accommodation, destinationCou
                 if (tab.key !== activeTab) tap()
                 setActiveTab(tab.key)
               }}
-              className={`liquid-tab-btn font-serif px-5 ${activeTab === tab.key ? 'active' : ''}`}
+              className={`frosted-tab-btn font-serif px-5 ${activeTab === tab.key ? 'active' : ''}`}
             >
               {tab.label}
             </button>

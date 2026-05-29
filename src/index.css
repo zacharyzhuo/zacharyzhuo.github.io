@@ -62,6 +62,13 @@ a:focus-visible,
   border-radius: 4px;
 }
 
+/* modal 開啟時焦點落在 dialog 容器（tabindex="-1"）上，它只是接收焦點的殼，
+   不該畫出可見焦點框；內部真正的 focusable 仍保留 :focus-visible 行為。 */
+[role="dialog"]:focus,
+[role="dialog"]:focus-visible {
+  outline: none;
+}
+
 /* Safe Area Insets for iPhone X and newer */
 .safe-area-inset {
   padding-top: env(safe-area-inset-top);
@@ -430,7 +437,7 @@ a:focus-visible,
   animation: planeFly 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-/* DayNav sticky header Liquid Glass */
+/* DayNav sticky header Frosted glass */
 .glass-day-nav {
   background: rgba(249, 248, 244, 0.6);
   backdrop-filter: var(--glass-nav);
@@ -440,7 +447,7 @@ a:focus-visible,
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
 }
 
-/* 行程卡片 Liquid Glass */
+/* 行程卡片 Frosted glass */
 .glass-card {
   background: rgba(255, 255, 255, 0.45);
   backdrop-filter: var(--glass-card);
@@ -464,8 +471,8 @@ a:focus-visible,
   pointer-events: none;
 }
 
-/* Liquid Glass 按鈕效果 */
-.liquid-glass-button {
+/* Frosted glass 按鈕效果 */
+.frosted-glass-button {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: var(--glass-button);
   -webkit-backdrop-filter: var(--glass-button);
@@ -481,7 +488,7 @@ a:focus-visible,
     border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.liquid-glass-button:hover {
+.frosted-glass-button:hover {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
   box-shadow:
@@ -490,15 +497,15 @@ a:focus-visible,
   transform: translateY(-1px);
 }
 
-.liquid-glass-button:active {
+.frosted-glass-button:active {
   transform: translateY(0);
   box-shadow:
     0 4px 20px 0 rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* 深色背景的液態玻璃按鈕（用於 Instagram 風格） */
-.liquid-glass-button-dark {
+/* 深色背景的毛玻璃按鈕（用於 Instagram 風格） */
+.frosted-glass-button-dark {
   background: rgba(0, 0, 0, 0.2);
   backdrop-filter: var(--glass-button);
   -webkit-backdrop-filter: var(--glass-button);
@@ -513,7 +520,7 @@ a:focus-visible,
     border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.liquid-glass-button-dark:hover {
+.frosted-glass-button-dark:hover {
   background: rgba(0, 0, 0, 0.3);
   border-color: rgba(255, 255, 255, 0.2);
   box-shadow:
@@ -522,14 +529,14 @@ a:focus-visible,
   transform: translateY(-1px);
 }
 
-.liquid-glass-button-dark:active {
+.frosted-glass-button-dark:active {
   transform: translateY(0);
   box-shadow:
     0 4px 20px 0 rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Bottom sheet 玻璃卡片（DetailModal 用）- Liquid Glass 模擬 */
+/* Bottom sheet 玻璃卡片（DetailModal 用）- Frosted glass 模擬 */
 .glass-bottom-sheet {
   position: relative;
   overflow: hidden;
@@ -600,8 +607,8 @@ a:focus-visible,
   mix-blend-mode: overlay;
 }
 
-/* Liquid Glass Tab Switcher */
-.liquid-tab-track {
+/* Frosted glass Tab Switcher */
+.frosted-tab-track {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: var(--glass-tab);
   -webkit-backdrop-filter: var(--glass-tab);
@@ -617,7 +624,7 @@ a:focus-visible,
   max-width: 100%;
 }
 
-.liquid-tab-btn {
+.frosted-tab-btn {
   flex: none;
   white-space: nowrap;
   border-radius: 9999px;
@@ -645,14 +652,14 @@ a:focus-visible,
 }
 
 /* 非選中狀態 */
-.liquid-tab-btn:hover:not(.active) {
+.frosted-tab-btn:hover:not(.active) {
   color: #57534e;
   /* stone-600 */
   background: rgba(0, 0, 0, 0.02);
 }
 
-/* 選中狀態 (Liquid Glass Style) */
-.liquid-tab-btn.active {
+/* 選中狀態 (Frosted glass Style) */
+.frosted-tab-btn.active {
   color: #2C2C2C;
   /* jp-text */
   background: rgba(255, 255, 255, 0.2);
@@ -675,7 +682,7 @@ a:focus-visible,
 }
 
 /* 選中狀態的額外光澤 (頂部亮面) */
-.liquid-tab-btn.active::after {
+.frosted-tab-btn.active::after {
   content: "";
   position: absolute;
   top: 0;

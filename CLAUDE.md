@@ -54,7 +54,7 @@ src/
 │   │   ├── Sidebar.jsx              # 抽屜導航（含 MENU_ITEMS 清單）
 │   │   └── BottomSheet.jsx          # 共用底部彈出層
 │   ├── home/
-│   │   └── TripCard.jsx             # 首頁行程卡片（Liquid Glass 風格）
+│   │   └── TripCard.jsx             # 首頁行程卡片（毛玻璃風格）
 │   ├── trip/
 │   │   ├── DayNav.jsx               # 日期橫向導航列
 │   │   ├── DayBanner.jsx            # 每日 banner 圖 + 標題
@@ -264,8 +264,8 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - **文字色**：`#2C2C2C`（jp-text）、`stone` 系列
 - **字型**：全站 `"Noto Serif JP"`（font-serif），所有文字元素應帶 `font-serif`
 - **字級**：micro eyebrow / 大寫 caps 標籤用 `text-2xs`（tailwind token，0.625rem），勿再用 `text-[10px]/[11px]` arbitrary value
-- **Liquid Glass**：玻璃 `backdrop-filter` 組合集中在 `index.css` 的 `:root` token，**勿再散寫 blur/saturate/contrast 數值**。語意 token：`--glass-nav`（DayNav）、`--glass-card`（行程卡）、`--glass-overlay`（BottomSheet + Sidebar）、`--glass-button`、`--glass-tab` / `--glass-tab-active`
-- CSS utility classes：`liquid-tab-track`、`liquid-tab-btn`、`liquid-glass-button`、`.safe-area-inset`、`.safe-area-bottom`、`.scrollbar-hide`、`.glass-card`、`.glass-bottom-sheet`、`.glass-sidebar`
+- **Frosted glass（毛玻璃）**：本站玻璃材質是 frosted glass / glassmorphism（`backdrop-filter: blur/saturate/contrast` + 高光邊框），**非** iOS 26 那種有邊緣折射扭曲的 Liquid Glass（web 上難以兼顧相容性與效能，刻意不追）。玻璃 `backdrop-filter` 組合集中在 `index.css` 的 `:root` token，**勿再散寫 blur/saturate/contrast 數值**。語意 token：`--glass-nav`（DayNav）、`--glass-card`（行程卡）、`--glass-overlay`（BottomSheet + Sidebar）、`--glass-button`、`--glass-tab` / `--glass-tab-active`
+- CSS utility classes：`frosted-tab-track`、`frosted-tab-btn`、`frosted-glass-button`、`.safe-area-inset`、`.safe-area-bottom`、`.scrollbar-hide`、`.glass-card`、`.glass-bottom-sheet`、`.glass-sidebar`
 
 ### Accessibility 原則
 

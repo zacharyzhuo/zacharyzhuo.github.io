@@ -75,7 +75,7 @@ function StandaloneCard({ item }) {
             href={item.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2.5 liquid-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
+            className="p-2.5 frosted-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
             onClick={e => e.stopPropagation()}
             aria-label={`查看 ${item.name} 的位置`}
           >
@@ -110,7 +110,7 @@ function BuildingCard({ building }) {
             href={building.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2.5 liquid-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center ml-2 shrink-0"
+            className="p-2.5 frosted-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center ml-2 shrink-0"
             onClick={e => e.stopPropagation()}
             aria-label={`查看 ${building.name} 的位置`}
           >
@@ -142,7 +142,7 @@ function BuildingCard({ building }) {
                   href={shop.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2.5 liquid-glass-button rounded-full text-stone-600 touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center ml-2 shrink-0"
+                  className="p-2.5 frosted-glass-button rounded-full text-stone-600 touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center ml-2 shrink-0"
                   onClick={e => e.stopPropagation()}
                   aria-label={`查看 ${shop.name} 的位置`}
                 >
@@ -217,12 +217,12 @@ export default function ShoppingSection({ rows }) {
 
       {areas.length > 1 && (
         <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
-          <div className="liquid-tab-track scrollbar-hide pointer-events-auto shadow-2xl">
+          <div className="frosted-tab-track scrollbar-hide pointer-events-auto shadow-2xl">
             {areas.map(area => (
               <button
                 key={area}
                 onClick={e => handleTabClick(e, area)}
-                className={`liquid-tab-btn font-serif px-5 ${activeArea === area ? 'active' : ''}`}
+                className={`frosted-tab-btn font-serif px-5 ${activeArea === area ? 'active' : ''}`}
               >
                 {area}
               </button>

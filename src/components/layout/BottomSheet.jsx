@@ -129,6 +129,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
         aria-modal="true"
         aria-labelledby={titleId}
         aria-hidden={!isOpen}
+        tabIndex={-1}
         className={sheetClass}
         style={dragY > 0 ? { transform: `translateY(${dragY}px)` } : undefined}
       >
@@ -163,7 +164,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
 
           <button
             onClick={onClose}
-            className="absolute top-8 right-6 z-20 p-3 liquid-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="absolute top-8 right-6 z-20 p-3 frosted-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="關閉"
           >
             <X size={20} />
