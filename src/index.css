@@ -4,10 +4,6 @@
 
 body {
   background-color: #F9F8F4;
-  /* 極淡 SVG 雜訊紋理：保證 backdrop-filter 永遠有東西可 blur，整體質感有「紙」的感覺
-     baseFrequency 高 = 細點；opacity 透過 feColorMatrix 控制（0.06 ≈ 看不到但 glass 摸得到） */
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  background-attachment: fixed;
   color: #2C2C2C;
   font-family: "Noto Serif JP", "Hiragino Mincho ProN", serif;
   -webkit-font-smoothing: antialiased;
@@ -416,10 +412,9 @@ a:focus-visible,
   background: rgba(249, 248, 244, 0.6);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.8),
-    0 4px 16px rgba(0, 0, 0, 0.04);
+  /* 底邊只留一條極淺 hairline 過渡，不要二次白光 */
+  border-bottom: 1px solid rgba(120, 113, 108, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
 }
 
 /* 行程卡片 Liquid Glass */
@@ -510,29 +505,22 @@ a:focus-visible,
 .glass-bottom-sheet {
   position: relative;
   overflow: hidden;
-  /* 極高透明度 */
   background: rgba(255, 255, 255, 0.05);
-  /* 高飽和 + 高對比 = 液態透鏡感 */
   backdrop-filter: blur(16px) saturate(200%) contrast(120%);
   -webkit-backdrop-filter: blur(16px) saturate(200%) contrast(120%);
   border-radius: 2rem 2rem 0 0;
-  /* 邊框亮度提高，更像玻璃切面 */
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  /* 邊只留頂部與左右 hairline，避免疊光 */
+  border-top: 1px solid rgba(120, 113, 108, 0.08);
+  border-left: 1px solid rgba(120, 113, 108, 0.08);
+  border-right: 1px solid rgba(120, 113, 108, 0.08);
   border-bottom: none;
+  /* 外陰影只在開啟時掛上：sheet 殼永遠 render（藏在 translate-y-full），
+     若常駐這條向上陰影，box-shadow 不被 transform 裁切，會從 viewport 底緣滲入，
+     多個 sheet 殼疊加 = 底部「好幾層」陰影。改為僅 aria-hidden="false" 時生效。 */
+}
 
-  /* Liquid Light Effect (混合微量陰影) */
-  box-shadow:
-    /* 1. 極銳利的高光邊緣 (表面反光) */
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
-    /* 2. 微微的折射暗帶 (增加立體感，但不要太重) */
-    inset 0 3px 8px -1px rgba(0, 0, 0, 0.12),
-    /* 3. 寬範圍的柔和光暈 (模擬厚玻璃邊緣聚光) */
-    inset 0 0 20px 2px rgba(255, 255, 255, 0.2),
-    /* 4. 頂部額外的聚光 (透鏡效應) */
-    inset 0 4px 10px rgba(255, 255, 255, 0.3),
-    /* 5. 側面微光 */
-    inset 1px 0 5px rgba(255, 255, 255, 0.2),
-    inset -1px 0 5px rgba(255, 255, 255, 0.2);
+[aria-hidden="false"] > .glass-bottom-sheet {
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.05);
 }
 
 /* 額外的流動光影效果 */
@@ -558,25 +546,16 @@ a:focus-visible,
   backdrop-filter: blur(16px) saturate(200%) contrast(120%);
   -webkit-backdrop-filter: blur(16px) saturate(200%) contrast(120%);
   border-radius: 0 2rem 2rem 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.4);
-  /* 實體邊框 */
+  /* 右側只留一條極淺 hairline，避免疊出白光暈 */
+  border-right: 1px solid rgba(120, 113, 108, 0.08);
   border-top: none;
   border-bottom: none;
   border-left: none;
+  /* 同 glass-bottom-sheet：向右外陰影只在開啟時掛上，避免 -translate-x-full 藏起時滲出左緣。 */
+}
 
-  /* Liquid Light Effect (側邊 - 混合微量陰影) */
-  box-shadow:
-    /* 右側銳利高光 */
-    inset -1px 0 0 0 rgba(255, 255, 255, 0.9),
-    /* 右側折射暗帶 */
-    inset -3px 0 8px -1px rgba(0, 0, 0, 0.12),
-    /* 邊緣寬光暈 */
-    inset -4px 0 20px 2px rgba(255, 255, 255, 0.2),
-    /* 頂部/底部聚光 */
-    inset -10px 0 10px rgba(255, 255, 255, 0.3),
-    /* 上下微光 */
-    inset 0 1px 5px rgba(255, 255, 255, 0.2),
-    inset 0 -1px 5px rgba(255, 255, 255, 0.2);
+[aria-hidden="false"] > .glass-sidebar {
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.04);
 }
 
 .glass-sidebar::before {

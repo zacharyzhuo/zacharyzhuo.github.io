@@ -34,11 +34,11 @@ function NowMarker({ time, innerRef }) {
   )
 }
 const TYPE_MAP = {
-  transport:  { label: '交通', icon: Train, border: 'border-blue-200 text-blue-700 bg-blue-50' },
-  food:       { label: '美食', icon: Utensils, border: 'border-orange-200 text-orange-700 bg-orange-50' },
-  attraction: { label: '景點', icon: Camera, border: 'border-emerald-200 text-emerald-700 bg-emerald-50' },
-  shopping:   { label: '購物', icon: ShoppingBag, border: 'border-pink-200 text-pink-700 bg-pink-50' },
-  hotel:      { label: '住宿', icon: Hotel, border: 'border-purple-200 text-purple-700 bg-purple-50' },
+  transport:  { label: '交通', icon: Train, border: 'border-blue-200/40 text-blue-700 bg-blue-50/20 backdrop-blur-sm' },
+  food:       { label: '美食', icon: Utensils, border: 'border-orange-200/40 text-orange-700 bg-orange-50/20 backdrop-blur-sm' },
+  attraction: { label: '景點', icon: Camera, border: 'border-emerald-200/40 text-emerald-700 bg-emerald-50/20 backdrop-blur-sm' },
+  shopping:   { label: '購物', icon: ShoppingBag, border: 'border-pink-200/40 text-pink-700 bg-pink-50/20 backdrop-blur-sm' },
+  hotel:      { label: '住宿', icon: Hotel, border: 'border-purple-200/40 text-purple-700 bg-purple-50/20 backdrop-blur-sm' },
 }
 
 const SPOT_TYPE_ORDER = { food: 0, attraction: 1, shopping: 2 }

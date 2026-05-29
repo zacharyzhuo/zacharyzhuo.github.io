@@ -45,7 +45,7 @@ function FlightsTab({ flights }) {
           return (
             <div key={i} className="glass-card relative p-5 rounded-2xl overflow-hidden">
               <div className="flex justify-between items-center mb-4 border-b border-[#5C6E58]/20 pb-2">
-                <span className="text-sm font-bold border border-blue-200 text-blue-700 bg-blue-50 px-2 py-1 rounded font-serif tabular-nums">
+                <span className="text-sm font-bold border border-blue-200/40 text-blue-700 bg-blue-50/20 backdrop-blur-sm px-2 py-1 rounded font-serif tabular-nums">
                   {f.date}
                 </span>
                 <span className="text-sm font-bold text-jp-green font-serif tracking-wide">{f.flight_no}</span>
@@ -142,17 +142,17 @@ function HotelTab({ accommodation }) {
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-3">
-                    <span className={`text-sm font-bold border px-2 py-1 rounded font-serif ${
+                    <span className={`text-sm font-bold border backdrop-blur-sm px-2 py-1 rounded font-serif ${
                       h.type === 'hotel'
-                        ? 'border-purple-200 text-purple-700 bg-purple-50'
+                        ? 'border-purple-200/40 text-purple-700 bg-purple-50/20'
                         : h.type === 'airbnb'
-                        ? 'border-pink-200 text-pink-700 bg-pink-50'
-                        : 'border-stone-200 text-stone-600 bg-stone-50'
+                        ? 'border-pink-200/40 text-pink-700 bg-pink-50/20'
+                        : 'border-stone-200/40 text-stone-600 bg-stone-50/20'
                     }`}>
                       {h.type === 'hotel' ? '飯店' : h.type === 'airbnb' ? 'Airbnb' : '住宿'}
                     </span>
                     {h.date && (
-                      <span className="text-sm font-bold border border-blue-200 text-blue-700 bg-blue-50 px-2 py-1 rounded font-serif tabular-nums">
+                      <span className="text-sm font-bold border border-blue-200/40 text-blue-700 bg-blue-50/20 backdrop-blur-sm px-2 py-1 rounded font-serif tabular-nums">
                         {h.date}
                       </span>
                     )}

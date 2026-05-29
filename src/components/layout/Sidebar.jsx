@@ -88,6 +88,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
       />
       <div
         ref={sidebarRef}
+        aria-hidden={!isOpen}
         className={sidebarClass}
         style={dragX < 0 ? { transform: `translateX(${dragX}px)` } : undefined}
         onTouchStart={onTouchStart}

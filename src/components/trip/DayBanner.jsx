@@ -26,12 +26,13 @@ export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripN
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-stone-500 to-stone-700" />
       )}
-      {/* 底部漸層淡入 jp-bg，讓 banner 跟下方 itinerary 自然接縫 */}
+      {/* 底部漸層淡入 jp-bg，讓 banner 跟下方 itinerary 自然接縫
+         單條 ease-in-out 線性 fade（3 stop）避免階梯感 */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(to bottom, transparent 0%, transparent 30%, rgba(249, 248, 244, 0.05) 45%, rgba(249, 248, 244, 0.15) 60%, rgba(249, 248, 244, 0.3) 72%, rgba(249, 248, 244, 0.5) 82%, rgba(249, 248, 244, 0.7) 90%, rgba(249, 248, 244, 0.85) 95%, rgba(249, 248, 244, 0.95) 98%, rgb(249, 248, 244) 100%)',
+            'linear-gradient(to bottom, transparent 50%, rgba(249, 248, 244, 0.7) 88%, rgb(249, 248, 244) 100%)',
         }}
       />
       {/* 上半部加深 overlay，白字保持可讀 */}
