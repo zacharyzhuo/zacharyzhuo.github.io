@@ -7,6 +7,7 @@ import {
 import { useScrollLock } from '../../hooks/useScrollLock.js'
 import { useModalA11y } from '../../hooks/useModalA11y.js'
 import { formatToday } from '../../lib/tripDate.js'
+import { resist } from '../../lib/gesture.js'
 import EmptyState from '../ui/EmptyState.jsx'
 
 function formatNowHHMM() {
@@ -131,11 +132,11 @@ function DetailModal({ row, spots, onClose }) {
     const onMove = (e) => {
       if (touchStartY.current === null) return
       const delta = e.touches[0].clientY - touchStartY.current
-      if (delta > 0) {
-        e.preventDefault()
-        dragYRef.current = delta
-        setDragY(delta)
-      }
+      e.preventDefault()
+      // 往下＝關閉方向，1:1 跟手；往上＝反方向，阻尼拉伸（放開彈回）
+      const next = delta > 0 ? delta : resist(delta)
+      dragYRef.current = next
+      setDragY(next)
     }
     el.addEventListener('touchmove', onMove, { passive: false })
     return () => el.removeEventListener('touchmove', onMove)
@@ -197,7 +198,7 @@ function DetailModal({ row, spots, onClose }) {
         aria-hidden={!isOpen}
         tabIndex={-1}
         className={sheetClass}
-        style={dragY > 0 ? { transform: `translateY(${dragY}px)` } : undefined}
+        style={dragY !== 0 ? { transform: `translateY(${dragY}px)` } : undefined}
       >
         {/* 開啟 overshoot 時蓋住底部露出的縫（平常在畫面外） */}
         <div aria-hidden="true" className="glass-overshoot-fill absolute inset-x-0 top-full h-40 pointer-events-none" />

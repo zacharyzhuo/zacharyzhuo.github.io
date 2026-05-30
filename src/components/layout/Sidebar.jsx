@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { X, Home } from 'lucide-react'
 import { env } from '../../lib/env.js'
 import { useModalA11y } from '../../hooks/useModalA11y.js'
+import { resist } from '../../lib/gesture.js'
 
 export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameEn }) {
   const navigate = useNavigate()
@@ -61,12 +62,11 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
 
       if (!isHorizontal.current) return
 
-      // 只允許向左滑（負值）
-      if (dx < 0) {
-        e.preventDefault()
-        dragXRef.current = dx
-        setDragX(dx)
-      }
+      e.preventDefault()
+      // 向左＝關閉方向，1:1 跟手；向右＝反方向，阻尼拉伸（放開彈回）
+      const next = dx < 0 ? dx : resist(dx)
+      dragXRef.current = next
+      setDragX(next)
     }
 
     el.addEventListener('touchmove', onMove, { passive: false })
@@ -93,7 +93,8 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
     setIsDragging(false)
     setDragX(0)
     dragXRef.current = 0
-    if (captured < -80 || velocity > 0.5) onCloseRef.current()
+    // 只在「關閉方向（向左，captured < 0）」才觸發關閉；反方向快速拉不該關
+    if (captured < -80 || (velocity > 0.5 && captured < 0)) onCloseRef.current()
   }
 
   const sidebarClass = [
@@ -118,7 +119,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
         aria-labelledby={titleId}
         aria-hidden={!isOpen}
         className={sidebarClass}
-        style={dragX < 0 ? { transform: `translateX(${dragX}px)` } : undefined}
+        style={dragX !== 0 ? { transform: `translateX(${dragX}px)` } : undefined}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
