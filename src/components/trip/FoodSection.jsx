@@ -62,34 +62,49 @@ export default function FoodSection({ rows }) {
                 {items.map((row, i) => (
                   <div
                     key={`${activeArea}-${category}-${i}`}
-                    className="glass-card relative rounded-xl p-5 group overflow-hidden"
+                    className="glass-card relative rounded-xl p-5 group overflow-hidden flex gap-4"
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h4 className="font-bold text-jp-text font-serif text-lg leading-tight">{row.name}</h4>
-                        {(row.hours || row.time) && (
-                          <span className="text-xs text-stone-600 font-serif mt-1 flex items-center gap-1 tabular-nums">
-                            <Clock size={12} /> {row.hours || row.time}
-                          </span>
+                    {/* 左側縮圖（資料驅動：row.image 有值才顯示） */}
+                    {row.image && (
+                      <img
+                        src={row.image}
+                        alt=""
+                        width={64}
+                        height={64}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-16 h-16 rounded-xl object-cover shrink-0 bg-stone-200"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-jp-text font-serif text-lg leading-tight">{row.name}</h4>
+                          {(row.hours || row.time) && (
+                            <span className="text-xs text-stone-600 font-serif mt-1 flex items-center gap-1 tabular-nums">
+                              <Clock size={12} /> {row.hours || row.time}
+                            </span>
+                          )}
+                        </div>
+                        {row.link && (
+                          <a
+                            href={row.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2.5 frosted-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0 ml-2"
+                            onClick={e => e.stopPropagation()}
+                            aria-label={`查看 ${row.name} 的位置`}
+                          >
+                            <Navigation size={15} />
+                          </a>
                         )}
                       </div>
-                      {row.link && (
-                        <a
-                          href={row.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2.5 frosted-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center"
-                          onClick={e => e.stopPropagation()}
-                        >
-                          <Navigation size={15} />
-                        </a>
+                      {(row.note || row.desc || row.address) && (
+                        <p className="text-sm text-stone-600 leading-relaxed font-serif">
+                          {row.note || row.desc || row.address}
+                        </p>
                       )}
                     </div>
-                    {(row.note || row.desc || row.address) && (
-                      <p className="text-sm text-stone-600 leading-relaxed font-serif">
-                        {row.note || row.desc || row.address}
-                      </p>
-                    )}
                   </div>
                 ))}
               </div>

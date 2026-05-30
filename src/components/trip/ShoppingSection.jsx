@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { ShoppingBag, Clock, Navigation } from 'lucide-react'
 import EmptyState from '../ui/EmptyState.jsx'
 import SegmentedControl from '../ui/SegmentedControl.jsx'
+import { categoryChipStyle } from '../../lib/categories.js'
 
 /**
  * Flat CSV rows → grouped display units.
@@ -47,8 +48,8 @@ function StandaloneCard({ item }) {
   return (
     <div className="glass-card relative rounded-xl px-4 py-3 overflow-hidden">
       <div className="flex items-center gap-3">
-        {/* 左側 icon */}
-        <div className="p-2 bg-pink-50 text-pink-500 rounded-full shrink-0">
+        {/* 左側 icon（購物分類色，取自 categories.js） */}
+        <div className="p-2 rounded-full shrink-0" style={categoryChipStyle('shopping')}>
           <ShoppingBag size={16} />
         </div>
 
@@ -93,7 +94,7 @@ function BuildingCard({ building }) {
       {/* Building header */}
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-pink-50 text-pink-500 rounded-full shrink-0">
+          <div className="p-2 rounded-full shrink-0" style={categoryChipStyle('shopping')}>
             <ShoppingBag size={16} />
           </div>
           <div>

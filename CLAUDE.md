@@ -86,6 +86,7 @@ src/
 │   ├── env.js                       # 集中讀取 + 驗證 Vite env
 │   ├── haptic.js                    # navigator.vibrate 包裝（tap/bump/success）
 │   ├── swrCache.js                  # localStorage 版 stale-while-revalidate
+│   ├── categories.js                # 行程分類色彩單一 source of truth（label/icon/ink + chip 樣式）
 │   └── tripDate.js                  # 旅程日期相關純函式
 ├── trips/
 │   └── tokyo-hokkaido-2026-03/
@@ -232,10 +233,10 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 **`itinerary` tab**
 
-| `date` | `time` | `name` | `type` | `address` | `link` | `description` | `note` | `hours` | `parent` |
-|---|---|---|---|---|---|---|---|---|---|
+| `date` | `time` | `name` | `type` | `address` | `link` | `description` | `note` | `hours` | `parent` | `image` |
+|---|---|---|---|---|---|---|---|---|---|---|
 
-`type` 可選值：`attraction`（預設）、`hotel`、`food`、`shopping`、`transport`
+`type` 可選值：`attraction`（預設）、`hotel`、`food`、`shopping`、`transport`（label / icon / 顏色見 `src/lib/categories.js`）
 
 欄位說明：
 - `date`：用於將 rows 分組到日。可填短格式 `M/D`（如 `6/4`）或完整 `YYYY/MM/DD`；短格式會用 index sheet 的 `dates` start 補年（跨年 trip 自動處理）。Day 序號由 `(date - tripStart)` 反推，不再需要獨立 `day` 欄。
@@ -244,6 +245,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - `hours`：營業時間，顯示於卡片底部小 badge
 - `address`：Google Maps 導航查詢字串（`link` 有值時優先用 `link`）
 - `parent`：**子項目專用**，填入父卡片的 `name`（字串完全比對）。有值的 row 不出現在主時間軸，改顯示在父卡片 modal 的「街道亮點」區。排序：`food → attraction → shopping`；父卡片底部自動出現「N 個亮點」badge
+- `image`：選填縮圖（完整 URL 或 `/trips/<slug>/...` 絕對路徑）。**資料驅動、與 type 無關**：有值才顯示。卡片右側 64×64 圓角縮圖；點開 modal 時頂部顯示為 hero 圖。`lazy` 載入。
 
 **`shopping` tab**
 
@@ -255,12 +257,13 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 **`food` tab**
 
-| `area` | `category` | `name` | `hours` | `desc` | `link` |
-|---|---|---|---|---|---|
+| `area` | `category` | `name` | `hours` | `desc` | `link` | `image` |
+|---|---|---|---|---|---|---|
 
 - `area`：浮動 tab 分區（空白則不顯示 area tabs）
 - `category`：分組標題（空白則不分組）
 - `desc`：店家描述（程式碼同時支援 `note` 欄位名稱）
+- `image`：選填縮圖（完整 URL 或絕對路徑），有值才顯示在卡片左側 64×64 圓角；`lazy` 載入
 - 若 `food` tab 無資料，fallback 為 `itinerary` 中 `type === 'food'` 的行程（由 `useFoodItems` 處理）
 
 ---
@@ -281,6 +284,42 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
   - **勿無差別灑**：進度條、fade、骨架、列表整列不套。`prefers-reduced-motion` 由全域 reset 自動降為瞬時（縫也不會出現）。
 - **按下滑出取消（`useCancelableTap`）**：選中類可點元件（TripCard、ItinerarySection 卡片、Sidebar 選單項）用 `hooks/useCancelableTap.js`：按下 setPointerCapture，放開時 `isPointInRect` 判定放開點是否仍在元件內，滑出去放開＝取消，避免長按/誤觸。呼叫一次回傳 `{ onPointerDown, onPointerUp, guard }`，`guard(fn)` 包原本 onClick，可服務 `.map()` 清單（同時只按一個）。原生 onClick 保留給鍵盤無障礙。ChecklistSection 已自帶距離式（移動 >10px 不 toggle）取消，不重複套。
 - **分段控制器（SegmentedControl）**：所有分段 tab（TripInfoSection / FoodSection / ShoppingSection）統一用 `src/components/ui/SegmentedControl.jsx`，**勿再各自手寫 `frosted-tab-track` markup**。玻璃感由**單一移動膠囊** `.frosted-tab-pill` 呈現（`.frosted-tab-btn.active` 只負責文字色），膠囊 width/transform 由 `useSegmentedDrag` 量測各 segment 實際 rect 設定。支援 pointer 拖拉跟手：按下任一段都可起手（非選中段按下即切換並滑行過去），按著一路滑可跨段、**拖拉中即時 `onChange` 切換畫面內容**，跨段 haptic、放開吸附（6px 門檻、邊緣 rubber-band）。拖拉期間 `isDraggingRef` 讓 value 變化的 reposition 讓位，避免跟手位置被搶。切換時短暫加 `.traveling`（透明玻璃態滑行）、按住/拖拉加 `.lifted`（放大超出邊界 + 更透）、`.dragging` 移除膠囊 `backdrop-filter`（iOS Safari 防 jank 逃生艙）。內容超寬時自動降級為「可橫向捲動 + 點按」
+
+### 分類色彩系統（`src/lib/categories.js`）
+
+行程分類（`itinerary` 的 `type`）的 **label / icon / 顏色** 統一由 `src/lib/categories.js` 提供，**是唯一 source of truth**。新增分類或改色只動這個檔；**勿再散寫 Tailwind pastel（`blue-700` / `pink-500` …）或 raw hex**。
+
+配色為低彩度日本傳統「鼠色系」（和紙手帳調性），與品牌抹茶綠同一色族：
+
+| 分類 | 傳統色 | ink hex |
+|---|---|---|
+| `transport` 交通 | 藍鼠 | `#4E6171` |
+| `food` 美食 | 弁柄（赤陶） | `#9C5A43` |
+| `attraction` 景點 | 苔・橄欖 | `#656E3C` |
+| `shopping` 購物 | 葡萄鼠 | `#8A5A6E` |
+| `hotel` 住宿 | 藤鼠 | `#5E5E86` |
+
+- **抹茶綠 `jp-green #5C6E58` 是全站唯一主 accent**（連結 / active / CTA / 進度條 / focus ring），**不當分類色用**；景點故意用偏黃橄欖色與品牌綠區隔，避免「品牌 or 分類」混淆。全站只有一種綠（先前 `prepare` 卡片誤用的 `#6B9080` 已統一為 `jp-green`）。
+- API：
+  - `getCategory(type)`：回 `{ label, icon, ink }`，未知 type 退回景點。
+  - `categoryChipStyle(type)` / `chipStyle(ink)`：**淡玻璃 chip**（文字 ink / 邊框 ink@40% / 底 ink@10%），搭配 className `border backdrop-blur-sm rounded`。用於小標籤。
+  - `categorySolidStyle(type)` / `solidStyle(ink)`：**實心**（底 ink / icon 白）。用於需要 pop 的場景（時間軸節點、側欄 feature icon）。低彩度 washi ink 用淡底會顯灰，故大 icon 一律用實心。
+  - `categoryInk(type)`：純 ink 色（給脊線、節點底色等）。
+  - `BRAND_INK`：品牌抹茶綠（= `jp-green` `#5C6E58`）的 JS 字面值，給 inline style 餵 `chipStyle` / `solidStyle` 用（Tailwind class 不適用時）；勿再散寫 `#5C6E58`。
+- 引用處：`ItinerarySection`（節點實心 + 脊線 + eyebrow 標籤）、`ShoppingSection`（店家 icon 圓底，淡 chip）、`TripInfoSection`（住宿 hotel/airbnb 同屬住宿分類，同色靠文字區分）、`TripPage` 的 `MENU_ITEMS`（側欄 icon，**實心**）。
+- **日期 badge 是 metadata 不是分類**，一律用中性 stone（`TripInfoSection` 的 `DATE_BADGE`），勿套分類色以免色彩語意過載。
+- 側欄 `MENU_ITEMS` 的 icon 色由 `iconStyle`（inline style object，目前用 `categorySolidStyle` / `solidStyle`）提供，Sidebar 以 `style={iconStyle}` 套用（不再用 `color` className）。
+
+### 行程時間軸（ItinerarySection）
+
+每筆行程是 **三欄**：`時間 | 軌道節點 | 卡片`。
+
+- **節點化軌道**：每個時間點是一顆 `w-7 h-7` 分類色圓形節點（白色 type icon 在內），節點下接 `w-[1.5px]` 連接線；**type 的視覺識別主要靠節點**（顏色 + icon），不再埋在卡片底部。
+- **卡片左脊線**：卡片 `overflow-hidden` + 絕對定位 `w-1` 分類色 spine（`categoryInk`）；內容左 padding 加大（`pl-5`）避讓。
+- **分類標籤**：卡片內用輕量**彩色 eyebrow**（`text-2xs` 分類色），取代原本的 bordered pill。
+- **砍空殼**：底部 meta（地址 + 「N 個亮點」badge）**只在真有值時渲染**，無地址不印 placeholder；移除了原本的 ChevronRight（整卡可點不需要）。「N 個亮點」badge 用品牌綠 chip（`chipStyle(BRAND_INK)`），不再用 amber。
+- **時間權重**：時間 `text-sm font-bold tabular-nums` 右對齊指向節點。
+- **NowMarker**（今日「現在」紅線）對齊同一套三欄；紅色僅用於「現在/今日/live」語意。
 
 ### Accessibility 原則
 

@@ -10,6 +10,7 @@ import { useEasterEgg } from '../hooks/useEasterEgg.js'
 import { pickInitialDay, formatDayLabel } from '../lib/tripDate.js'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 import { useDays, useFoodItems, useNormalizedDays, useNormalizedItinerary } from '../hooks/useTripDerived.js'
+import { categorySolidStyle, solidStyle, BRAND_INK } from '../lib/categories.js'
 import { TripSkeleton, SectionSkeleton } from '../components/ui/Skeletons.jsx'
 import ErrorState from '../components/ui/ErrorState.jsx'
 import Sidebar from '../components/layout/Sidebar.jsx'
@@ -25,11 +26,13 @@ const FoodSection = lazy(() => import('../components/trip/FoodSection.jsx'))
 
 const LAST_TRIP_KEY = 'lastTripSlug'
 
+// 側欄 icon 色：實心 ink 底 + 白 icon（與時間軸節點同語言，低彩度 washi 用淡底會顯灰）。
+// shopping / food 直接取分類色；info 借交通色（航班為主）、checklist 用品牌綠。
 const MENU_ITEMS = [
-  { key: 'info',      label: '旅程資訊', subLabel: 'Flight & Info',  icon: <Info size={20} />,          color: 'bg-blue-50/80 text-blue-600' },
-  { key: 'checklist', label: '行李清單', subLabel: 'Packing List',   icon: <ClipboardList size={22} />, color: 'bg-green-50/80 text-green-600' },
-  { key: 'shopping',  label: '逛街清單', subLabel: 'Shopping Map',   icon: <ShoppingBag size={22} />,   color: 'bg-pink-50/80 text-pink-600' },
-  { key: 'food',      label: '美食清單', subLabel: 'Food List',      icon: <Utensils size={22} />,      color: 'bg-orange-50/80 text-orange-600' },
+  { key: 'info',      label: '旅程資訊', subLabel: 'Flight & Info',  icon: <Info size={20} />,          iconStyle: categorySolidStyle('transport') },
+  { key: 'checklist', label: '行李清單', subLabel: 'Packing List',   icon: <ClipboardList size={22} />, iconStyle: solidStyle(BRAND_INK) },
+  { key: 'shopping',  label: '逛街清單', subLabel: 'Shopping Map',   icon: <ShoppingBag size={22} />,   iconStyle: categorySolidStyle('shopping') },
+  { key: 'food',      label: '美食清單', subLabel: 'Food List',      icon: <Utensils size={22} />,      iconStyle: categorySolidStyle('food') },
 ]
 
 function getYearMonth(dates) {
@@ -295,6 +298,7 @@ export default function TripPage() {
         onSelect={(key) => { setActiveModal(key); setSidebarOpen(false) }}
         sections={MENU_ITEMS}
         tripNameEn={tripNameEn}
+        countryCode={trip.destination_country}
       />
 
       {/* Section Modals */}

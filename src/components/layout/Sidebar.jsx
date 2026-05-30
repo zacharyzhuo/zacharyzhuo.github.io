@@ -5,8 +5,9 @@ import { env } from '../../lib/env.js'
 import { useModalA11y } from '../../hooks/useModalA11y.js'
 import { useCancelableTap } from '../../hooks/useCancelableTap.js'
 import { resist } from '../../lib/gesture.js'
+import ExchangeRate from './ExchangeRate.jsx'
 
-export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameEn }) {
+export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameEn, countryCode }) {
   const navigate = useNavigate()
   const [dragX, setDragX] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
@@ -127,7 +128,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
 
           <div className="flex-1 overflow-y-auto overscroll-contain py-4">
             <nav className="space-y-2 px-4">
-              {sections.map(({ key, label, subLabel, icon, color }) => (
+              {sections.map(({ key, label, subLabel, icon, iconStyle }) => (
                 <button
                   key={key}
                   onPointerDown={tap.onPointerDown}
@@ -135,7 +136,10 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
                   onClick={tap.guard(() => { onSelect(key); onClose() })}
                   className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/20 transition-colors text-left group press-springy"
                 >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${color ?? 'bg-white/30 text-jp-green'}`}>
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-jp-green"
+                    style={iconStyle}
+                  >
                     {icon}
                   </div>
                   <div>
@@ -150,6 +154,8 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
               ))}
             </nav>
           </div>
+
+          <ExchangeRate countryCode={countryCode} />
 
           <div className="px-4 pb-2 flex justify-center">
             <button

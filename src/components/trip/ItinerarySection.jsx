@@ -1,8 +1,7 @@
 import { Fragment, useState, useEffect, useRef, useMemo, useId } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  Camera, Utensils, ShoppingBag, Train, Hotel,
-  ChevronRight, X, Navigation, BookOpen, Clock, MapPin
+  Camera, X, Navigation, BookOpen, Clock, MapPin
 } from 'lucide-react'
 import { useScrollLock } from '../../hooks/useScrollLock.js'
 import { useModalA11y } from '../../hooks/useModalA11y.js'
@@ -10,6 +9,7 @@ import { useCancelableTap } from '../../hooks/useCancelableTap.js'
 import { formatToday } from '../../lib/tripDate.js'
 import { resist } from '../../lib/gesture.js'
 import { openExternal } from '../../lib/openExternal.js'
+import { getCategory, categoryChipStyle, categoryInk, chipStyle, BRAND_INK } from '../../lib/categories.js'
 import EmptyState from '../ui/EmptyState.jsx'
 
 function formatNowHHMM() {
@@ -17,38 +17,26 @@ function formatNowHHMM() {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
-// 今日時間軸上「現在 HH:MM」紅線標記
+// 今日時間軸上「現在 HH:MM」紅線標記。對齊新三欄（時間 | 軌道節點 | 內容）。
 function NowMarker({ time, innerRef }) {
   return (
-    <div ref={innerRef} className="flex gap-4 px-6 -mt-2 mb-4">
-      <div className="w-12 shrink-0 flex flex-col items-center">
-        <span className="text-2xs font-serif font-bold text-jp-red leading-none tabular-nums tracking-tight">
-          {time}
-        </span>
+    <div ref={innerRef} className="flex gap-2.5 px-5 -mt-1 mb-3 items-center">
+      <span className="w-10 shrink-0 text-right text-2xs font-serif font-bold text-jp-red leading-none tabular-nums">
+        {time}
+      </span>
+      <div className="w-7 shrink-0 flex justify-center">
+        <span className="w-3 h-3 rounded-full bg-jp-red animate-pulse shadow-[0_0_0_4px_rgba(185,54,50,0.15)]" />
       </div>
       <div className="flex-1 min-w-0 flex items-center gap-2">
         <span className="text-2xs font-serif font-bold text-jp-red uppercase tracking-[0.2em] shrink-0">
           現在
         </span>
         <div className="flex-1 h-[1px] bg-jp-red/40" />
-        <span className="w-2 h-2 rounded-full bg-jp-red shrink-0 animate-pulse shadow-[0_0_0_4px_rgba(185,54,50,0.15)]" />
       </div>
     </div>
   )
 }
-const TYPE_MAP = {
-  transport:  { label: '交通', icon: Train, border: 'border-blue-200/40 text-blue-700 bg-blue-50/20 backdrop-blur-sm' },
-  food:       { label: '美食', icon: Utensils, border: 'border-orange-200/40 text-orange-700 bg-orange-50/20 backdrop-blur-sm' },
-  attraction: { label: '景點', icon: Camera, border: 'border-emerald-200/40 text-emerald-700 bg-emerald-50/20 backdrop-blur-sm' },
-  shopping:   { label: '購物', icon: ShoppingBag, border: 'border-pink-200/40 text-pink-700 bg-pink-50/20 backdrop-blur-sm' },
-  hotel:      { label: '住宿', icon: Hotel, border: 'border-purple-200/40 text-purple-700 bg-purple-50/20 backdrop-blur-sm' },
-}
-
 const SPOT_TYPE_ORDER = { food: 0, attraction: 1, shopping: 2 }
-
-function getTypeInfo(type) {
-  return TYPE_MAP[type] || TYPE_MAP['attraction']
-}
 
 function buildGoogleMapsUrl(address, name) {
   const query = address || name || ''
@@ -62,7 +50,7 @@ function sortSpots(spots) {
 }
 
 function SpotItem({ spot }) {
-  const { label, border } = getTypeInfo(spot.type)
+  const { label } = getCategory(spot.type)
   const url = spot.link?.startsWith('http')
     ? spot.link
     : buildGoogleMapsUrl(spot.address, spot.name)
@@ -71,7 +59,10 @@ function SpotItem({ spot }) {
     <div className="flex items-start gap-3 py-2.5 border-b border-stone-100 last:border-0">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className={`text-2xs px-1.5 py-0.5 border rounded font-serif font-bold shrink-0 uppercase tracking-wider ${border}`}>
+          <span
+            className="text-2xs px-1.5 py-0.5 border rounded font-serif font-bold shrink-0 uppercase tracking-wider backdrop-blur-sm"
+            style={categoryChipStyle(spot.type)}
+          >
             {label}
           </span>
           <span className="font-serif font-bold text-jp-text text-sm leading-snug truncate">
@@ -175,7 +166,7 @@ function DetailModal({ row, spots, onClose }) {
   // 注意：不能在這裡早 return null，否則第一次點開時 sheet div 直接 mount 在 translate-y-0，
   // 沒有「translate-y-full → translate-y-0」的起點可以動，CSS transition 不會觸發。
   // 改為：殼永遠 render（預設 translate-y-full 藏在畫面外），內容才依 current 條件渲染。
-  const typeInfo = current ? getTypeInfo(current.type) : null
+  const typeInfo = current ? getCategory(current.type) : null
   const navUrl = current
     ? (current.link?.startsWith('http')
         ? current.link
@@ -232,8 +223,22 @@ function DetailModal({ row, spots, onClose }) {
           </button>
 
           <div className="overflow-y-auto overscroll-contain px-8 pb-32 flex-1 pt-4">
+            {current.image && (
+              <img
+                src={current.image}
+                alt=""
+                width={800}
+                height={320}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-40 rounded-2xl object-cover mb-4 bg-stone-200"
+              />
+            )}
             <div className="flex items-center gap-3 mb-2">
-              <span className={`px-3 py-1 border text-xs tracking-widest font-bold font-serif uppercase rounded ${typeInfo.border}`}>
+              <span
+                className="px-3 py-1 border text-xs tracking-widest font-bold font-serif uppercase rounded backdrop-blur-sm"
+                style={categoryChipStyle(current.type)}
+              >
                 {typeInfo.label}
               </span>
               <span className="font-serif text-xl text-stone-600 tabular-nums">{current.time}</span>
@@ -370,7 +375,7 @@ export default function ItinerarySection({ rows, dayDate }) {
     <>
       <div className="mt-2">
         {mainRows.map((row, i) => {
-          const { label, icon: Icon, border } = getTypeInfo(row.type)
+          const { label, icon: Icon } = getCategory(row.type)
           const isLast = i === mainRows.length - 1
           const spots = sortSpots(spotsByParent[row.name] ?? [])
           const isPastRow = isToday && row.time && row.time < now
@@ -379,27 +384,48 @@ export default function ItinerarySection({ rows, dayDate }) {
             <Fragment key={`${row.time}:${row.name}`}>
               {nowIdx === i && <NowMarker time={now} innerRef={nowMarkerRef} />}
             <div
-              className={`flex gap-4 px-6 group ${isPastRow ? 'opacity-50' : ''}`}
+              className={`flex gap-2.5 px-5 group ${isPastRow ? 'opacity-50' : ''}`}
             >
-              <div className="w-12 shrink-0 flex flex-col items-center pt-1">
-                <span className="text-sm font-serif font-medium text-jp-text leading-none tabular-nums tracking-tight">{row.time}</span>
-                {!isLast && <div className="w-[1px] bg-stone-200 flex-1 my-2" />}
+              {/* 時間（拉高權重，右對齊指向節點） */}
+              <span className="w-10 shrink-0 text-right text-sm font-serif font-bold text-jp-text leading-none tabular-nums pt-2.5">
+                {row.time}
+              </span>
+
+              {/* 軌道：分類色節點（含 type icon）+ 連接線 */}
+              <div className="w-7 shrink-0 flex flex-col items-center">
+                <span
+                  aria-hidden="true"
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-white shadow-[0_1px_3px_rgba(0,0,0,0.18)] shrink-0"
+                  style={{ backgroundColor: categoryInk(row.type) }}
+                >
+                  <Icon size={15} />
+                </span>
+                {!isLast && <div className="w-[1.5px] bg-stone-200 flex-1 mt-1.5" />}
               </div>
 
-              <div className="flex-1 min-w-0 pb-8">
+              <div className="flex-1 min-w-0 pb-7">
                 <button
                   type="button"
                   onPointerDown={cardTap.onPointerDown}
                   onPointerUp={cardTap.onPointerUp}
                   onClick={cardTap.guard(() => { setSelected({ row, spots }) })}
-                  aria-label={`${row.time} ${row.name} 詳情`}
-                  className="glass-card press-springy relative rounded-2xl p-4 h-full w-full flex flex-col text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
+                  aria-label={`${row.time} ${label} ${row.name} 詳情`}
+                  className="glass-card press-springy relative rounded-2xl py-4 pr-4 pl-5 h-full w-full flex flex-row gap-3 items-start text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <span className={`text-xs tracking-wider uppercase px-2 py-0.5 rounded border font-serif font-bold ${border}`}>
-                      {label}
-                    </span>
-                  </div>
+                  {/* 分類色左脊線 */}
+                  <span
+                    aria-hidden="true"
+                    className="absolute left-0 top-0 bottom-0 w-1"
+                    style={{ backgroundColor: categoryInk(row.type) }}
+                  />
+
+                  <div className="flex-1 min-w-0 flex flex-col">
+                  <span
+                    className="text-2xs font-serif font-bold uppercase tracking-[0.15em] mb-1"
+                    style={{ color: categoryInk(row.type) }}
+                  >
+                    {label}
+                  </span>
 
                   <h4 className="text-lg font-serif font-bold text-jp-text mb-1 leading-snug">{row.name}</h4>
                   {row.description && (
@@ -415,18 +441,41 @@ export default function ItinerarySection({ rows, dayDate }) {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2 text-xs text-stone-400 font-serif mt-auto pt-2 min-w-0">
-                    <Icon size={16} />
-                    <span className="truncate text-stone-500 opacity-70 flex-1 min-w-0">
-                      {row.address || '查看地圖位置'}
-                    </span>
-                    {spots.length > 0 && (
-                      <span className="text-xs text-amber-600 font-bold font-serif shrink-0 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                        {spots.length} 個亮點
-                      </span>
-                    )}
-                    <ChevronRight size={12} className="ml-1 shrink-0 opacity-50" />
+                  {/* 底部 meta：只有真有地址 / 亮點才渲染（無內容不留空殼） */}
+                  {(row.address || spots.length > 0) && (
+                    <div className="flex items-center gap-2 text-xs text-stone-400 font-serif mt-auto pt-2 min-w-0">
+                      {row.address && (
+                        <>
+                          <MapPin size={13} className="shrink-0 text-stone-400" />
+                          <span className="truncate text-stone-500 opacity-80 flex-1 min-w-0">
+                            {row.address}
+                          </span>
+                        </>
+                      )}
+                      {spots.length > 0 && (
+                        <span
+                          className="text-xs font-bold font-serif shrink-0 px-2 py-0.5 rounded-full border backdrop-blur-sm ml-auto"
+                          style={chipStyle(BRAND_INK)}
+                        >
+                          {spots.length} 個亮點
+                        </span>
+                      )}
+                    </div>
+                  )}
                   </div>
+
+                  {/* 右側縮圖（資料驅動：row.image 有值才顯示，與 type 無關） */}
+                  {row.image && (
+                    <img
+                      src={row.image}
+                      alt=""
+                      width={64}
+                      height={64}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-16 h-16 rounded-xl object-cover shrink-0 bg-stone-200"
+                    />
+                  )}
                 </button>
               </div>
             </div>
