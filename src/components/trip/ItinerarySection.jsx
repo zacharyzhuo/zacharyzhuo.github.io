@@ -376,7 +376,7 @@ export default function ItinerarySection({ rows, dayDate }) {
                   type="button"
                   onClick={() => { setSelected({ row, spots }) }}
                   aria-label={`${row.time} ${row.name} 詳情`}
-                  className="glass-card relative rounded-2xl p-4 active:scale-[0.98] transition-transform duration-200 h-full w-full flex flex-col text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
+                  className="glass-card press-springy relative rounded-2xl p-4 h-full w-full flex flex-col text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <span className={`text-xs tracking-wider uppercase px-2 py-0.5 rounded border font-serif font-bold ${border}`}>

@@ -19,6 +19,10 @@ export default {
         // micro eyebrow / 大寫 caps 標籤統一尺寸，取代散落的 text-[10px]/[11px]
         '2xs': '0.625rem',
       },
+      transitionTimingFunction: {
+        // iOS26 Q 彈彈簧（對應 index.css 的 --ease-spring），可用 `ease-spring`
+        spring: 'var(--ease-spring)',
+      },
     },
   },
   plugins: [],

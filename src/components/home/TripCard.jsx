@@ -71,7 +71,7 @@ export default function TripCard({ trip, variant = 'normal' }) {
       onClick={() => navigate(`/trip/${trip.slug}`)}
       onMouseEnter={() => prefetchTrip(trip.sheet_id)}
       onTouchStart={() => prefetchTrip(trip.sheet_id)}
-      className={`w-full relative rounded-2xl overflow-hidden touch-manipulation group bg-stone-200 ${heightClass} ${cardOpacity}`}
+      className={`w-full relative rounded-2xl overflow-hidden touch-manipulation group bg-stone-200 press-springy ${heightClass} ${cardOpacity}`}
       aria-label={`查看 ${trip.name} 行程`}
     >
       {/* Cover image */}
