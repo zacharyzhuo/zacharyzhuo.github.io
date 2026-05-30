@@ -91,11 +91,17 @@ function FlightsTab({ flights }) {
   )
 }
 
-function PrepareTab({ destinationCountry }) {
-  const isJapan = destinationCountry === 'JP'
+/**
+ * 行前準備：資料驅動，讀 trip sheet 的 prepare tab（欄位 label / desc / url）。
+ * 每筆 render 成一張連結卡片；無資料則顯示空狀態。
+ *
+ * @param {{ items: Array<{ label: string, desc?: string, url?: string }> }} props
+ */
+function PrepareTab({ items }) {
+  const tap = useCancelableTap()
 
-  if (!isJapan) {
-    return <EmptyState icon={ClipboardList} title="尚無行前準備項目" hint="目前只有日本行程會帶出 Visit Japan Web 提醒。" />
+  if (!items || items.length === 0) {
+    return <EmptyState icon={ClipboardList} title="尚無行前準備項目" hint="在這趟行程的 prepare tab 填入簽證、入境表單、eSIM 等連結，這裡就會列出來。" />
   }
 
   return (
@@ -103,22 +109,29 @@ function PrepareTab({ destinationCountry }) {
       <h3 className="text-base font-bold text-stone-600 uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
         <ClipboardList size={18} /> 行前準備
       </h3>
-      <button
-        onClick={() => window.open('https://vjw-lp.digital.go.jp/zh-hant/', '_blank')}
-        className="w-full bg-[#6B9080] text-white p-6 rounded-2xl hover:brightness-105 transition-colors text-left group relative overflow-hidden touch-manipulation min-h-[48px]"
-        aria-label="開啟 Visit Japan Web 網站"
-      >
-        <div className="absolute right-[-10px] top-[-10px] opacity-10 rotate-12">
-          <Plane size={100} />
-        </div>
-        <div className="relative z-10 flex items-center justify-between">
-          <div>
-            <h4 className="text-xl font-serif font-bold mb-1">Visit Japan Web</h4>
-            <p className="text-sm opacity-80 font-serif tracking-wide">入境日本必備・提前填寫申報</p>
-          </div>
-          <ExternalLink size={24} className="opacity-80 group-hover:opacity-100" />
-        </div>
-      </button>
+      <div className="space-y-3">
+        {items.map((item, i) => (
+          <button
+            key={`${item.label}-${i}`}
+            onPointerDown={tap.onPointerDown}
+            onPointerUp={tap.onPointerUp}
+            onClick={tap.guard(() => { if (item.url) window.open(item.url, '_blank') })}
+            className="w-full bg-[#6B9080] text-white p-6 rounded-2xl press-springy text-left group relative overflow-hidden touch-manipulation min-h-[48px]"
+            aria-label={`開啟 ${item.label}`}
+          >
+            <div className="absolute right-[-10px] top-[-10px] opacity-10 rotate-12">
+              <ExternalLink size={100} />
+            </div>
+            <div className="relative z-10 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h4 className="text-xl font-serif font-bold mb-1">{item.label}</h4>
+                {item.desc && <p className="text-sm opacity-80 font-serif tracking-wide">{item.desc}</p>}
+              </div>
+              {item.url && <ExternalLink size={24} className="opacity-80 shrink-0" />}
+            </div>
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
@@ -215,7 +228,7 @@ function HotelTab({ accommodation }) {
   )
 }
 
-export default function TripInfoSection({ flights, accommodation, destinationCountry }) {
+export default function TripInfoSection({ flights, accommodation, prepare }) {
   const [activeTab, setActiveTab] = useState('flights')
   const scrollRef = useRef(null)
 
@@ -231,7 +244,7 @@ export default function TripInfoSection({ flights, accommodation, destinationCou
       >
         <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">旅程資訊</h2>
         {activeTab === 'flights' && <FlightsTab flights={flights} />}
-        {activeTab === 'prepare' && <PrepareTab destinationCountry={destinationCountry} />}
+        {activeTab === 'prepare' && <PrepareTab items={prepare} />}
         {activeTab === 'hotel' && <HotelTab accommodation={accommodation} />}
       </div>
 

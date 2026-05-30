@@ -21,7 +21,7 @@ Vite + React SPA，以 Google Sheets 作為 CMS，部署於 GitHub Pages。
 ```
 Google Sheets (Public)
 ├── Index Sheet        → 所有行程清單
-└── 每趟行程 Sheet     → flights / itinerary / accommodation / shopping / checklist / food / days
+└── 每趟行程 Sheet     → flights / itinerary / accommodation / shopping / checklist / food / days / prepare
 
          ↓ fetch CSV at runtime
          ↓   - module-level Map 快取（同 session 不重複 fetch）
@@ -126,14 +126,11 @@ a11y：BottomSheet 與 ItinerarySection 的 DetailModal 都套用 `useModalA11y`
 | `shopping` | 逛街清單 |
 | `food` | 美食清單 |
 
-### `destination_country` 國家限定功能
+### 行前準備（資料驅動）
 
-`TripInfoSection` 接收 `destinationCountry` prop（來自 index sheet `destination_country` 欄位），用於開關國家專屬內容：
+「行前準備」tab 由 trip sheet 的 **`prepare` tab** 驅動（不再寫死國家）。`TripInfoSection` 接收 `prepare` prop（rows），`PrepareTab` 把每筆 render 成連結卡片；無資料則顯示「尚無行前準備項目」空狀態。Visit Japan Web、簽證申請、入境/海關表單、eSIM 等都是其中一筆資料列。
 
-| 值 | 行為 |
-|---|---|
-| `JP` | **行前準備** tab 顯示 Visit Japan Web 按鈕 |
-| 空白 / 其他 | 顯示「尚無行前準備項目」佔位訊息 |
+> index sheet 的 `destination_country` 欄位目前**未被程式使用**（行前準備改資料驅動後不再需要它 gate）；欄位保留無妨，未來若有其他國家限定功能可再用。
 
 ### Trip Extras 機制（求婚彩蛋）
 
@@ -189,7 +186,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 | `slug` | 行程唯一識別碼（用於 URL） | `fukuoka-2026-01` |
 | `name` | 行程顯示名稱（中文） | `福岡` |
 | `name_en` | 英文副標題（選填，用於 header 與 sidebar） | `Fukuoka` |
-| `destination_country` | 目的地國家代碼，用於開關國家限定功能（選填） | `JP` |
+| `destination_country` | 目的地國家代碼（選填，目前程式未使用，保留欄位） | `JP` |
 | `dates` | 旅行日期範圍 | `2026/01/10 - 01/14` |
 | `cover_image_url` | 封面圖片 URL | `https://...` |
 | `sheet_id` | 該行程 Google Sheet 的 ID | `1BxiMVs...` |
@@ -197,7 +194,16 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 `name_en` 為空時自動從 `slug` 推算（例：`tokyo-hokkaido-2026-03` → `TOKYO HOKKAIDO TRIP`）。
 
-### 每趟行程 Sheet（7 個 tab）
+### 每趟行程 Sheet（8 個 tab）
+
+**`prepare` tab**（行前準備，資料驅動）
+
+| `label` | `desc` | `url` |
+|---|---|---|
+
+- `label`：項目標題（如 `Visit Japan Web`、`泰國簽證申請`、`韓國 K-ETA`）
+- `desc`：副標/說明（選填）
+- `url`：連結（選填；有值才顯示外連 icon 並可點開）
 
 **`days` tab**
 

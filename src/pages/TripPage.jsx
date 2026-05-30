@@ -70,6 +70,7 @@ export default function TripPage() {
   const checklistHook = useSheetData(trip?.sheet_id, 'checklist')
   const foodHook = useSheetData(trip?.sheet_id, 'food')
   const daysHook = useSheetData(trip?.sheet_id, 'days')
+  const prepareHook = useSheetData(trip?.sheet_id, 'prepare')
 
   const { data: flights, loading: flightsLoading } = flightsHook
   const { data: itinerary, loading: itineraryLoading } = itineraryHook
@@ -78,6 +79,7 @@ export default function TripPage() {
   const { data: checklist } = checklistHook
   const { data: food } = foodHook
   const { data: daysData } = daysHook
+  const { data: prepare } = prepareHook
 
   // Pull-to-refresh：清快取後重抓所有 trip sheets
   const refreshAllSheets = useCallback(async () => {
@@ -89,10 +91,12 @@ export default function TripPage() {
       checklistHook.refresh(),
       foodHook.refresh(),
       daysHook.refresh(),
+      prepareHook.refresh(),
     ])
   }, [
     flightsHook.refresh, itineraryHook.refresh, accommodationHook.refresh,
     shoppingHook.refresh, checklistHook.refresh, foodHook.refresh, daysHook.refresh,
+    prepareHook.refresh,
   ])
   const { pullY, refreshing, triggerThreshold } = usePullToRefresh(refreshAllSheets, {
     // sidebar / modal / 彩蛋打開時停掉 pull-to-refresh，避免跟拖曳關閉手勢衝突
@@ -297,9 +301,9 @@ export default function TripPage() {
       <BottomSheet isOpen={activeModal === 'info'} onClose={() => setActiveModal(null)} title="旅程資訊" noScroll noStickyTitle>
         {activeModal === 'info' && (
           <Suspense fallback={<SectionSkeleton />}>
-            {flightsHook.loading || accommodationHook.loading
+            {flightsHook.loading || accommodationHook.loading || prepareHook.loading
               ? <SectionSkeleton />
-              : <TripInfoSection flights={flights} accommodation={accommodation} destinationCountry={trip?.destination_country} />}
+              : <TripInfoSection flights={flights} accommodation={accommodation} prepare={prepare} />}
           </Suspense>
         )}
       </BottomSheet>
