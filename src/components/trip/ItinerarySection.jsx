@@ -200,8 +200,8 @@ function DetailModal({ row, spots, onClose }) {
         className={sheetClass}
         style={dragY !== 0 ? { transform: `translateY(${dragY}px)` } : undefined}
       >
-        {/* 開啟 overshoot / 反向拉時蓋住底部露出的縫；往上重疊塞到面板底下，面板蓋住接縫線 */}
-        <div aria-hidden="true" className="glass-overshoot-fill absolute inset-x-0 top-[calc(100%-1rem)] h-40 pointer-events-none" />
+        {/* 開啟 overshoot / 反向拉時蓋住底部露出的縫（緊貼面板下緣、不重疊） */}
+        <div aria-hidden="true" className="glass-overshoot-fill absolute inset-x-0 top-full h-40 pointer-events-none" />
         <div className="glass-bottom-sheet min-h-[40vh] max-h-[85vh] flex flex-col relative overflow-hidden">
         {current && (
           <>

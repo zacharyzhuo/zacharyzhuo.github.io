@@ -135,9 +135,9 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
         className={sheetClass}
         style={dragY !== 0 ? { transform: `translateY(${dragY}px)` } : undefined}
       >
-        {/* 開啟 overshoot / 反向拉時蓋住底部露出的縫（平常在畫面外）。
-            往上重疊塞到面板底下 → 面板蓋住接縫線，避免兩塊 backdrop 之間出現硬邊。 */}
-        <div aria-hidden="true" className="glass-overshoot-fill absolute inset-x-0 top-[calc(100%-1rem)] h-40 pointer-events-none" />
+        {/* 開啟 overshoot / 反向拉時蓋住底部露出的縫（平常緊貼面板下緣、在畫面外）。
+            刻意「緊貼不重疊」：重疊塞到半透明面板底下會被 backdrop 重取樣，沿底緣留永久淺帶。 */}
+        <div aria-hidden="true" className="glass-overshoot-fill absolute inset-x-0 top-full h-40 pointer-events-none" />
         <div className="glass-bottom-sheet h-[79vh] flex flex-col relative">
 
           {/* Drag handle 區：pill + 標題列整片皆可拖；hitbox 從 pill 的 4px 擴大到整個 header（約 56px+） */}

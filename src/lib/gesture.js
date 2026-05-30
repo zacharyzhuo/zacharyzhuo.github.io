@@ -6,7 +6,7 @@
  * @param {number} [max] 阻尼後位移上限（須 < glass-overshoot-fill 的覆蓋範圍）
  * @returns {number} 阻尼後位移
  */
-export function resist(delta, max = 48) {
+export function resist(delta, max = 24) {
   const sign = Math.sign(delta)
   const abs = Math.abs(delta)
   return sign * (1 - 1 / (abs / max + 1)) * max
