@@ -11,3 +11,16 @@ export function resist(delta, max = 24) {
   const abs = Math.abs(delta)
   return sign * (1 - 1 / (abs / max + 1)) * max
 }
+
+/**
+ * 點 (x, y) 是否落在 rect（DOMRect 形狀：left/right/top/bottom）內。
+ * 用於「按下後滑出元件範圍放開＝取消」的判定。
+ *
+ * @param {number} x
+ * @param {number} y
+ * @param {{ left: number, right: number, top: number, bottom: number }} rect
+ * @returns {boolean}
+ */
+export function isPointInRect(x, y, rect) {
+  return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+}

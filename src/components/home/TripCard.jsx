@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { MapPin, Calendar } from 'lucide-react'
 import { prefetchSheet } from '../../hooks/useSheetData.js'
+import { useCancelableTap } from '../../hooks/useCancelableTap.js'
 import { getTripStatus } from '../../lib/tripDate.js'
 
 // Tier 1：主畫面馬上要的（itinerary 排程 + days 標題/banner）→ 立即併發
@@ -52,6 +53,7 @@ function StatusPill({ status, daysToStart, daysFromEnd }) {
  */
 export default function TripCard({ trip, variant = 'normal' }) {
   const navigate = useNavigate()
+  const tap = useCancelableTap()
   const { status, daysToStart, daysFromEnd } = getTripStatus(trip.dates)
 
   // active 一律 hero；upcoming（30 天內）也用 hero；其他維持原狀
@@ -68,7 +70,9 @@ export default function TripCard({ trip, variant = 'normal' }) {
 
   return (
     <button
-      onClick={() => navigate(`/trip/${trip.slug}`)}
+      onPointerDown={tap.onPointerDown}
+      onPointerUp={tap.onPointerUp}
+      onClick={tap.guard(() => navigate(`/trip/${trip.slug}`))}
       onMouseEnter={() => prefetchTrip(trip.sheet_id)}
       onTouchStart={() => prefetchTrip(trip.sheet_id)}
       className={`w-full relative rounded-2xl overflow-hidden touch-manipulation group bg-stone-200 press-springy ${heightClass} ${cardOpacity}`}

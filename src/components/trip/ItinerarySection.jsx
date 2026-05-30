@@ -313,6 +313,7 @@ function DetailModal({ row, spots, onClose }) {
  */
 export default function ItinerarySection({ rows, dayDate }) {
   const [selected, setSelected] = useState(null)
+  const cardTap = useCancelableTap()
   const [now, setNow] = useState(formatNowHHMM)
   const nowMarkerRef = useRef(null)
   const isToday = dayDate && dayDate === formatToday()
@@ -381,7 +382,9 @@ export default function ItinerarySection({ rows, dayDate }) {
               <div className="flex-1 min-w-0 pb-8">
                 <button
                   type="button"
-                  onClick={() => { setSelected({ row, spots }) }}
+                  onPointerDown={cardTap.onPointerDown}
+                  onPointerUp={cardTap.onPointerUp}
+                  onClick={cardTap.guard(() => { setSelected({ row, spots }) })}
                   aria-label={`${row.time} ${row.name} 詳情`}
                   className="glass-card press-springy relative rounded-2xl p-4 h-full w-full flex flex-col text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
                 >
