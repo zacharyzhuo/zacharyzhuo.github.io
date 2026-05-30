@@ -1,6 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
+  // hover: 只在支援 hover 的裝置生效，避免觸控 tap 後 hover 樣式 sticky 卡住（如側邊欄 item 變深背景）
+  future: { hoverOnlyWhenSupported: true },
   theme: {
     extend: {
       colors: {

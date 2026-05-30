@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useId } from 'react'
 import { X } from 'lucide-react'
 import { useModalA11y } from '../../hooks/useModalA11y.js'
+import { useCancelableTap } from '../../hooks/useCancelableTap.js'
 import { resist } from '../../lib/gesture.js'
 
 export default function BottomSheet({ isOpen, onClose, title, children, noScroll = false, noStickyTitle = false }) {
@@ -14,6 +15,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
   const dragYRef = useRef(0)
   const onCloseRef = useRef(onClose)
   const titleId = useId()
+  const tap = useCancelableTap()
 
   useModalA11y(isOpen, onClose, sheetRef)
   // 用來追蹤這次 touch 是不是「從 content 頂端開始往下拉 = 拖關」的情境
@@ -169,7 +171,9 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
           </div>
 
           <button
-            onClick={onClose}
+            onPointerDown={tap.onPointerDown}
+            onPointerUp={tap.onPointerUp}
+            onClick={tap.guard(onClose)}
             className="absolute top-8 right-6 z-20 p-3 frosted-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="關閉"
           >

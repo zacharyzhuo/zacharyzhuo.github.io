@@ -106,6 +106,7 @@ function DetailModal({ row, spots, onClose }) {
   const dragYRef = useRef(0)
   const onCloseRef = useRef(onClose)
   const titleId = useId()
+  const tap = useCancelableTap()
 
   useEffect(() => { onCloseRef.current = onClose }, [onClose])
 
@@ -220,7 +221,9 @@ function DetailModal({ row, spots, onClose }) {
           </div>
 
           <button
-            onClick={onClose}
+            onPointerDown={tap.onPointerDown}
+            onPointerUp={tap.onPointerUp}
+            onClick={tap.guard(onClose)}
             className="absolute top-8 right-6 z-20 p-3 frosted-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="關閉詳情"
           >
@@ -282,7 +285,9 @@ function DetailModal({ row, spots, onClose }) {
           {/* 底部浮動 Google Maps 導航 CTA */}
           <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
             <button
-              onClick={() => window.open(navUrl, '_blank')}
+              onPointerDown={tap.onPointerDown}
+              onPointerUp={tap.onPointerUp}
+              onClick={tap.guard(() => window.open(navUrl, '_blank'))}
               className="frosted-tab-track press-springy pointer-events-auto shadow-2xl font-serif text-stone-600 flex items-center gap-2"
               style={{
                 padding: '12px 32px',

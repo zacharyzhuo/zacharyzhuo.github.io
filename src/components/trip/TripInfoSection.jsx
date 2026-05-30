@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Plane, Luggage, ExternalLink, Hotel, ClipboardList, Navigation } from 'lucide-react'
 import EmptyState from '../ui/EmptyState.jsx'
 import SegmentedControl from '../ui/SegmentedControl.jsx'
+import { useCancelableTap } from '../../hooks/useCancelableTap.js'
 
 const INFO_TABS = [
   { key: 'flights', label: '航班資訊' },
@@ -123,6 +124,7 @@ function PrepareTab({ destinationCountry }) {
 }
 
 function HotelTab({ accommodation }) {
+  const tap = useCancelableTap()
   if (accommodation.length === 0) {
     return <EmptyState icon={Hotel} title="尚無住宿資訊" hint="把飯店或 Airbnb 填到 accommodation tab，這裡會列出來。" />
   }
@@ -185,16 +187,23 @@ function HotelTab({ accommodation }) {
                   )}
 
                   {h.link && (
-                    <a
-                      href={h.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full frosted-glass-button text-stone-600 py-3 rounded-xl font-serif tracking-wide flex items-center justify-center gap-2 mt-4 touch-manipulation min-h-[44px]"
-                      aria-label="查看住宿位置"
-                    >
-                      <Navigation size={16} />
-                      Google Maps 導航
-                    </a>
+                    <div className="flex justify-center mt-4">
+                      <button
+                        onPointerDown={tap.onPointerDown}
+                        onPointerUp={tap.onPointerUp}
+                        onClick={tap.guard(() => window.open(h.link, '_blank'))}
+                        className="frosted-tab-track press-springy shadow-2xl font-serif text-stone-600 flex items-center gap-2 touch-manipulation"
+                        style={{
+                          padding: '12px 32px',
+                          background: 'rgba(255, 255, 255, 0.45)',
+                          boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.7), 0 8px 24px rgba(0,0,0,0.15)',
+                        }}
+                        aria-label="查看住宿位置"
+                      >
+                        <Navigation size={16} />
+                        Google Maps 導航
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>

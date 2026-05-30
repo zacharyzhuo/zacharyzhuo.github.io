@@ -115,7 +115,9 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
           <div className="p-6 flex justify-between items-center">
             <h2 id={titleId} className="text-xl font-serif font-bold text-jp-text">Trip Menu</h2>
             <button
-              onClick={onClose}
+              onPointerDown={tap.onPointerDown}
+              onPointerUp={tap.onPointerUp}
+              onClick={tap.guard(onClose)}
               className="p-3 frosted-glass-button rounded-full text-stone-600 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="關閉選單"
             >
@@ -151,11 +153,13 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
 
           <div className="px-4 pb-2">
             <button
-              onClick={() => {
+              onPointerDown={tap.onPointerDown}
+              onPointerUp={tap.onPointerUp}
+              onClick={tap.guard(() => {
                 onClose()
                 // ?home=1 告訴 HomePage 略過自動跳轉，避免無限循環
                 navigate('/?home=1')
-              }}
+              })}
               className="w-full flex items-center justify-center gap-2 p-3 rounded-xl frosted-glass-button text-stone-600 font-serif text-sm touch-manipulation min-h-[44px]"
               aria-label="返回行程列表"
             >
