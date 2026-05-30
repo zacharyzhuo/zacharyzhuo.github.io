@@ -67,7 +67,9 @@ export default function SegmentedControl({
       onKeyDown={handleKeyDown}
       className={`frosted-tab-track scrollbar-hide pointer-events-auto shadow-2xl ${isDegraded ? 'is-scrollable' : 'is-draggable'} ${className}`}
     >
-      <span ref={pillRef} className="frosted-tab-pill" aria-hidden="true" />
+      <span ref={pillRef} className="frosted-tab-pill" aria-hidden="true">
+        <span className="frosted-tab-pill-fill" />
+      </span>
       {tabs.map(tab => (
         <button
           key={tab.key}

@@ -20,6 +20,9 @@
   --glass-button: blur(6px) saturate(150%);
   --glass-tab: blur(8px) saturate(120%);
   --glass-tab-active: blur(8px) saturate(140%);
+
+  /* iOS26 風格 Q 彈彈簧：overshoot 較大的單次回彈，全站動畫共用 */
+  --ease-spring: cubic-bezier(0.34, 1.7, 0.42, 1);
 }
 
 body {
@@ -638,9 +641,10 @@ a:focus-visible,
   touch-action: none;
 }
 
-/* 拖拉模式不可捲動：膠囊回彈時超出內容區不該撐出橫向捲動軸（會卡成點按模式） */
+/* 拖拉模式 overflow: visible：(1) 本身非捲動容器，不可能橫向捲動（捲動誤判已靠按鈕量測根治）
+   (2) 讓膠囊 press 放大時能溢出邊界（Slack/iOS26 風格） */
 .frosted-tab-track.is-draggable {
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* 降級模式：把原生橫向捲動還回去 */
@@ -648,18 +652,35 @@ a:focus-visible,
   touch-action: pan-x;
 }
 
-/* 移動膠囊 indicator：width/transform 由 JS 量測各 segment 實際 rect 設定 */
+/* 膠囊外層：只負責「位置」。width/transform(translateX) 由 JS 量測各 segment rect 設定。
+   位置與 press 縮放分離（外層管位移、內層 fill 管 scale），兩者 transform 才不互相覆蓋。 */
 .frosted-tab-pill {
   position: absolute;
   top: 6px;
   bottom: 6px;
   left: 0;
   width: 0;
-  /* JS 設定實際寬度 */
   transform: translateX(0);
-  /* JS 設定實際位移 */
-  border-radius: 9999px;
   pointer-events: none;
+  /* iOS26 Q 彈：較大 overshoot 的彈簧曲線 */
+  transition:
+    transform 0.52s var(--ease-spring),
+    width 0.52s var(--ease-spring);
+}
+
+/* 拖拉中：關外層 transition 讓膠囊 1:1 跟手 */
+.frosted-tab-pill.dragging {
+  transition: none;
+  will-change: transform;
+}
+
+/* 膠囊內層：玻璃材質本體 + press 縮放。inset:0 撐滿外層，scale 溢出 = 超出 item 範圍。 */
+.frosted-tab-pill-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  transform: scale(1);
+  transform-origin: center;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: var(--glass-tab-active);
   -webkit-backdrop-filter: var(--glass-tab-active);
@@ -670,12 +691,13 @@ a:focus-visible,
     inset 0 0 15px rgba(255, 255, 255, 0.3),
     0 4px 15px rgba(0, 0, 0, 0.1);
   transition:
-    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-    width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform 0.52s var(--ease-spring),
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
-/* 膠囊頂部亮面（自 .frosted-tab-btn.active::after 移來） */
-.frosted-tab-pill::after {
+/* 膠囊頂部亮面 */
+.frosted-tab-pill-fill::after {
   content: "";
   position: absolute;
   top: 0;
@@ -687,19 +709,35 @@ a:focus-visible,
   opacity: 0.8;
 }
 
-/* 拖拉中：移除 backdrop-filter（iOS Safari 下移動 blur 元素會 jank/取樣錯誤），
-   換半透明實底當逃生艙；同時關 transition 讓膠囊 1:1 跟手 */
-.frosted-tab-pill.dragging {
+/* 按住/拖拉：膠囊放大超出範圍 + 變更透明（Slack / iOS26 press morph）。
+   放大(press-in)用較短 transition 快速回饋；放開時自動回到 base fill 的 0.52s 彈簧慢慢 Q 彈。 */
+.frosted-tab-pill.lifted .frosted-tab-pill-fill {
+  transform: scale(1.18);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.7),
+    inset 0 0 22px rgba(255, 255, 255, 0.25),
+    0 10px 26px rgba(0, 0, 0, 0.14);
+  transition:
+    transform 0.22s var(--ease-spring),
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* 拖拉中：移除 backdrop-filter（iOS Safari 移動 blur 元素會 jank/取樣錯誤），換半透明實底逃生艙 */
+.frosted-tab-pill.dragging .frosted-tab-pill-fill {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  background: rgba(255, 255, 255, 0.55);
-  transition: none;
-  will-change: transform;
+  background: rgba(255, 255, 255, 0.35);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .frosted-tab-pill {
+  .frosted-tab-pill,
+  .frosted-tab-pill-fill {
     transition: none;
+  }
+  .frosted-tab-pill.lifted .frosted-tab-pill-fill {
+    transform: none;
   }
 }
 
@@ -731,11 +769,10 @@ a:focus-visible,
   /* 預留邊框位置 */
 }
 
-/* 非選中狀態 */
+/* 非選中狀態：只變文字色，不加深底色（選取由膠囊呈現，且觸控 sticky hover 會殘留變深） */
 .frosted-tab-btn:hover:not(.active) {
   color: #57534e;
   /* stone-600 */
-  background: rgba(0, 0, 0, 0.02);
 }
 
 /* 選中狀態：玻璃感改由移動膠囊呈現，按鈕本身只變文字色（避免「兩塊玻璃」） */
