@@ -276,7 +276,7 @@ function DetailModal({ row, spots, onClose }) {
           <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
             <button
               onClick={() => window.open(navUrl, '_blank')}
-              className="frosted-tab-track pointer-events-auto shadow-2xl font-serif text-stone-600 flex items-center gap-2"
+              className="frosted-tab-track press-springy pointer-events-auto shadow-2xl font-serif text-stone-600 flex items-center gap-2"
               style={{
                 padding: '12px 32px',
                 background: 'rgba(255, 255, 255, 0.45)',

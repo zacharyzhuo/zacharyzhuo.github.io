@@ -16,6 +16,25 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
   const onCloseRef = useRef(onClose)
   const sidebarRef = useRef(null)
   const titleId = useId()
+  // 選單項：按下後滑出按鈕範圍才放開 = 取消（避免長按誤觸）。click 仍保留給鍵盤無障礙。
+  const releasedOutsideRef = useRef(false)
+
+  const onItemPointerDown = (e) => {
+    releasedOutsideRef.current = false
+    try { e.currentTarget.setPointerCapture(e.pointerId) } catch { /* ignore */ }
+  }
+  const onItemPointerUp = (e) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    releasedOutsideRef.current = !(
+      e.clientX >= r.left && e.clientX <= r.right &&
+      e.clientY >= r.top && e.clientY <= r.bottom
+    )
+  }
+  const handleSelect = (key) => () => {
+    if (releasedOutsideRef.current) { releasedOutsideRef.current = false; return } // 滑出後放開：取消
+    onSelect(key)
+    onClose()
+  }
 
   useEffect(() => { onCloseRef.current = onClose }, [onClose])
 
@@ -119,7 +138,9 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
               {sections.map(({ key, label, subLabel, icon, color }) => (
                 <button
                   key={key}
-                  onClick={() => { onSelect(key); onClose() }}
+                  onPointerDown={onItemPointerDown}
+                  onPointerUp={onItemPointerUp}
+                  onClick={handleSelect(key)}
                   className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/20 transition-colors text-left group press-springy"
                 >
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${color ?? 'bg-white/30 text-jp-green'}`}>
