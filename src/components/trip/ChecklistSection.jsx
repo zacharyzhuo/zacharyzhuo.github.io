@@ -132,7 +132,7 @@ export default function ChecklistSection({ rows, slug }) {
                         ✓
                       </span>
                     ) : (
-                      <span className="text-xs font-serif text-stone-400 tabular-nums">
+                      <span className="text-xs font-serif text-stone-600 tabular-nums">
                         {done} / {total}
                       </span>
                     )}
