@@ -25,6 +25,8 @@
 
   /* iOS26 風格 Q 彈彈簧：overshoot 較大的單次回彈，全站動畫共用 */
   --ease-spring: cubic-bezier(0.34, 1.7, 0.42, 1);
+  /* 較柔版：給大行程的面板（sheet / 抽屜）開啟用，overshoot 較小，避免長距離滑入彈過頭 */
+  --ease-spring-soft: cubic-bezier(0.3, 1.22, 0.5, 1);
 }
 
 body {
@@ -589,6 +591,15 @@ a:focus-visible,
       transparent 100%);
   pointer-events: none;
   mix-blend-mode: overlay;
+}
+
+/* 蓋縫塊：開啟 overshoot 時，面板被頂出停駐邊會露出後面頁面的縫。
+   在停駐邊外鋪一截同色 + 同 blur 的延伸塊（平常在畫面外），overshoot 時填滿縫。
+   必須放在 transition-transform 的外層容器內、玻璃面板外（玻璃面板 overflow:hidden 會裁掉）。 */
+.glass-overshoot-fill {
+  background: rgba(249, 248, 244, 0.42);
+  backdrop-filter: var(--glass-overlay);
+  -webkit-backdrop-filter: var(--glass-overlay);
 }
 
 /* Sidebar 玻璃效果 */

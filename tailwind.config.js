@@ -22,6 +22,8 @@ export default {
       transitionTimingFunction: {
         // iOS26 Q 彈彈簧（對應 index.css 的 --ease-spring），可用 `ease-spring`
         spring: 'var(--ease-spring)',
+        // 較柔版，給大行程面板開啟用（`ease-spring-soft`）
+        'spring-soft': 'var(--ease-spring-soft)',
       },
     },
   },

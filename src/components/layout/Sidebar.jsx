@@ -98,7 +98,8 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
 
   const sidebarClass = [
     'fixed inset-y-0 left-0 w-64 z-50 transform',
-    isDragging ? '' : 'transition-transform duration-300 ease-out',
+    // 開啟用 Q 彈彈簧（overshoot 的左緣縫由 glass-overshoot-fill 蓋住），關閉維持乾淨 ease-out
+    isDragging ? '' : (isOpen ? 'transition-transform duration-500 ease-spring-soft' : 'transition-transform duration-300 ease-out'),
     dragX === 0 ? (isOpen ? 'translate-x-0' : '-translate-x-full') : '',
   ].filter(Boolean).join(' ')
 
@@ -121,6 +122,8 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
+        {/* 開啟 overshoot 時蓋住左緣露出的縫（平常在畫面外） */}
+        <div aria-hidden="true" className="glass-overshoot-fill absolute inset-y-0 right-full w-40 pointer-events-none" />
         <div className="h-full w-full glass-sidebar flex flex-col">
           <div className="p-6 flex justify-between items-center">
             <h2 id={titleId} className="text-xl font-serif font-bold text-jp-text">Trip Menu</h2>
