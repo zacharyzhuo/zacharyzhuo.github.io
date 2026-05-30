@@ -160,15 +160,15 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
                 // ?home=1 告訴 HomePage 略過自動跳轉，避免無限循環
                 navigate('/?home=1')
               })}
-              className="frosted-tab-track press-springy shadow-2xl font-serif text-stone-600 flex items-center gap-2 touch-manipulation"
+              className="frosted-tab-track press-springy font-serif text-xs text-stone-500 flex items-center gap-1.5 touch-manipulation"
               style={{
-                padding: '12px 32px',
-                background: 'rgba(255, 255, 255, 0.45)',
-                boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.7), 0 8px 24px rgba(0,0,0,0.15)',
+                padding: '7px 16px',
+                background: 'rgba(255, 255, 255, 0.2)',
+                boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.5), 0 2px 8px rgba(0,0,0,0.06)',
               }}
               aria-label="返回行程列表"
             >
-              <Home size={16} />
+              <Home size={14} />
               <span>回行程列表</span>
             </button>
           </div>
