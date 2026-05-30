@@ -557,7 +557,8 @@ a:focus-visible,
 
 /* Bottom sheet 玻璃卡片（DetailModal 用）- Frosted glass 模擬 */
 .glass-bottom-sheet {
-  position: relative;
+  /* position 由使用端的 Tailwind `absolute` 設定（單層延伸 frost）；
+     勿在此設 position: relative，否則同特異度會蓋掉 `absolute`，frost 變零高度而消失。 */
   overflow: hidden;
   /* 透光感：blur 由 --glass-overlay token 控（偏低，看得穿背後）；
      底色 0.42 補足可讀性，這是透光 vs sheet 內文字可讀的取捨點。 */
@@ -596,7 +597,7 @@ a:focus-visible,
 
 /* Sidebar 玻璃效果 */
 .glass-sidebar {
-  position: relative;
+  /* position 由使用端的 Tailwind `absolute` 設定（單層延伸 frost）；勿設 relative，見 glass-bottom-sheet 註解 */
   overflow: hidden;
   /* 底色 0.42：blur 降低後補足選單文字可讀性（背後是頁面內容） */
   background: rgba(249, 248, 244, 0.42);
