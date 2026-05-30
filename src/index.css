@@ -712,12 +712,12 @@ a:focus-visible,
 /* 按住/拖拉：膠囊放大超出範圍 + 變更透明（Slack / iOS26 press morph）。
    放大(press-in)用較短 transition 快速回饋；放開時自動回到 base fill 的 0.52s 彈簧慢慢 Q 彈。 */
 .frosted-tab-pill.lifted .frosted-tab-pill-fill {
-  transform: scale(1.18);
-  background: rgba(255, 255, 255, 0.08);
+  transform: scale(1.32);
+  background: rgba(255, 255, 255, 0.03);
   box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.7),
-    inset 0 0 22px rgba(255, 255, 255, 0.25),
-    0 10px 26px rgba(0, 0, 0, 0.14);
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 0 22px rgba(255, 255, 255, 0.15),
+    0 12px 28px rgba(0, 0, 0, 0.12);
   transition:
     transform 0.22s var(--ease-spring),
     background-color 0.2s ease,
