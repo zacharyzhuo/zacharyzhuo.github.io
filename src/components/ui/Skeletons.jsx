@@ -52,6 +52,29 @@ export function TripSkeleton() {
   )
 }
 
+/** 側邊欄 section 骨架：鏡射 noScroll section 版面（標題 + 卡片列 + 底部浮動 tab）。
+    同時用於 lazy chunk 的 Suspense fallback 與 sheet 資料載入中。 */
+export function SectionSkeleton({ bottomBar = true }) {
+  return (
+    <div className="flex flex-col relative h-full" role="status" aria-busy="true">
+      <span className="sr-only">載入中…</span>
+      <div className="flex-1 min-h-0 overflow-hidden px-8 pt-2">
+        <Bar className="w-28 h-7 rounded-md mt-8 mb-5" />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Bar key={i} className="w-full h-24 rounded-2xl" />
+          ))}
+        </div>
+      </div>
+      {bottomBar && (
+        <div className="absolute bottom-3 left-0 right-0 flex justify-center px-4 safe-area-bottom">
+          <Bar className="w-64 h-14 rounded-full" />
+        </div>
+      )}
+    </div>
+  )
+}
+
 /** 首頁卡片清單骨架（不含 header，直接塞進既有 main） */
 export function HomeCardsSkeleton() {
   return (

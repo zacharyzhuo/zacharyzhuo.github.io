@@ -10,7 +10,7 @@ import { useEasterEgg } from '../hooks/useEasterEgg.js'
 import { pickInitialDay, formatDayLabel } from '../lib/tripDate.js'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 import { useDays, useFoodItems, useNormalizedDays, useNormalizedItinerary } from '../hooks/useTripDerived.js'
-import { TripSkeleton } from '../components/ui/Skeletons.jsx'
+import { TripSkeleton, SectionSkeleton } from '../components/ui/Skeletons.jsx'
 import ErrorState from '../components/ui/ErrorState.jsx'
 import Sidebar from '../components/layout/Sidebar.jsx'
 import BottomSheet from '../components/layout/BottomSheet.jsx'
@@ -296,32 +296,40 @@ export default function TripPage() {
       {/* Section Modals */}
       <BottomSheet isOpen={activeModal === 'info'} onClose={() => setActiveModal(null)} title="旅程資訊" noScroll noStickyTitle>
         {activeModal === 'info' && (
-          <Suspense fallback={<div className="p-8 text-stone-400">載入中…</div>}>
-            <TripInfoSection flights={flights} accommodation={accommodation} destinationCountry={trip?.destination_country} />
+          <Suspense fallback={<SectionSkeleton />}>
+            {flightsHook.loading || accommodationHook.loading
+              ? <SectionSkeleton />
+              : <TripInfoSection flights={flights} accommodation={accommodation} destinationCountry={trip?.destination_country} />}
           </Suspense>
         )}
       </BottomSheet>
 
       <BottomSheet isOpen={activeModal === 'checklist'} onClose={() => setActiveModal(null)} title="行李清單" noScroll noStickyTitle>
         {activeModal === 'checklist' && (
-          <Suspense fallback={<div className="p-8 text-stone-400">載入中…</div>}>
-            <ChecklistSection key={`checklist-${slug}`} rows={checklist} slug={slug} />
+          <Suspense fallback={<SectionSkeleton bottomBar={false} />}>
+            {checklistHook.loading
+              ? <SectionSkeleton bottomBar={false} />
+              : <ChecklistSection key={`checklist-${slug}`} rows={checklist} slug={slug} />}
           </Suspense>
         )}
       </BottomSheet>
 
       <BottomSheet isOpen={activeModal === 'shopping'} onClose={() => setActiveModal(null)} title="逛街清單" noScroll noStickyTitle>
         {activeModal === 'shopping' && (
-          <Suspense fallback={<div className="p-8 text-stone-400">載入中…</div>}>
-            <ShoppingSection rows={shopping} />
+          <Suspense fallback={<SectionSkeleton />}>
+            {shoppingHook.loading
+              ? <SectionSkeleton />
+              : <ShoppingSection rows={shopping} />}
           </Suspense>
         )}
       </BottomSheet>
 
       <BottomSheet isOpen={activeModal === 'food'} onClose={() => setActiveModal(null)} title="美食清單" noScroll noStickyTitle>
         {activeModal === 'food' && (
-          <Suspense fallback={<div className="p-8 text-stone-400">載入中…</div>}>
-            <FoodSection rows={foodItems} />
+          <Suspense fallback={<SectionSkeleton />}>
+            {foodHook.loading
+              ? <SectionSkeleton />
+              : <FoodSection rows={foodItems} />}
           </Suspense>
         )}
       </BottomSheet>
