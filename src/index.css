@@ -638,6 +638,11 @@ a:focus-visible,
   touch-action: none;
 }
 
+/* 拖拉模式不可捲動：膠囊回彈時超出內容區不該撐出橫向捲動軸（會卡成點按模式） */
+.frosted-tab-track.is-draggable {
+  overflow: hidden;
+}
+
 /* 降級模式：把原生橫向捲動還回去 */
 .frosted-tab-track.is-scrollable {
   touch-action: pan-x;
