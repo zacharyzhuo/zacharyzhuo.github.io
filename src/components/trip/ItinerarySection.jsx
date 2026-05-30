@@ -9,6 +9,7 @@ import { useModalA11y } from '../../hooks/useModalA11y.js'
 import { useCancelableTap } from '../../hooks/useCancelableTap.js'
 import { formatToday } from '../../lib/tripDate.js'
 import { resist } from '../../lib/gesture.js'
+import { openExternal } from '../../lib/openExternal.js'
 import EmptyState from '../ui/EmptyState.jsx'
 
 function formatNowHHMM() {
@@ -84,7 +85,7 @@ function SpotItem({ spot }) {
         )}
       </div>
       <button
-        onClick={(e) => { e.stopPropagation(); window.open(url, '_blank') }}
+        onClick={(e) => { e.stopPropagation(); openExternal(url) }}
         className="shrink-0 p-2 frosted-glass-button rounded-lg text-stone-500 touch-manipulation min-w-[36px] min-h-[36px] flex items-center justify-center"
         aria-label={`${spot.name} Google Maps`}
       >
@@ -287,7 +288,7 @@ function DetailModal({ row, spots, onClose }) {
             <button
               onPointerDown={tap.onPointerDown}
               onPointerUp={tap.onPointerUp}
-              onClick={tap.guard(() => window.open(navUrl, '_blank'))}
+              onClick={tap.guard(() => openExternal(navUrl))}
               className="frosted-tab-track press-springy pointer-events-auto shadow-2xl font-serif text-stone-600 flex items-center gap-2"
               style={{
                 padding: '12px 32px',

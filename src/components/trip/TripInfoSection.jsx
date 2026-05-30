@@ -3,6 +3,7 @@ import { Plane, Luggage, ExternalLink, Hotel, ClipboardList, Navigation } from '
 import EmptyState from '../ui/EmptyState.jsx'
 import SegmentedControl from '../ui/SegmentedControl.jsx'
 import { useCancelableTap } from '../../hooks/useCancelableTap.js'
+import { openExternal } from '../../lib/openExternal.js'
 
 const INFO_TABS = [
   { key: 'flights', label: '航班資訊' },
@@ -115,7 +116,7 @@ function PrepareTab({ items }) {
             key={`${item.label}-${i}`}
             onPointerDown={tap.onPointerDown}
             onPointerUp={tap.onPointerUp}
-            onClick={tap.guard(() => { if (item.url) window.open(item.url, '_blank') })}
+            onClick={tap.guard(() => openExternal(item.url))}
             className="w-full bg-[#6B9080] text-white p-6 rounded-2xl press-springy text-left group relative overflow-hidden touch-manipulation min-h-[48px]"
             aria-label={`開啟 ${item.label}`}
           >
@@ -204,7 +205,7 @@ function HotelTab({ accommodation }) {
                       <button
                         onPointerDown={tap.onPointerDown}
                         onPointerUp={tap.onPointerUp}
-                        onClick={tap.guard(() => window.open(h.link, '_blank'))}
+                        onClick={tap.guard(() => openExternal(h.link))}
                         className="frosted-tab-track press-springy shadow-2xl font-serif text-stone-600 flex items-center gap-2 touch-manipulation"
                         style={{
                           padding: '12px 32px',
