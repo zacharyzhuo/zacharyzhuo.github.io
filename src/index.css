@@ -20,6 +20,8 @@
   --glass-button: blur(6px) saturate(150%);
   --glass-tab: blur(8px) saturate(120%);
   --glass-tab-active: blur(8px) saturate(140%);
+  /* press 放大時的膠囊：更強 frosted（body 幾乎全透，靠 backdrop 把後面糊掉 = Slack 玻璃感） */
+  --glass-tab-lifted: blur(14px) saturate(170%);
 
   /* iOS26 風格 Q 彈彈簧：overshoot 較大的單次回彈，全站動畫共用 */
   --ease-spring: cubic-bezier(0.34, 1.7, 0.42, 1);
@@ -713,11 +715,15 @@ a:focus-visible,
    放大(press-in)用較短 transition 快速回饋；放開時自動回到 base fill 的 0.52s 彈簧慢慢 Q 彈。 */
 .frosted-tab-pill.lifted .frosted-tab-pill-fill {
   transform: scale(1.32);
-  background: rgba(255, 255, 255, 0.03);
+  /* body 近乎全透，玻璃感交給 backdrop frosted + 明亮細邊 */
+  background: rgba(255, 255, 255, 0.015);
+  backdrop-filter: var(--glass-tab-lifted);
+  -webkit-backdrop-filter: var(--glass-tab-lifted);
+  border-color: rgba(255, 255, 255, 0.75);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 0 22px rgba(255, 255, 255, 0.15),
-    0 12px 28px rgba(0, 0, 0, 0.12);
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 0 24px rgba(255, 255, 255, 0.12),
+    0 12px 30px rgba(0, 0, 0, 0.12);
   transition:
     transform 0.22s var(--ease-spring),
     background-color 0.2s ease,
