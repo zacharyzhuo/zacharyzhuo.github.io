@@ -2,8 +2,13 @@
  * 觸覺回饋
  *
  * iOS Safari 不支援 navigator.vibrate()，改用 Safari 17.4+ 的
- * <input type="checkbox" switch> trick：在背景建立一個隱藏 switch、
- * toggle 它、再移除，iOS Taptic Engine 就會觸發。
+ * <input type="checkbox" switch> trick：toggle 一個 switch，iOS Taptic Engine 就會觸發。
+ *
+ * 關鍵：該 switch 必須「真的被 render」才會有 haptic。
+ *   - 不能 display:none（不 render → 無效）
+ *   - 不能掛在 <head>（head 子元素不 render → 無效）
+ * 因此改成常駐在 <body>、用 position:fixed + opacity:0 + 1px 藏在畫面外（仍 render）。
+ *
  * Android / 其他環境 fallback 回 navigator.vibrate()。
  */
 
@@ -11,29 +16,35 @@ const isIOS =
   typeof navigator !== 'undefined' &&
   /iPad|iPhone|iPod/.test(navigator.userAgent)
 
-/** 觸發一次 iOS switch haptic（必須同步，在 user gesture context 內執行） */
-function iosHapticOnce() {
-  const label = document.createElement('label')
-  label.ariaHidden = 'true'
-  label.style.display = 'none'
+let switchEl = null
 
+/** 取得（或惰性建立）常駐的隱形 iOS switch。render 在畫面外，不影響版面與互動。 */
+function getSwitch() {
+  if (switchEl || typeof document === 'undefined' || !document.body) return switchEl
+  const label = document.createElement('label')
+  label.setAttribute('aria-hidden', 'true')
+  // 渲染但不可見、不可互動、不佔版面感知
+  label.style.cssText =
+    'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1;'
   const input = document.createElement('input')
   input.type = 'checkbox'
   input.setAttribute('switch', '')
   label.appendChild(input)
+  document.body.appendChild(label)
+  switchEl = label
+  return switchEl
+}
 
-  document.head.appendChild(label)
-  label.click()
-  document.head.removeChild(label)
+/** 觸發一次 iOS switch haptic（必須同步，在 user gesture context 內執行） */
+function iosHapticOnce() {
+  try { getSwitch()?.click() } catch { /* ignore */ }
 }
 
 /** 觸發 N 次 iOS switch haptic，每次間隔 gap ms */
 function iosHaptic(times = 1, gap = 70) {
-  // 第一次必須同步（保持在 user gesture context 內）
-  iosHapticOnce()
-  // 後續次數可以用 setTimeout（success 的雙拍）
+  iosHapticOnce() // 第一次必須同步（保持在 user gesture context 內）
   for (let i = 1; i < times; i++) {
-    setTimeout(() => { try { iosHapticOnce() } catch { /* ignore */ } }, i * gap)
+    setTimeout(iosHapticOnce, i * gap)
   }
 }
 
