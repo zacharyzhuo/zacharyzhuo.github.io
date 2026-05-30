@@ -614,6 +614,8 @@ a:focus-visible,
 
 /* Frosted glass Tab Switcher */
 .frosted-tab-track {
+  position: relative;
+  /* 移動膠囊以此為 offsetParent 定位 */
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: var(--glass-tab);
   -webkit-backdrop-filter: var(--glass-tab);
@@ -629,6 +631,73 @@ a:focus-visible,
   max-width: 100%;
 }
 
+/* 拖拉模式：吃掉觸控手勢仲裁，否則水平/斜向拖拉會被瀏覽器判成 pan/scroll，
+   在 pointermove 之前就 pointercancel，拖拉中途斷掉（手機特有，桌面無 touch-action 仲裁） */
+.frosted-tab-track.is-draggable,
+.frosted-tab-track.is-draggable .frosted-tab-btn {
+  touch-action: none;
+}
+
+/* 降級模式：把原生橫向捲動還回去 */
+.frosted-tab-track.is-scrollable {
+  touch-action: pan-x;
+}
+
+/* 移動膠囊 indicator：width/transform 由 JS 量測各 segment 實際 rect 設定 */
+.frosted-tab-pill {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+  width: 0;
+  /* JS 設定實際寬度 */
+  transform: translateX(0);
+  /* JS 設定實際位移 */
+  border-radius: 9999px;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: var(--glass-tab-active);
+  -webkit-backdrop-filter: var(--glass-tab-active);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -2px 10px rgba(255, 255, 255, 0.4),
+    inset 0 0 15px rgba(255, 255, 255, 0.3),
+    0 4px 15px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 膠囊頂部亮面（自 .frosted-tab-btn.active::after 移來） */
+.frosted-tab-pill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 100%);
+  border-radius: 9999px 9999px 100% 100%;
+  opacity: 0.8;
+}
+
+/* 拖拉中：移除 backdrop-filter（iOS Safari 下移動 blur 元素會 jank/取樣錯誤），
+   換半透明實底當逃生艙；同時關 transition 讓膠囊 1:1 跟手 */
+.frosted-tab-pill.dragging {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: rgba(255, 255, 255, 0.55);
+  transition: none;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frosted-tab-pill {
+    transition: none;
+  }
+}
+
 .frosted-tab-btn {
   flex: none;
   white-space: nowrap;
@@ -640,7 +709,8 @@ a:focus-visible,
     border-color 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
     box-shadow 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
-  overflow: hidden;
+  z-index: 1;
+  /* 文字疊在移動膠囊之上 */
   /* 未選中色階：stone-500 → hover stone-600 → active jp-text。
      原 #9ca3af（gray-400，≈2:1）對比過低，改 stone-500 維持次級感但讀得到 */
   color: #78716c;
@@ -663,41 +733,10 @@ a:focus-visible,
   background: rgba(0, 0, 0, 0.02);
 }
 
-/* 選中狀態 (Frosted glass Style) */
+/* 選中狀態：玻璃感改由移動膠囊呈現，按鈕本身只變文字色（避免「兩塊玻璃」） */
 .frosted-tab-btn.active {
   color: #2C2C2C;
   /* jp-text */
-  background: rgba(255, 255, 255, 0.2);
-  /* 半透明玻璃底色 */
-  backdrop-filter: var(--glass-tab-active);
-  -webkit-backdrop-filter: var(--glass-tab-active);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  /* 玻璃邊框 */
-
-  /* Liquid Bubble Effect */
-  box-shadow:
-    /* 頂部銳利高光 */
-    inset 0 2px 0 rgba(255, 255, 255, 0.9),
-    /* 底部柔和反光 */
-    inset 0 -2px 10px rgba(255, 255, 255, 0.4),
-    /* 內部體積光 */
-    inset 0 0 15px rgba(255, 255, 255, 0.3),
-    /* 外部投影 */
-    0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-/* 選中狀態的額外光澤 (頂部亮面) */
-.frosted-tab-btn.active::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 45%;
-  /* 只覆蓋上半部 */
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 100%);
-  border-radius: 9999px 9999px 100% 100%;
-  opacity: 0.8;
 }
 
 /* 清單 category 完成慶祝動畫 */

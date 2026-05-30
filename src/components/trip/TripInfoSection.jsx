@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Plane, Luggage, ExternalLink, Hotel, ClipboardList, Navigation } from 'lucide-react'
-import { tap } from '../../lib/haptic.js'
 import EmptyState from '../ui/EmptyState.jsx'
+import SegmentedControl from '../ui/SegmentedControl.jsx'
 
 const INFO_TABS = [
   { key: 'flights', label: '航班資訊' },
@@ -227,21 +227,13 @@ export default function TripInfoSection({ flights, accommodation, destinationCou
       </div>
 
       <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
-        <div className="frosted-tab-track scrollbar-hide pointer-events-auto shadow-2xl">
-          {INFO_TABS.map(tab => (
-            <button
-              key={tab.key}
-              onClick={e => {
-                e.stopPropagation()
-                if (tab.key !== activeTab) tap()
-                setActiveTab(tab.key)
-              }}
-              className={`frosted-tab-btn font-serif px-5 ${activeTab === tab.key ? 'active' : ''}`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          tabs={INFO_TABS}
+          value={activeTab}
+          onChange={setActiveTab}
+          itemClassName="px-5"
+          ariaLabel="旅程資訊分頁"
+        />
       </div>
     </div>
   )

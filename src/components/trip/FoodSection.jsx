@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Navigation, Clock, Utensils } from 'lucide-react'
-import { tap } from '../../lib/haptic.js'
 import EmptyState from '../ui/EmptyState.jsx'
+import SegmentedControl from '../ui/SegmentedControl.jsx'
 
 /**
  * @param {{ rows: Array<{ name: string, area?: string, category?: string, hours?: string, note?: string, link?: string, time?: string, address?: string }> }} props
@@ -11,6 +11,7 @@ export default function FoodSection({ rows }) {
     () => [...new Set(rows.map(r => r.area).filter(Boolean))],
     [rows]
   )
+  const areaTabs = useMemo(() => areas.map(a => ({ key: a, label: a })), [areas])
   const [activeArea, setActiveArea] = useState(() => areas[0] ?? '')
   const scrollRef = useRef(null)
 
@@ -24,13 +25,6 @@ export default function FoodSection({ rows }) {
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTo({ top: 0 })
   }, [activeArea])
-
-  function handleTabClick(e, area) {
-    e.stopPropagation()
-    if (area !== activeArea) tap()
-    setActiveArea(area)
-    e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
-  }
 
   if (rows.length === 0) {
     return <EmptyState icon={Utensils} title="尚無美食清單" hint="填好 food tab，或在 itinerary 標 type=food 也會自動帶過來。" />
@@ -106,17 +100,13 @@ export default function FoodSection({ rows }) {
 
       {areas.length > 1 && (
         <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
-          <div className="frosted-tab-track scrollbar-hide pointer-events-auto shadow-2xl">
-            {areas.map(area => (
-              <button
-                key={area}
-                onClick={e => handleTabClick(e, area)}
-                className={`frosted-tab-btn font-serif px-8 ${activeArea === area ? 'active' : ''}`}
-              >
-                {area}
-              </button>
-            ))}
-          </div>
+          <SegmentedControl
+            tabs={areaTabs}
+            value={activeArea}
+            onChange={setActiveArea}
+            itemClassName="px-8"
+            ariaLabel="美食分區"
+          />
         </div>
       )}
     </div>

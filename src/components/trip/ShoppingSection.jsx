@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { ShoppingBag, Clock, Navigation } from 'lucide-react'
-import { tap } from '../../lib/haptic.js'
 import EmptyState from '../ui/EmptyState.jsx'
+import SegmentedControl from '../ui/SegmentedControl.jsx'
 
 /**
  * Flat CSV rows → grouped display units.
@@ -165,6 +165,7 @@ export default function ShoppingSection({ rows }) {
     () => [...new Set(rows.map(r => r.area).filter(Boolean))],
     [rows]
   )
+  const areaTabs = useMemo(() => areas.map(a => ({ key: a, label: a })), [areas])
   const [activeArea, setActiveArea] = useState(() => areas[0] ?? '')
   const scrollRef = useRef(null)
 
@@ -186,12 +187,6 @@ export default function ShoppingSection({ rows }) {
     if (scrollRef.current) scrollRef.current.scrollTo({ top: 0 })
   }, [activeArea])
 
-  function handleTabClick(e, area) {
-    e.stopPropagation()
-    if (area !== activeArea) tap()
-    setActiveArea(area)
-    e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
-  }
 
   if (rows.length === 0) {
     return <EmptyState icon={ShoppingBag} title="尚無逛街清單" hint="填好 shopping tab（建築 + 樓層 + 店家），這裡會自動分群。" />
@@ -217,17 +212,13 @@ export default function ShoppingSection({ rows }) {
 
       {areas.length > 1 && (
         <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center px-4 safe-area-bottom pointer-events-none">
-          <div className="frosted-tab-track scrollbar-hide pointer-events-auto shadow-2xl">
-            {areas.map(area => (
-              <button
-                key={area}
-                onClick={e => handleTabClick(e, area)}
-                className={`frosted-tab-btn font-serif px-5 ${activeArea === area ? 'active' : ''}`}
-              >
-                {area}
-              </button>
-            ))}
-          </div>
+          <SegmentedControl
+            tabs={areaTabs}
+            value={activeArea}
+            onChange={setActiveArea}
+            itemClassName="px-5"
+            ariaLabel="逛街分區"
+          />
         </div>
       )}
     </div>

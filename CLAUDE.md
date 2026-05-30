@@ -64,6 +64,7 @@ src/
 │   │   ├── FoodSection.jsx          # 美食清單（area tabs + category 分組）
 │   │   └── ChecklistSection.jsx     # 打包清單（localStorage 持久化 + 進度條）
 │   └── ui/
+│       ├── SegmentedControl.jsx     # 玻璃膠囊分段控制器（移動膠囊 + 拖拉跟手 + 自適應降級）
 │       ├── Skeletons.jsx            # 冷啟動載入骨架（TripSkeleton 全頁 / HomeCardsSkeleton 卡片）
 │       ├── EmptyState.jsx           # 共用空狀態（icon + 標題 + hint）
 │       ├── ErrorBoundary.jsx        # React error boundary
@@ -78,7 +79,8 @@ src/
 │   ├── useModalA11y.js              # modal a11y：ESC 關閉、focus trap、focus restore
 │   ├── usePageMeta.js               # 動態 document.title + OG meta
 │   ├── useTripDerived.js            # useNormalizedItinerary / useNormalizedDays / useDays / useFoodItems
-│   └── usePullToRefresh.js          # 下拉刷新手勢
+│   ├── usePullToRefresh.js          # 下拉刷新手勢
+│   └── useSegmentedDrag.js          # 分段控制器膠囊量測 + pointer 拖拉跟手 + 降級判斷（含 rubberBand/nearestIndex 純函式）
 ├── lib/
 │   ├── sheets.js                    # CSV 解析工具（parseCSV、sheetURL）
 │   ├── env.js                       # 集中讀取 + 驗證 Vite env
@@ -265,7 +267,8 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - **字型**：全站 `"Noto Serif JP"`（font-serif），所有文字元素應帶 `font-serif`
 - **字級**：micro eyebrow / 大寫 caps 標籤用 `text-2xs`（tailwind token，0.625rem），勿再用 `text-[10px]/[11px]` arbitrary value
 - **Frosted glass（毛玻璃）**：本站玻璃材質是 frosted glass / glassmorphism（`backdrop-filter: blur/saturate/contrast` + 高光邊框），**非** iOS 26 那種有邊緣折射扭曲的 Liquid Glass（web 上難以兼顧相容性與效能，刻意不追）。玻璃 `backdrop-filter` 組合集中在 `index.css` 的 `:root` token，**勿再散寫 blur/saturate/contrast 數值**。語意 token：`--glass-nav`（DayNav）、`--glass-card`（行程卡）、`--glass-overlay`（BottomSheet + Sidebar）、`--glass-button`、`--glass-tab` / `--glass-tab-active`
-- CSS utility classes：`frosted-tab-track`、`frosted-tab-btn`、`frosted-glass-button`、`.safe-area-inset`、`.safe-area-bottom`、`.scrollbar-hide`、`.glass-card`、`.glass-bottom-sheet`、`.glass-sidebar`
+- CSS utility classes：`frosted-tab-track`、`frosted-tab-btn`、`frosted-tab-pill`、`frosted-glass-button`、`.safe-area-inset`、`.safe-area-bottom`、`.scrollbar-hide`、`.glass-card`、`.glass-bottom-sheet`、`.glass-sidebar`
+- **分段控制器（SegmentedControl）**：所有分段 tab（TripInfoSection / FoodSection / ShoppingSection）統一用 `src/components/ui/SegmentedControl.jsx`，**勿再各自手寫 `frosted-tab-track` markup**。玻璃感由**單一移動膠囊** `.frosted-tab-pill` 呈現（`.frosted-tab-btn.active` 只負責文字色），膠囊 width/transform 由 `useSegmentedDrag` 量測各 segment 實際 rect 設定。支援 pointer 拖拉跟手（6px 門檻、邊緣 rubber-band、放開吸附 + haptic）；內容超寬時自動降級為「可橫向捲動 + 點按」。拖拉中加 `.dragging` 移除膠囊 `backdrop-filter`（iOS Safari 防 jank 逃生艙），落定還原
 
 ### Accessibility 原則
 
