@@ -151,7 +151,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
             </nav>
           </div>
 
-          <div className="px-4 pb-2">
+          <div className="px-4 pb-2 flex justify-center">
             <button
               onPointerDown={tap.onPointerDown}
               onPointerUp={tap.onPointerUp}
@@ -160,7 +160,12 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
                 // ?home=1 告訴 HomePage 略過自動跳轉，避免無限循環
                 navigate('/?home=1')
               })}
-              className="w-full flex items-center justify-center gap-2 p-3 rounded-xl frosted-glass-button text-stone-600 font-serif text-sm touch-manipulation min-h-[44px]"
+              className="frosted-tab-track press-springy shadow-2xl font-serif text-stone-600 flex items-center gap-2 touch-manipulation"
+              style={{
+                padding: '12px 32px',
+                background: 'rgba(255, 255, 255, 0.45)',
+                boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.7), 0 8px 24px rgba(0,0,0,0.15)',
+              }}
               aria-label="返回行程列表"
             >
               <Home size={16} />
