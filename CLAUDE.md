@@ -271,6 +271,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - **Q 彈動效**：iOS26 風格彈簧 token：`--ease-spring`（彈較多，小元件用，Tailwind `ease-spring`）、`--ease-spring-soft`（彈較少，大行程面板用，`ease-spring-soft`）。
   - **press 微彈**：可點離散元件（卡片 / 選單項 / CTA / icon 按鈕）套 `.press-springy`（按下 squish、放開彈回）或共用的 `.frosted-glass-button`。
   - **面板開啟彈跳**：BottomSheet / Sidebar / ItinerarySection 詳情 sheet 開啟用 `ease-spring-soft`（overshoot），**關閉維持 `ease-out`**（關閉不彈）。overshoot 會把面板頂出停駐邊露縫 → 在 transition-transform 外層容器內、玻璃面板外放 `.glass-overshoot-fill`（同色 + 同 blur、平常在畫面外）蓋縫。**若把彈簧調更彈，overshoot 變大,要同步加大蓋縫塊高/寬（目前 `h-40`/`w-40`）**。
+  - **反向拖拉拉伸**：拖拉關閉手勢往反方向拉時，用 `lib/gesture.js` 的 `resist()`（阻尼、上限 80px < 蓋縫塊 160px）做 rubber-band 拉伸，放開由開啟彈簧彈回；只從拖拉把手（pill/header）觸發，內容區反向拉是捲動。close 判定加了方向 guard（反向快速甩不關）。
   - **勿無差別灑**：進度條、fade、骨架、列表整列不套。`prefers-reduced-motion` 由全域 reset 自動降為瞬時（縫也不會出現）。
 - **分段控制器（SegmentedControl）**：所有分段 tab（TripInfoSection / FoodSection / ShoppingSection）統一用 `src/components/ui/SegmentedControl.jsx`，**勿再各自手寫 `frosted-tab-track` markup**。玻璃感由**單一移動膠囊** `.frosted-tab-pill` 呈現（`.frosted-tab-btn.active` 只負責文字色），膠囊 width/transform 由 `useSegmentedDrag` 量測各 segment 實際 rect 設定。支援 pointer 拖拉跟手：按下任一段都可起手（非選中段按下即切換並滑行過去），按著一路滑可跨段、**拖拉中即時 `onChange` 切換畫面內容**，跨段 haptic、放開吸附（6px 門檻、邊緣 rubber-band）。拖拉期間 `isDraggingRef` 讓 value 變化的 reposition 讓位，避免跟手位置被搶。切換時短暫加 `.traveling`（透明玻璃態滑行）、按住/拖拉加 `.lifted`（放大超出邊界 + 更透）、`.dragging` 移除膠囊 `backdrop-filter`（iOS Safari 防 jank 逃生艙）。內容超寬時自動降級為「可橫向捲動 + 點按」
 
