@@ -25,9 +25,9 @@
 
   /* iOS26 風格 Q 彈彈簧：overshoot 較大的單次回彈，全站動畫共用 */
   --ease-spring: cubic-bezier(0.34, 1.7, 0.42, 1);
-  /* 較柔版：給大行程面板（sheet / 抽屜）開啟用。overshoot 刻意小，
-     露出的蓋縫塊範圍越小、與面板取樣的背景越接近，接縫越不明顯 */
-  --ease-spring-soft: cubic-bezier(0.34, 1.14, 0.5, 1);
+  /* 較柔版：給大行程面板（sheet / 抽屜）開啟用。面板改單層玻璃延伸（無接縫），
+     可放大 overshoot 做明顯回彈；frost 延伸 224px 足以覆蓋。 */
+  --ease-spring-soft: cubic-bezier(0.34, 1.5, 0.5, 1);
 }
 
 body {
@@ -575,7 +575,7 @@ a:focus-visible,
      多個 sheet 殼疊加 = 底部「好幾層」陰影。改為僅 aria-hidden="false" 時生效。 */
 }
 
-[aria-hidden="false"] > .glass-bottom-sheet {
+[aria-hidden="false"] .glass-bottom-sheet {
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.05);
 }
 
@@ -592,15 +592,6 @@ a:focus-visible,
       transparent 100%);
   pointer-events: none;
   mix-blend-mode: overlay;
-}
-
-/* 蓋縫塊：開啟 overshoot 時，面板被頂出停駐邊會露出後面頁面的縫。
-   在停駐邊外鋪一截同色 + 同 blur 的延伸塊（平常在畫面外），overshoot 時填滿縫。
-   必須放在 transition-transform 的外層容器內、玻璃面板外（玻璃面板 overflow:hidden 會裁掉）。 */
-.glass-overshoot-fill {
-  background: rgba(249, 248, 244, 0.42);
-  backdrop-filter: var(--glass-overlay);
-  -webkit-backdrop-filter: var(--glass-overlay);
 }
 
 /* Sidebar 玻璃效果 */
@@ -620,7 +611,7 @@ a:focus-visible,
   /* 同 glass-bottom-sheet：向右外陰影只在開啟時掛上，避免 -translate-x-full 藏起時滲出左緣。 */
 }
 
-[aria-hidden="false"] > .glass-sidebar {
+[aria-hidden="false"] .glass-sidebar {
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.04);
 }
 

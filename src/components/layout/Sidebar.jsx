@@ -99,7 +99,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
 
   const sidebarClass = [
     'fixed inset-y-0 left-0 w-64 z-50 transform',
-    // 開啟用 Q 彈彈簧（overshoot 的左緣縫由 glass-overshoot-fill 蓋住），關閉維持乾淨 ease-out
+    // 開啟用 Q 彈彈簧（overshoot 由單層延伸玻璃覆蓋，無縫），關閉維持乾淨 ease-out
     isDragging ? '' : (isOpen ? 'transition-transform duration-500 ease-spring-soft' : 'transition-transform duration-300 ease-out'),
     dragX === 0 ? (isOpen ? 'translate-x-0' : '-translate-x-full') : '',
   ].filter(Boolean).join(' ')
@@ -123,9 +123,11 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {/* 開啟 overshoot / 反向拉時蓋住左緣露出的縫（緊貼抽屜左緣、不重疊） */}
-        <div aria-hidden="true" className="glass-overshoot-fill absolute inset-y-0 right-full w-40 pointer-events-none" />
-        <div className="h-full w-full glass-sidebar flex flex-col">
+        {/* 單一毛玻璃層：往左延伸超過停駐邊（-left-40），開啟 overshoot / 反向拉由「同一塊」玻璃覆蓋 → 無接縫。
+            內容層疊在上面、不帶 backdrop。 */}
+        <div className="relative h-full w-full">
+          <div aria-hidden="true" className="glass-sidebar absolute inset-0 -left-40 pointer-events-none" />
+          <div className="relative h-full w-full flex flex-col">
           <div className="p-6 flex justify-between items-center">
             <h2 id={titleId} className="text-xl font-serif font-bold text-jp-text">Trip Menu</h2>
             <button
@@ -185,6 +187,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
             <p className="text-2xs text-stone-400 font-mono mt-1 opacity-60" title={env.APP_VERSION}>
               v{env.APP_VERSION === 'dev' ? 'dev' : env.APP_VERSION.slice(0, 7)}
             </p>
+          </div>
           </div>
         </div>
       </div>

@@ -162,7 +162,7 @@ function DetailModal({ row, spots, onClose }) {
 
   const sheetClass = [
     'fixed inset-x-0 bottom-0 z-50 transform',
-    // 開啟用 Q 彈彈簧（縫由 glass-overshoot-fill 蓋住），關閉維持乾淨 ease-out
+    // 開啟用 Q 彈彈簧（overshoot 由單層延伸玻璃覆蓋，無縫），關閉維持乾淨 ease-out
     isDragging ? '' : (isOpen ? 'transition-transform duration-500 ease-spring-soft' : 'transition-transform duration-300 ease-out'),
     dragY === 0 ? (isOpen ? 'translate-y-0' : 'translate-y-full') : '',
   ].filter(Boolean).join(' ')
@@ -200,9 +200,11 @@ function DetailModal({ row, spots, onClose }) {
         className={sheetClass}
         style={dragY !== 0 ? { transform: `translateY(${dragY}px)` } : undefined}
       >
-        {/* 開啟 overshoot / 反向拉時蓋住底部露出的縫（緊貼面板下緣、不重疊） */}
-        <div aria-hidden="true" className="glass-overshoot-fill absolute inset-x-0 top-full h-40 pointer-events-none" />
-        <div className="glass-bottom-sheet min-h-[40vh] max-h-[85vh] flex flex-col relative overflow-hidden">
+        {/* 單一毛玻璃層：往下延伸超過停駐邊（-bottom-56），開啟 overshoot / 反向拉由「同一塊」玻璃覆蓋 → 無接縫。
+            內容層疊在上面、不帶 backdrop。 */}
+        <div className="relative">
+          <div aria-hidden="true" className="glass-bottom-sheet absolute inset-0 -bottom-56 pointer-events-none" />
+          <div className="min-h-[40vh] max-h-[85vh] flex flex-col relative overflow-hidden rounded-t-[2rem]">
         {current && (
           <>
 
@@ -294,6 +296,7 @@ function DetailModal({ row, spots, onClose }) {
           </div>
           </>
         )}
+        </div>
         </div>
       </div>
     </>,

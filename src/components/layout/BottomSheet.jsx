@@ -111,7 +111,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
 
   const sheetClass = [
     'fixed inset-x-0 bottom-0 z-50',
-    // 開啟用 Q 彈彈簧（會 overshoot，縫由 glass-overshoot-fill 蓋住），關閉維持乾淨 ease-out
+    // 開啟用 Q 彈彈簧（overshoot 由單層延伸玻璃覆蓋，無縫），關閉維持乾淨 ease-out
     isDragging ? '' : (isOpen ? 'transition-transform duration-500 ease-spring-soft' : 'transition-transform duration-300 ease-out'),
     dragY === 0 ? (isOpen ? 'translate-y-0' : 'translate-y-full') : '',
   ].filter(Boolean).join(' ')
@@ -135,10 +135,11 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
         className={sheetClass}
         style={dragY !== 0 ? { transform: `translateY(${dragY}px)` } : undefined}
       >
-        {/* 開啟 overshoot / 反向拉時蓋住底部露出的縫（平常緊貼面板下緣、在畫面外）。
-            刻意「緊貼不重疊」：重疊塞到半透明面板底下會被 backdrop 重取樣，沿底緣留永久淺帶。 */}
-        <div aria-hidden="true" className="glass-overshoot-fill absolute inset-x-0 top-full h-40 pointer-events-none" />
-        <div className="glass-bottom-sheet h-[79vh] flex flex-col relative">
+        {/* 單一毛玻璃層：往下延伸超過停駐邊（-bottom-56），開啟 overshoot / 反向拉都由「同一塊」
+            玻璃覆蓋 → 構造上無接縫（取代舊的 glass-overshoot-fill 貼塊）。內容層疊在上面、不帶 backdrop。 */}
+        <div className="relative h-[79vh]">
+          <div aria-hidden="true" className="glass-bottom-sheet absolute inset-0 -bottom-56 pointer-events-none" />
+          <div className="relative h-full flex flex-col">
 
           {/* Drag handle 區：pill + 標題列整片皆可拖；hitbox 從 pill 的 4px 擴大到整個 header（約 56px+） */}
           <div
@@ -182,6 +183,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
               {children}
             </div>
           )}
+          </div>
         </div>
       </div>
     </>
