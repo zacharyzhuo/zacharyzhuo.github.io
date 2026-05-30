@@ -26,7 +26,7 @@ export default function SegmentedControl({
   const pillRef = useRef(null)
   const keys = useMemo(() => tabs.map(t => t.key), [tabs])
 
-  const { isDegraded, consumeClickAfterDrag } = useSegmentedDrag({
+  const { isDegraded, consumeClickAfterDrag, beginTravel } = useSegmentedDrag({
     trackRef,
     pillRef,
     keys,
@@ -39,6 +39,7 @@ export default function SegmentedControl({
     if (consumeClickAfterDrag()) return // 拖拉剛結束，吞掉這次 click
     if (key !== value) {
       tap()
+      beginTravel() // 膠囊先變透明玻璃態，再滑行到新位置
       onChange(key)
     }
     if (isDegraded) {
@@ -55,6 +56,7 @@ export default function SegmentedControl({
       : Math.min(keys.length - 1, idx + 1)
     if (nextIdx !== idx) {
       tap()
+      beginTravel()
       onChange(keys[nextIdx])
     }
   }

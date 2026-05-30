@@ -713,9 +713,10 @@ a:focus-visible,
 
 /* 按住/拖拉：膠囊放大超出範圍 + 變更透明（Slack / iOS26 press morph）。
    放大(press-in)用較短 transition 快速回饋；放開時自動回到 base fill 的 0.52s 彈簧慢慢 Q 彈。 */
-.frosted-tab-pill.lifted .frosted-tab-pill-fill {
-  transform: scale(1.32);
-  /* body 近乎全透，玻璃感交給 backdrop frosted + 明亮細邊 */
+/* 透明玻璃態：press 按住(lifted) 與 切換滑行(traveling) 共用。
+   body 近乎全透，玻璃感交給 backdrop frosted + 明亮細邊。 */
+.frosted-tab-pill.lifted .frosted-tab-pill-fill,
+.frosted-tab-pill.traveling .frosted-tab-pill-fill {
   background: rgba(255, 255, 255, 0.015);
   backdrop-filter: var(--glass-tab-lifted);
   -webkit-backdrop-filter: var(--glass-tab-lifted);
@@ -724,6 +725,11 @@ a:focus-visible,
     inset 0 1px 0 rgba(255, 255, 255, 0.6),
     inset 0 0 24px rgba(255, 255, 255, 0.12),
     0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* press 按住才放大超出範圍（快速放大，放開時回到 base 0.52s 慢慢 Q 彈） */
+.frosted-tab-pill.lifted .frosted-tab-pill-fill {
+  transform: scale(1.32);
   transition:
     transform 0.22s var(--ease-spring),
     background-color 0.2s ease,
