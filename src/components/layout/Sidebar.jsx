@@ -123,8 +123,8 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {/* 開啟 overshoot 時蓋住左緣露出的縫（平常在畫面外） */}
-        <div aria-hidden="true" className="glass-overshoot-fill absolute inset-y-0 right-full w-40 pointer-events-none" />
+        {/* 開啟 overshoot / 反向拉時蓋住左緣露出的縫；往右重疊塞到抽屜底下，抽屜蓋住接縫線 */}
+        <div aria-hidden="true" className="glass-overshoot-fill absolute inset-y-0 right-[calc(100%-1rem)] w-40 pointer-events-none" />
         <div className="h-full w-full glass-sidebar flex flex-col">
           <div className="p-6 flex justify-between items-center">
             <h2 id={titleId} className="text-xl font-serif font-bold text-jp-text">Trip Menu</h2>

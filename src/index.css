@@ -25,8 +25,9 @@
 
   /* iOS26 風格 Q 彈彈簧：overshoot 較大的單次回彈，全站動畫共用 */
   --ease-spring: cubic-bezier(0.34, 1.7, 0.42, 1);
-  /* 較柔版：給大行程的面板（sheet / 抽屜）開啟用，overshoot 較小，避免長距離滑入彈過頭 */
-  --ease-spring-soft: cubic-bezier(0.3, 1.22, 0.5, 1);
+  /* 較柔版：給大行程面板（sheet / 抽屜）開啟用。overshoot 刻意小，
+     露出的蓋縫塊範圍越小、與面板取樣的背景越接近，接縫越不明顯 */
+  --ease-spring-soft: cubic-bezier(0.34, 1.14, 0.5, 1);
 }
 
 body {
