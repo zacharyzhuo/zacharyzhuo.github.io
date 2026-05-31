@@ -14,7 +14,7 @@
      目前值 = 原 stone-600 / stone-500 / stone-200，外觀零變化。 */
   --text-secondary: #57534e; /* 原 text-stone-600：正文次要文字 */
   --text-muted: #78716c;     /* 原 text-stone-500：小標 / 註記 */
-  --hairline: #e7e5e4;       /* 原 stone-200：1px 分隔線 */
+  --hairline: #e7e5e4;       /* stone-200：1px 分隔線 / timeline 連接線（淡，與設計預覽一致） */
 
   /* 鍵盤焦點 ring */
   --glass-focus-ring: rgba(92, 110, 88, 0.6);
