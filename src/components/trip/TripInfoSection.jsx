@@ -4,7 +4,7 @@ import EmptyState from '../ui/EmptyState.jsx'
 import SegmentedControl from '../ui/SegmentedControl.jsx'
 import { useCancelableTap } from '../../hooks/useCancelableTap.js'
 import { openExternal } from '../../lib/openExternal.js'
-import { categorySolidStyle, categoryInk } from '../../lib/categories.js'
+import { categoryInk } from '../../lib/categories.js'
 
 // 登機證撕票口：在色帶下緣（y=44px，對應色帶高度 h-11）兩側挖「真的」半圓鏤空，
 // 透出底層 BottomSheet 背景（用 mask，非貼色塊）。外層需另包 wrapper 保住投影（mask 會連陰影一起裁掉）。
@@ -61,17 +61,20 @@ function FlightsTab({ flights }) {
             // wrapper 只負責投影（mask 會裁掉陰影，故投影掛在沒被 mask 的外層）
             <div key={i} className="rounded-2xl" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.07)' }}>
             <div className="glass-card relative rounded-2xl overflow-hidden" style={FLIGHT_NOTCH_STYLE}>
-              {/* 登機證色帶：transport 藍鼠實心 + 白字（flight_no 左、日期右）。h-11=44px 對應撕票口 y */}
-              <div className="flex justify-between items-center px-5 h-11" style={categorySolidStyle('transport')}>
+              {/* 登機證色帶：transport 半透明淡色 + 深色字（清透版，不再大面積實心）。h-11=44px 對應撕票口 y */}
+              <div
+                className="flex justify-between items-center px-5 h-11"
+                style={{ backgroundColor: `${categoryInk('transport')}33`, color: categoryInk('transport') }}
+              >
                 <span className="font-serif font-bold tracking-wide flex items-center gap-2">
                   <Plane size={15} className="rotate-90" />
                   {f.flight_no}
                 </span>
-                <span className="font-serif font-bold text-sm tabular-nums opacity-90">{f.date}</span>
+                <span className="font-serif font-bold text-sm tabular-nums opacity-75">{f.date}</span>
               </div>
 
-              {/* 撕票虛線（兩端的鏤空由卡片 mask 挖出） */}
-              <div className="border-t border-dashed border-stone-300/70" />
+              {/* 撕票虛線（兩端的鏤空由卡片 mask 挖出）；stone-400 較明顯的虛線 */}
+              <div className="border-t border-dashed border-stone-400" />
 
               <div className="p-5">
                 <div className="flex justify-between items-center">
@@ -140,19 +143,14 @@ function PrepareTab({ items }) {
             onPointerDown={tap.onPointerDown}
             onPointerUp={tap.onPointerUp}
             onClick={tap.guard(() => openExternal(item.url))}
-            className="w-full bg-jp-green text-white p-6 rounded-2xl press-springy text-left group relative overflow-hidden touch-manipulation min-h-[48px]"
+            className="glass-card press-springy w-full p-5 rounded-2xl text-left relative overflow-hidden touch-manipulation min-h-[48px] flex items-center justify-between gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
             aria-label={`開啟 ${item.label}`}
           >
-            <div className="absolute right-[-10px] top-[-10px] opacity-10 rotate-12">
-              <ExternalLink size={100} />
+            <div className="min-w-0">
+              <h4 className="text-lg font-serif font-bold text-jp-text mb-0.5 leading-snug">{item.label}</h4>
+              {item.desc && <p className="text-sm text-muted font-serif leading-relaxed">{item.desc}</p>}
             </div>
-            <div className="relative z-10 flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <h4 className="text-xl font-serif font-bold mb-1">{item.label}</h4>
-                {item.desc && <p className="text-sm opacity-80 font-serif tracking-wide">{item.desc}</p>}
-              </div>
-              {item.url && <ExternalLink size={24} className="opacity-80 shrink-0" />}
-            </div>
+            {item.url && <ExternalLink size={20} className="text-jp-green shrink-0" />}
           </button>
         ))}
       </div>

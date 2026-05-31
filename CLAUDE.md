@@ -129,7 +129,7 @@ a11y：BottomSheet 與 ItinerarySection 的 DetailModal 都套用 `useModalA11y`
 
 ### 行前準備（資料驅動）
 
-「行前準備」tab 由 trip sheet 的 **`prepare` tab** 驅動（不再寫死國家）。`TripInfoSection` 接收 `prepare` prop（rows），`PrepareTab` 把每筆 render 成連結卡片；無資料則顯示「尚無行前準備項目」空狀態。Visit Japan Web、簽證申請、入境/海關表單、eSIM 等都是其中一筆資料列。
+「行前準備」tab 由 trip sheet 的 **`prepare` tab** 驅動（不再寫死國家）。`TripInfoSection` 接收 `prepare` prop（rows），`PrepareTab` 把每筆 render 成**玻璃連結卡**（`glass-card` + 深色標題 + `text-muted` 副標 + jp-green `ExternalLink` icon，與全站卡片同語言；不再是大面積實心綠塊）；無資料則顯示「尚無行前準備項目」空狀態。Visit Japan Web、簽證申請、入境/海關表單、eSIM 等都是其中一筆資料列。
 
 > index sheet 的 `destination_country` 欄位目前**未被程式使用**（行前準備改資料驅動後不再需要它 gate）；欄位保留無妨，未來若有其他國家限定功能可再用。
 
@@ -303,18 +303,18 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - API：
   - `getCategory(type)`：回 `{ label, en, icon, ink }`（`en` 為大寫英文，給編輯排版 eyebrow 用），未知 type 退回景點。
   - `categoryChipStyle(type)` / `chipStyle(ink)`：**淡玻璃 chip**（文字 ink / 邊框 ink@40% / 底 ink@10%），搭配 className `border backdrop-blur-sm rounded`。用於小標籤。
-  - `categorySolidStyle(type)` / `solidStyle(ink)`：**實心**（底 ink / 字白）。目前用於航班登機證色帶（transport 實心）。
+  - `categorySolidStyle(type)` / `solidStyle(ink)`：**實心**（底 ink / 字白）。目前無引用（航班色帶已改半透明、側欄改純 icon），保留 API 供未來實心場景。
   - `categoryInk(type)`：純 ink 色（給脊線、節點底色等）。
   - `BRAND_INK`：品牌抹茶綠（= `jp-green` `#5C6E58`）的 JS 字面值，給 inline style 餵 `chipStyle` / `solidStyle` 用（Tailwind class 不適用時）；勿再散寫 `#5C6E58`。
-- 引用處：`ItinerarySection`（時間軸節點 + 脊線 + eyebrow + modal 編輯排版）、`ShoppingSection`（樓層 `FloorTag` 用淡 chip）、`FoodSection`（店名前弁柄色點）、`TripInfoSection`（航班登機證色帶用 transport 實心、航線用 transport ink；住宿 hotel/airbnb 同屬住宿分類，同色靠文字區分）、`TripPage` 的 `MENU_ITEMS`（側欄 icon，**純色 icon 無圓底**）。
-- **日期是 metadata 不是分類**，勿套分類色：航班日期在登機證色帶上（白字）、住宿日期在 eyebrow 的 `STAY · <date>`。
+- 引用處：`ItinerarySection`（時間軸節點 + 脊線 + eyebrow + modal 編輯排版）、`ShoppingSection`（樓層 `FloorTag` 用淡 chip）、`FoodSection`（店名前弁柄色點）、`TripInfoSection`（航班登機證色帶用 transport 半透明淡色 + 深色字、航線用 transport ink；行前準備玻璃連結卡用 jp-green 外連 icon；住宿 hotel/airbnb 同屬住宿分類，同色靠文字區分）、`TripPage` 的 `MENU_ITEMS`（側欄 icon，**純色 icon 無圓底**）。
+- **日期是 metadata 不是分類**，勿套分類色：航班日期在登機證色帶上（transport 深色字）、住宿日期在 eyebrow 的 `STAY · <date>`。
 - 側欄 `MENU_ITEMS` 的 icon = **純分類色 icon（無圓底）**，`iconStyle` 為 `{ color: categoryInk(...) }`（與時間軸軌道同語言），Sidebar 以 `style={iconStyle}` 套用。
 
 ### 各 section 的設計語言（避免脊線濫用）
 
 **脊線是行程時間軸卡的專屬招牌，其他 section 用不同裝置表達分類色**：
 
-- **航班卡（FlightsTab）= 登機證**：頂部 transport 藍鼠**實心色帶**（`categorySolidStyle('transport')`，白字 flight_no + 日期，色帶固定高 `h-11`=44px），色帶下接**撕票口**（虛線 + 兩側用 CSS `mask`（`FLIGHT_NOTCH_STYLE`，雙 radial-gradient + `mask-composite: intersect` / `-webkit-mask-composite: source-in`）在 y=44 挖真半圓鏤空，透出底層 sheet）；再接玻璃機身區，航線（端點/線/飛機）用 transport ink（`categoryInk` + `currentColor`）。⚠️ mask 會連投影一起裁掉，故外層另包 wrapper 掛 box-shadow；WebKit 下 `mask` 不會裁 `backdrop-filter`，鏤空處會殘留卡片自身的一層淡霜（已知限制）。
+- **航班卡（FlightsTab）= 登機證**：頂部 transport **半透明淡色色帶**（`${categoryInk('transport')}33` ≈ 20% 底 + transport ink 深色字，清透不再大面積實心，色帶固定高 `h-11`=44px），色帶下接**撕票口**（虛線 + 兩側用 CSS `mask`（`FLIGHT_NOTCH_STYLE`，雙 radial-gradient + `mask-composite: intersect` / `-webkit-mask-composite: source-in`）在 y=44 挖真半圓鏤空，透出底層 sheet）；再接玻璃機身區，航線（端點/線/飛機）用 transport ink（`categoryInk` + `currentColor`）。⚠️ mask 會連投影一起裁掉，故外層另包 wrapper 掛 box-shadow；WebKit 下 `mask` 不會裁 `backdrop-filter`，鏤空處會殘留卡片自身的一層淡霜（已知限制）。
 - **逛街卡（ShoppingSection）= 索引 tag**：樓層 `FloorTag`（購物色淡 chip）當左錨點，**不再用重複的袋子 icon**；無樓層時 tag 內顯示一顆色點維持對齊。建築卡標頭無 icon，識別色交給下方樓層 tag。
 - **美食卡（FoodSection）= 縮圖 + 色點**：店名前一顆弁柄色小圓點當分類標記；有 `image` 時左側縮圖。
 - **行程 modal（DetailModal）= 編輯排版**：彩色 eyebrow（`label` + `en`）→ 特大標題（`text-3xl`）→ 一行 meta（`時間 · 地點`，**無地址不顯示**，已修掉 placeholder）→ 有 `image` 才放 hero 圖 → 髮絲線 eyebrow 分隔的「關於此處 / 街道亮點」。不再用 bordered pill。
