@@ -85,8 +85,8 @@ export default function FoodSection({ rows }) {
                             {row.name}
                           </h4>
                           {(row.hours || row.time) && (
-                            <span className="text-xs text-secondary font-serif mt-1 flex items-center gap-1 tabular-nums">
-                              <Clock size={12} /> {row.hours || row.time}
+                            <span className="text-sm text-secondary font-serif mt-1 flex items-center gap-1.5 tabular-nums">
+                              <Clock size={13} className="shrink-0" /> {row.hours || row.time}
                             </span>
                           )}
                         </div>

@@ -12,8 +12,14 @@ import { categoryChipStyle } from '../../lib/categories.js'
  *  - building !== ''  : belongs to that building → grouped under one card
  *
  * The first row that introduces a new building name becomes the building header
- * (its name/hours/link represent the building itself; floor is ignored).
+ * (its name/hours/link/desc represent the building itself; floor is ignored).
  * Subsequent rows with the same building name are sub-shops.
+ *
+ * Building-meta row: when a row's `name === building` AND it has no `floor`, it
+ * describes the building itself (e.g. a mall entrance / overall note), so it only
+ * feeds the header meta and is NOT also listed as a redundant sub-shop. A
+ * name===building row WITH a floor (e.g. a whole-building store spanning B2～8F)
+ * stays a sub-shop so its floor range still shows.
  */
 function groupItems(rows) {
   const groups = []
@@ -23,20 +29,27 @@ function groupItems(rows) {
     if (!row.building) {
       // Standalone shop
       groups.push({ type: 'standalone', ...row })
-    } else {
-      if (!buildingMap[row.building]) {
-        // First time we see this building — create the group
-        const g = {
-          type: 'building',
-          name: row.building,
-          hours: row.hours,
-          link: row.link,
-          shops: [],
-        }
-        buildingMap[row.building] = g
-        groups.push(g)
+      return
+    }
+
+    const isBuildingMeta = row.name === row.building && !row.floor
+
+    if (!buildingMap[row.building]) {
+      // First time we see this building — create the group
+      const g = {
+        type: 'building',
+        name: row.building,
+        hours: row.hours,
+        link: row.link,
+        desc: row.desc,
+        shops: [],
       }
-      // Add this row as a shop inside the building
+      buildingMap[row.building] = g
+      groups.push(g)
+    }
+
+    // Meta rows only populate the header; everything else is a sub-shop
+    if (!isBuildingMeta) {
       buildingMap[row.building].shops.push(row)
     }
   })
@@ -65,9 +78,12 @@ function StandaloneCard({ item }) {
 
         <div className="flex-1 min-w-0">
           <p className="font-bold text-jp-text font-serif text-base leading-snug">{item.name}</p>
+          {item.desc && (
+            <p className="text-sm text-secondary leading-relaxed font-serif mt-1">{item.desc}</p>
+          )}
           {item.hours && (
-            <div className="flex items-center gap-1 text-xs text-secondary font-serif mt-1 tabular-nums">
-              <Clock size={11} /> {item.hours}
+            <div className="flex items-center gap-1.5 text-sm text-secondary font-serif mt-1 tabular-nums">
+              <Clock size={13} className="shrink-0" /> {item.hours}
             </div>
           )}
         </div>
@@ -96,9 +112,12 @@ function BuildingCard({ building }) {
       <div className="flex justify-between items-center gap-2">
         <div className="min-w-0">
           <h3 className="font-bold text-jp-text font-serif text-base leading-snug">{building.name}</h3>
+          {building.desc && (
+            <p className="text-sm text-secondary leading-relaxed font-serif mt-1">{building.desc}</p>
+          )}
           {building.hours && (
-            <span className="text-xs text-secondary font-serif mt-1 flex tabular-nums items-center gap-1">
-              <Clock size={12} /> {building.hours}
+            <span className="text-sm text-secondary font-serif mt-1 flex tabular-nums items-center gap-1.5">
+              <Clock size={13} className="shrink-0" /> {building.hours}
             </span>
           )}
         </div>
@@ -124,9 +143,12 @@ function BuildingCard({ building }) {
               <FloorTag floor={shop.floor} />
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm text-stone-700 font-serif leading-snug">{shop.name}</p>
+                {shop.desc && (
+                  <p className="text-sm text-secondary leading-relaxed font-serif mt-0.5">{shop.desc}</p>
+                )}
                 {shop.hours && (
-                  <div className="flex items-center gap-1 text-xs text-secondary font-serif mt-0.5 tabular-nums">
-                    <Clock size={12} /> {shop.hours}
+                  <div className="flex items-center gap-1.5 text-sm text-secondary font-serif mt-1 tabular-nums">
+                    <Clock size={13} className="shrink-0" /> {shop.hours}
                   </div>
                 )}
               </div>
@@ -151,7 +173,7 @@ function BuildingCard({ building }) {
 }
 
 /**
- * @param {{ rows: Array<{ area: string, building: string, name: string, floor: string, hours: string, link: string }> }} props
+ * @param {{ rows: Array<{ area: string, building: string, name: string, floor: string, hours: string, link: string, desc: string }> }} props
  */
 export default function ShoppingSection({ rows }) {
   const areas = useMemo(

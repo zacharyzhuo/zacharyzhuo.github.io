@@ -249,11 +249,13 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 **`shopping` tab**
 
-| `area` | `building` | `name` | `floor` | `hours` | `link` |
-|---|---|---|---|---|---|
+| `area` | `building` | `name` | `floor` | `hours` | `link` | `desc` |
+|---|---|---|---|---|---|---|
 
 - `building` 空白：獨棟店，單獨顯示一個 block
-- `building` 有值：合併顯示在同名建築的 block（第一筆為建築標頭，其 `hours`/`link` 代表整棟）
+- `building` 有值：合併顯示在同名建築的 block（第一筆為建築標頭，其 `hours`/`link`/`desc` 代表整棟）
+- **building-meta 列**：某筆 `name === building` 且 `floor` 空白時，視為「描述整棟」的 meta 列，只餵建築標頭（desc/hours/link），**不再重複列為子店**（避免標頭與子店名稱重複）。但 `name === building` 卻**有樓層**（如整棟店橫跨 `B2～8F`）的列仍當子店，好讓樓層範圍照常顯示。判斷在 `groupItems`
+- `desc`：店家備註（選填，有值才顯示），顯示於店名與 `hours` 之間的淡色副文（`text-secondary`）。standalone 卡、building 標頭、building 子店列三處皆支援。把原本硬塞在 `name` 後面的括號補充（如「伴手禮一站・芒果乾/otap」）改填這欄，店名可回到單行
 
 **`food` tab**
 
