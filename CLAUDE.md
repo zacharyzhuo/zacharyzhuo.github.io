@@ -317,7 +317,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - **航班卡（FlightsTab）= 登機證**：頂部 transport **半透明淡色色帶**（`${categoryInk('transport')}33` ≈ 20% 底 + transport ink 深色字，清透不再大面積實心，色帶固定高 `h-11`=44px），色帶下接**撕票口**（虛線 + 兩側用 CSS `mask`（`FLIGHT_NOTCH_STYLE`，雙 radial-gradient + `mask-composite: intersect` / `-webkit-mask-composite: source-in`）在 y=44 挖真半圓鏤空，透出底層 sheet）；再接玻璃機身區，航線（端點/線/飛機）用 transport ink（`categoryInk` + `currentColor`）。⚠️ mask 會連投影一起裁掉，故外層另包 wrapper 掛 box-shadow；WebKit 下 `mask` 不會裁 `backdrop-filter`，鏤空處會殘留卡片自身的一層淡霜（已知限制）。
 - **逛街卡（ShoppingSection）= 索引 tag**：樓層 `FloorTag`（購物色淡 chip）當左錨點，**不再用重複的袋子 icon**；無樓層時 tag 內顯示一顆色點維持對齊。建築卡標頭無 icon，識別色交給下方樓層 tag。
 - **美食卡（FoodSection）= 縮圖 + 色點**：店名前一顆弁柄色小圓點當分類標記；有 `image` 時左側縮圖。
-- **行程 modal（DetailModal）= 編輯排版**：彩色 eyebrow（`label` + `en`）→ 特大標題（`text-3xl`）→ 一行 meta（`時間 · 地點`，**無地址不顯示**，已修掉 placeholder）→ 有 `image` 才放 hero 圖 → 髮絲線 eyebrow 分隔的「關於此處 / 街道亮點」。不再用 bordered pill。
+- **行程 modal（DetailModal）= 編輯排版**：彩色 eyebrow（`label` + `en`）→ 標題（`text-2xl`，同住宿卡）→ 一行 meta（`時間 · 地點`，**無地址不顯示**，已修掉 placeholder）→ 有 `image` 才放 hero 圖 → 髮絲線 eyebrow 分隔的「關於此處 / 街道亮點」。不再用 bordered pill。
 - **住宿卡（HotelTab）= 編輯排版**（同 modal 家族）：eyebrow（子型別 `飯店/Airbnb` + `STAY · <入住日>`，hotel 藤鼠色）→ 大標（飯店名）→ 地址 meta → 髮絲線「入住資訊」+ check-in/out **等寬兩欄 + 置中分隔線** → Maps CTA。不再用 type chip / date badge。
 - **DayBanner（每日 banner）**：照片上**不蓋暗色遮罩**（中央 scrim 會讓整張照片發灰）；文字可讀性改靠**多層 text-shadow 暗色光暈**，小字（日期 / 今日行程 / 副標）用更緊更深的 `SMALL_TEXT_SHADOW`、大標用容器較柔的光暈即可。底部保留淡入米白漸層做與下方行程區的接縫。勿再加回中央暗色 scrim。
 

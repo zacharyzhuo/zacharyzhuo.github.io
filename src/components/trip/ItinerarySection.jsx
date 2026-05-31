@@ -237,7 +237,7 @@ function DetailModal({ row, spots, onClose }) {
             </div>
 
             {/* 特大標題 */}
-            <h2 id={titleId} className="text-3xl font-serif font-bold text-jp-text leading-tight mb-2.5 pr-12">
+            <h2 id={titleId} className="text-2xl font-serif font-bold text-jp-text leading-tight mb-2.5 pr-12">
               {current.name}
             </h2>
 
