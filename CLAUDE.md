@@ -360,6 +360,24 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 圖片、音樂等靜態資源放於 `public/trips/<slug>/`，以絕對路徑存取：`/trips/<slug>/images/D1.jpg`
 
+### 外部圖片（Cloudinary）
+
+行程照片（`cover_image_url` / `banner_url` / itinerary・food 的 `image` 欄）改放外部圖床、在 sheet 填 URL；目前用 **Cloudinary**（免費額度對此站綽綽有餘，且能自動轉檔縮放，免自己轉 AVIF/WebP）。
+
+**貼進 sheet 的 URL 要帶 transformation 參數**（插在 `/upload/` 之後）：
+
+```
+.../upload/f_auto,q_auto,w_800/v123/xxx.jpg
+```
+
+- `f_auto`：依瀏覽器自動吐 AVIF / WebP（免自己轉檔）
+- `q_auto`：自動最佳壓縮品質
+- `w_<寬>`：縮到合理寬度（縮放比換格式更重要）
+
+建議寬度：itinerary・food 的 `image`（縮圖 + modal hero 共用）與 `cover_image_url` 用 `w_800`；`banner_url` 用 `w_1200`。
+
+> 程式端不需配合：app 已對 `<img>` 設 `loading="lazy"` + 固定 `width`/`height`（防 CLS），優化全在「sheet 裡貼什麼 URL」這層。若日後離開 Cloudinary，需自備轉檔（Cloudflare R2 + 先轉好檔、或 Cloudflare Images / Bunny.net Optimizer 等含自動轉檔的服務）。
+
 ---
 
 ## 部署
