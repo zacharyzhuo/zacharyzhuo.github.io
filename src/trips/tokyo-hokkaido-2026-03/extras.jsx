@@ -525,7 +525,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       {/* BGM */}
       <audio
         ref={bgmRef}
-        src={`${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/sukidakara.mp3`}
+        src={`${BASE}proposal-photos/sukidakara.mp3`}
         loop
         preload="auto"
       />
@@ -692,7 +692,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
             <div className="absolute top-4 left-4 z-20 flex items-center gap-2 h-[44px]">
               <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center overflow-hidden flex-shrink-0">
                 <img
-                  src={`${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/gokigen_panda.png`}
+                  src={`${BASE}proposal-photos/gokigen_panda.png`}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
@@ -737,7 +737,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
               >
                 <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 border border-white/30">
                   <img
-                    src={`${BASE}trips/tokyo-hokkaido-2026-03/proposal-photos/angelet.jpg`}
+                    src={`${BASE}proposal-photos/angelet.jpg`}
                     alt="Angelet"
                     className="w-full h-full object-cover"
                     onError={(e) => { e.target.style.display = 'none' }}
