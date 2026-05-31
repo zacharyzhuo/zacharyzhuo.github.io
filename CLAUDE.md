@@ -303,12 +303,12 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - API：
   - `getCategory(type)`：回 `{ label, en, icon, ink }`（`en` 為大寫英文，給編輯排版 eyebrow 用），未知 type 退回景點。
   - `categoryChipStyle(type)` / `chipStyle(ink)`：**淡玻璃 chip**（文字 ink / 邊框 ink@40% / 底 ink@10%），搭配 className `border backdrop-blur-sm rounded`。用於小標籤。
-  - `categorySolidStyle(type)` / `solidStyle(ink)`：**實心**（底 ink / icon 白）。用於需要 pop 的場景（時間軸節點、側欄 feature icon）。低彩度 washi ink 用淡底會顯灰，故大 icon 一律用實心。
+  - `categorySolidStyle(type)` / `solidStyle(ink)`：**實心**（底 ink / 字白）。目前用於航班登機證色帶（transport 實心）。
   - `categoryInk(type)`：純 ink 色（給脊線、節點底色等）。
   - `BRAND_INK`：品牌抹茶綠（= `jp-green` `#5C6E58`）的 JS 字面值，給 inline style 餵 `chipStyle` / `solidStyle` 用（Tailwind class 不適用時）；勿再散寫 `#5C6E58`。
-- 引用處：`ItinerarySection`（時間軸節點 + 脊線 + eyebrow + modal 編輯排版）、`ShoppingSection`（樓層 `FloorTag` 用淡 chip）、`FoodSection`（店名前弁柄色點）、`TripInfoSection`（航班登機證色帶用 transport 實心、航線用 transport ink；住宿 hotel/airbnb 同屬住宿分類，同色靠文字區分）、`TripPage` 的 `MENU_ITEMS`（側欄 icon，**實心**）。
+- 引用處：`ItinerarySection`（時間軸節點 + 脊線 + eyebrow + modal 編輯排版）、`ShoppingSection`（樓層 `FloorTag` 用淡 chip）、`FoodSection`（店名前弁柄色點）、`TripInfoSection`（航班登機證色帶用 transport 實心、航線用 transport ink；住宿 hotel/airbnb 同屬住宿分類，同色靠文字區分）、`TripPage` 的 `MENU_ITEMS`（側欄 icon，**純色 icon 無圓底**）。
 - **日期是 metadata 不是分類**，勿套分類色：航班日期在登機證色帶上（白字）、住宿日期在 eyebrow 的 `STAY · <date>`。
-- 側欄 `MENU_ITEMS` 的 icon 色由 `iconStyle`（inline style object，目前用 `categorySolidStyle` / `solidStyle`）提供，Sidebar 以 `style={iconStyle}` 套用（不再用 `color` className）。
+- 側欄 `MENU_ITEMS` 的 icon = **純分類色 icon（無圓底）**，`iconStyle` 為 `{ color: categoryInk(...) }`（與時間軸軌道同語言），Sidebar 以 `style={iconStyle}` 套用。
 
 ### 各 section 的設計語言（避免脊線濫用）
 
@@ -325,8 +325,8 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 每筆行程是 **三欄**：`時間 | 軌道節點 | 卡片`。
 
-- **節點化軌道**：每個時間點是一顆 `w-7 h-7` 分類色圓形節點（白色 type icon 在內），節點下接 `w-[1.5px]` 連接線；**type 的視覺識別主要靠節點**（顏色 + icon），不再埋在卡片底部。
-- **卡片左脊線**：卡片 `overflow-hidden` + 絕對定位 `w-1` 分類色 spine（`categoryInk`）；內容左 padding 加大（`pl-5`）避讓。
+- **節點化軌道**：每個時間點是**純分類色 type icon（無圓底）**（`categoryInk` 著色、`size 18`，放在 `w-7 h-7` 置中盒維持對齊），下接 `w-[1.5px]` 連接線；刻意輕量（先前的實心圓底 + 4px 脊線份量太重）。
+- **卡片細脊線**：卡片 `overflow-hidden` + 絕對定位 **`w-[2px]` 半透**分類色 spine（`categoryInk` + `80` alpha ≈ 50%）；內容左 padding `pl-4`。
 - **分類標籤**：卡片內用輕量**彩色 eyebrow**（`text-2xs` 分類色），取代原本的 bordered pill。
 - **砍空殼**：底部 meta（地址 + 「N 個亮點」badge）**只在真有值時渲染**，無地址不印 placeholder；移除了原本的 ChevronRight（整卡可點不需要）。「N 個亮點」badge 用品牌綠 chip（`chipStyle(BRAND_INK)`），不再用 amber。
 - **時間權重**：時間 `text-sm font-bold tabular-nums` 右對齊指向節點。

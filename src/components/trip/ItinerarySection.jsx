@@ -403,16 +403,16 @@ export default function ItinerarySection({ rows, dayDate }) {
                 {row.time}
               </span>
 
-              {/* 軌道：分類色節點（含 type icon）+ 連接線 */}
+              {/* 軌道：純分類色 icon（無圓底）+ 連接線 */}
               <div className="w-7 shrink-0 flex flex-col items-center">
                 <span
                   aria-hidden="true"
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-white shadow-[0_1px_3px_rgba(0,0,0,0.18)] shrink-0"
-                  style={{ backgroundColor: categoryInk(row.type) }}
+                  className="w-7 h-7 flex items-center justify-center shrink-0"
+                  style={{ color: categoryInk(row.type) }}
                 >
-                  <Icon size={15} />
+                  <Icon size={18} />
                 </span>
-                {!isLast && <div className="w-[1.5px] bg-hairline flex-1 mt-1.5" />}
+                {!isLast && <div className="w-[1.5px] bg-hairline flex-1 mt-1" />}
               </div>
 
               <div className="flex-1 min-w-0 pb-7">
@@ -422,13 +422,13 @@ export default function ItinerarySection({ rows, dayDate }) {
                   onPointerUp={cardTap.onPointerUp}
                   onClick={cardTap.guard(() => { setSelected({ row, spots }) })}
                   aria-label={`${row.time} ${label} ${row.name} 詳情`}
-                  className="glass-card press-springy relative rounded-2xl py-4 pr-4 pl-5 h-full w-full flex flex-row gap-3 items-start text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
+                  className="glass-card press-springy relative rounded-2xl py-4 pr-4 pl-4 h-full w-full flex flex-row gap-3 items-start text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
                 >
-                  {/* 分類色左脊線 */}
+                  {/* 分類色細脊線（2px 半透） */}
                   <span
                     aria-hidden="true"
-                    className="absolute left-0 top-0 bottom-0 w-1"
-                    style={{ backgroundColor: categoryInk(row.type) }}
+                    className="absolute left-0 top-0 bottom-0 w-[2px]"
+                    style={{ backgroundColor: `${categoryInk(row.type)}80` }}
                   />
 
                   <div className="flex-1 min-w-0 flex flex-col">
