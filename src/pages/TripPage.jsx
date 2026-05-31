@@ -217,7 +217,7 @@ export default function TripPage() {
             opacity: pullIndicatorOpacity,
           }}
         >
-          <div className="frosted-glass-button rounded-full p-3 text-stone-500">
+          <div className="frosted-glass-button rounded-full p-3 text-muted">
             <RefreshCw size={20} className={refreshing ? 'animate-spin' : ''} />
           </div>
         </div>
@@ -228,7 +228,7 @@ export default function TripPage() {
         <div className="relative pt-8 pb-4 px-6 flex items-center justify-between">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-3 frosted-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="p-3 frosted-glass-button rounded-full text-muted touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="開啟選單"
           >
             <Menu size={24} />

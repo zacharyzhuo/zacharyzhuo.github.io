@@ -24,7 +24,7 @@ export default function ErrorState({
       </div>
       <div>
         <p className="text-jp-text font-medium">{title}</p>
-        <p className="text-jp-sub text-sm mt-1">{message}</p>
+        <p className="text-muted text-sm mt-1">{message}</p>
       </div>
       <button
         onClick={handle}

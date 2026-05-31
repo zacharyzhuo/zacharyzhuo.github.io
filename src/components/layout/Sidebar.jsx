@@ -119,7 +119,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
               onPointerDown={tap.onPointerDown}
               onPointerUp={tap.onPointerUp}
               onClick={tap.guard(onClose)}
-              className="p-3 frosted-glass-button rounded-full text-stone-600 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="p-3 frosted-glass-button rounded-full text-secondary touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="關閉選單"
             >
               <X size={18} />
@@ -146,7 +146,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
                     <span className="block font-serif font-bold text-base text-jp-text">
                       {label}
                     </span>
-                    <span className="block text-xs font-serif tracking-wide text-stone-500">
+                    <span className="block text-xs font-serif tracking-wide text-muted">
                       {subLabel}
                     </span>
                   </div>
@@ -166,7 +166,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
                 // ?home=1 告訴 HomePage 略過自動跳轉，避免無限循環
                 navigate('/?home=1')
               })}
-              className="frosted-tab-track press-springy font-serif text-xs text-stone-500 flex items-center gap-1.5 touch-manipulation"
+              className="frosted-tab-track press-springy font-serif text-xs text-muted flex items-center gap-1.5 touch-manipulation"
               style={{
                 padding: '7px 16px',
                 background: 'rgba(255, 255, 255, 0.2)',
@@ -180,7 +180,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
           </div>
 
           <div className="px-6 pb-6 pt-2 text-center">
-            <p className="text-xs text-stone-600 font-serif tracking-widest uppercase opacity-70">
+            <p className="text-xs text-secondary font-serif tracking-widest uppercase opacity-70">
               {tripNameEn || 'Trip'}
             </p>
             <p className="text-2xs text-stone-400 font-mono mt-1 opacity-60" title={env.APP_VERSION}>

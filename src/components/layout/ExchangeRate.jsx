@@ -48,7 +48,7 @@ export default function ExchangeRate({ countryCode }) {
         className="press-springy w-full flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl touch-manipulation min-h-[44px]"
         aria-label={`目前匯率 ${line}，點擊切換換算方向`}
       >
-        <span className="flex items-center gap-1.5 font-serif text-xs text-stone-600">
+        <span className="flex items-center gap-1.5 font-serif text-xs text-secondary">
           <ArrowLeftRight size={12} className="text-stone-400" aria-hidden="true" />
           {line}
         </span>

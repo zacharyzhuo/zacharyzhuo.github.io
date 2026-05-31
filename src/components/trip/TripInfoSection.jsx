@@ -49,7 +49,7 @@ function FlightsTab({ flights }) {
 
   return (
     <div>
-      <h3 className="text-base font-bold text-stone-600 uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
+      <h3 className="text-base font-bold text-secondary uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
         <Plane size={18} /> 航班資訊
       </h3>
       <div className="space-y-4">
@@ -77,7 +77,7 @@ function FlightsTab({ flights }) {
                 <div className="flex justify-between items-center">
                   <div className="text-center">
                     <div className="text-2xl font-serif font-bold text-jp-text">{dep}</div>
-                    <div className="text-sm text-stone-600 font-serif">{from}</div>
+                    <div className="text-sm text-secondary font-serif">{from}</div>
                   </div>
                   {/* 航線：端點/線/飛機用 transport 色（currentColor） */}
                   <div className="flex items-center" style={{ color: categoryInk('transport') }}>
@@ -89,14 +89,14 @@ function FlightsTab({ flights }) {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-serif font-bold text-jp-text">{arr}</div>
-                    <div className="text-sm text-stone-600 font-serif">{to}</div>
+                    <div className="text-sm text-secondary font-serif">{to}</div>
                   </div>
                 </div>
                 {(f.carry_on || f.checked_bag) && (
                   <div className="mt-4 pt-4 border-t border-jp-green/20">
                     <div className="flex items-start gap-2">
-                      <Luggage size={16} className="text-stone-500 mt-0.5 flex-shrink-0" />
-                      <div className="text-sm text-stone-600 leading-relaxed whitespace-pre-line font-serif">
+                      <Luggage size={16} className="text-muted mt-0.5 flex-shrink-0" />
+                      <div className="text-sm text-secondary leading-relaxed whitespace-pre-line font-serif">
                         {[
                           f.carry_on && `手提行李：${f.carry_on}`,
                           f.checked_bag && `托運行李：${f.checked_bag}`,
@@ -130,7 +130,7 @@ function PrepareTab({ items }) {
 
   return (
     <div>
-      <h3 className="text-base font-bold text-stone-600 uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
+      <h3 className="text-base font-bold text-secondary uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
         <ClipboardList size={18} /> 行前準備
       </h3>
       <div className="space-y-3">
@@ -168,14 +168,14 @@ function HotelTab({ accommodation }) {
 
   return (
     <div>
-      <h3 className="text-base font-bold text-stone-600 uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
+      <h3 className="text-base font-bold text-secondary uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
         <Hotel size={18} /> 住宿資訊
       </h3>
       <div className="space-y-6">
         {accommodation.map((h, i) => (
           <div key={i}>
             {h.region && (
-              <h4 className="text-sm font-bold text-stone-600 mb-3 pl-1 font-serif">{h.region}</h4>
+              <h4 className="text-sm font-bold text-secondary mb-3 pl-1 font-serif">{h.region}</h4>
             )}
             <div className="glass-card p-6 rounded-2xl relative overflow-hidden">
               {/* 編輯排版：eyebrow（子型別 + STAY · 入住日）→ 大標 → 地址 → 髮絲線入住資訊 */}
@@ -194,7 +194,7 @@ function HotelTab({ accommodation }) {
               <h5 className="font-serif font-bold text-jp-text text-2xl leading-tight mb-2">{h.name}</h5>
 
               {h.address && (
-                <div className="flex items-center gap-1.5 text-sm text-stone-500 font-serif">
+                <div className="flex items-center gap-1.5 text-sm text-muted font-serif">
                   <MapPin size={13} className="text-jp-green shrink-0" />
                   <span className="min-w-0">{h.address}</span>
                 </div>
@@ -203,21 +203,21 @@ function HotelTab({ accommodation }) {
               {(h.check_in || h.check_out) && (
                 <>
                   <div className="flex items-center gap-2 mt-5 mb-3">
-                    <span className="text-2xs font-serif font-bold uppercase tracking-[0.2em] text-stone-500 shrink-0">入住資訊</span>
-                    <div className="h-[1px] flex-1 bg-stone-200" />
+                    <span className="text-2xs font-serif font-bold uppercase tracking-[0.2em] text-muted shrink-0">入住資訊</span>
+                    <div className="h-[1px] flex-1 bg-hairline" />
                   </div>
                   {/* 兩欄等寬 + 置中分隔線：呈現置中、平衡感（同預覽的 in/out 面板） */}
-                  <div className="flex items-stretch rounded-xl border border-white/30 bg-white/30 px-5 py-3 text-sm font-serif text-stone-600">
+                  <div className="flex items-stretch rounded-xl border border-white/30 bg-white/30 px-5 py-3 text-sm font-serif text-secondary">
                     {h.check_in && (
                       <div className="flex-1 text-center">
-                        <span className="block text-2xs text-stone-500 uppercase font-serif tracking-widest mb-1">Check-in</span>
+                        <span className="block text-2xs text-muted uppercase font-serif tracking-widest mb-1">Check-in</span>
                         <span className="text-base text-jp-text font-bold font-serif tabular-nums">{h.check_in}</span>
                       </div>
                     )}
-                    {h.check_in && h.check_out && <div className="w-[1px] bg-stone-200 mx-4" />}
+                    {h.check_in && h.check_out && <div className="w-[1px] bg-hairline mx-4" />}
                     {h.check_out && (
                       <div className="flex-1 text-center">
-                        <span className="block text-2xs text-stone-500 uppercase font-serif tracking-widest mb-1">Check-out</span>
+                        <span className="block text-2xs text-muted uppercase font-serif tracking-widest mb-1">Check-out</span>
                         <span className="text-base text-jp-text font-bold font-serif tabular-nums">{h.check_out}</span>
                       </div>
                     )}
@@ -226,7 +226,7 @@ function HotelTab({ accommodation }) {
               )}
 
               {h.note && (
-                <p className="text-sm text-stone-600 mt-4 font-serif leading-relaxed whitespace-pre-line">{h.note}</p>
+                <p className="text-sm text-secondary mt-4 font-serif leading-relaxed whitespace-pre-line">{h.note}</p>
               )}
 
               {h.link && (
@@ -235,7 +235,7 @@ function HotelTab({ accommodation }) {
                     onPointerDown={tap.onPointerDown}
                     onPointerUp={tap.onPointerUp}
                     onClick={tap.guard(() => openExternal(h.link))}
-                    className="frosted-tab-track press-springy shadow-2xl font-serif text-stone-600 flex items-center gap-2 touch-manipulation"
+                    className="frosted-tab-track press-springy shadow-2xl font-serif text-secondary flex items-center gap-2 touch-manipulation"
                     style={{
                       padding: '12px 32px',
                       background: 'rgba(255, 255, 255, 0.45)',

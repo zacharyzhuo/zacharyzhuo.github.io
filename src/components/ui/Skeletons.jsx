@@ -40,7 +40,7 @@ export function TripSkeleton() {
           <div key={i} className="flex gap-4 px-6">
             <div className="w-12 shrink-0 flex flex-col items-center pt-1">
               <Bar className="w-8 h-3 rounded" />
-              {i < 3 && <div className="w-[1px] bg-stone-200 flex-1 my-2" />}
+              {i < 3 && <div className="w-[1px] bg-hairline flex-1 my-2" />}
             </div>
             <div className="flex-1 min-w-0 pb-8">
               <Bar className="w-full h-28 rounded-2xl" />

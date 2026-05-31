@@ -43,7 +43,7 @@ export default class ErrorBoundary extends Component {
             <AlertTriangle size={28} />
           </div>
           <h1 className="text-xl font-serif font-bold text-jp-text mb-2">這頁出了點問題</h1>
-          <p className="text-sm text-stone-600 font-serif leading-relaxed mb-6">
+          <p className="text-sm text-secondary font-serif leading-relaxed mb-6">
             畫面渲染時發生錯誤。可能是資料格式變更，或新版尚未載入完成。
           </p>
           <button
@@ -57,7 +57,7 @@ export default class ErrorBoundary extends Component {
           {this.state.error?.message && (
             <details className="mt-6 text-left">
               <summary className="text-xs text-stone-400 font-serif cursor-pointer">技術細節</summary>
-              <pre className="mt-2 text-2xs text-stone-500 font-mono bg-stone-100/50 p-3 rounded-lg overflow-auto whitespace-pre-wrap">
+              <pre className="mt-2 text-2xs text-muted font-mono bg-stone-100/50 p-3 rounded-lg overflow-auto whitespace-pre-wrap">
                 {this.state.error.message}
               </pre>
             </details>

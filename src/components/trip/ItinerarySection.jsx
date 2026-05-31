@@ -70,14 +70,14 @@ function SpotItem({ spot }) {
           </span>
         </div>
         {spot.description && (
-          <p className="text-xs text-stone-500 font-serif leading-relaxed line-clamp-1 pl-[2px]">
+          <p className="text-xs text-muted font-serif leading-relaxed line-clamp-1 pl-[2px]">
             {spot.description}
           </p>
         )}
       </div>
       <button
         onClick={(e) => { e.stopPropagation(); openExternal(url) }}
-        className="shrink-0 p-2 frosted-glass-button rounded-lg text-stone-500 touch-manipulation min-w-[36px] min-h-[36px] flex items-center justify-center"
+        className="shrink-0 p-2 frosted-glass-button rounded-lg text-muted touch-manipulation min-w-[36px] min-h-[36px] flex items-center justify-center"
         aria-label={`${spot.name} Google Maps`}
       >
         <Navigation size={14} />
@@ -216,7 +216,7 @@ function DetailModal({ row, spots, onClose }) {
             onPointerDown={tap.onPointerDown}
             onPointerUp={tap.onPointerUp}
             onClick={tap.guard(onClose)}
-            className="absolute top-8 right-6 z-20 p-3 frosted-glass-button rounded-full text-stone-500 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="absolute top-8 right-6 z-20 p-3 frosted-glass-button rounded-full text-muted touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="關閉詳情"
           >
             <X size={20} />
@@ -243,9 +243,9 @@ function DetailModal({ row, spots, onClose }) {
 
             {/* meta 一行：時間 · 地點（無地址不顯示，修掉 placeholder） */}
             {(current.time || current.address) && (
-              <div className="flex items-center gap-2 text-sm text-stone-500 font-serif mb-6 flex-wrap">
+              <div className="flex items-center gap-2 text-sm text-muted font-serif mb-6 flex-wrap">
                 {current.time && (
-                  <span className="font-bold text-stone-600 tabular-nums">{current.time}</span>
+                  <span className="font-bold text-secondary tabular-nums">{current.time}</span>
                 )}
                 {current.time && current.address && <span className="text-stone-300">·</span>}
                 {current.address && (
@@ -274,8 +274,8 @@ function DetailModal({ row, spots, onClose }) {
             {current.note && (
               <section className="mb-8">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xs font-serif font-bold uppercase tracking-[0.2em] text-stone-500 shrink-0">關於此處</span>
-                  <div className="h-[1px] flex-1 bg-stone-200" />
+                  <span className="text-2xs font-serif font-bold uppercase tracking-[0.2em] text-muted shrink-0">關於此處</span>
+                  <div className="h-[1px] flex-1 bg-hairline" />
                 </div>
                 <p className="text-jp-text leading-relaxed font-serif text-base opacity-90 whitespace-pre-line">
                   {current.note}
@@ -287,9 +287,9 @@ function DetailModal({ row, spots, onClose }) {
             {currentSpots.length > 0 && (
               <section>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xs font-serif font-bold uppercase tracking-[0.2em] text-stone-500 shrink-0">街道亮點</span>
+                  <span className="text-2xs font-serif font-bold uppercase tracking-[0.2em] text-muted shrink-0">街道亮點</span>
                   <span className="text-2xs text-stone-400 font-serif tabular-nums shrink-0">{currentSpots.length}</span>
-                  <div className="h-[1px] flex-1 bg-stone-200" />
+                  <div className="h-[1px] flex-1 bg-hairline" />
                 </div>
                 <div>
                   {currentSpots.map((spot) => (
@@ -306,7 +306,7 @@ function DetailModal({ row, spots, onClose }) {
               onPointerDown={tap.onPointerDown}
               onPointerUp={tap.onPointerUp}
               onClick={tap.guard(() => openExternal(navUrl))}
-              className="frosted-tab-track press-springy pointer-events-auto shadow-2xl font-serif text-stone-600 flex items-center gap-2"
+              className="frosted-tab-track press-springy pointer-events-auto shadow-2xl font-serif text-secondary flex items-center gap-2"
               style={{
                 padding: '12px 32px',
                 background: 'rgba(255, 255, 255, 0.45)',
@@ -412,7 +412,7 @@ export default function ItinerarySection({ rows, dayDate }) {
                 >
                   <Icon size={15} />
                 </span>
-                {!isLast && <div className="w-[1.5px] bg-stone-200 flex-1 mt-1.5" />}
+                {!isLast && <div className="w-[1.5px] bg-hairline flex-1 mt-1.5" />}
               </div>
 
               <div className="flex-1 min-w-0 pb-7">
@@ -441,13 +441,13 @@ export default function ItinerarySection({ rows, dayDate }) {
 
                   <h4 className="text-lg font-serif font-bold text-jp-text mb-1 leading-snug">{row.name}</h4>
                   {row.description && (
-                    <p className="text-sm text-stone-500 line-clamp-3 font-serif mb-2 leading-relaxed opacity-80">
+                    <p className="text-sm text-muted line-clamp-3 font-serif mb-2 leading-relaxed opacity-80">
                       {row.description}
                     </p>
                   )}
 
                   {row.hours && (
-                    <div className="flex items-center gap-1.5 text-xs text-stone-500 font-serif mb-3 bg-white/40 backdrop-blur-sm border border-white/50 w-fit px-2 py-1 rounded-full tabular-nums">
+                    <div className="flex items-center gap-1.5 text-xs text-muted font-serif mb-3 bg-white/40 backdrop-blur-sm border border-white/50 w-fit px-2 py-1 rounded-full tabular-nums">
                       <Clock size={12} />
                       <span>{row.hours}</span>
                     </div>
@@ -459,7 +459,7 @@ export default function ItinerarySection({ rows, dayDate }) {
                       {row.address && (
                         <>
                           <MapPin size={13} className="shrink-0 text-stone-400" />
-                          <span className="truncate text-stone-500 opacity-80 flex-1 min-w-0">
+                          <span className="truncate text-muted opacity-80 flex-1 min-w-0">
                             {row.address}
                           </span>
                         </>

@@ -66,7 +66,7 @@ function StandaloneCard({ item }) {
         <div className="flex-1 min-w-0">
           <p className="font-bold text-jp-text font-serif text-base leading-snug">{item.name}</p>
           {item.hours && (
-            <div className="flex items-center gap-1 text-xs text-stone-600 font-serif mt-1 tabular-nums">
+            <div className="flex items-center gap-1 text-xs text-secondary font-serif mt-1 tabular-nums">
               <Clock size={11} /> {item.hours}
             </div>
           )}
@@ -77,7 +77,7 @@ function StandaloneCard({ item }) {
             href={item.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2.5 frosted-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
+            className="p-2.5 frosted-glass-button rounded-full text-secondary transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
             onClick={e => e.stopPropagation()}
             aria-label={`查看 ${item.name} 的位置`}
           >
@@ -97,7 +97,7 @@ function BuildingCard({ building }) {
         <div className="min-w-0">
           <h3 className="font-bold text-jp-text font-serif text-base leading-snug">{building.name}</h3>
           {building.hours && (
-            <span className="text-xs text-stone-600 font-serif mt-1 flex tabular-nums items-center gap-1">
+            <span className="text-xs text-secondary font-serif mt-1 flex tabular-nums items-center gap-1">
               <Clock size={12} /> {building.hours}
             </span>
           )}
@@ -107,7 +107,7 @@ function BuildingCard({ building }) {
             href={building.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2.5 frosted-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
+            className="p-2.5 frosted-glass-button rounded-full text-secondary transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
             onClick={e => e.stopPropagation()}
             aria-label={`查看 ${building.name} 的位置`}
           >
@@ -118,14 +118,14 @@ function BuildingCard({ building }) {
 
       {/* 子店：樓層 tag 起頭的清單 */}
       {building.shops.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-stone-200/70 space-y-2.5">
+        <div className="mt-3 pt-3 border-t border-hairline space-y-2.5">
           {building.shops.map((shop, i) => (
             <div key={i} className="flex items-center gap-3">
               <FloorTag floor={shop.floor} />
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm text-stone-700 font-serif leading-snug">{shop.name}</p>
                 {shop.hours && (
-                  <div className="flex items-center gap-1 text-xs text-stone-600 font-serif mt-0.5 tabular-nums">
+                  <div className="flex items-center gap-1 text-xs text-secondary font-serif mt-0.5 tabular-nums">
                     <Clock size={12} /> {shop.hours}
                   </div>
                 )}
@@ -135,7 +135,7 @@ function BuildingCard({ building }) {
                   href={shop.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2.5 frosted-glass-button rounded-full text-stone-600 touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
+                  className="p-2.5 frosted-glass-button rounded-full text-secondary touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
                   onClick={e => e.stopPropagation()}
                   aria-label={`查看 ${shop.name} 的位置`}
                 >

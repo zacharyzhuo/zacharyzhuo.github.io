@@ -55,7 +55,7 @@ export default function FoodSection({ rows }) {
           {Object.entries(byCategory).map(([category, items]) => (
             <div key={category}>
               {category && (
-                <h3 className="text-xs font-bold text-stone-600 font-serif uppercase tracking-widest mb-4 pb-2">
+                <h3 className="text-xs font-bold text-secondary font-serif uppercase tracking-widest mb-4 pb-2">
                   {category}
                 </h3>
               )}
@@ -85,7 +85,7 @@ export default function FoodSection({ rows }) {
                             {row.name}
                           </h4>
                           {(row.hours || row.time) && (
-                            <span className="text-xs text-stone-600 font-serif mt-1 flex items-center gap-1 tabular-nums">
+                            <span className="text-xs text-secondary font-serif mt-1 flex items-center gap-1 tabular-nums">
                               <Clock size={12} /> {row.hours || row.time}
                             </span>
                           )}
@@ -95,7 +95,7 @@ export default function FoodSection({ rows }) {
                             href={row.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-2.5 frosted-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0 ml-2"
+                            className="p-2.5 frosted-glass-button rounded-full text-secondary transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0 ml-2"
                             onClick={e => e.stopPropagation()}
                             aria-label={`查看 ${row.name} 的位置`}
                           >
@@ -104,7 +104,7 @@ export default function FoodSection({ rows }) {
                         )}
                       </div>
                       {(row.note || row.desc || row.address) && (
-                        <p className="text-sm text-stone-600 leading-relaxed font-serif">
+                        <p className="text-sm text-secondary leading-relaxed font-serif">
                           {row.note || row.desc || row.address}
                         </p>
                       )}

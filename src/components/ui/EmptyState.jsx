@@ -13,7 +13,7 @@ export default function EmptyState({ icon: Icon, title, hint }) {
       <div className="mb-4 text-stone-300">
         <Icon size={56} strokeWidth={1.2} />
       </div>
-      <p className="font-serif text-base text-stone-500 mb-1">{title}</p>
+      <p className="font-serif text-base text-muted mb-1">{title}</p>
       {hint && (
         <p className="font-serif text-xs text-stone-400 tracking-wide max-w-[18em] leading-relaxed">
           {hint}

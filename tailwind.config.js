@@ -8,10 +8,14 @@ export default {
       colors: {
         'jp-bg': '#F9F8F4',
         'jp-text': '#2C2C2C',
-        'jp-sub': '#666666',
         'jp-green': '#5C6E58',
         'jp-red': '#B93632',
         'jp-light-gray': '#E5E5E5',
+        // 語意文字/線條 token，背後吃 CSS 變數（深色模式時只改 :root 變數即可一次翻）。
+        // secondary/muted 目前值 = 原 stone-600 / stone-500（零外觀變化）；jp-sub 已退役併入 muted。
+        'secondary': 'var(--text-secondary)',
+        'muted': 'var(--text-muted)',
+        'hairline': 'var(--hairline)',
       },
       fontFamily: {
         serif: ['"Noto Serif JP"', '"Hiragino Mincho ProN"', 'serif'],

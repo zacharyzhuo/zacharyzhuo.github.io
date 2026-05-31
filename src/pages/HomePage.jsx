@@ -61,7 +61,7 @@ export default function HomePage() {
             opacity: indicatorOpacity,
           }}
         >
-          <div className="frosted-glass-button rounded-full p-3 text-stone-500">
+          <div className="frosted-glass-button rounded-full p-3 text-muted">
             <RefreshCw size={20} className={indicatorRotation} />
           </div>
         </div>
@@ -73,7 +73,7 @@ export default function HomePage() {
       {/* Header */}
       <header className="px-6 pt-8 pb-6">
         <h1 className="text-3xl font-serif font-bold text-jp-text">Trip Diaries</h1>
-        <p className="text-sm text-jp-sub font-serif mt-1">旅行記錄</p>
+        <p className="text-sm text-muted font-serif mt-1">旅行記錄</p>
       </header>
 
       {/* Content */}
@@ -95,7 +95,7 @@ export default function HomePage() {
               <TripCard key={trip.slug} trip={trip} />
             ))}
             {trips.length === 0 && (
-              <p className="text-center text-jp-sub font-serif text-sm mt-12">尚無行程</p>
+              <p className="text-center text-muted font-serif text-sm mt-12">尚無行程</p>
             )}
           </div>
         )}
