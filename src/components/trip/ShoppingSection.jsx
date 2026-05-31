@@ -44,33 +44,34 @@ function groupItems(rows) {
   return groups
 }
 
+/** 樓層索引 tag（購物色玻璃 chip）：有樓層顯示樓層，無樓層顯示一顆色點，min-width 維持對齊。 */
+function FloorTag({ floor }) {
+  return (
+    <span
+      className="shrink-0 min-w-[2.25rem] flex items-center justify-center px-2 py-1 rounded-lg border backdrop-blur-sm font-serif font-bold text-sm tabular-nums leading-none"
+      style={categoryChipStyle('shopping')}
+    >
+      {floor || <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60" />}
+    </span>
+  )
+}
+
 function StandaloneCard({ item }) {
   return (
     <div className="glass-card relative rounded-xl px-4 py-3 overflow-hidden">
       <div className="flex items-center gap-3">
-        {/* 左側 icon（購物分類色，取自 categories.js） */}
-        <div className="p-2 rounded-full shrink-0" style={categoryChipStyle('shopping')}>
-          <ShoppingBag size={16} />
-        </div>
+        {/* 樓層索引 tag 當左錨點（取代原本重複的袋子 icon） */}
+        <FloorTag floor={item.floor} />
 
-        {/* 中間：名稱 + 樓層/時間 */}
         <div className="flex-1 min-w-0">
           <p className="font-bold text-jp-text font-serif text-base leading-snug">{item.name}</p>
-          {(item.floor || item.hours) && (
-            <div className="flex items-center gap-2 text-xs text-stone-600 font-serif mt-1 tabular-nums">
-              {item.floor && (
-                <span className="bg-stone-100 px-1.5 py-0.5 rounded text-stone-600 font-medium text-2xs">{item.floor}</span>
-              )}
-              {item.hours && (
-                <span className="flex items-center gap-1">
-                  <Clock size={11} /> {item.hours}
-                </span>
-              )}
+          {item.hours && (
+            <div className="flex items-center gap-1 text-xs text-stone-600 font-serif mt-1 tabular-nums">
+              <Clock size={11} /> {item.hours}
             </div>
           )}
         </div>
 
-        {/* 右側導航按鈕 */}
         {item.link && (
           <a
             href={item.link}
@@ -91,27 +92,22 @@ function StandaloneCard({ item }) {
 function BuildingCard({ building }) {
   return (
     <div className="glass-card relative rounded-xl px-4 py-3 overflow-hidden">
-      {/* Building header */}
-      <div className="flex justify-between items-center mb-3">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-full shrink-0" style={categoryChipStyle('shopping')}>
-            <ShoppingBag size={16} />
-          </div>
-          <div>
-            <h3 className="font-bold text-jp-text font-serif text-base leading-snug">{building.name}</h3>
-            {building.hours && (
-              <span className="text-xs text-stone-600 font-serif mt-1 flex tabular-nums items-center gap-1">
-                <Clock size={12} /> {building.hours}
-              </span>
-            )}
-          </div>
+      {/* Building header（無 icon，識別色交給下方樓層 tag） */}
+      <div className="flex justify-between items-center gap-2">
+        <div className="min-w-0">
+          <h3 className="font-bold text-jp-text font-serif text-base leading-snug">{building.name}</h3>
+          {building.hours && (
+            <span className="text-xs text-stone-600 font-serif mt-1 flex tabular-nums items-center gap-1">
+              <Clock size={12} /> {building.hours}
+            </span>
+          )}
         </div>
         {building.link && (
           <a
             href={building.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2.5 frosted-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center ml-2 shrink-0"
+            className="p-2.5 frosted-glass-button rounded-full text-stone-600 transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
             onClick={e => e.stopPropagation()}
             aria-label={`查看 ${building.name} 的位置`}
           >
@@ -120,30 +116,26 @@ function BuildingCard({ building }) {
         )}
       </div>
 
-      {/* Sub-shops with left border accent */}
+      {/* 子店：樓層 tag 起頭的清單 */}
       {building.shops.length > 0 && (
-        <div className="mt-4 space-y-3">
+        <div className="mt-3 pt-3 border-t border-stone-200/70 space-y-2.5">
           {building.shops.map((shop, i) => (
-            <div key={i} className="flex justify-between items-center">
-              <div>
-                <p className="font-bold text-sm text-stone-700 font-serif">{shop.name}</p>
-                <div className="flex items-center gap-2 text-xs text-stone-600 font-serif mt-0.5 tabular-nums">
-                  {shop.floor && (
-                    <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-600 font-medium">{shop.floor}</span>
-                  )}
-                  {shop.hours && (
-                    <span className="flex items-center gap-1">
-                      <Clock size={12} /> {shop.hours}
-                    </span>
-                  )}
-                </div>
+            <div key={i} className="flex items-center gap-3">
+              <FloorTag floor={shop.floor} />
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-sm text-stone-700 font-serif leading-snug">{shop.name}</p>
+                {shop.hours && (
+                  <div className="flex items-center gap-1 text-xs text-stone-600 font-serif mt-0.5 tabular-nums">
+                    <Clock size={12} /> {shop.hours}
+                  </div>
+                )}
               </div>
               {shop.link && (
                 <a
                   href={shop.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2.5 frosted-glass-button rounded-full text-stone-600 touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center ml-2 shrink-0"
+                  className="p-2.5 frosted-glass-button rounded-full text-stone-600 touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
                   onClick={e => e.stopPropagation()}
                   aria-label={`查看 ${shop.name} 的位置`}
                 >

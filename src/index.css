@@ -459,14 +459,13 @@ a:focus-visible,
 
 /* 行程卡片 Frosted glass */
 .glass-card {
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.4);
   backdrop-filter: var(--glass-card);
   -webkit-backdrop-filter: var(--glass-card);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    inset 0 0 12px rgba(255, 255, 255, 0.15),
-    0 4px 16px rgba(0, 0, 0, 0.06);
+  /* 不畫任何白色外框/高光線：在彩色模糊背景上會描出明顯白邊。
+     完全靠下方柔和投影做分離。 */
+  border: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
 .glass-card::before {
@@ -475,9 +474,8 @@ a:focus-visible,
   inset: 0;
   border-radius: inherit;
   background: linear-gradient(160deg,
-      rgba(255, 255, 255, 0.35) 0%,
-      rgba(255, 255, 255, 0.1) 30%,
-      transparent 60%);
+      rgba(255, 255, 255, 0.06) 0%,
+      transparent 45%);
   pointer-events: none;
 }
 

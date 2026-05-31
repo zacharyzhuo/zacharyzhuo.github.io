@@ -11,11 +11,11 @@ import { Camera, Utensils, ShoppingBag, Train, Hotel } from 'lucide-react'
  * 不當分類色用；景點故意用偏黃的橄欖苔色與品牌綠區隔，避免「品牌 or 分類」的混淆。
  */
 export const CATEGORIES = {
-  transport:  { label: '交通', icon: Train,        ink: '#4E6171' }, // 藍鼠 ai-nezumi
-  food:       { label: '美食', icon: Utensils,     ink: '#9C5A43' }, // 弁柄 bengara（赤陶）
-  attraction: { label: '景點', icon: Camera,       ink: '#656E3C' }, // 苔・橄欖 koke
-  shopping:   { label: '購物', icon: ShoppingBag,  ink: '#8A5A6E' }, // 葡萄鼠 budou-nezumi
-  hotel:      { label: '住宿', icon: Hotel,         ink: '#5E5E86' }, // 藤鼠 fuji-nezumi
+  transport:  { label: '交通', en: 'TRANSPORT',  icon: Train,        ink: '#4E6171' }, // 藍鼠 ai-nezumi
+  food:       { label: '美食', en: 'FOOD',       icon: Utensils,     ink: '#9C5A43' }, // 弁柄 bengara（赤陶）
+  attraction: { label: '景點', en: 'ATTRACTION', icon: Camera,       ink: '#656E3C' }, // 苔・橄欖 koke
+  shopping:   { label: '購物', en: 'SHOPPING',   icon: ShoppingBag,  ink: '#8A5A6E' }, // 葡萄鼠 budou-nezumi
+  hotel:      { label: '住宿', en: 'STAY',       icon: Hotel,         ink: '#5E5E86' }, // 藤鼠 fuji-nezumi
 }
 
 /** 品牌抹茶綠（= jp-green）。給 JS inline style 用（Tailwind class 不適用、需餵 chip/solid helper 時）。 */

@@ -275,7 +275,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - **文字色**：`#2C2C2C`（jp-text）、`stone` 系列
 - **字型**：全站 `"Noto Serif JP"`（font-serif），所有文字元素應帶 `font-serif`
 - **字級**：micro eyebrow / 大寫 caps 標籤用 `text-2xs`（tailwind token，0.625rem），勿再用 `text-[10px]/[11px]` arbitrary value
-- **Frosted glass（毛玻璃）**：本站玻璃材質是 frosted glass / glassmorphism（`backdrop-filter: blur/saturate/contrast` + 高光邊框），**非** iOS 26 那種有邊緣折射扭曲的 Liquid Glass（web 上難以兼顧相容性與效能，刻意不追）。玻璃 `backdrop-filter` 組合集中在 `index.css` 的 `:root` token，**勿再散寫 blur/saturate/contrast 數值**。語意 token：`--glass-nav`（DayNav）、`--glass-card`（行程卡）、`--glass-overlay`（BottomSheet + Sidebar）、`--glass-button`、`--glass-tab` / `--glass-tab-active` / `--glass-tab-lifted`（press 放大時更強 frosted）
+- **Frosted glass（毛玻璃）**：本站玻璃材質是 frosted glass / glassmorphism（`backdrop-filter: blur/saturate/contrast` + 高光邊框），**非** iOS 26 那種有邊緣折射扭曲的 Liquid Glass（web 上難以兼顧相容性與效能，刻意不追）。玻璃 `backdrop-filter` 組合集中在 `index.css` 的 `:root` token，**勿再散寫 blur/saturate/contrast 數值**。語意 token：`--glass-nav`（DayNav）、`--glass-card`（行程卡）、`--glass-overlay`（BottomSheet + Sidebar）、`--glass-button`、`--glass-tab` / `--glass-tab-active` / `--glass-tab-lifted`（press 放大時更強 frosted）。`.glass-card` **不畫白色外框/高光線**（`border: none`、無 inset 白高光、底色 `rgba(255,255,255,0.4)`），只靠下方柔和投影 `0 6px 18px rgba(0,0,0,0.08)` 做分離。原因：在彩色模糊背景（BottomSheet 透出 banner）上，白框/白高光會描出搶眼白邊。若日後覺得玻璃感不夠可加極淡高光，但勿回到舊的 0.6 border / 0.8 inset 白框。
 - CSS utility classes：`frosted-tab-track`、`frosted-tab-btn`、`frosted-tab-pill`、`frosted-glass-button`、`press-springy`、`.safe-area-inset`、`.safe-area-bottom`、`.scrollbar-hide`、`.glass-card`、`.glass-bottom-sheet`、`.glass-sidebar`
 - **Q 彈動效**：iOS26 風格彈簧 token：`--ease-spring`（彈較多，小元件用，Tailwind `ease-spring`）、`--ease-spring-soft`（彈較少，大行程面板用，`ease-spring-soft`）。
   - **press 微彈**：可點離散元件（卡片 / 選單項 / CTA / icon 按鈕）套 `.press-springy`（按下 squish、放開彈回）或共用的 `.frosted-glass-button`。
@@ -301,14 +301,24 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 - **抹茶綠 `jp-green #5C6E58` 是全站唯一主 accent**（連結 / active / CTA / 進度條 / focus ring），**不當分類色用**；景點故意用偏黃橄欖色與品牌綠區隔，避免「品牌 or 分類」混淆。全站只有一種綠（先前 `prepare` 卡片誤用的 `#6B9080` 已統一為 `jp-green`）。
 - API：
-  - `getCategory(type)`：回 `{ label, icon, ink }`，未知 type 退回景點。
+  - `getCategory(type)`：回 `{ label, en, icon, ink }`（`en` 為大寫英文，給編輯排版 eyebrow 用），未知 type 退回景點。
   - `categoryChipStyle(type)` / `chipStyle(ink)`：**淡玻璃 chip**（文字 ink / 邊框 ink@40% / 底 ink@10%），搭配 className `border backdrop-blur-sm rounded`。用於小標籤。
   - `categorySolidStyle(type)` / `solidStyle(ink)`：**實心**（底 ink / icon 白）。用於需要 pop 的場景（時間軸節點、側欄 feature icon）。低彩度 washi ink 用淡底會顯灰，故大 icon 一律用實心。
   - `categoryInk(type)`：純 ink 色（給脊線、節點底色等）。
   - `BRAND_INK`：品牌抹茶綠（= `jp-green` `#5C6E58`）的 JS 字面值，給 inline style 餵 `chipStyle` / `solidStyle` 用（Tailwind class 不適用時）；勿再散寫 `#5C6E58`。
-- 引用處：`ItinerarySection`（節點實心 + 脊線 + eyebrow 標籤）、`ShoppingSection`（店家 icon 圓底，淡 chip）、`TripInfoSection`（住宿 hotel/airbnb 同屬住宿分類，同色靠文字區分）、`TripPage` 的 `MENU_ITEMS`（側欄 icon，**實心**）。
-- **日期 badge 是 metadata 不是分類**，一律用中性 stone（`TripInfoSection` 的 `DATE_BADGE`），勿套分類色以免色彩語意過載。
+- 引用處：`ItinerarySection`（時間軸節點 + 脊線 + eyebrow + modal 編輯排版）、`ShoppingSection`（樓層 `FloorTag` 用淡 chip）、`FoodSection`（店名前弁柄色點）、`TripInfoSection`（航班登機證色帶用 transport 實心、航線用 transport ink；住宿 hotel/airbnb 同屬住宿分類，同色靠文字區分）、`TripPage` 的 `MENU_ITEMS`（側欄 icon，**實心**）。
+- **日期是 metadata 不是分類**，勿套分類色：航班日期在登機證色帶上（白字）、住宿日期在 eyebrow 的 `STAY · <date>`。
 - 側欄 `MENU_ITEMS` 的 icon 色由 `iconStyle`（inline style object，目前用 `categorySolidStyle` / `solidStyle`）提供，Sidebar 以 `style={iconStyle}` 套用（不再用 `color` className）。
+
+### 各 section 的設計語言（避免脊線濫用）
+
+**脊線是行程時間軸卡的專屬招牌，其他 section 用不同裝置表達分類色**：
+
+- **航班卡（FlightsTab）= 登機證**：頂部 transport 藍鼠**實心色帶**（`categorySolidStyle('transport')`，白字 flight_no + 日期，色帶固定高 `h-11`=44px），色帶下接**撕票口**（虛線 + 兩側用 CSS `mask`（`FLIGHT_NOTCH_STYLE`，雙 radial-gradient + `mask-composite: intersect` / `-webkit-mask-composite: source-in`）在 y=44 挖真半圓鏤空，透出底層 sheet）；再接玻璃機身區，航線（端點/線/飛機）用 transport ink（`categoryInk` + `currentColor`）。⚠️ mask 會連投影一起裁掉，故外層另包 wrapper 掛 box-shadow；WebKit 下 `mask` 不會裁 `backdrop-filter`，鏤空處會殘留卡片自身的一層淡霜（已知限制）。
+- **逛街卡（ShoppingSection）= 索引 tag**：樓層 `FloorTag`（購物色淡 chip）當左錨點，**不再用重複的袋子 icon**；無樓層時 tag 內顯示一顆色點維持對齊。建築卡標頭無 icon，識別色交給下方樓層 tag。
+- **美食卡（FoodSection）= 縮圖 + 色點**：店名前一顆弁柄色小圓點當分類標記；有 `image` 時左側縮圖。
+- **行程 modal（DetailModal）= 編輯排版**：彩色 eyebrow（`label` + `en`）→ 特大標題（`text-3xl`）→ 一行 meta（`時間 · 地點`，**無地址不顯示**，已修掉 placeholder）→ 有 `image` 才放 hero 圖 → 髮絲線 eyebrow 分隔的「關於此處 / 街道亮點」。不再用 bordered pill。
+- **住宿卡（HotelTab）= 編輯排版**（同 modal 家族）：eyebrow（子型別 `飯店/Airbnb` + `STAY · <入住日>`，hotel 藤鼠色）→ 大標（飯店名）→ 地址 meta → 髮絲線「入住資訊」+ check-in/out 兩欄 → Maps CTA。不再用 type chip / date badge。
 
 ### 行程時間軸（ItinerarySection）
 

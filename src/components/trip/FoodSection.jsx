@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { Navigation, Clock, Utensils } from 'lucide-react'
 import EmptyState from '../ui/EmptyState.jsx'
 import SegmentedControl from '../ui/SegmentedControl.jsx'
+import { categoryInk } from '../../lib/categories.js'
 
 /**
  * @param {{ rows: Array<{ name: string, area?: string, category?: string, hours?: string, note?: string, link?: string, time?: string, address?: string }> }} props
@@ -79,7 +80,10 @@ export default function FoodSection({ rows }) {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start mb-2">
                         <div className="min-w-0">
-                          <h4 className="font-bold text-jp-text font-serif text-lg leading-tight">{row.name}</h4>
+                          <h4 className="font-bold text-jp-text font-serif text-lg leading-tight flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: categoryInk('food') }} aria-hidden="true" />
+                            {row.name}
+                          </h4>
                           {(row.hours || row.time) && (
                             <span className="text-xs text-stone-600 font-serif mt-1 flex items-center gap-1 tabular-nums">
                               <Clock size={12} /> {row.hours || row.time}

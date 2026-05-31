@@ -1,7 +1,7 @@
 import { Fragment, useState, useEffect, useRef, useMemo, useId } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  Camera, X, Navigation, BookOpen, Clock, MapPin
+  Camera, X, Navigation, Clock, MapPin
 } from 'lucide-react'
 import { useScrollLock } from '../../hooks/useScrollLock.js'
 import { useModalA11y } from '../../hooks/useModalA11y.js'
@@ -222,70 +222,82 @@ function DetailModal({ row, spots, onClose }) {
             <X size={20} />
           </button>
 
-          <div className="overflow-y-auto overscroll-contain px-8 pb-32 flex-1 pt-4">
+          <div className="overflow-y-auto overscroll-contain px-8 pb-32 flex-1 pt-6">
+            {/* 彩色 eyebrow（分類） */}
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="text-sm font-serif font-bold" style={{ color: categoryInk(current.type) }}>
+                {typeInfo.label}
+              </span>
+              <span
+                className="text-2xs font-serif font-bold uppercase tracking-[0.25em]"
+                style={{ color: categoryInk(current.type), opacity: 0.6 }}
+              >
+                {typeInfo.en}
+              </span>
+            </div>
+
+            {/* 特大標題 */}
+            <h2 id={titleId} className="text-3xl font-serif font-bold text-jp-text leading-tight mb-2.5 pr-12">
+              {current.name}
+            </h2>
+
+            {/* meta 一行：時間 · 地點（無地址不顯示，修掉 placeholder） */}
+            {(current.time || current.address) && (
+              <div className="flex items-center gap-2 text-sm text-stone-500 font-serif mb-6 flex-wrap">
+                {current.time && (
+                  <span className="font-bold text-stone-600 tabular-nums">{current.time}</span>
+                )}
+                {current.time && current.address && <span className="text-stone-300">·</span>}
+                {current.address && (
+                  <span className="inline-flex items-center gap-1 min-w-0">
+                    <MapPin size={13} className="text-jp-green shrink-0" />
+                    <span className="truncate">{current.address}</span>
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* hero 圖（有才放，置於 meta 下） */}
             {current.image && (
               <img
                 src={current.image}
                 alt=""
                 width={800}
-                height={320}
+                height={384}
                 loading="lazy"
                 decoding="async"
-                className="w-full h-40 rounded-2xl object-cover mb-4 bg-stone-200"
+                className="w-full h-48 rounded-2xl object-cover mb-7 bg-stone-200"
               />
             )}
-            <div className="flex items-center gap-3 mb-2">
-              <span
-                className="px-3 py-1 border text-xs tracking-widest font-bold font-serif uppercase rounded backdrop-blur-sm"
-                style={categoryChipStyle(current.type)}
-              >
-                {typeInfo.label}
-              </span>
-              <span className="font-serif text-xl text-stone-600 tabular-nums">{current.time}</span>
-            </div>
 
-            <h2 id={titleId} className="text-2xl font-serif font-bold text-jp-text mb-3 leading-tight mt-2 pr-12">
-              {current.name}
-            </h2>
-
-            <div className="flex items-center gap-2 text-sm text-stone-600 mb-5 font-serif leading-relaxed">
-              <MapPin size={14} className="text-jp-green shrink-0" />
-              {current.address || '查看地圖位置'}
-            </div>
-
-            <div className="space-y-8">
-              {current.note && (
-                <div>
-                  <h3 className="font-bold text-jp-text mb-2 flex items-center gap-2 text-base font-serif">
-                    <BookOpen size={14} />
-                    關於此處
-                  </h3>
-                  <p className="text-jp-text leading-relaxed font-serif text-base opacity-90 whitespace-pre-line">
-                    {current.note}
-                  </p>
+            {/* 關於此處（髮絲線 eyebrow） */}
+            {current.note && (
+              <section className="mb-8">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xs font-serif font-bold uppercase tracking-[0.2em] text-stone-500 shrink-0">關於此處</span>
+                  <div className="h-[1px] flex-1 bg-stone-200" />
                 </div>
-              )}
+                <p className="text-jp-text leading-relaxed font-serif text-base opacity-90 whitespace-pre-line">
+                  {current.note}
+                </p>
+              </section>
+            )}
 
-              {currentSpots.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="h-[1px] w-3 bg-stone-300" />
-                    <h3 className="font-bold text-jp-text text-sm font-serif tracking-wide shrink-0">
-                      街道亮點
-                    </h3>
-                    <span className="text-xs text-stone-400 font-serif shrink-0 tabular-nums">
-                      {currentSpots.length} 個
-                    </span>
-                    <div className="h-[1px] flex-1 bg-stone-200" />
-                  </div>
-                  <div>
-                    {currentSpots.map((spot) => (
-                      <SpotItem key={`${spot.type}:${spot.name}`} spot={spot} />
-                    ))}
-                  </div>
+            {/* 街道亮點 */}
+            {currentSpots.length > 0 && (
+              <section>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xs font-serif font-bold uppercase tracking-[0.2em] text-stone-500 shrink-0">街道亮點</span>
+                  <span className="text-2xs text-stone-400 font-serif tabular-nums shrink-0">{currentSpots.length}</span>
+                  <div className="h-[1px] flex-1 bg-stone-200" />
                 </div>
-              )}
-            </div>
+                <div>
+                  {currentSpots.map((spot) => (
+                    <SpotItem key={`${spot.type}:${spot.name}`} spot={spot} />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
           {/* 底部浮動 Google Maps 導航 CTA */}

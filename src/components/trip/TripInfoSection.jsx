@@ -1,13 +1,22 @@
 import { useState, useRef, useEffect } from 'react'
-import { Plane, Luggage, ExternalLink, Hotel, ClipboardList, Navigation } from 'lucide-react'
+import { Plane, Luggage, ExternalLink, Hotel, ClipboardList, Navigation, MapPin } from 'lucide-react'
 import EmptyState from '../ui/EmptyState.jsx'
 import SegmentedControl from '../ui/SegmentedControl.jsx'
 import { useCancelableTap } from '../../hooks/useCancelableTap.js'
 import { openExternal } from '../../lib/openExternal.js'
-import { categoryChipStyle } from '../../lib/categories.js'
+import { categorySolidStyle, categoryInk } from '../../lib/categories.js'
 
-// 日期是 metadata 而非分類，用中性 stone（勿用分類色，避免色彩語意過載）
-const DATE_BADGE = 'border border-stone-300/50 text-stone-500 bg-stone-100/50 backdrop-blur-sm px-2 py-1 rounded font-serif tabular-nums text-sm font-bold'
+// 登機證撕票口：在色帶下緣（y=44px，對應色帶高度 h-11）兩側挖「真的」半圓鏤空，
+// 透出底層 BottomSheet 背景（用 mask，非貼色塊）。外層需另包 wrapper 保住投影（mask 會連陰影一起裁掉）。
+const FLIGHT_NOTCH = 'radial-gradient(circle 9px at left 44px, transparent 8.5px, #000 9px), radial-gradient(circle 9px at right 44px, transparent 8.5px, #000 9px)'
+const FLIGHT_NOTCH_STYLE = {
+  WebkitMaskImage: FLIGHT_NOTCH,
+  maskImage: FLIGHT_NOTCH,
+  WebkitMaskRepeat: 'no-repeat',
+  maskRepeat: 'no-repeat',
+  WebkitMaskComposite: 'source-in',
+  maskComposite: 'intersect',
+}
 
 const INFO_TABS = [
   { key: 'flights', label: '航班資訊' },
@@ -49,45 +58,55 @@ function FlightsTab({ flights }) {
           const { dep, arr } = parseTime(f.time)
 
           return (
-            <div key={i} className="glass-card relative p-5 rounded-2xl overflow-hidden">
-              <div className="flex justify-between items-center mb-4 border-b border-jp-green/20 pb-2">
-                <span className={DATE_BADGE}>
-                  {f.date}
+            // wrapper 只負責投影（mask 會裁掉陰影，故投影掛在沒被 mask 的外層）
+            <div key={i} className="rounded-2xl" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.07)' }}>
+            <div className="glass-card relative rounded-2xl overflow-hidden" style={FLIGHT_NOTCH_STYLE}>
+              {/* 登機證色帶：transport 藍鼠實心 + 白字（flight_no 左、日期右）。h-11=44px 對應撕票口 y */}
+              <div className="flex justify-between items-center px-5 h-11" style={categorySolidStyle('transport')}>
+                <span className="font-serif font-bold tracking-wide flex items-center gap-2">
+                  <Plane size={15} className="rotate-90" />
+                  {f.flight_no}
                 </span>
-                <span className="text-sm font-bold text-jp-green font-serif tracking-wide">{f.flight_no}</span>
+                <span className="font-serif font-bold text-sm tabular-nums opacity-90">{f.date}</span>
               </div>
-              <div className="flex justify-between items-center mb-4">
-                <div className="text-center">
-                  <div className="text-2xl font-serif font-bold text-jp-text">{dep}</div>
-                  <div className="text-sm text-stone-600 font-serif">{from}</div>
-                </div>
-                <div className="flex flex-col items-center text-stone-400">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full border border-stone-400" />
-                    <div className="w-12 h-[1px] bg-stone-400" />
-                    <Plane size={18} className="rotate-90 text-stone-400" />
-                    <div className="w-12 h-[1px] bg-stone-400" />
-                    <div className="w-3 h-3 rounded-full bg-stone-400" />
+
+              {/* 撕票虛線（兩端的鏤空由卡片 mask 挖出） */}
+              <div className="border-t border-dashed border-stone-300/70" />
+
+              <div className="p-5">
+                <div className="flex justify-between items-center">
+                  <div className="text-center">
+                    <div className="text-2xl font-serif font-bold text-jp-text">{dep}</div>
+                    <div className="text-sm text-stone-600 font-serif">{from}</div>
+                  </div>
+                  {/* 航線：端點/線/飛機用 transport 色（currentColor） */}
+                  <div className="flex items-center" style={{ color: categoryInk('transport') }}>
+                    <div className="w-2.5 h-2.5 rounded-full border-2 border-current" />
+                    <div className="w-12 h-[1px] bg-current opacity-50" />
+                    <Plane size={18} className="rotate-90" />
+                    <div className="w-12 h-[1px] bg-current opacity-50" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-current" />
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-serif font-bold text-jp-text">{arr}</div>
+                    <div className="text-sm text-stone-600 font-serif">{to}</div>
                   </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-serif font-bold text-jp-text">{arr}</div>
-                  <div className="text-sm text-stone-600 font-serif">{to}</div>
-                </div>
-              </div>
-              {(f.carry_on || f.checked_bag) && (
-                <div className="mt-4 pt-4 border-t border-jp-green/20">
-                  <div className="flex items-start gap-2">
-                    <Luggage size={16} className="text-stone-500 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm text-stone-600 leading-relaxed whitespace-pre-line font-serif">
-                      {[
-                        f.carry_on && `手提行李：${f.carry_on}`,
-                        f.checked_bag && `托運行李：${f.checked_bag}`,
-                      ].filter(Boolean).join('\n')}
+                {(f.carry_on || f.checked_bag) && (
+                  <div className="mt-4 pt-4 border-t border-jp-green/20">
+                    <div className="flex items-start gap-2">
+                      <Luggage size={16} className="text-stone-500 mt-0.5 flex-shrink-0" />
+                      <div className="text-sm text-stone-600 leading-relaxed whitespace-pre-line font-serif">
+                        {[
+                          f.carry_on && `手提行李：${f.carry_on}`,
+                          f.checked_bag && `托運行李：${f.checked_bag}`,
+                        ].filter(Boolean).join('\n')}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+            </div>
             </div>
           )
         })}
@@ -159,70 +178,76 @@ function HotelTab({ accommodation }) {
               <h4 className="text-sm font-bold text-stone-600 mb-3 pl-1 font-serif">{h.region}</h4>
             )}
             <div className="glass-card p-6 rounded-2xl relative overflow-hidden">
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap mb-3">
-                    {/* 飯店 / Airbnb 同屬「住宿」分類，用同一分類色，靠文字區分子型別 */}
-                    <span
-                      className="text-sm font-bold border backdrop-blur-sm px-2 py-1 rounded font-serif"
-                      style={categoryChipStyle('hotel')}
-                    >
-                      {h.type === 'hotel' ? '飯店' : h.type === 'airbnb' ? 'Airbnb' : '住宿'}
-                    </span>
-                    {h.date && (
-                      <span className={DATE_BADGE}>
-                        {h.date}
-                      </span>
+              {/* 編輯排版：eyebrow（子型別 + STAY · 入住日）→ 大標 → 地址 → 髮絲線入住資訊 */}
+              <div className="flex items-baseline gap-2 mb-1.5 flex-wrap">
+                <span className="text-sm font-serif font-bold" style={{ color: categoryInk('hotel') }}>
+                  {h.type === 'hotel' ? '飯店' : h.type === 'airbnb' ? 'Airbnb' : '住宿'}
+                </span>
+                <span
+                  className="text-2xs font-serif font-bold uppercase tracking-[0.25em]"
+                  style={{ color: categoryInk('hotel'), opacity: 0.6 }}
+                >
+                  STAY{h.date ? ` · ${h.date}` : ''}
+                </span>
+              </div>
+
+              <h5 className="font-serif font-bold text-jp-text text-2xl leading-tight mb-2">{h.name}</h5>
+
+              {h.address && (
+                <div className="flex items-center gap-1.5 text-sm text-stone-500 font-serif">
+                  <MapPin size={13} className="text-jp-green shrink-0" />
+                  <span className="min-w-0">{h.address}</span>
+                </div>
+              )}
+
+              {(h.check_in || h.check_out) && (
+                <>
+                  <div className="flex items-center gap-2 mt-5 mb-3">
+                    <span className="text-2xs font-serif font-bold uppercase tracking-[0.2em] text-stone-500 shrink-0">入住資訊</span>
+                    <div className="h-[1px] flex-1 bg-stone-200" />
+                  </div>
+                  {/* 兩欄等寬 + 置中分隔線：呈現置中、平衡感（同預覽的 in/out 面板） */}
+                  <div className="flex items-stretch rounded-xl border border-white/30 bg-white/30 px-5 py-3 text-sm font-serif text-stone-600">
+                    {h.check_in && (
+                      <div className="flex-1 text-center">
+                        <span className="block text-2xs text-stone-500 uppercase font-serif tracking-widest mb-1">Check-in</span>
+                        <span className="text-base text-jp-text font-bold font-serif tabular-nums">{h.check_in}</span>
+                      </div>
+                    )}
+                    {h.check_in && h.check_out && <div className="w-[1px] bg-stone-200 mx-4" />}
+                    {h.check_out && (
+                      <div className="flex-1 text-center">
+                        <span className="block text-2xs text-stone-500 uppercase font-serif tracking-widest mb-1">Check-out</span>
+                        <span className="text-base text-jp-text font-bold font-serif tabular-nums">{h.check_out}</span>
+                      </div>
                     )}
                   </div>
-                  <h5 className="font-serif font-bold text-jp-text text-xl leading-tight mb-2">{h.name}</h5>
-                  {h.address && (
-                    <p className="text-sm text-stone-600 font-serif mb-4 leading-relaxed">{h.address}</p>
-                  )}
+                </>
+              )}
 
-                  {(h.check_in || h.check_out) && (
-                    <div className="flex gap-6 mb-4 text-sm font-serif text-stone-600 bg-white/30 p-3 rounded-lg border border-white/40">
-                      {h.check_in && (
-                        <div>
-                          <span className="block text-2xs text-stone-500 uppercase font-serif tracking-widest mb-1">Check-in</span>
-                          <span className="text-sm text-stone-600 font-serif tabular-nums">{h.check_in}</span>
-                        </div>
-                      )}
-                      {h.check_in && h.check_out && <div className="w-[1px] bg-stone-200" />}
-                      {h.check_out && (
-                        <div>
-                          <span className="block text-2xs text-stone-500 uppercase font-serif tracking-widest mb-1">Check-out</span>
-                          <span className="text-sm text-stone-600 font-serif tabular-nums">{h.check_out}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
+              {h.note && (
+                <p className="text-sm text-stone-600 mt-4 font-serif leading-relaxed whitespace-pre-line">{h.note}</p>
+              )}
 
-                  {h.note && (
-                    <p className="text-sm text-stone-600 mb-2 font-serif leading-relaxed whitespace-pre-line">{h.note}</p>
-                  )}
-
-                  {h.link && (
-                    <div className="flex justify-center mt-4">
-                      <button
-                        onPointerDown={tap.onPointerDown}
-                        onPointerUp={tap.onPointerUp}
-                        onClick={tap.guard(() => openExternal(h.link))}
-                        className="frosted-tab-track press-springy shadow-2xl font-serif text-stone-600 flex items-center gap-2 touch-manipulation"
-                        style={{
-                          padding: '12px 32px',
-                          background: 'rgba(255, 255, 255, 0.45)',
-                          boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.7), 0 8px 24px rgba(0,0,0,0.15)',
-                        }}
-                        aria-label="查看住宿位置"
-                      >
-                        <Navigation size={16} />
-                        Google Maps 導航
-                      </button>
-                    </div>
-                  )}
+              {h.link && (
+                <div className="flex justify-center mt-5">
+                  <button
+                    onPointerDown={tap.onPointerDown}
+                    onPointerUp={tap.onPointerUp}
+                    onClick={tap.guard(() => openExternal(h.link))}
+                    className="frosted-tab-track press-springy shadow-2xl font-serif text-stone-600 flex items-center gap-2 touch-manipulation"
+                    style={{
+                      padding: '12px 32px',
+                      background: 'rgba(255, 255, 255, 0.45)',
+                      boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.7), 0 8px 24px rgba(0,0,0,0.15)',
+                    }}
+                    aria-label="查看住宿位置"
+                  >
+                    <Navigation size={16} />
+                    Google Maps 導航
+                  </button>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         ))}
