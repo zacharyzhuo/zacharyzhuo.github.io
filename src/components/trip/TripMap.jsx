@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { Crosshair, MapPin } from 'lucide-react'
-import { getCategory, BRAND_INK, categoryChipStyle, chipStyle } from '../../lib/categories.js'
+import { getCategory, BRAND_INK, BACKUP_INK, categoryChipStyle, chipStyle } from '../../lib/categories.js'
 import { sortByDistance, routePoints, buildMapsUrl } from '../../lib/maps.js'
 import { openExternal } from '../../lib/openExternal.js'
 import { tap as hapticTap, bump } from '../../lib/haptic.js'
@@ -25,6 +25,18 @@ function InvalidateOnMount() {
   return null
 }
 
+// 切換模式時 chip 列收合/展開會改變地圖高度；Leaflet 不會自動察覺，需重新量測。
+function InvalidateOnModeChange({ mode }) {
+  const map = useMap()
+  const isFirst = useRef(true)
+  useEffect(() => {
+    if (isFirst.current) { isFirst.current = false; return }
+    const id = requestAnimationFrame(() => map.invalidateSize())
+    return () => cancelAnimationFrame(id)
+  }, [map, mode])
+  return null
+}
+
 // 依目前要顯示的點自動 fit；positionsKey 變了才重算（避免每 render 都 fit）。
 function FitBounds({ positions, positionsKey }) {
   const map = useMap()
@@ -38,15 +50,16 @@ function FitBounds({ positions, positionsKey }) {
 }
 
 function popupNode(point) {
-  const cat = point.bucket === 'backup' ? { label: '備選', ink: BRAND_INK } : getCategory(point.bucket)
+  const eyebrowColor = point.bucket === 'backup' ? BACKUP_INK : getCategory(point.bucket).ink
   const url = buildMapsUrl(point)
   return (
     <div className="font-serif">
-      <div className="text-2xs tracking-widest uppercase font-bold" style={{ color: point.bucket === 'backup' ? '#6B6B66' : cat.ink }}>
+      <div className="text-2xs tracking-widest uppercase font-bold" style={{ color: eyebrowColor }}>
         {BUCKET_LABEL[point.bucket]}
       </div>
       <div className="text-base font-bold text-jp-text mt-0.5 mb-0.5">{point.name}</div>
       {point.desc && <div className="text-xs text-muted mb-1.5 leading-snug">{point.desc}</div>}
+      {/* 刻意用 Google 藍（非站內 jp-green）：示意這顆會開啟 Google 產品，借品牌色辨識 */}
       {url && (
         <button
           type="button"
@@ -146,7 +159,7 @@ export default function TripMap({ points, initialMode = 'explore', day = null })
           <div className="flex flex-wrap gap-2">
             {BUCKETS.map((b) => {
               const on = active.has(b)
-              const style = b === 'backup' ? chipStyle('#6B6B66') : categoryChipStyle(b)
+              const style = b === 'backup' ? chipStyle(BACKUP_INK) : categoryChipStyle(b)
               return (
                 <button
                   key={b}
@@ -169,11 +182,19 @@ export default function TripMap({ points, initialMode = 'explore', day = null })
       <div className="relative flex-1 min-h-0">
         {shown.length === 0 ? (
           <div className="absolute inset-0 flex items-center justify-center">
-            <EmptyState
-              icon={MapPin}
-              title={mode === 'route' ? '這天還沒有地圖座標' : '尚無地圖座標'}
-              hint="在 Google Sheet 的 itinerary tab 填 lat / lng 即可上圖"
-            />
+            {mode === 'explore' && points.length > 0 ? (
+              <EmptyState
+                icon={MapPin}
+                title="所有分類已關閉"
+                hint="點上方分類即可重新顯示地圖點"
+              />
+            ) : (
+              <EmptyState
+                icon={MapPin}
+                title={mode === 'route' ? '這天還沒有地圖座標' : '尚無地圖座標'}
+                hint="在 Google Sheet 的 itinerary tab 填 lat / lng 即可上圖"
+              />
+            )}
           </div>
         ) : (
           <>
@@ -186,6 +207,7 @@ export default function TripMap({ points, initialMode = 'explore', day = null })
               style={{ background: '#eceae3' }}
             >
               <InvalidateOnMount />
+              <InvalidateOnModeChange mode={mode} />
               <FitBounds positions={positions} positionsKey={positionsKey} />
               <TileLayer
                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
@@ -200,7 +222,10 @@ export default function TripMap({ points, initialMode = 'explore', day = null })
                     key={p.id}
                     position={[p.lat, p.lng]}
                     icon={markerIcon(p.bucket)}
-                    ref={(el) => { if (el) markerRefs.current[p.id] = el }}
+                    ref={(el) => {
+                      if (el) markerRefs.current[p.id] = el
+                      else delete markerRefs.current[p.id]
+                    }}
                   >
                     <Popup>{popupNode(p)}</Popup>
                   </Marker>

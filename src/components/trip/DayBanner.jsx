@@ -72,7 +72,7 @@ export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripN
         <button
           type="button"
           onClick={onOpenRoute}
-          className="absolute right-4 bottom-4 z-10 inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-jp-text text-xs font-serif font-bold frosted-glass-button touch-manipulation"
+          className="absolute right-4 bottom-4 z-10 inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-full text-jp-text text-xs font-serif font-bold frosted-glass-button touch-manipulation"
           style={{ textShadow: 'none' }}
           aria-label="看今日路線地圖"
         >
