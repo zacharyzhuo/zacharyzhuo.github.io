@@ -4,7 +4,7 @@ import { useModalA11y } from '../../hooks/useModalA11y.js'
 import { useCancelableTap } from '../../hooks/useCancelableTap.js'
 import { resist } from '../../lib/gesture.js'
 
-export default function BottomSheet({ isOpen, onClose, title, children, noScroll = false, noStickyTitle = false }) {
+export default function BottomSheet({ isOpen, onClose, title, children, noScroll = false, noStickyTitle = false, tall = false }) {
   const [dragY, setDragY] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const headerDragRef = useRef(null)
@@ -139,7 +139,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
       >
         {/* 單一毛玻璃層：往下延伸超過停駐邊（-bottom-56），開啟 overshoot / 反向拉都由「同一塊」
             玻璃覆蓋 → 構造上無接縫（取代舊的 glass-overshoot-fill 貼塊）。內容層疊在上面、不帶 backdrop。 */}
-        <div className="relative h-[79vh]">
+        <div className={`relative ${tall ? 'h-[92vh]' : 'h-[79vh]'}`}>
           <div aria-hidden="true" className="glass-bottom-sheet absolute inset-0 -bottom-56 pointer-events-none" />
           <div className="relative h-full flex flex-col">
 
