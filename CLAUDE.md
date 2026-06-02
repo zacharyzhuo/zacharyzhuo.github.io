@@ -57,13 +57,13 @@ src/
 │   │   └── TripCard.jsx             # 首頁行程卡片（毛玻璃風格）
 │   ├── trip/
 │   │   ├── DayNav.jsx               # 日期橫向導航列
-│   │   ├── DayBanner.jsx            # 每日 banner 圖 + 標題（+「今日路線」地圖入口按鈕）
+│   │   ├── DayBanner.jsx            # 每日 banner 圖 + 標題
 │   │   ├── ItinerarySection.jsx     # 每日行程（含 DetailModal）
 │   │   ├── TripInfoSection.jsx      # 旅程資訊（航班 / 行前準備 / 住宿，三 tab）
 │   │   ├── ShoppingSection.jsx      # 購物清單（area tabs + building 分組）
 │   │   ├── FoodSection.jsx          # 美食清單（area tabs + category 分組）
 │   │   ├── ChecklistSection.jsx     # 打包清單（localStorage 持久化 + 進度條）
-│   │   ├── TripMap.jsx              # 行程地圖（探索 + 今日路線；react-leaflet + CARTO 底圖）
+│   │   ├── TripMap.jsx              # 行程地圖（探索 + 路線；單一入口，路線用 DayNav 換天；react-leaflet + CARTO 底圖）
 │   │   ├── NearbyPanel.jsx          # 探索模式「離你最近」可收合面板（geolocation + haversine）
 │   │   └── mapIcons.js              # 地圖 marker divIcon 工廠（實心彩點 / 編號點 / 備選空心墨灰環 / 我的位置）
 │   └── ui/
@@ -283,14 +283,14 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 行程頁的地圖功能，`src/components/trip/TripMap.jsx`，包在 **tall 版 `BottomSheet`（`h-[92vh]`）** 裡，用 **react-leaflet v5 + leaflet + CARTO Positron 免費底圖**（不用 API key），以 `React.lazy` 切出 chunk。
 
-### 兩個入口、兩種模式（同一個 `TripMap` 元件）
+### 單一入口、modal 內兩種模式（同一個 `TripMap` 元件）
 
-| 入口 | 位置 | 模式 |
-|---|---|---|
-| 地圖 icon | 行程頁 header **右上角**（與左上漢堡對稱）；`mapPoints` 為空時不顯示 | **探索**：全部點、跨日、可分類篩選、定位找最近 |
-| 「今日路線」按鈕 | **DayBanner** 右下毛玻璃膠囊；該天有座標的點才顯示 | **路線**：帶入當天，點按 `time` 連成 1→2→3 動線 |
+- **入口**：行程頁 header **右上角**的地圖 icon（與左上漢堡對稱）；`mapPoints` 為空時不顯示。DayBanner **沒有**地圖按鈕。
+- 打開後**預設探索模式**，頂部一顆 `SegmentedControl`（探索 / 路線）切換：
+  - **探索**：全部點、跨日、可分類篩選（chip 列）、定位找最近。
+  - **路線**：頂部 chip 列換成 **`DayNav`（複用行程頁那顆）**，預設選中**開啟當下背景頁那天**（`activeDay`），可在 modal 內換天瀏覽各日動線（換天只改地圖，不動背景頁）。
 
-`TripMap` 接 `points` / `initialMode` / `day` 三個 prop；進去後仍可切換模式。
+`TripMap` 接 `points` / `days` / `activeDay` 三個 prop；`mode` 與 `routeDay` 都是元件內部 state（每次開啟重置為探索 + 背景當天）。
 
 ### 點的來源與分類（bucket）
 
@@ -308,7 +308,7 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 
 ### 路線模式
 
-只取**當天有座標的點**按 `time` 排序，畫編號 marker + 品牌綠虛線（綠=動線語意，非分類色）。清單點 `day=null` 自然不進路線。`daysWithRoute` 決定哪天 DayBanner 顯示「今日路線」按鈕。
+只取**選中那天有座標的點**按 `time` 排序，畫編號 marker + 品牌綠虛線（綠=動線語意，非分類色）。清單（food/shopping）點 `day=null` 自然不進路線。要看哪天由 modal 內的 `DayNav` 選（預設 `activeDay`）。
 
 ### 顏色 / marker
 
