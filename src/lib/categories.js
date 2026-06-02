@@ -21,6 +21,12 @@ export const CATEGORIES = {
 /** 品牌抹茶綠（= jp-green）。給 JS inline style 用（Tailwind class 不適用、需餵 chip/solid helper 時）。 */
 export const BRAND_INK = '#5C6E58'
 
+/**
+ * 備選點（itinerary 空 date）在地圖上的顏色：中性墨灰（利休鼠調）。
+ * 刻意「非品牌綠、非任何分類色」，搭配空心環 marker 讀作「候選、尚未鎖定」。
+ */
+export const BACKUP_INK = '#6B6B66'
+
 const DEFAULT_TYPE = 'attraction'
 
 /** 取分類 meta；未知 / 空 type 退回景點（itinerary 預設類型）。 */
