@@ -9,6 +9,7 @@ import { openExternal } from '../../lib/openExternal.js'
 import { tap as hapticTap, bump } from '../../lib/haptic.js'
 import { markerIcon, numberedIcon, meIcon } from './mapIcons.js'
 import NearbyPanel from './NearbyPanel.jsx'
+import DayNav from './DayNav.jsx'
 import SegmentedControl from '../ui/SegmentedControl.jsx'
 import EmptyState from '../ui/EmptyState.jsx'
 
@@ -76,13 +77,14 @@ function popupNode(point) {
 
 /**
  * @param {{
- *   points: Array,        // toMapPoints() 結果（全部有座標的點）
- *   initialMode?: 'explore'|'route',
- *   day?: number|null,    // route 模式帶入的日期
+ *   points: Array,           // toMapPoints() 結果（全部有座標的點）
+ *   days?: Array<{ day:number, date:string }>, // 路線 tab 的日期列
+ *   activeDay?: number|null, // 開啟時預設選中的天（背景頁當下那天）
  * }} props
  */
-export default function TripMap({ points, initialMode = 'explore', day = null }) {
-  const [mode, setMode] = useState(initialMode)
+export default function TripMap({ points, days = [], activeDay = null }) {
+  const [mode, setMode] = useState('explore')
+  const [routeDay, setRouteDay] = useState(activeDay ?? days[0]?.day ?? null)
   const [active, setActive] = useState(() => new Set(BUCKETS))
   const [userPos, setUserPos] = useState(null)
   const [geoStatus, setGeoStatus] = useState('idle') // idle|locating|ok|error
@@ -91,7 +93,7 @@ export default function TripMap({ points, initialMode = 'explore', day = null })
   const markerRefs = useRef({})
 
   const explorePoints = useMemo(() => points.filter((p) => active.has(p.bucket)), [points, active])
-  const routePts = useMemo(() => (day != null ? routePoints(points, day) : []), [points, day])
+  const routePts = useMemo(() => (routeDay != null ? routePoints(points, routeDay) : []), [points, routeDay])
 
   const shown = mode === 'route' ? routePts : explorePoints
   const positions = useMemo(() => shown.map((p) => [p.lat, p.lng]), [shown])
@@ -138,22 +140,20 @@ export default function TripMap({ points, initialMode = 'explore', day = null })
 
   return (
     <div className="flex flex-col h-full overflow-hidden rounded-t-[2rem]">
-      {/* header：模式切換 + （探索才有）分類 chip */}
-      <div className="flex-none px-5 pt-2 pb-3">
+      {/* header：模式切換（探索＝分類 chip 列 / 路線＝DayNav 換天） */}
+      <div className="flex-none pt-2">
         <h2 className="sr-only">行程地圖</h2>
-        {day != null && (
-          <div className="flex justify-center mb-3">
-            <SegmentedControl
-              tabs={[{ key: 'explore', label: '探索' }, { key: 'route', label: '路線' }]}
-              value={mode}
-              onChange={switchMode}
-              itemClassName="px-5"
-              ariaLabel="地圖模式"
-            />
-          </div>
-        )}
+        <div className="flex justify-center mb-2 px-5">
+          <SegmentedControl
+            tabs={[{ key: 'explore', label: '探索' }, { key: 'route', label: '路線' }]}
+            value={mode}
+            onChange={switchMode}
+            itemClassName="px-5"
+            ariaLabel="地圖模式"
+          />
+        </div>
         {mode === 'explore' && (
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="flex flex-wrap gap-2 justify-center px-5 pb-3">
             {BUCKETS.map((b) => {
               const on = active.has(b)
               const ink = b === 'backup' ? BACKUP_INK : getCategory(b).ink
@@ -172,6 +172,9 @@ export default function TripMap({ points, initialMode = 'explore', day = null })
               )
             })}
           </div>
+        )}
+        {mode === 'route' && days.length > 0 && (
+          <DayNav days={days} activeDay={routeDay} onSelect={setRouteDay} />
         )}
       </div>
 

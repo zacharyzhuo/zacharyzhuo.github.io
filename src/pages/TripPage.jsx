@@ -66,10 +66,9 @@ export default function TripPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [activeModal, setActiveModal] = useState(null)
   const [extras, setExtras] = useState(null)
-  const [mapState, setMapState] = useState({ open: false, mode: 'explore', day: null })
-  const openExploreMap = useCallback(() => setMapState({ open: true, mode: 'explore', day: null }), [])
-  const openRouteMap = useCallback((day) => setMapState({ open: true, mode: 'route', day }), [])
-  const closeMap = useCallback(() => setMapState((s) => ({ ...s, open: false })), [])
+  const [mapOpen, setMapOpen] = useState(false)
+  const openMap = useCallback(() => setMapOpen(true), [])
+  const closeMap = useCallback(() => setMapOpen(false), [])
 
   // 各 sheet tab data
   const flightsHook = useSheetData(trip?.sheet_id, 'flights')
@@ -109,7 +108,7 @@ export default function TripPage() {
   ])
   const { pullY, refreshing, triggerThreshold } = usePullToRefresh(refreshAllSheets, {
     // sidebar / modal / 彩蛋打開時停掉 pull-to-refresh，避免跟拖曳關閉手勢衝突
-    enabled: !sidebarOpen && !activeModal && !mapState.open,
+    enabled: !sidebarOpen && !activeModal && !mapOpen,
   })
 
   // Trip-specific extras（求婚彩蛋）lazy load
@@ -131,7 +130,7 @@ export default function TripPage() {
 
   const easterEgg = useEasterEgg({ extras })
 
-  useScrollLock(sidebarOpen || !!activeModal || easterEgg.open || mapState.open)
+  useScrollLock(sidebarOpen || !!activeModal || easterEgg.open || mapOpen)
 
   usePageMeta({
     title: trip ? `${trip.name}｜${trip.dates || ''}`.replace(/｜$/, '') : '行程',
@@ -174,17 +173,13 @@ export default function TripPage() {
     [normalizedItinerary, food, shopping]
   )
   const hasMapPoints = mapPoints.length > 0
-  const daysWithRoute = useMemo(
-    () => new Set(mapPoints.filter((p) => p.day != null).map((p) => p.day)),
-    [mapPoints]
-  )
 
   // 左右滑動切日手勢
   const swipe = useDaySwipe({
     days,
     activeDay,
     setActiveDay,
-    enabled: !sidebarOpen && !activeModal && !mapState.open,
+    enabled: !sidebarOpen && !activeModal && !mapOpen,
   })
 
   // 一次性 swipe 教學：第一次造訪有 ≥ 2 天的 trip 時 peek 一下下個 panel
@@ -262,7 +257,7 @@ export default function TripPage() {
           </div>
           {hasMapPoints ? (
             <button
-              onClick={openExploreMap}
+              onClick={openMap}
               className="p-3 frosted-glass-button rounded-full text-muted touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="開啟地圖"
             >
@@ -308,8 +303,6 @@ export default function TripPage() {
               itinerary={dayItinerary}
               tripName={trip.name}
               isCurrent
-              hasRoute={daysWithRoute.has(activeDay)}
-              onOpenRoute={openRouteMap}
             />
             {/* Next panel：absolute 放在右側 (left-full)，不參與高度 */}
             {nextDayObj && (
@@ -373,10 +366,10 @@ export default function TripPage() {
       </BottomSheet>
 
       {/* Map */}
-      <BottomSheet isOpen={mapState.open} onClose={closeMap} title="行程地圖" noScroll noStickyTitle tall>
-        {mapState.open && (
+      <BottomSheet isOpen={mapOpen} onClose={closeMap} title="行程地圖" noScroll noStickyTitle tall>
+        {mapOpen && (
           <Suspense fallback={<SectionSkeleton />}>
-            <TripMap points={mapPoints} initialMode={mapState.mode} day={mapState.day} />
+            <TripMap points={mapPoints} days={days} activeDay={activeDay} />
           </Suspense>
         )}
       </BottomSheet>
@@ -394,7 +387,7 @@ export default function TripPage() {
 }
 
 // 單一日 panel：banner + itinerary list；dayObj 為 null 時整格不渲染（給三欄第一/末日用）
-function DayPanel({ dayObj, dayMeta, itinerary, tripName, isCurrent = false, hasRoute = false, onOpenRoute }) {
+function DayPanel({ dayObj, dayMeta, itinerary, tripName, isCurrent = false }) {
   if (!dayObj) return null
   return (
     <div className="overflow-hidden">
@@ -405,7 +398,6 @@ function DayPanel({ dayObj, dayMeta, itinerary, tripName, isCurrent = false, has
         dateLabel={formatDayLabel(dayObj.date)}
         tripName={tripName}
         eager={isCurrent}
-        onOpenRoute={hasRoute && onOpenRoute ? () => onOpenRoute(dayObj.day) : undefined}
       />
       <div className="h-6" />
       <div className="mt-2">
