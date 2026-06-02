@@ -41,7 +41,7 @@ export function toMapPoints(normalized) {
     const bucket = pointBucket(row)
     if (!coords || !bucket) return acc
     acc.push({
-      id: `${row.name || ''}-${coords.lat}-${coords.lng}`,
+      id: `${row.name || ''}-${row._day ?? 'x'}-${row.time || ''}-${coords.lat}-${coords.lng}`,
       name: row.name || '',
       lat: coords.lat,
       lng: coords.lng,
@@ -93,6 +93,52 @@ export function routePoints(points, day) {
 export function formatDistance(m) {
   if (!Number.isFinite(m)) return ''
   return m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toFixed(1)} km`
+}
+
+/**
+ * food / shopping 清單列 → 地圖點。清單點無日期（day=null）→ 只進探索模式，不進路線。
+ * bucket 固定為呼叫端指定（'food' 或 'shopping'）。
+ */
+export function listToMapPoints(rows, bucket) {
+  if (!Array.isArray(rows)) return []
+  return rows.reduce((acc, row) => {
+    const coords = parseLatLng(row)
+    if (!coords) return acc
+    const name = row.name || ''
+    acc.push({
+      id: `${bucket}-${name}-${coords.lat}-${coords.lng}`,
+      name,
+      lat: coords.lat,
+      lng: coords.lng,
+      bucket,
+      type: bucket,
+      link: row.link || '',
+      address: row.address || '',
+      desc: row.desc || row.note || '',
+      time: '',
+      day: null,
+    })
+    return acc
+  }, [])
+}
+
+const locationKey = (p) => `${p.bucket}-${p.lat.toFixed(5)}-${p.lng.toFixed(5)}`
+
+/**
+ * 合併 itinerary 點與清單點：itinerary 點全留（保留 day，能進路線）；清單點若與既有點
+ * 同 bucket 同座標（5 位小數）則去重 —— 涵蓋 list-vs-itinerary 與 list-vs-list 重複。
+ * 注意：itinerary 點彼此不去重（同一旅館的早餐/午餐視為各自的停留）。
+ */
+export function mergeMapPoints(itineraryPoints, listPoints) {
+  const seen = new Set(itineraryPoints.map(locationKey))
+  const extra = []
+  for (const p of listPoints) {
+    const key = locationKey(p)
+    if (seen.has(key)) continue
+    seen.add(key)
+    extra.push(p)
+  }
+  return [...itineraryPoints, ...extra]
 }
 
 /**

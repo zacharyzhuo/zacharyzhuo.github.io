@@ -11,7 +11,7 @@ import { pickInitialDay, formatDayLabel } from '../lib/tripDate.js'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 import { useDays, useFoodItems, useNormalizedDays, useNormalizedItinerary } from '../hooks/useTripDerived.js'
 import { categoryInk, BRAND_INK } from '../lib/categories.js'
-import { toMapPoints } from '../lib/maps.js'
+import { toMapPoints, listToMapPoints, mergeMapPoints } from '../lib/maps.js'
 import { TripSkeleton, SectionSkeleton } from '../components/ui/Skeletons.jsx'
 import ErrorState from '../components/ui/ErrorState.jsx'
 import Sidebar from '../components/layout/Sidebar.jsx'
@@ -166,7 +166,13 @@ export default function TripPage() {
   const nextDayItinerary = useMemo(() => nextDayObj ? filterDayItinerary(nextDayObj.day) : [], [normalizedItinerary, nextDayObj])
 
   const foodItems = useFoodItems(food, itinerary)
-  const mapPoints = useMemo(() => toMapPoints(normalizedItinerary), [normalizedItinerary])
+  const mapPoints = useMemo(
+    () => mergeMapPoints(
+      toMapPoints(normalizedItinerary),
+      [...listToMapPoints(food, 'food'), ...listToMapPoints(shopping, 'shopping')]
+    ),
+    [normalizedItinerary, food, shopping]
+  )
   const hasMapPoints = mapPoints.length > 0
   const daysWithRoute = useMemo(
     () => new Set(mapPoints.filter((p) => p.day != null).map((p) => p.day)),

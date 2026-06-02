@@ -8,6 +8,8 @@ import {
   routePoints,
   formatDistance,
   buildMapsUrl,
+  listToMapPoints,
+  mergeMapPoints,
 } from '../../lib/maps.js'
 
 describe('parseLatLng', () => {
@@ -134,5 +136,44 @@ describe('buildMapsUrl', () => {
   it('returns empty string when nothing usable', () => {
     expect(buildMapsUrl({ link: '', name: '', address: '' })).toBe('')
     expect(buildMapsUrl(null)).toBe('')
+  })
+})
+
+describe('listToMapPoints', () => {
+  it('maps list rows with coords to the given bucket, day null', () => {
+    const rows = [
+      { name: 'Zubuchon', lat: '10.3115', lng: '123.9181', link: 'https://x', desc: 'lechon' },
+      { name: 'No coords', lat: '', lng: '' },
+    ]
+    const pts = listToMapPoints(rows, 'food')
+    expect(pts).toHaveLength(1)
+    expect(pts[0]).toMatchObject({ name: 'Zubuchon', bucket: 'food', type: 'food', day: null, link: 'https://x', desc: 'lechon' })
+  })
+  it('returns [] for non-array', () => { expect(listToMapPoints(null, 'food')).toEqual([]) })
+})
+
+describe('mergeMapPoints', () => {
+  it('keeps all itinerary points and drops list points colliding by bucket+coords', () => {
+    const itin = [{ id: 'a', name: 'A', bucket: 'food', lat: 10.30982, lng: 123.91942, day: 1 }]
+    const list = [
+      { id: 'b', name: 'A-dup', bucket: 'food', lat: 10.309820, lng: 123.919420, day: null },
+      { id: 'c', name: 'C', bucket: 'shopping', lat: 10.31, lng: 123.92, day: null },
+    ]
+    const merged = mergeMapPoints(itin, list)
+    expect(merged.map((p) => p.name)).toEqual(['A', 'C'])
+  })
+  it('dedups list vs list at same bucket+coords (5dp)', () => {
+    const list = [
+      { id: 'b', name: 'B', bucket: 'food', lat: 9.5, lng: 123.7, day: null },
+      { id: 'b2', name: 'B2', bucket: 'food', lat: 9.500001, lng: 123.700004, day: null },
+    ]
+    expect(mergeMapPoints([], list).map((p) => p.name)).toEqual(['B'])
+  })
+  it('does NOT merge two itinerary points at same coords (different meals/days kept)', () => {
+    const itin = [
+      { id: 'x1', name: 'Breakfast', bucket: 'food', lat: 10.30982, lng: 123.91942, day: 2 },
+      { id: 'x2', name: 'Breakfast', bucket: 'food', lat: 10.30982, lng: 123.91942, day: 4 },
+    ]
+    expect(mergeMapPoints(itin, []).map((p) => p.name)).toEqual(['Breakfast', 'Breakfast'])
   })
 })
