@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { Crosshair, MapPin } from 'lucide-react'
-import { getCategory, BRAND_INK, BACKUP_INK, categoryChipStyle, chipStyle } from '../../lib/categories.js'
+import { getCategory, BRAND_INK, BACKUP_INK } from '../../lib/categories.js'
 import { sortByDistance, routePoints, buildMapsUrl } from '../../lib/maps.js'
 import { openExternal } from '../../lib/openExternal.js'
 import { tap as hapticTap, bump } from '../../lib/haptic.js'
@@ -153,18 +153,18 @@ export default function TripMap({ points, initialMode = 'explore', day = null })
           </div>
         )}
         {mode === 'explore' && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 justify-center">
             {BUCKETS.map((b) => {
               const on = active.has(b)
-              const style = b === 'backup' ? chipStyle(BACKUP_INK) : categoryChipStyle(b)
+              const ink = b === 'backup' ? BACKUP_INK : getCategory(b).ink
               return (
                 <button
                   key={b}
                   type="button"
                   onClick={() => toggleBucket(b)}
-                  style={on ? style : undefined}
-                  className={`text-xs font-serif px-3 py-1 rounded-full border backdrop-blur-sm touch-manipulation transition-opacity ${
-                    on ? '' : 'border-stone-200 text-stone-400 opacity-50'
+                  style={on ? { color: ink, borderColor: `${ink}59` } : undefined}
+                  className={`frosted-glass-button text-xs font-serif font-bold px-4 py-1.5 rounded-full touch-manipulation ${
+                    on ? '' : 'text-stone-400 opacity-55'
                   }`}
                 >
                   {BUCKET_LABEL[b]}
