@@ -300,7 +300,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - **`food` tab**：全部歸 `food` bucket（`day=null`，只進探索）。
 - **`shopping` tab**：全部歸 `shopping` bucket（`day=null`，只進探索；建議只填建築標頭列）。
 
-探索模式 4 顆篩選 chip：**美食 / 景點 / 購物 / 備選**。每個點屬於剛好一個 bucket。
+探索模式 4 顆篩選 chip（置中、毛玻璃 `.frosted-glass-button` 樣式，分類色在文字＋邊框）：**美食 / 購物 / 景點 / 備選**（順序即 `BUCKETS` 常數）。每個點屬於剛好一個 bucket。
 
 ### 去重（`mergeMapPoints`）
 
