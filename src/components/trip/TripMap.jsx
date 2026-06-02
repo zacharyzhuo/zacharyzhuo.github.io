@@ -1,0 +1,254 @@
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import { Crosshair, MapPin } from 'lucide-react'
+import { getCategory, BRAND_INK, categoryChipStyle, chipStyle } from '../../lib/categories.js'
+import { sortByDistance, routePoints, buildMapsUrl } from '../../lib/maps.js'
+import { openExternal } from '../../lib/openExternal.js'
+import { tap as hapticTap, bump } from '../../lib/haptic.js'
+import { markerIcon, numberedIcon, meIcon } from './mapIcons.js'
+import NearbyPanel from './NearbyPanel.jsx'
+import EmptyState from '../ui/EmptyState.jsx'
+
+const TOKYO = [35.6762, 139.6503]
+const BUCKETS = ['food', 'attraction', 'shopping', 'backup']
+const BUCKET_LABEL = { food: '美食', attraction: '景點', shopping: '購物', backup: '備選' }
+
+// Leaflet 在「開啟時才長出來」的容器裡需重新量尺寸，否則圖磚渲染成灰塊。
+function InvalidateOnMount() {
+  const map = useMap()
+  useEffect(() => {
+    const id = setTimeout(() => map.invalidateSize(), 250)
+    return () => clearTimeout(id)
+  }, [map])
+  return null
+}
+
+// 依目前要顯示的點自動 fit；positionsKey 變了才重算（避免每 render 都 fit）。
+function FitBounds({ positions, positionsKey }) {
+  const map = useMap()
+  useEffect(() => {
+    if (!positions.length) return
+    const bounds = L.latLngBounds(positions)
+    map.fitBounds(bounds, { padding: [44, 44], maxZoom: 16 })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, positionsKey])
+  return null
+}
+
+function popupNode(point) {
+  const cat = point.bucket === 'backup' ? { label: '備選', ink: BRAND_INK } : getCategory(point.bucket)
+  const url = buildMapsUrl(point)
+  return (
+    <div className="font-serif">
+      <div className="text-2xs tracking-widest uppercase font-bold" style={{ color: point.bucket === 'backup' ? '#6B6B66' : cat.ink }}>
+        {BUCKET_LABEL[point.bucket]}
+      </div>
+      <div className="text-base font-bold text-jp-text mt-0.5 mb-0.5">{point.name}</div>
+      {point.desc && <div className="text-xs text-muted mb-1.5 leading-snug">{point.desc}</div>}
+      {url && (
+        <button
+          type="button"
+          onClick={() => openExternal(url)}
+          className="text-[13px] font-bold text-[#1a73e8] touch-manipulation"
+        >
+          ↗ 開啟 Google Maps 導航
+        </button>
+      )}
+    </div>
+  )
+}
+
+/**
+ * @param {{
+ *   points: Array,        // toMapPoints() 結果（全部有座標的點）
+ *   initialMode?: 'explore'|'route',
+ *   day?: number|null,    // route 模式帶入的日期
+ * }} props
+ */
+export default function TripMap({ points, initialMode = 'explore', day = null }) {
+  const [mode, setMode] = useState(initialMode)
+  const [active, setActive] = useState(() => new Set(BUCKETS))
+  const [userPos, setUserPos] = useState(null)
+  const [geoStatus, setGeoStatus] = useState('idle') // idle|locating|ok|error
+  const [nearbyOpen, setNearbyOpen] = useState(false)
+  const mapRef = useRef(null)
+  const markerRefs = useRef({})
+
+  const explorePoints = useMemo(() => points.filter((p) => active.has(p.bucket)), [points, active])
+  const routePts = useMemo(() => (day != null ? routePoints(points, day) : []), [points, day])
+
+  const shown = mode === 'route' ? routePts : explorePoints
+  const positions = useMemo(() => shown.map((p) => [p.lat, p.lng]), [shown])
+  const positionsKey = useMemo(() => positions.map((p) => p.join(',')).join('|'), [positions])
+
+  const ranked = useMemo(
+    () => (userPos ? sortByDistance(explorePoints, userPos) : []),
+    [userPos, explorePoints]
+  )
+
+  const toggleBucket = useCallback((b) => {
+    hapticTap()
+    setActive((prev) => {
+      const next = new Set(prev)
+      next.has(b) ? next.delete(b) : next.add(b)
+      return next
+    })
+  }, [])
+
+  const locate = useCallback(() => {
+    bump()
+    if (!navigator.geolocation) { setGeoStatus('error'); setNearbyOpen(true); return }
+    setGeoStatus('locating'); setNearbyOpen(true)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const ll = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+        setUserPos(ll); setGeoStatus('ok')
+        mapRef.current?.flyTo([ll.lat, ll.lng], 14)
+      },
+      () => setGeoStatus('error'),
+      { enableHighAccuracy: true, timeout: 8000 }
+    )
+  }, [])
+
+  const focusPoint = useCallback((p) => {
+    bump()
+    mapRef.current?.flyTo([p.lat, p.lng], 16)
+    markerRefs.current[p.id]?.openPopup()
+  }, [])
+
+  const switchMode = useCallback((m) => { hapticTap(); setMode(m) }, [])
+
+  const initialCenter = positions[0] || (userPos ? [userPos.lat, userPos.lng] : TOKYO)
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden rounded-t-[2rem]">
+      {/* header：模式切換 + （探索才有）分類 chip */}
+      <div className="flex-none px-5 pt-2 pb-3">
+        <h2 className="sr-only">行程地圖</h2>
+        <div className="inline-flex rounded-full bg-black/5 p-1 mb-3">
+          {['explore', 'route'].map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => switchMode(m)}
+              disabled={m === 'route' && day == null}
+              className={`px-4 py-1.5 rounded-full text-sm font-serif touch-manipulation transition-colors ${
+                mode === m ? 'bg-white text-jp-text shadow-sm' : 'text-muted'
+              } ${m === 'route' && day == null ? 'opacity-40' : ''}`}
+            >
+              {m === 'explore' ? '探索' : day != null ? `DAY ${day} 路線` : '路線'}
+            </button>
+          ))}
+        </div>
+        {mode === 'explore' && (
+          <div className="flex flex-wrap gap-2">
+            {BUCKETS.map((b) => {
+              const on = active.has(b)
+              const style = b === 'backup' ? chipStyle('#6B6B66') : categoryChipStyle(b)
+              return (
+                <button
+                  key={b}
+                  type="button"
+                  onClick={() => toggleBucket(b)}
+                  style={on ? style : undefined}
+                  className={`text-xs font-serif px-3 py-1 rounded-full border backdrop-blur-sm touch-manipulation transition-opacity ${
+                    on ? '' : 'border-stone-200 text-stone-400 opacity-50'
+                  }`}
+                >
+                  {BUCKET_LABEL[b]}
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* map */}
+      <div className="relative flex-1 min-h-0">
+        {shown.length === 0 ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <EmptyState
+              icon={MapPin}
+              title={mode === 'route' ? '這天還沒有地圖座標' : '尚無地圖座標'}
+              hint="在 Google Sheet 的 itinerary tab 填 lat / lng 即可上圖"
+            />
+          </div>
+        ) : (
+          <>
+            <MapContainer
+              ref={mapRef}
+              center={initialCenter}
+              zoom={14}
+              zoomControl={true}
+              className="absolute inset-0 h-full w-full"
+              style={{ background: '#eceae3' }}
+            >
+              <InvalidateOnMount />
+              <FitBounds positions={positions} positionsKey={positionsKey} />
+              <TileLayer
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                attribution='&copy; OpenStreetMap &copy; CARTO'
+                subdomains="abcd"
+                maxZoom={20}
+              />
+
+              {mode === 'explore' &&
+                explorePoints.map((p) => (
+                  <Marker
+                    key={p.id}
+                    position={[p.lat, p.lng]}
+                    icon={markerIcon(p.bucket)}
+                    ref={(el) => { if (el) markerRefs.current[p.id] = el }}
+                  >
+                    <Popup>{popupNode(p)}</Popup>
+                  </Marker>
+                ))}
+
+              {mode === 'route' && (
+                <>
+                  {routePts.length > 1 && (
+                    <Polyline
+                      positions={routePts.map((p) => [p.lat, p.lng])}
+                      pathOptions={{ color: BRAND_INK, weight: 3, dashArray: '2,8', lineCap: 'round', opacity: 0.85 }}
+                    />
+                  )}
+                  {routePts.map((p, i) => (
+                    <Marker key={p.id} position={[p.lat, p.lng]} icon={numberedIcon(p.bucket, i + 1)}>
+                      <Popup>{popupNode(p)}</Popup>
+                    </Marker>
+                  ))}
+                </>
+              )}
+
+              {userPos && <Marker position={[userPos.lat, userPos.lng]} icon={meIcon()} />}
+            </MapContainer>
+
+            {/* locate button（探索模式才有意義） */}
+            {mode === 'explore' && (
+              <button
+                type="button"
+                onClick={locate}
+                className="absolute right-4 bottom-[124px] z-[600] w-12 h-12 rounded-full bg-white shadow-lg grid place-items-center text-jp-green active:scale-95 touch-manipulation"
+                aria-label="定位我的位置"
+              >
+                <Crosshair size={22} />
+              </button>
+            )}
+
+            {mode === 'explore' && (
+              <NearbyPanel
+                ranked={ranked}
+                status={geoStatus}
+                open={nearbyOpen}
+                onToggle={() => setNearbyOpen((o) => !o)}
+                onSelect={focusPoint}
+              />
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
