@@ -52,17 +52,20 @@ src/
 ├── components/
 │   ├── layout/
 │   │   ├── Sidebar.jsx              # 抽屜導航（含 MENU_ITEMS 清單）
-│   │   └── BottomSheet.jsx          # 共用底部彈出層
+│   │   └── BottomSheet.jsx          # 共用底部彈出層（tall 變體：h-[92vh]，供地圖用）
 │   ├── home/
 │   │   └── TripCard.jsx             # 首頁行程卡片（毛玻璃風格）
 │   ├── trip/
 │   │   ├── DayNav.jsx               # 日期橫向導航列
-│   │   ├── DayBanner.jsx            # 每日 banner 圖 + 標題
+│   │   ├── DayBanner.jsx            # 每日 banner 圖 + 標題（+「今日路線」地圖入口按鈕）
 │   │   ├── ItinerarySection.jsx     # 每日行程（含 DetailModal）
 │   │   ├── TripInfoSection.jsx      # 旅程資訊（航班 / 行前準備 / 住宿，三 tab）
 │   │   ├── ShoppingSection.jsx      # 購物清單（area tabs + building 分組）
 │   │   ├── FoodSection.jsx          # 美食清單（area tabs + category 分組）
-│   │   └── ChecklistSection.jsx     # 打包清單（localStorage 持久化 + 進度條）
+│   │   ├── ChecklistSection.jsx     # 打包清單（localStorage 持久化 + 進度條）
+│   │   ├── TripMap.jsx              # 行程地圖（探索 + 今日路線；react-leaflet + CARTO 底圖）
+│   │   ├── NearbyPanel.jsx          # 探索模式「離你最近」可收合面板（geolocation + haversine）
+│   │   └── mapIcons.js              # 地圖 marker divIcon 工廠（實心彩點 / 編號點 / 備選空心墨灰環 / 我的位置）
 │   └── ui/
 │       ├── SegmentedControl.jsx     # 玻璃膠囊分段控制器（移動膠囊 + 拖拉跟手 + 自適應降級）
 │       ├── Skeletons.jsx            # 冷啟動載入骨架（TripSkeleton 全頁 / HomeCardsSkeleton 卡片）
@@ -86,8 +89,9 @@ src/
 │   ├── env.js                       # 集中讀取 + 驗證 Vite env
 │   ├── haptic.js                    # navigator.vibrate 包裝（tap/bump/success）
 │   ├── swrCache.js                  # localStorage 版 stale-while-revalidate
-│   ├── categories.js                # 行程分類色彩單一 source of truth（label/icon/ink + chip 樣式）
-│   └── tripDate.js                  # 旅程日期相關純函式
+│   ├── categories.js                # 行程分類色彩單一 source of truth（label/icon/ink + chip 樣式 + BACKUP_INK）
+│   ├── tripDate.js                  # 旅程日期相關純函式
+│   └── maps.js                      # 地圖純函式（座標解析 / bucket / haversine / 路線排序 / Maps URL / 去重合併）
 ├── trips/
 │   └── tokyo-hokkaido-2026-03/
 │       └── extras.jsx               # 求婚彩蛋（僅此行程）
@@ -233,8 +237,8 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 **`itinerary` tab**
 
-| `date` | `time` | `name` | `type` | `address` | `link` | `description` | `note` | `hours` | `parent` | `image` |
-|---|---|---|---|---|---|---|---|---|---|---|
+| `date` | `time` | `name` | `type` | `address` | `link` | `description` | `note` | `hours` | `parent` | `image` | `lat` | `lng` |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
 
 `type` 可選值：`attraction`（預設）、`hotel`、`food`、`shopping`、`transport`（label / icon / 顏色見 `src/lib/categories.js`）
 
@@ -246,27 +250,76 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - `address`：Google Maps 導航查詢字串（`link` 有值時優先用 `link`）
 - `parent`：**子項目專用**，填入父卡片的 `name`（字串完全比對）。有值的 row 不出現在主時間軸，改顯示在父卡片 modal 的「街道亮點」區。排序：`food → attraction → shopping`；父卡片底部自動出現「N 個亮點」badge
 - `image`：選填縮圖（完整 URL 或 `/trips/<slug>/...` 絕對路徑）。**資料驅動、與 type 無關**：有值才顯示。卡片右側 64×64 圓角縮圖；點開 modal 時頂部顯示為 hero 圖。`lazy` 載入。
+- `lat` / `lng`：選填經緯度（從 Google Maps 複製貼上，兩欄分開）。給「地圖」功能（見下方）戳點用，有值才上圖。詳見 **地圖（TripMap）** 一節。
 
 **`shopping` tab**
 
-| `area` | `building` | `name` | `floor` | `hours` | `link` | `desc` |
-|---|---|---|---|---|---|---|
+| `area` | `building` | `name` | `floor` | `hours` | `link` | `desc` | `lat` | `lng` |
+|---|---|---|---|---|---|---|---|---|
+
+> 欄位以 **header 名稱** 對應（`parseCSV` 產生物件），實際 sheet 內欄位順序可不同；新增欄位只要 header 名對得上即可。
 
 - `building` 空白：獨棟店，單獨顯示一個 block
 - `building` 有值：合併顯示在同名建築的 block（第一筆為建築標頭，其 `hours`/`link`/`desc` 代表整棟）
 - **building-meta 列**：某筆 `name === building` 且 `floor` 空白時，視為「描述整棟」的 meta 列，只餵建築標頭（desc/hours/link），**不再重複列為子店**（避免標頭與子店名稱重複）。但 `name === building` 卻**有樓層**（如整棟店橫跨 `B2～8F`）的列仍當子店，好讓樓層範圍照常顯示。判斷在 `groupItems`
 - `desc`：店家備註（選填，有值才顯示），顯示於店名與 `hours` 之間的淡色副文（`text-secondary`）。standalone 卡、building 標頭、building 子店列三處皆支援。把原本硬塞在 `name` 後面的括號補充（如「伴手禮一站・芒果乾/otap」）改填這欄，店名可回到單行
+- `lat` / `lng`：選填經緯度，給地圖用（歸「購物」分類）。建議只在**建築標頭列**填（一棟一個點）；同棟分店留白即可（地圖會依座標去重）
 
 **`food` tab**
 
-| `area` | `category` | `name` | `hours` | `desc` | `link` | `image` |
-|---|---|---|---|---|---|---|
+| `area` | `category` | `name` | `hours` | `desc` | `link` | `image` | `lat` | `lng` |
+|---|---|---|---|---|---|---|---|---|
 
 - `area`：浮動 tab 分區（空白則不顯示 area tabs）
 - `category`：分組標題（空白則不分組）
 - `desc`：店家描述（程式碼同時支援 `note` 欄位名稱）
 - `image`：選填縮圖（完整 URL 或絕對路徑），有值才顯示在卡片左側 64×64 圓角；`lazy` 載入
-- 若 `food` tab 無資料，fallback 為 `itinerary` 中 `type === 'food'` 的行程（由 `useFoodItems` 處理）
+- `lat` / `lng`：選填經緯度，給地圖用（歸「美食」分類）。有值才上圖
+- 若 `food` tab 無資料，fallback 為 `itinerary` 中 `type === 'food'` 的行程（由 `useFoodItems` 處理）。**注意**：地圖的美食點來自 **raw `food` tab**（非 `useFoodItems`），避免與 itinerary 的 food 重複計算
+
+---
+
+## 地圖（TripMap）
+
+行程頁的地圖功能，`src/components/trip/TripMap.jsx`，包在 **tall 版 `BottomSheet`（`h-[92vh]`）** 裡，用 **react-leaflet v5 + leaflet + CARTO Positron 免費底圖**（不用 API key），以 `React.lazy` 切出 chunk。
+
+### 兩個入口、兩種模式（同一個 `TripMap` 元件）
+
+| 入口 | 位置 | 模式 |
+|---|---|---|
+| 地圖 icon | 行程頁 header **右上角**（與左上漢堡對稱）；`mapPoints` 為空時不顯示 | **探索**：全部點、跨日、可分類篩選、定位找最近 |
+| 「今日路線」按鈕 | **DayBanner** 右下毛玻璃膠囊；該天有座標的點才顯示 | **路線**：帶入當天，點按 `time` 連成 1→2→3 動線 |
+
+`TripMap` 接 `points` / `initialMode` / `day` 三個 prop；進去後仍可切換模式。
+
+### 點的來源與分類（bucket）
+
+地圖點來自**三個 tab**（皆需填 `lat`/`lng`，有座標才上圖）：
+
+- **`itinerary` tab**：有日期 → 依 `type` 歸 `food`/`attraction`/`shopping`；**空 `date` → `backup`（備選，不分 type）**；`transport`/`hotel` **不上圖**。
+- **`food` tab**：全部歸 `food` bucket（`day=null`，只進探索）。
+- **`shopping` tab**：全部歸 `shopping` bucket（`day=null`，只進探索；建議只填建築標頭列）。
+
+探索模式 4 顆篩選 chip：**美食 / 景點 / 購物 / 備選**。每個點屬於剛好一個 bucket。
+
+### 去重（`mergeMapPoints`）
+
+itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shopping）點若與既有點**同 bucket 同座標（5 位小數）**則去重 — 涵蓋 list-vs-itinerary 與 list-vs-list 重複。itinerary 點彼此**不**去重（同旅館的早餐/午餐各算一個停留）。組裝在 `TripPage`：`mergeMapPoints(toMapPoints(itinerary), [...listToMapPoints(food,'food'), ...listToMapPoints(shopping,'shopping')])`。
+
+### 路線模式
+
+只取**當天有座標的點**按 `time` 排序，畫編號 marker + 品牌綠虛線（綠=動線語意，非分類色）。清單點 `day=null` 自然不進路線。`daysWithRoute` 決定哪天 DayBanner 顯示「今日路線」按鈕。
+
+### 顏色 / marker
+
+- marker 顏色取自 `categories.js`：food/attraction/shopping 用各自 ink；**備選用 `BACKUP_INK`（中性墨灰 `#6B6B66`，非品牌綠、非分類色）+ 空心環**。
+- Google Maps 導航連結：優先用該點 `link`（地點頁）；無 `link` 才退用 `name+address` 搜尋字串（**不用裸經緯度**）。`buildMapsUrl` 在 `lib/maps.js`，開連結走 `openExternal`（PWA 相容）。
+- 「離你最近」面板（`NearbyPanel`）：`navigator.geolocation` + `haversineMeters` 排序；是 sheet **內**的可收合 panel，非第二層彈窗。
+
+### 已知限制 / 雷
+
+- Leaflet 在「開啟時才長出來」「切模式高度改變」的容器需 `map.invalidateSize()`（`InvalidateOnMount` / `InvalidateOnModeChange` 處理），否則圖磚渲染成灰塊/灰條。
+- 純函式（`parseLatLng`/`pointBucket`/`toMapPoints`/`listToMapPoints`/`mergeMapPoints`/`haversineMeters`/`sortByDistance`/`routePoints`/`formatDistance`/`buildMapsUrl`）集中在 `lib/maps.js` 並有測試；Leaflet 元件本身以手動驗收為主。
 
 ---
 
