@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Menu, Info, ClipboardList, ShoppingBag, Utensils, RefreshCw } from 'lucide-react'
+import { Menu, Info, ClipboardList, ShoppingBag, Utensils, RefreshCw, Map as MapIcon } from 'lucide-react'
 import { useTrips } from '../hooks/useTrips.js'
 import { useSheetData } from '../hooks/useSheetData.js'
 import { useScrollLock } from '../hooks/useScrollLock.js'
@@ -11,6 +11,7 @@ import { pickInitialDay, formatDayLabel } from '../lib/tripDate.js'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 import { useDays, useFoodItems, useNormalizedDays, useNormalizedItinerary } from '../hooks/useTripDerived.js'
 import { categoryInk, BRAND_INK } from '../lib/categories.js'
+import { toMapPoints } from '../lib/maps.js'
 import { TripSkeleton, SectionSkeleton } from '../components/ui/Skeletons.jsx'
 import ErrorState from '../components/ui/ErrorState.jsx'
 import Sidebar from '../components/layout/Sidebar.jsx'
@@ -23,6 +24,7 @@ const TripInfoSection = lazy(() => import('../components/trip/TripInfoSection.js
 const ShoppingSection = lazy(() => import('../components/trip/ShoppingSection.jsx'))
 const ChecklistSection = lazy(() => import('../components/trip/ChecklistSection.jsx'))
 const FoodSection = lazy(() => import('../components/trip/FoodSection.jsx'))
+const TripMap = lazy(() => import('../components/trip/TripMap.jsx'))
 
 const LAST_TRIP_KEY = 'lastTripSlug'
 
@@ -64,6 +66,10 @@ export default function TripPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [activeModal, setActiveModal] = useState(null)
   const [extras, setExtras] = useState(null)
+  const [mapState, setMapState] = useState({ open: false, mode: 'explore', day: null })
+  const openExploreMap = useCallback(() => setMapState({ open: true, mode: 'explore', day: null }), [])
+  const openRouteMap = useCallback((day) => setMapState({ open: true, mode: 'route', day }), [])
+  const closeMap = useCallback(() => setMapState((s) => ({ ...s, open: false })), [])
 
   // 各 sheet tab data
   const flightsHook = useSheetData(trip?.sheet_id, 'flights')
@@ -103,7 +109,7 @@ export default function TripPage() {
   ])
   const { pullY, refreshing, triggerThreshold } = usePullToRefresh(refreshAllSheets, {
     // sidebar / modal / 彩蛋打開時停掉 pull-to-refresh，避免跟拖曳關閉手勢衝突
-    enabled: !sidebarOpen && !activeModal,
+    enabled: !sidebarOpen && !activeModal && !mapState.open,
   })
 
   // Trip-specific extras（求婚彩蛋）lazy load
@@ -125,7 +131,7 @@ export default function TripPage() {
 
   const easterEgg = useEasterEgg({ extras })
 
-  useScrollLock(sidebarOpen || !!activeModal || easterEgg.open)
+  useScrollLock(sidebarOpen || !!activeModal || easterEgg.open || mapState.open)
 
   usePageMeta({
     title: trip ? `${trip.name}｜${trip.dates || ''}`.replace(/｜$/, '') : '行程',
@@ -160,13 +166,19 @@ export default function TripPage() {
   const nextDayItinerary = useMemo(() => nextDayObj ? filterDayItinerary(nextDayObj.day) : [], [normalizedItinerary, nextDayObj])
 
   const foodItems = useFoodItems(food, itinerary)
+  const mapPoints = useMemo(() => toMapPoints(normalizedItinerary), [normalizedItinerary])
+  const hasMapPoints = mapPoints.length > 0
+  const daysWithRoute = useMemo(
+    () => new Set(mapPoints.filter((p) => p.day != null).map((p) => p.day)),
+    [mapPoints]
+  )
 
   // 左右滑動切日手勢
   const swipe = useDaySwipe({
     days,
     activeDay,
     setActiveDay,
-    enabled: !sidebarOpen && !activeModal,
+    enabled: !sidebarOpen && !activeModal && !mapState.open,
   })
 
   // 一次性 swipe 教學：第一次造訪有 ≥ 2 天的 trip 時 peek 一下下個 panel
@@ -242,7 +254,17 @@ export default function TripPage() {
             </p>
             <h1 className="text-2xl font-bold tracking-[0.1em] text-jp-text leading-tight">{trip.name}旅行</h1>
           </div>
-          <div className="w-10" />
+          {hasMapPoints ? (
+            <button
+              onClick={openExploreMap}
+              className="p-3 frosted-glass-button rounded-full text-muted touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="開啟地圖"
+            >
+              <MapIcon size={24} />
+            </button>
+          ) : (
+            <div className="w-10" />
+          )}
         </div>
 
         {/* Day Nav */}
@@ -280,6 +302,8 @@ export default function TripPage() {
               itinerary={dayItinerary}
               tripName={trip.name}
               isCurrent
+              hasRoute={daysWithRoute.has(activeDay)}
+              onOpenRoute={openRouteMap}
             />
             {/* Next panel：absolute 放在右側 (left-full)，不參與高度 */}
             {nextDayObj && (
@@ -342,6 +366,15 @@ export default function TripPage() {
         )}
       </BottomSheet>
 
+      {/* Map */}
+      <BottomSheet isOpen={mapState.open} onClose={closeMap} title="行程地圖" noScroll noStickyTitle tall>
+        {mapState.open && (
+          <Suspense fallback={<SectionSkeleton />}>
+            <TripMap points={mapPoints} initialMode={mapState.mode} day={mapState.day} />
+          </Suspense>
+        )}
+      </BottomSheet>
+
       {/* Easter Egg Modal */}
       {extras?.ProposalModal && (
         <extras.ProposalModal
@@ -355,7 +388,7 @@ export default function TripPage() {
 }
 
 // 單一日 panel：banner + itinerary list；dayObj 為 null 時整格不渲染（給三欄第一/末日用）
-function DayPanel({ dayObj, dayMeta, itinerary, tripName, isCurrent = false }) {
+function DayPanel({ dayObj, dayMeta, itinerary, tripName, isCurrent = false, hasRoute = false, onOpenRoute }) {
   if (!dayObj) return null
   return (
     <div className="overflow-hidden">
@@ -366,6 +399,7 @@ function DayPanel({ dayObj, dayMeta, itinerary, tripName, isCurrent = false }) {
         dateLabel={formatDayLabel(dayObj.date)}
         tripName={tripName}
         eager={isCurrent}
+        onOpenRoute={hasRoute && onOpenRoute ? () => onOpenRoute(dayObj.day) : undefined}
       />
       <div className="h-6" />
       <div className="mt-2">
