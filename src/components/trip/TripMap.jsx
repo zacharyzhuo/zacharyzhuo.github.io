@@ -9,10 +9,11 @@ import { openExternal } from '../../lib/openExternal.js'
 import { tap as hapticTap, bump } from '../../lib/haptic.js'
 import { markerIcon, numberedIcon, meIcon } from './mapIcons.js'
 import NearbyPanel from './NearbyPanel.jsx'
+import SegmentedControl from '../ui/SegmentedControl.jsx'
 import EmptyState from '../ui/EmptyState.jsx'
 
 const TOKYO = [35.6762, 139.6503]
-const BUCKETS = ['food', 'attraction', 'shopping', 'backup']
+const BUCKETS = ['food', 'shopping', 'attraction', 'backup']
 const BUCKET_LABEL = { food: '美食', attraction: '景點', shopping: '購物', backup: '備選' }
 
 // Leaflet 在「開啟時才長出來」的容器裡需重新量尺寸，否則圖磚渲染成灰塊。
@@ -131,7 +132,7 @@ export default function TripMap({ points, initialMode = 'explore', day = null })
     markerRefs.current[p.id]?.openPopup()
   }, [])
 
-  const switchMode = useCallback((m) => { hapticTap(); setMode(m) }, [])
+  const switchMode = useCallback((m) => setMode(m), [])
 
   const initialCenter = positions[0] || (userPos ? [userPos.lat, userPos.lng] : TOKYO)
 
@@ -140,21 +141,17 @@ export default function TripMap({ points, initialMode = 'explore', day = null })
       {/* header：模式切換 + （探索才有）分類 chip */}
       <div className="flex-none px-5 pt-2 pb-3">
         <h2 className="sr-only">行程地圖</h2>
-        <div className="inline-flex rounded-full bg-black/5 p-1 mb-3">
-          {['explore', 'route'].map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => switchMode(m)}
-              disabled={m === 'route' && day == null}
-              className={`px-4 py-1.5 rounded-full text-sm font-serif touch-manipulation transition-colors ${
-                mode === m ? 'bg-white text-jp-text shadow-sm' : 'text-muted'
-              } ${m === 'route' && day == null ? 'opacity-40' : ''}`}
-            >
-              {m === 'explore' ? '探索' : day != null ? `DAY ${day} 路線` : '路線'}
-            </button>
-          ))}
-        </div>
+        {day != null && (
+          <div className="flex justify-center mb-3">
+            <SegmentedControl
+              tabs={[{ key: 'explore', label: '探索' }, { key: 'route', label: '路線' }]}
+              value={mode}
+              onChange={switchMode}
+              itemClassName="px-5"
+              ariaLabel="地圖模式"
+            />
+          </div>
+        )}
         {mode === 'explore' && (
           <div className="flex flex-wrap gap-2">
             {BUCKETS.map((b) => {
