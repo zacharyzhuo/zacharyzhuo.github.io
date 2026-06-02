@@ -174,7 +174,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
             onPointerDown={tap.onPointerDown}
             onPointerUp={tap.onPointerUp}
             onClick={tap.guard(onClose)}
-            className="absolute top-8 right-6 z-20 p-3 frosted-glass-button rounded-full text-muted touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="absolute top-8 right-6 z-[1100] p-3 frosted-glass-button rounded-full text-muted touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="關閉"
           >
             <X size={20} />
