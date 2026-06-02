@@ -1,3 +1,5 @@
+import { Map as MapIcon } from 'lucide-react'
+
 /**
  * @param {{
  *   bannerUrl?: string,
@@ -6,12 +8,13 @@
  *   dateLabel?: string,  // 例：'06/04 · 週四'
  *   tripName?: string,   // 用來判斷 title === tripName 時隱藏 subtitle 避免重複
  *   eager?: boolean,     // 當前日 panel 設 true：圖片改 eager + fetchpriority high（above-the-fold）
+ *   onOpenRoute?: () => void,  // 開啟今日路線地圖
  * }} props
  */
 // 小字（日期 / 今日行程 / 副標）筆畫細、又常壓在亮色天空上，靠更緊更深的陰影撐可讀；大標夠粗用容器的光暈即可。
 const SMALL_TEXT_SHADOW = '0 1px 2px rgba(0,0,0,0.85), 0 0 4px rgba(0,0,0,0.6)'
 
-export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripName, eager = false }) {
+export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripName, eager = false, onOpenRoute }) {
   // subtitle 跟 trip 主名稱重複時隱藏（例：subtitle="宿霧" / tripName="宿霧"）
   const showSubtitle = subtitle && subtitle !== tripName && subtitle !== title
 
@@ -65,6 +68,18 @@ export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripN
           </p>
         )}
       </div>
+      {onOpenRoute && (
+        <button
+          type="button"
+          onClick={onOpenRoute}
+          className="absolute right-4 bottom-4 z-10 inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-jp-text text-xs font-serif font-bold frosted-glass-button touch-manipulation"
+          style={{ textShadow: 'none' }}
+          aria-label="看今日路線地圖"
+        >
+          <MapIcon size={15} />
+          今日路線
+        </button>
+      )}
     </div>
   )
 }
