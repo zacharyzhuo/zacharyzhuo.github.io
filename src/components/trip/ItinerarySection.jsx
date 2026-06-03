@@ -343,8 +343,10 @@ export default function ItinerarySection({ rows, dayDate }) {
   const isToday = dayDate && dayDate === formatToday()
 
   // 每分鐘 tick 一次，讓「現在」線會慢慢往下移
+  // 切到「今天」時先立刻刷新一次 now，避免沿用切換前（如午夜前 23:56）的舊值
   useEffect(() => {
     if (!isToday) return
+    setNow(formatNowHHMM())
     const t = setInterval(() => setNow(formatNowHHMM()), 60_000)
     return () => clearInterval(t)
   }, [isToday])
@@ -390,13 +392,12 @@ export default function ItinerarySection({ rows, dayDate }) {
           const { label, icon: Icon } = getCategory(row.type)
           const isLast = i === mainRows.length - 1
           const spots = sortSpots(spotsByParent[row.name] ?? [])
-          const isPastRow = isToday && row.time && row.time < now
 
           return (
             <Fragment key={`${row.time}:${row.name}`}>
               {nowIdx === i && <NowMarker time={now} innerRef={nowMarkerRef} />}
             <div
-              className={`flex gap-2.5 px-5 group ${isPastRow ? 'opacity-50' : ''}`}
+              className="flex gap-2.5 px-5 group"
             >
               {/* 時間（拉高權重，右對齊指向節點） */}
               <span className="w-10 shrink-0 text-right text-sm font-serif font-bold text-jp-text leading-none tabular-nums pt-2.5">
