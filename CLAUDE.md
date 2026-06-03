@@ -288,15 +288,15 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 
 | 欄 | 正確型別 | 怎麼寫 |
 |---|---|---|
-| `date`（所有 tab） | **日期** | `USER_ENTERED` 寫 `6/5`（Sheets 自動成真日期；gviz 輸出 `6/5`） |
-| `lat` / `lng` | **數字** | `USER_ENTERED` 寫數字字串 `10.4070429`（成 number；gviz 輸出數字） |
-| `check_in` / `check_out`（accommodation） | 時間值（現況 OK） | 維持；gviz 輸出 `15:00` 字串 |
-| **`time` / `hours` 等「整格會被自動轉換」的自由文字欄** | **純文字** | 該**整欄** numberFormat 設成 `TEXT`，再 `USER_ENTERED` 寫值。否則純 `09:50` 會被當時間值、或變 forced-text 出現 `'`。（`time` 欄混有 `evening`/`varies`，必須是文字） |
+| `date`（所有 tab） | **日期（DATE）** | `USER_ENTERED` 寫 `6/5`；整欄 numberFormat `type=DATE`（現用 `m/d`）。gviz 輸出 `6/4`，resolveTripDate 吃 `M/D`／`YYYY/MM/DD` |
+| `itinerary.time`、`accommodation.check_in`/`check_out` | **時間（TIME）** | 整欄 numberFormat `type=TIME, pattern=hh:mm`，再 `USER_ENTERED` 寫 `09:50`。gviz 輸出乾淨 `09:50`（已驗）。**只放真時鐘時間**；模糊時間（`evening`、待定）**留空**或寫進 `description`／`note`，**不要**在 time 欄塞文字（會冒出 `'` 又被 gviz 吐空） |
+| `lat` / `lng` | **數字（Number）** | `USER_ENTERED` 寫數字字串 `10.4070429`（成 number；gviz 輸出數字） |
+| `flights.time`、`hours` 等含**區間/中文**的自由文字 | **文字** | 內容非單一可轉換值（`07:00 - 09:50`、`06:30 – 10:30`、`停留 40 分鐘`）→ Sheets 不會自動轉、本來就無 `'`，直接 `USER_ENTERED` 寫 |
 | 其餘文字欄（`name`/`address`/`link`/`description`/`note`/`type`/`area`/…） | 文字 | `USER_ENTERED`；內容非「整格可轉換」不會出現 `'`，免特別處理 |
 
 **通則**：
 - 寫 cell 一律 `valueInputOption: USER_ENTERED`（**不要 `RAW`**）；URL 也才會變連結。
-- 純 `HH:MM` 或純數字要當「字串」存的欄（主要 `itinerary.time`）：先用 `batchUpdate` 的 `repeatCell` 把整欄 `userEnteredFormat.numberFormat.type` 設成 `TEXT`，再寫值。
+- 要把某欄設成特定型別（`date`→DATE、`time`/`check_in`/`check_out`→TIME、純數字欄→NUMBER）：先用 `batchUpdate` 的 `repeatCell` 設整欄 `userEnteredFormat.numberFormat`（`{type, pattern}`），再 `USER_ENTERED` 寫值。`time` 欄只放真時間，非時間的值留空。
 - **寫後必驗**：`curl 'https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:csv&sheet=<tab>'`，確認新列該填的欄**非空**、值正確。
 - 偵測殘留 forced-text：`spreadsheets.get` 帶 `includeGridData` 看 `userEnteredValue` 是否為 `stringValue` 但內容是純數字/純 `HH:MM`/純日期（這種就是型別錯）。
 - **要在某天中間插列**（保持時間順序，而非丟到表尾）：用 `batchUpdate` 的 `insertDimension`（指定分頁 `sheetId`、`ROWS`、`startIndex`/`endIndex`）插空列，再 `values.update` 寫入；itinerary **無 `day` 欄**，日由 `date` 推。
