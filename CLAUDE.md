@@ -302,6 +302,31 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 探索模式 4 顆篩選 chip（置中、毛玻璃 `.frosted-glass-button` 樣式，分類色在文字＋邊框）：**美食 / 購物 / 景點 / 備選**（順序即 `BUCKETS` 常數）。每個點屬於剛好一個 bucket。
 
+### 座標查法（lat/lng 怎麼填才準 — 給未來的 Claude）
+
+幫使用者填 `lat`/`lng` 時，**務必照下面的優先序取「圖釘真實座標」，不要憑記憶猜、也不要用地圖鏡頭中心**：
+
+1. **該列有 Google Maps 地點連結（`link`）** → 解析重導後網址裡的 **`!3d<lat>!4d<lng>`**（這才是圖釘位置）。
+   ```bash
+   final=$(curl -sL -A "Mozilla/5.0" -o /tmp/m.html -w '%{url_effective}' "$URL")
+   echo "$final" | grep -oE '!3d-?[0-9.]+!4d-?[0-9.]+' | head -1   # 抓不到再 grep /tmp/m.html
+   ```
+   ⚠️ **絕對不要用網址裡的 `@lat,lng`** —— 那是「地圖鏡頭中心」，常與圖釘差數百公尺到數公里（踩過：Moonlit 差 2.4km、Halomango 鏡頭跑到外省）。
+   ⚠️ 若連結重導到 `…/maps/search/…`（搜尋連結，非釘選地點）就**沒有** `!3d!4d` → 改走第 2 步，或請使用者重發一個「地點」連結（Google Maps 點該圖釘 → 分享 → 複製連結）。
+
+2. **沒連結，或連結是搜尋連結** → 用 **OpenStreetMap Nominatim**（免費、回傳真實地點座標）：
+   ```bash
+   curl -s -A "your-app/1.0 (contact)" \
+     "https://nominatim.openstreetmap.org/search?format=json&limit=3&q=<名稱+區域>"
+   ```
+   守則：帶 User-Agent、≤1 req/sec；**核對回傳的 `display_name` 確實是該店/地標**、且座標落在該趟行程的合理範圍（如本宿霧 trip：Cebu 市區約 `10.3x,123.9x`、Panglao 約 `9.55,123.77`、Oslob 約 `9.46,123.38`），再寫入。對不上就留白，別硬填。
+
+3. **寫入後一定做區域 sanity check**：把所有點掃一遍，任何落在行程範圍外的就是查錯了。
+
+4. **本來就沒有固定地點的列留白**（如 `Dinner On Own`、「晚餐待定」、海上的「追海豚」）；有座標才上圖，留白不影響其他點。
+
+> Google Sheet 寫入用 `gws sheets spreadsheets values update`（`lat`/`lng` 兩欄分開）；寫前先 `--dry-run`、寫後讀回抽驗。
+
 ### 去重（`mergeMapPoints`）
 
 itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shopping）點若與既有點**同 bucket 同座標（5 位小數）**則去重 — 涵蓋 list-vs-itinerary 與 list-vs-list 重複。itinerary 點彼此**不**去重（同旅館的早餐/午餐各算一個停留）。組裝在 `TripPage`：`mergeMapPoints(toMapPoints(itinerary), [...listToMapPoints(food,'food'), ...listToMapPoints(shopping,'shopping')])`。
