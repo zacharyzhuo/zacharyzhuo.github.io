@@ -278,7 +278,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - `lat` / `lng`：選填經緯度，給地圖用（歸「美食」分類）。有值才上圖
 - 若 `food` tab 無資料，fallback 為 `itinerary` 中 `type === 'food'` 的行程（由 `useFoodItems` 處理）。**注意**：地圖的美食點來自 **raw `food` tab**（非 `useFoodItems`），避免與 itinerary 的 food 重複計算
 
-> **描述欄統一為 `description`（不縮寫，與全表其他欄一致）**：itinerary 本來就是 `description`，food / shopping / prepare 由舊的 `desc` 改名統一。各讀取處（FoodSection / ShoppingSection / TripInfoSection / `maps.js` listToMapPoints）一律 **`description` 優先、`desc` 為 fallback**（容忍 SWR 舊快取與部署空窗）；ShoppingSection 在 `groupItems` 入口把 `description||desc` 正規化成內部 `.desc`，下游不動。新資料一律填 `description` 欄。
+> **描述欄統一為 `description`（不縮寫，與全表其他欄一致）**：itinerary 本來就是 `description`，food / shopping / prepare 由舊的 `desc` 改名統一。所有讀取處（FoodSection / ShoppingSection / TripInfoSection / `maps.js` listToMapPoints）一律**只認 `description`**（無 `desc` fallback，sheet 已全部改名）。ShoppingSection 內部欄位也用 `.description`。
 
 ### 寫入 sheet 的型別政策（MUST 遵守）⚠️
 

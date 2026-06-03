@@ -148,7 +148,7 @@ function PrepareTab({ items }) {
           >
             <div className="min-w-0">
               <h4 className="text-lg font-serif font-bold text-jp-text mb-0.5 leading-snug">{item.label}</h4>
-              {(item.description || item.desc) && <p className="text-sm text-muted font-serif leading-relaxed">{item.description || item.desc}</p>}
+              {item.description && <p className="text-sm text-muted font-serif leading-relaxed">{item.description}</p>}
             </div>
             {item.url && <ExternalLink size={20} className="text-jp-green shrink-0" />}
           </button>

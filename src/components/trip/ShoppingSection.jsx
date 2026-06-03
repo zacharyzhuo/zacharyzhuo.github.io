@@ -12,7 +12,7 @@ import { categoryChipStyle } from '../../lib/categories.js'
  *  - building !== ''  : belongs to that building → grouped under one card
  *
  * The first row that introduces a new building name becomes the building header
- * (its name/hours/link/desc represent the building itself; floor is ignored).
+ * (its name/hours/link/description represent the building itself; floor is ignored).
  * Subsequent rows with the same building name are sub-shops.
  *
  * Building-meta row: when a row's `name === building` AND it has no `floor`, it
@@ -25,10 +25,7 @@ function groupItems(rows) {
   const groups = []
   const buildingMap = {}
 
-  // 欄位統一為 description（舊資料/快取仍可能是 desc）→ 正規化成內部 .desc，下游不變
-  const norm = rows.map(row => ({ ...row, desc: row.description || row.desc }))
-
-  norm.forEach(row => {
+  rows.forEach(row => {
     if (!row.building) {
       // Standalone shop
       groups.push({ type: 'standalone', ...row })
@@ -44,7 +41,7 @@ function groupItems(rows) {
         name: row.building,
         hours: row.hours,
         link: row.link,
-        desc: row.desc,
+        description: row.description,
         shops: [],
       }
       buildingMap[row.building] = g
@@ -81,8 +78,8 @@ function StandaloneCard({ item }) {
 
         <div className="flex-1 min-w-0">
           <p className="font-bold text-jp-text font-serif text-base leading-snug">{item.name}</p>
-          {item.desc && (
-            <p className="text-sm text-secondary leading-relaxed font-serif mt-1">{item.desc}</p>
+          {item.description && (
+            <p className="text-sm text-secondary leading-relaxed font-serif mt-1">{item.description}</p>
           )}
           {item.hours && (
             <div className="flex items-center gap-1.5 text-sm text-secondary font-serif mt-1 tabular-nums">
@@ -115,8 +112,8 @@ function BuildingCard({ building }) {
       <div className="flex justify-between items-center gap-2">
         <div className="min-w-0">
           <h3 className="font-bold text-jp-text font-serif text-base leading-snug">{building.name}</h3>
-          {building.desc && (
-            <p className="text-sm text-secondary leading-relaxed font-serif mt-1">{building.desc}</p>
+          {building.description && (
+            <p className="text-sm text-secondary leading-relaxed font-serif mt-1">{building.description}</p>
           )}
           {building.hours && (
             <span className="text-sm text-secondary font-serif mt-1 flex tabular-nums items-center gap-1.5">
@@ -146,8 +143,8 @@ function BuildingCard({ building }) {
               <FloorTag floor={shop.floor} />
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm text-stone-700 font-serif leading-snug">{shop.name}</p>
-                {shop.desc && (
-                  <p className="text-sm text-secondary leading-relaxed font-serif mt-0.5">{shop.desc}</p>
+                {shop.description && (
+                  <p className="text-sm text-secondary leading-relaxed font-serif mt-0.5">{shop.description}</p>
                 )}
                 {shop.hours && (
                   <div className="flex items-center gap-1.5 text-sm text-secondary font-serif mt-1 tabular-nums">

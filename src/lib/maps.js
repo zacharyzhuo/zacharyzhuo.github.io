@@ -141,7 +141,7 @@ export function listToMapPoints(rows, bucket) {
       type: bucket,
       link: row.link || '',
       address: row.address || '',
-      desc: row.description || row.desc || row.note || '',
+      desc: row.description || row.note || '',
       time: '',
       day: null,
     })
