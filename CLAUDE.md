@@ -64,7 +64,7 @@ src/
 │   │   ├── FoodSection.jsx          # 美食清單（area tabs + category 分組）
 │   │   ├── ChecklistSection.jsx     # 打包清單（localStorage 持久化 + 進度條）
 │   │   ├── TripMap.jsx              # 行程地圖（探索 + 路線；單一入口，路線用 DayNav 換天；react-leaflet + CARTO 底圖）
-│   │   ├── NearbyPanel.jsx          # 探索模式「離你最近」可收合面板（geolocation + haversine）
+│   │   ├── NearbyStrip.jsx          # 探索模式「離你最近」底部橫向卡片條（geolocation + haversine；非第二層 modal）
 │   │   └── mapIcons.js              # 地圖 marker divIcon 工廠（實心彩點 / 編號點 / 備選空心墨灰環 / 我的位置）
 │   └── ui/
 │       ├── SegmentedControl.jsx     # 玻璃膠囊分段控制器（移動膠囊 + 拖拉跟手 + 自適應降級）
@@ -393,7 +393,7 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 
 - marker 顏色取自 `categories.js`：food/attraction/shopping 用各自 ink；**備選用 `BACKUP_INK`（中性墨灰 `#6B6B66`，非品牌綠、非分類色）+ 空心環**。
 - Google Maps 導航連結：優先用該點 `link`（地點頁）；無 `link` 才退用 `name+address` 搜尋字串（**不用裸經緯度**）。`buildMapsUrl` 在 `lib/maps.js`，開連結走 `openExternal`（PWA 相容）。
-- 「離你最近」面板（`NearbyPanel`）：`navigator.geolocation` + `haversineMeters` 排序；是 sheet **內**的可收合 panel，非第二層彈窗。
+- 「離你最近」（`NearbyStrip`）：`navigator.geolocation` + `haversineMeters` 排序。**定位鈕只負責相機**（flyTo 我的位置 + 紅點），最近清單改成**底部一排可橫滑的小卡**（無把手、不蓋半屏、不像第二層 modal；locating/error 顯示置中小膠囊）。底部有卡片/膠囊時定位鈕自動抬高（`bottom-6`→`bottom-[112px]`）避免被蓋。點卡片 `flyTo`+開 popup。**勿**再把它做成會滑上來的 BottomSheet（會與外層地圖 modal 衝突）。
 
 ### 已知限制 / 雷
 

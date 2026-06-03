@@ -8,7 +8,7 @@ import { sortByDistance, routePoints, nextFocusIndex, buildMapsUrl } from '../..
 import { openExternal } from '../../lib/openExternal.js'
 import { tap as hapticTap, bump } from '../../lib/haptic.js'
 import { markerIcon, numberedIcon, meIcon } from './mapIcons.js'
-import NearbyPanel from './NearbyPanel.jsx'
+import NearbyStrip from './NearbyStrip.jsx'
 import DayNav from './DayNav.jsx'
 import SegmentedControl from '../ui/SegmentedControl.jsx'
 import EmptyState from '../ui/EmptyState.jsx'
@@ -117,7 +117,6 @@ export default function TripMap({ points, days = [], activeDay = null }) {
   const [active, setActive] = useState(() => new Set(BUCKETS))
   const [userPos, setUserPos] = useState(null)
   const [geoStatus, setGeoStatus] = useState('idle') // idle|locating|ok|error
-  const [nearbyOpen, setNearbyOpen] = useState(false)
   const mapRef = useRef(null)
   const markerRefs = useRef({})
 
@@ -145,8 +144,8 @@ export default function TripMap({ points, days = [], activeDay = null }) {
 
   const locate = useCallback(() => {
     bump()
-    if (!navigator.geolocation) { setGeoStatus('error'); setNearbyOpen(true); return }
-    setGeoStatus('locating'); setNearbyOpen(true)
+    if (!navigator.geolocation) { setGeoStatus('error'); return }
+    setGeoStatus('locating')
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const ll = { lat: pos.coords.latitude, lng: pos.coords.longitude }
@@ -315,12 +314,14 @@ export default function TripMap({ points, days = [], activeDay = null }) {
               {userPos && <Marker position={[userPos.lat, userPos.lng]} icon={meIcon()} />}
             </MapContainer>
 
-            {/* locate button（探索模式才有意義） */}
+            {/* locate button（探索模式才有意義）；底部出現膠囊/卡片條時抬高，不被蓋住 */}
             {mode === 'explore' && (
               <button
                 type="button"
                 onClick={locate}
-                className="absolute right-4 bottom-[124px] z-[600] w-12 h-12 rounded-full bg-white shadow-lg grid place-items-center text-jp-green active:scale-95 touch-manipulation"
+                className={`absolute right-4 z-[601] w-12 h-12 rounded-full bg-white shadow-lg grid place-items-center text-jp-green active:scale-95 touch-manipulation transition-[bottom] duration-300 ${
+                  geoStatus === 'idle' ? 'bottom-6' : 'bottom-[112px]'
+                }`}
                 aria-label="定位我的位置"
               >
                 <Crosshair size={22} />
@@ -328,13 +329,7 @@ export default function TripMap({ points, days = [], activeDay = null }) {
             )}
 
             {mode === 'explore' && (
-              <NearbyPanel
-                ranked={ranked}
-                status={geoStatus}
-                open={nearbyOpen}
-                onToggle={() => setNearbyOpen((o) => !o)}
-                onSelect={focusPoint}
-              />
+              <NearbyStrip ranked={ranked} status={geoStatus} onSelect={focusPoint} />
             )}
 
             {/* 路線逐站 stepper：‹ 3/7 › ，中間數字點一下回總覽 */}
