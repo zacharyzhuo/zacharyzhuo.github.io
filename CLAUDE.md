@@ -160,11 +160,20 @@ const extras = await import(`../trips/${trip.slug}/extras.jsx`).catch(() => null
 
 `useSheetData` 採兩層快取：
 
-1. **Module-level `Map`**：同一 session 重複請求秒回，無 stale。
+1. **Module-level `Map`**（`promiseCache`）：同一 session（JS context）重複請求秒回，**無自動 revalidate**。
 2. **localStorage SWR (`lib/swrCache.js`)**：
    - 命中時立即回傳 cached data 給 UI（瞬開）
-   - 同時背景 revalidate，拿到新資料再覆蓋並寫回 cache
+   - 拿到新資料再覆蓋並寫回 cache
    - Key prefix 帶 `VERSION`（目前 `v1`），未來資料 schema 變更時 bump 即可作廢舊快取
+
+### 回前景自動刷新（resume revalidate）— 解 iOS PWA warm resume 卡舊資料/舊版
+
+iOS「加入桌面」的 PWA 背景恢復是 **warm resume**：不重載頁面、JS context 還活著，所以 `promiseCache` 與「靠 mount 觸發的 fetch」都不會重跑 → 不整個關掉就一直看到舊資料 / 舊版本。
+
+對策（`hooks/useRevalidateOnVisible.js`：背景 >10s 後回前景才觸發，避免短暫切換猛打網路）：
+- **資料**：`useSheetData` / `useTrips` 掛 `useRevalidateOnVisible` → 回前景時 **`revalidateSheet`（只清 in-memory `promiseCache`，保留 localStorage）+ bump refetchTick** 背景靜默重抓，**不重載整頁**。localStorage（冷啟動瞬開、離線 fallback）與 SW 的圖片/字型 CacheFirst **完全不受影響**。
+  - 注意區分：`invalidateSheet`（pull-to-refresh 用，**連 localStorage 一起清**）vs `revalidateSheet`（resume 用，**只清 in-memory**）。
+- **App 版本**：`main.jsx` 的 `onRegisteredSW` 除了 30 分鐘 interval，另加 `visibilitychange→visible` 時 `registration.update()`；有新版照 `registerType:'autoUpdate'` + `onNeedRefresh→updateSW(true)` **靜默自動重載**。
 
 ### 行程列表排序
 

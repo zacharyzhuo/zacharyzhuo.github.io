@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { sheetURL, parseCSV } from '../lib/sheets.js'
 import { getCached, setCached, clearCached } from '../lib/swrCache.js'
 import { env } from '../lib/env.js'
+import { useRevalidateOnVisible } from './useRevalidateOnVisible.js'
 
 const TRIPS_CACHE_KEY = 'trips:index'
 
@@ -22,6 +23,11 @@ export function useTrips() {
     // 等待一個 microtask 讓 effect 跑完，UI 端可 await 拿到 fresh 完成
     await new Promise(r => setTimeout(r, 600))
   }, [])
+
+  // 回前景 → 靜默 refetch index sheet（不清 localStorage，背景拿新清單不重載）
+  useRevalidateOnVisible(useCallback(() => {
+    setRefreshTick(t => t + 1)
+  }, []))
 
   useEffect(() => {
     const indexSheetId = env.INDEX_SHEET_ID

@@ -19,8 +19,12 @@ const updateSW = registerSW({
   },
   onRegisteredSW(_swUrl, registration) {
     if (!registration) return
-    setInterval(() => {
-      registration.update().catch(() => {})
-    }, 30 * 60 * 1000)
+    const checkForUpdate = () => registration.update().catch(() => {})
+    // 前景每 30 分鐘檢查一次
+    setInterval(checkForUpdate, 30 * 60 * 1000)
+    // PWA 從背景回前景就檢查（iOS warm resume 不重載，否則要整個關掉才會拿到新版）
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') checkForUpdate()
+    })
   },
 })

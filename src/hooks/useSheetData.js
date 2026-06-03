@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { sheetURL, parseCSV } from '../lib/sheets.js'
 import { getCached, setCached, clearCached } from '../lib/swrCache.js'
+import { useRevalidateOnVisible } from './useRevalidateOnVisible.js'
 
 // key -> Promise<rows>。同一 sheet+tab 的並行 request 共用同一個 Promise，避免重複 fetch
 const promiseCache = new Map()
@@ -19,6 +20,15 @@ export function invalidateSheet(sheetId, tabName) {
   const key = `${sheetId}:${tabName}`
   promiseCache.delete(key)
   clearCached(key)
+}
+
+/**
+ * 軟 revalidate：只清 in-memory promiseCache，**保留 localStorage**（冷啟動瞬開 + 離線 fallback
+ * 不受影響）。下次 fetch 走網路拿新資料、成功才覆蓋 localStorage。給 resume-on-visible 用。
+ */
+export function revalidateSheet(sheetId, tabName) {
+  if (!sheetId || !tabName) return
+  promiseCache.delete(`${sheetId}:${tabName}`)
 }
 
 export function fetchSheet(sheetId, tabName) {
@@ -70,6 +80,13 @@ export function useSheetData(sheetId, tabName) {
     invalidateSheet(sheetId, tabName)
     setRefreshTick(t => t + 1)
   }, [sheetId, tabName])
+
+  // PWA / 分頁從背景回前景 → 靜默 revalidate（清 in-memory、保留 localStorage，背景重抓不重載）
+  useRevalidateOnVisible(useCallback(() => {
+    if (!sheetId || !tabName) return
+    revalidateSheet(sheetId, tabName)
+    setRefreshTick(t => t + 1)
+  }, [sheetId, tabName]))
 
   useEffect(() => {
     if (!sheetId || !tabName) { setLoading(false); return }
