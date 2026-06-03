@@ -17,6 +17,14 @@ function formatNowHHMM() {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
+// 解析開頭的 `HH:MM`（允許個位數時、忽略後綴）→ 當日分鐘數；非時間（空、`下午`、`晚上`、`evening`…）回 null。
+// 用數值比較取代字串比較，避免 `3:22`(非零補位) 或中文時段被誤判過去/未來。
+function timeToMinutes(str) {
+  const m = /^(\d{1,2}):(\d{2})/.exec(String(str || '').trim())
+  if (!m) return null
+  return Number(m[1]) * 60 + Number(m[2])
+}
+
 // 今日時間軸上「現在 HH:MM」紅線標記。對齊新三欄（時間 | 軌道節點 | 內容）。
 function NowMarker({ time, innerRef }) {
   return (
@@ -353,10 +361,16 @@ export default function ItinerarySection({ rows, dayDate }) {
 
   const mainRows = useMemo(() => rows.filter(r => !r.parent), [rows])
 
-  // 「現在」標記插在第一個未開始 row 之前；全部都過了就放最後
+  // 「現在」標記插在第一個未開始 row 之前；全部都過了就放最後。
+  // 以分鐘數數值比較；非時間值（如 `下午`、空白）回 null → 跳過、不影響定位。
   const nowIdx = useMemo(() => {
     if (!isToday) return -1
-    const idx = mainRows.findIndex(r => r.time && r.time > now)
+    const nowMin = timeToMinutes(now)
+    if (nowMin == null) return -1
+    const idx = mainRows.findIndex(r => {
+      const m = timeToMinutes(r.time)
+      return m != null && m > nowMin
+    })
     return idx === -1 ? mainRows.length : idx
   }, [isToday, mainRows, now])
 
