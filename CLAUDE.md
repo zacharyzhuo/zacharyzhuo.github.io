@@ -278,15 +278,28 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - `lat` / `lng`：選填經緯度，給地圖用（歸「美食」分類）。有值才上圖
 - 若 `food` tab 無資料，fallback 為 `itinerary` 中 `type === 'food'` 的行程（由 `useFoodItems` 處理）。**注意**：地圖的美食點來自 **raw `food` tab**（非 `useFoodItems`），避免與 itinerary 的 food 重複計算
 
-### 寫入 sheet 的注意事項（gviz 型別陷阱）⚠️
+### 寫入 sheet 的型別政策（MUST 遵守）⚠️
 
-App 是透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 sheet，不是讀原始 cell。**gviz 會對每一欄推定單一型別，並把「不符該欄型別」的儲存格輸出成空字串**。這會咬到用 API/`gws` 寫資料的人：
+App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 sheet。**gviz 會對每一欄推定單一型別，並把「不符該欄型別」的儲存格輸出成空字串**。所以每個 cell 必須是「該欄正確的型別」，否則資料會在 app 端消失或錯亂。
 
-- **`date` 欄是 Date 型別**（既有列都是真日期）。若用 `gws ... values update/append` 搭 **`valueInputOption: RAW`** 寫 `"6/5"`，會存成**純文字**（cell 顯示 `'6/5`、靠左對齊）→ 型別不符 → **gviz 輸出空字串** → app 收到空 `date` → 該列 `_day=null` → **從當天時間軸消失**（且被地圖當「備選」點）。症狀：**Sheet 裡看得到、網頁卻不顯示**。
-- **修法 / 預設**：寫 `date` 欄（及任何含 Google Maps URL、要被 gviz 當特定型別的欄）一律用 **`valueInputOption: USER_ENTERED`**，讓 Sheets 解析成正確型別（`6/5`→真日期、URL→連結）。
-- **`lat`/`lng`** 是數字欄，RAW 寫數字字串目前 OK，但保險起見也用 `USER_ENTERED`。
-- **寫後必驗**：`curl 'https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:csv&sheet=itinerary'`，確認新列的 `date`（及該填的欄）**非空**。
-- **要在某天中間插列**（保持時間順序，而非丟到表尾）：用 `spreadsheets.batchUpdate` 的 `insertDimension`（指定該分頁 `sheetId`、`ROWS`、`startIndex`/`endIndex`）插入空列，再 `values.update` 寫入；注意 itinerary 內**沒有 `day` 欄**，日由 `date` 推。
+**踩過的雷**：用 `valueInputOption: RAW` 把 `"6/5"` 寫進 `date` 欄 → 存成**純文字**（cell 顯示 `'6/5`、靠左對齊）→ gviz 認定 date 欄是 Date 型別、把這個文字格輸出成**空字串** → app 收到空 `date` → 該列 `_day=null` → **從當天時間軸消失**（並被地圖當「備選」點）。症狀：**Sheet 裡看得到、網頁卻不顯示**。
+
+**鐵則：任何 cell 的第一個字元都不該是 `'`（forced-text）。出現 `'` 代表型別沒設對。** 各欄正確型別：
+
+| 欄 | 正確型別 | 怎麼寫 |
+|---|---|---|
+| `date`（所有 tab） | **日期** | `USER_ENTERED` 寫 `6/5`（Sheets 自動成真日期；gviz 輸出 `6/5`） |
+| `lat` / `lng` | **數字** | `USER_ENTERED` 寫數字字串 `10.4070429`（成 number；gviz 輸出數字） |
+| `check_in` / `check_out`（accommodation） | 時間值（現況 OK） | 維持；gviz 輸出 `15:00` 字串 |
+| **`time` / `hours` 等「整格會被自動轉換」的自由文字欄** | **純文字** | 該**整欄** numberFormat 設成 `TEXT`，再 `USER_ENTERED` 寫值。否則純 `09:50` 會被當時間值、或變 forced-text 出現 `'`。（`time` 欄混有 `evening`/`varies`，必須是文字） |
+| 其餘文字欄（`name`/`address`/`link`/`description`/`note`/`type`/`area`/…） | 文字 | `USER_ENTERED`；內容非「整格可轉換」不會出現 `'`，免特別處理 |
+
+**通則**：
+- 寫 cell 一律 `valueInputOption: USER_ENTERED`（**不要 `RAW`**）；URL 也才會變連結。
+- 純 `HH:MM` 或純數字要當「字串」存的欄（主要 `itinerary.time`）：先用 `batchUpdate` 的 `repeatCell` 把整欄 `userEnteredFormat.numberFormat.type` 設成 `TEXT`，再寫值。
+- **寫後必驗**：`curl 'https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:csv&sheet=<tab>'`，確認新列該填的欄**非空**、值正確。
+- 偵測殘留 forced-text：`spreadsheets.get` 帶 `includeGridData` 看 `userEnteredValue` 是否為 `stringValue` 但內容是純數字/純 `HH:MM`/純日期（這種就是型別錯）。
+- **要在某天中間插列**（保持時間順序，而非丟到表尾）：用 `batchUpdate` 的 `insertDimension`（指定分頁 `sheetId`、`ROWS`、`startIndex`/`endIndex`）插空列，再 `values.update` 寫入；itinerary **無 `day` 欄**，日由 `date` 推。
 
 ---
 
