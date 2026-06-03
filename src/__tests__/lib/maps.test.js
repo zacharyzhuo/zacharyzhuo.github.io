@@ -170,7 +170,7 @@ describe('buildMapsUrl', () => {
 describe('listToMapPoints', () => {
   it('maps list rows with coords to the given bucket, day null', () => {
     const rows = [
-      { name: 'Zubuchon', lat: '10.3115', lng: '123.9181', link: 'https://x', desc: 'lechon' },
+      { name: 'Zubuchon', lat: '10.3115', lng: '123.9181', link: 'https://x', description: 'lechon' },
       { name: 'No coords', lat: '', lng: '' },
     ]
     const pts = listToMapPoints(rows, 'food')
