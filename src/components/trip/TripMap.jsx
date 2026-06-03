@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { ChevronLeft, ChevronRight, Crosshair, MapPin, Navigation } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Crosshair, Layers, MapPin, Navigation } from 'lucide-react'
 import { getCategory, BRAND_INK, BACKUP_INK } from '../../lib/categories.js'
 import { sortByDistance, routePoints, nextFocusIndex, buildMapsUrl } from '../../lib/maps.js'
 import { openExternal } from '../../lib/openExternal.js'
@@ -112,6 +112,7 @@ function popupNode(point) {
  */
 export default function TripMap({ points, days = [], activeDay = null }) {
   const [mode, setMode] = useState('explore')
+  const [basemap, setBasemap] = useState('simple') // 'simple'（CARTO Positron）| 'transit'（OSM 標準圖，看得到車站/鐵道）
   const [routeDay, setRouteDay] = useState(activeDay ?? days[0]?.day ?? null)
   const [focusIdx, setFocusIdx] = useState(null) // 路線逐站 stepper：null = 總覽
   const [active, setActive] = useState(() => new Set(BUCKETS))
@@ -265,12 +266,23 @@ export default function TripMap({ points, days = [], activeDay = null }) {
               <InvalidateOnMount />
               <InvalidateOnModeChange mode={mode} />
               {mode === 'explore' && <FitBounds positions={positions} positionsKey={positionsKey} />}
-              <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                attribution='&copy; OpenStreetMap &copy; CARTO'
-                subdomains="abcd"
-                maxZoom={20}
-              />
+              {basemap === 'transit' ? (
+                <TileLayer
+                  key="osm"
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; OpenStreetMap contributors'
+                  subdomains="abc"
+                  maxZoom={19}
+                />
+              ) : (
+                <TileLayer
+                  key="carto"
+                  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                  attribution='&copy; OpenStreetMap &copy; CARTO'
+                  subdomains="abcd"
+                  maxZoom={20}
+                />
+              )}
 
               {mode === 'explore' &&
                 explorePoints.map((p) => (
@@ -313,6 +325,17 @@ export default function TripMap({ points, days = [], activeDay = null }) {
 
               {userPos && <Marker position={[userPos.lat, userPos.lng]} icon={meIcon()} />}
             </MapContainer>
+
+            {/* 底圖切換：簡約（Positron）↔ 交通（OSM 標準圖，看得到車站/鐵道，規劃日本行程用） */}
+            <button
+              type="button"
+              onClick={() => { hapticTap(); setBasemap((b) => (b === 'simple' ? 'transit' : 'simple')) }}
+              className="absolute top-3 right-3 z-[601] inline-flex items-center gap-1.5 px-3 h-9 rounded-full bg-white/90 backdrop-blur shadow-md text-jp-text text-xs font-serif font-bold active:scale-95 touch-manipulation"
+              aria-label={basemap === 'simple' ? '切換到交通底圖（顯示車站）' : '切換回簡約底圖'}
+            >
+              <Layers size={15} />
+              {basemap === 'simple' ? '簡約' : '交通'}
+            </button>
 
             {/* locate button（探索模式才有意義）；底部出現膠囊/卡片條時抬高，不被蓋住 */}
             {mode === 'explore' && (

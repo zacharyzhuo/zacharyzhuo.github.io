@@ -322,7 +322,12 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 
 ## 地圖（TripMap）
 
-行程頁的地圖功能，`src/components/trip/TripMap.jsx`，包在 **tall 版 `BottomSheet`（`h-[92vh]`）** 裡，用 **react-leaflet v5 + leaflet + CARTO Positron 免費底圖**（不用 API key），以 `React.lazy` 切出 chunk。
+行程頁的地圖功能，`src/components/trip/TripMap.jsx`，包在 **tall 版 `BottomSheet`（`h-[92vh]`）** 裡，用 **react-leaflet v5 + leaflet**，以 `React.lazy` 切出 chunk。
+
+**底圖切換（右上 `Layers` 鈕，`basemap` state，免 key）**：
+- `simple`（預設）= **CARTO Positron**（`light_all`）：和紙簡約調性，但**幾乎不顯示車站/POI**。
+- `transit` = **OSM 標準圖**（`tile.openstreetmap.org`）：原生顯示車站 icon、站名、地鐵/鐵道路線（日本 OSM 資料完整，規劃交通用）。
+- 用 keyed `<TileLayer>` 條件切換；切換不影響其他狀態。OSM 圖 `maxZoom=19`、Positron `maxZoom=20`。
 
 ### 單一入口、modal 內兩種模式（同一個 `TripMap` 元件）
 
