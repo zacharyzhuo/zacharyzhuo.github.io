@@ -119,10 +119,10 @@ function FlightsTab({ flights }) {
 }
 
 /**
- * 行前準備：資料驅動，讀 trip sheet 的 prepare tab（欄位 label / desc / url）。
+ * 行前準備：資料驅動，讀 trip sheet 的 prepare tab（欄位 label / description / url）。
  * 每筆 render 成一張連結卡片；無資料則顯示空狀態。
  *
- * @param {{ items: Array<{ label: string, desc?: string, url?: string }> }} props
+ * @param {{ items: Array<{ label: string, description?: string, url?: string }> }} props
  */
 function PrepareTab({ items }) {
   const tap = useCancelableTap()
@@ -148,7 +148,7 @@ function PrepareTab({ items }) {
           >
             <div className="min-w-0">
               <h4 className="text-lg font-serif font-bold text-jp-text mb-0.5 leading-snug">{item.label}</h4>
-              {item.desc && <p className="text-sm text-muted font-serif leading-relaxed">{item.desc}</p>}
+              {(item.description || item.desc) && <p className="text-sm text-muted font-serif leading-relaxed">{item.description || item.desc}</p>}
             </div>
             {item.url && <ExternalLink size={20} className="text-jp-green shrink-0" />}
           </button>

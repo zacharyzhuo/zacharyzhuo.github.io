@@ -25,7 +25,10 @@ function groupItems(rows) {
   const groups = []
   const buildingMap = {}
 
-  rows.forEach(row => {
+  // 欄位統一為 description（舊資料/快取仍可能是 desc）→ 正規化成內部 .desc，下游不變
+  const norm = rows.map(row => ({ ...row, desc: row.description || row.desc }))
+
+  norm.forEach(row => {
     if (!row.building) {
       // Standalone shop
       groups.push({ type: 'standalone', ...row })
@@ -173,7 +176,7 @@ function BuildingCard({ building }) {
 }
 
 /**
- * @param {{ rows: Array<{ area: string, building: string, name: string, floor: string, hours: string, link: string, desc: string }> }} props
+ * @param {{ rows: Array<{ area: string, building: string, name: string, floor: string, hours: string, link: string, description: string }> }} props
  */
 export default function ShoppingSection({ rows }) {
   const areas = useMemo(

@@ -203,11 +203,11 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 **`prepare` tab**（行前準備，資料驅動）
 
-| `label` | `desc` | `url` |
+| `label` | `description` | `url` |
 |---|---|---|
 
 - `label`：項目標題（如 `Visit Japan Web`、`泰國簽證申請`、`韓國 K-ETA`）
-- `desc`：副標/說明（選填）
+- `description`：副標/說明（選填）
 - `url`：連結（選填；有值才顯示外連 icon 並可點開）
 
 **`days` tab**
@@ -255,28 +255,30 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 **`shopping` tab**
 
-| `area` | `building` | `name` | `floor` | `hours` | `link` | `desc` | `lat` | `lng` |
+| `area` | `building` | `name` | `floor` | `hours` | `link` | `description` | `lat` | `lng` |
 |---|---|---|---|---|---|---|---|---|
 
 > 欄位以 **header 名稱** 對應（`parseCSV` 產生物件），實際 sheet 內欄位順序可不同；新增欄位只要 header 名對得上即可。
 
 - `building` 空白：獨棟店，單獨顯示一個 block
-- `building` 有值：合併顯示在同名建築的 block（第一筆為建築標頭，其 `hours`/`link`/`desc` 代表整棟）
-- **building-meta 列**：某筆 `name === building` 且 `floor` 空白時，視為「描述整棟」的 meta 列，只餵建築標頭（desc/hours/link），**不再重複列為子店**（避免標頭與子店名稱重複）。但 `name === building` 卻**有樓層**（如整棟店橫跨 `B2～8F`）的列仍當子店，好讓樓層範圍照常顯示。判斷在 `groupItems`
-- `desc`：店家備註（選填，有值才顯示），顯示於店名與 `hours` 之間的淡色副文（`text-secondary`）。standalone 卡、building 標頭、building 子店列三處皆支援。把原本硬塞在 `name` 後面的括號補充（如「伴手禮一站・芒果乾/otap」）改填這欄，店名可回到單行
+- `building` 有值：合併顯示在同名建築的 block（第一筆為建築標頭，其 `hours`/`link`/`description` 代表整棟）
+- **building-meta 列**：某筆 `name === building` 且 `floor` 空白時，視為「描述整棟」的 meta 列，只餵建築標頭（description/hours/link），**不再重複列為子店**（避免標頭與子店名稱重複）。但 `name === building` 卻**有樓層**（如整棟店橫跨 `B2～8F`）的列仍當子店，好讓樓層範圍照常顯示。判斷在 `groupItems`
+- `description`：店家備註（選填，有值才顯示），顯示於店名與 `hours` 之間的淡色副文（`text-secondary`）。standalone 卡、building 標頭、building 子店列三處皆支援。把原本硬塞在 `name` 後面的括號補充（如「伴手禮一站・芒果乾/otap」）改填這欄，店名可回到單行
 - `lat` / `lng`：選填經緯度，給地圖用（歸「購物」分類）。建議只在**建築標頭列**填（一棟一個點）；同棟分店留白即可（地圖會依座標去重）
 
 **`food` tab**
 
-| `area` | `category` | `name` | `hours` | `desc` | `link` | `image` | `lat` | `lng` |
+| `area` | `category` | `name` | `hours` | `description` | `link` | `image` | `lat` | `lng` |
 |---|---|---|---|---|---|---|---|---|
 
 - `area`：浮動 tab 分區（空白則不顯示 area tabs）
 - `category`：分組標題（空白則不分組）
-- `desc`：店家描述（程式碼同時支援 `note` 欄位名稱）
+- `description`：店家描述（程式碼同時支援 `note` 欄位名稱）
 - `image`：選填縮圖（完整 URL 或絕對路徑），有值才顯示在卡片左側 64×64 圓角；`lazy` 載入
 - `lat` / `lng`：選填經緯度，給地圖用（歸「美食」分類）。有值才上圖
 - 若 `food` tab 無資料，fallback 為 `itinerary` 中 `type === 'food'` 的行程（由 `useFoodItems` 處理）。**注意**：地圖的美食點來自 **raw `food` tab**（非 `useFoodItems`），避免與 itinerary 的 food 重複計算
+
+> **描述欄統一為 `description`（不縮寫，與全表其他欄一致）**：itinerary 本來就是 `description`，food / shopping / prepare 由舊的 `desc` 改名統一。各讀取處（FoodSection / ShoppingSection / TripInfoSection / `maps.js` listToMapPoints）一律 **`description` 優先、`desc` 為 fallback**（容忍 SWR 舊快取與部署空窗）；ShoppingSection 在 `groupItems` 入口把 `description||desc` 正規化成內部 `.desc`，下游不動。新資料一律填 `description` 欄。
 
 ### 寫入 sheet 的型別政策（MUST 遵守）⚠️
 

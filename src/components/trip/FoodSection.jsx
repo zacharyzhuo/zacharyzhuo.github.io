@@ -103,9 +103,9 @@ export default function FoodSection({ rows }) {
                           </a>
                         )}
                       </div>
-                      {(row.note || row.desc || row.address) && (
+                      {(row.note || row.description || row.desc || row.address) && (
                         <p className="text-sm text-secondary leading-relaxed font-serif">
-                          {row.note || row.desc || row.address}
+                          {row.note || row.description || row.desc || row.address}
                         </p>
                       )}
                     </div>
