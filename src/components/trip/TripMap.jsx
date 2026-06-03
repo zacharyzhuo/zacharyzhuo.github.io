@@ -14,8 +14,8 @@ import SegmentedControl from '../ui/SegmentedControl.jsx'
 import EmptyState from '../ui/EmptyState.jsx'
 
 const TOKYO = [35.6762, 139.6503]
-const BUCKETS = ['food', 'shopping', 'attraction', 'backup']
-const BUCKET_LABEL = { food: '美食', attraction: '景點', shopping: '購物', backup: '備選' }
+const BUCKETS = ['food', 'shopping', 'attraction', 'hotel', 'backup']
+const BUCKET_LABEL = { food: '美食', attraction: '景點', shopping: '購物', hotel: '住宿', backup: '備選' }
 
 // Leaflet 在「開啟時才長出來」的容器裡需重新量尺寸，否則圖磚渲染成灰塊。
 function InvalidateOnMount() {

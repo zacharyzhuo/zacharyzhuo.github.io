@@ -168,9 +168,13 @@ export default function TripPage() {
   const mapPoints = useMemo(
     () => mergeMapPoints(
       toMapPoints(normalizedItinerary),
-      [...listToMapPoints(food, 'food'), ...listToMapPoints(shopping, 'shopping')]
+      [
+        ...listToMapPoints(food, 'food'),
+        ...listToMapPoints(shopping, 'shopping'),
+        ...listToMapPoints(accommodation, 'hotel'),
+      ]
     ),
-    [normalizedItinerary, food, shopping]
+    [normalizedItinerary, food, shopping, accommodation]
   )
   const hasMapPoints = mapPoints.length > 0
 

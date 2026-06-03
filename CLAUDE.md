@@ -222,10 +222,11 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 **`accommodation` tab**
 
-| `date` | `name` | `address` | `check_in` | `check_out` | `link` | `region` | `type` | `note` |
-|---|---|---|---|---|---|---|---|---|
+| `date` | `name` | `address` | `check_in` | `check_out` | `link` | `region` | `type` | `note` | `lat` | `lng` |
+|---|---|---|---|---|---|---|---|---|---|---|
 
 `type` 可選值：`hotel`、`airbnb`
+`lat` / `lng`：選填經緯度，給地圖用（歸「住宿」分類）。有值才上圖。
 `date`：check-in 日期，UI 上會以 badge 形式顯示在卡片頂端（同 flight 卡片樣式）。
 
 **`checklist` tab**
@@ -294,13 +295,14 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 ### 點的來源與分類（bucket）
 
-地圖點來自**三個 tab**（皆需填 `lat`/`lng`，有座標才上圖）：
+地圖點來自**四個 tab**（皆需填 `lat`/`lng`，有座標才上圖）：
 
-- **`itinerary` tab**：有日期 → 依 `type` 歸 `food`/`attraction`/`shopping`；**空 `date` → `backup`（備選，不分 type）**；`transport`/`hotel` **不上圖**。
+- **`itinerary` tab**：有日期 → 依 `type` 歸 `food`/`attraction`/`shopping`；**空 `date` → `backup`（備選，不分 type）**；`transport`/`hotel` **不上圖**（住宿改由 accommodation tab 提供，避免重複）。
 - **`food` tab**：全部歸 `food` bucket（`day=null`，只進探索）。
 - **`shopping` tab**：全部歸 `shopping` bucket（`day=null`，只進探索；建議只填建築標頭列）。
+- **`accommodation` tab**：全部歸 `hotel` bucket（`day=null`，只進探索）。是住宿的唯一地圖來源。
 
-探索模式 4 顆篩選 chip（置中、毛玻璃 `.frosted-glass-button` 樣式，分類色在文字＋邊框）：**美食 / 購物 / 景點 / 備選**（順序即 `BUCKETS` 常數）。每個點屬於剛好一個 bucket。
+探索模式 5 顆篩選 chip（置中、毛玻璃 `.frosted-glass-button` 樣式，分類色在文字＋邊框）：**美食 / 購物 / 景點 / 住宿 / 備選**（順序即 `BUCKETS` 常數）。每個點屬於剛好一個 bucket。
 
 ### 座標查法（lat/lng 怎麼填才準 — 給未來的 Claude）
 
@@ -329,7 +331,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 ### 去重（`mergeMapPoints`）
 
-itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shopping）點若與既有點**同 bucket 同座標（5 位小數）**則去重 — 涵蓋 list-vs-itinerary 與 list-vs-list 重複。itinerary 點彼此**不**去重（同旅館的早餐/午餐各算一個停留）。組裝在 `TripPage`：`mergeMapPoints(toMapPoints(itinerary), [...listToMapPoints(food,'food'), ...listToMapPoints(shopping,'shopping')])`。
+itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shopping/accommodation）點若與既有點**同 bucket 同座標（5 位小數）**則去重 — 涵蓋 list-vs-itinerary 與 list-vs-list 重複。itinerary 點彼此**不**去重（同旅館的早餐/午餐各算一個停留）。組裝在 `TripPage`：`mergeMapPoints(toMapPoints(itinerary), [...listToMapPoints(food,'food'), ...listToMapPoints(shopping,'shopping'), ...listToMapPoints(accommodation,'hotel')])`。
 
 ### 路線模式
 
