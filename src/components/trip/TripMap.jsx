@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { Crosshair, MapPin } from 'lucide-react'
+import { Crosshair, MapPin, Navigation } from 'lucide-react'
 import { getCategory, BRAND_INK, BACKUP_INK } from '../../lib/categories.js'
 import { sortByDistance, routePoints, buildMapsUrl } from '../../lib/maps.js'
 import { openExternal } from '../../lib/openExternal.js'
@@ -52,24 +52,52 @@ function FitBounds({ positions, positionsKey }) {
 }
 
 function popupNode(point) {
-  const eyebrowColor = point.bucket === 'backup' ? BACKUP_INK : getCategory(point.bucket).ink
+  // 編輯排版（同住宿卡 / DetailModal 家族）：eyebrow（label + EN）→ 大標 → 髮絲線小標 → 內文段落 → CTA
+  const cat = point.bucket === 'backup' ? null : getCategory(point.bucket)
+  const ink = point.bucket === 'backup' ? BACKUP_INK : cat.ink
+  const en = cat?.en
   const url = buildMapsUrl(point)
   return (
-    <div className="font-serif">
-      <div className="text-2xs tracking-widest uppercase font-bold" style={{ color: eyebrowColor }}>
-        {BUCKET_LABEL[point.bucket]}
+    <div className="font-serif" style={{ minWidth: '11rem' }}>
+      <div className="flex items-baseline gap-1.5 mb-1 flex-wrap">
+        <span className="text-sm font-serif font-bold" style={{ color: ink }}>
+          {BUCKET_LABEL[point.bucket]}
+        </span>
+        {en && (
+          <span
+            className="text-2xs font-serif font-bold uppercase tracking-[0.25em]"
+            style={{ color: ink, opacity: 0.6 }}
+          >
+            {en}
+          </span>
+        )}
       </div>
-      <div className="text-base font-bold text-jp-text mt-0.5 mb-0.5">{point.name}</div>
-      {point.desc && <div className="text-xs text-muted mb-1.5 leading-snug">{point.desc}</div>}
-      {/* 刻意用 Google 藍（非站內 jp-green）：示意這顆會開啟 Google 產品，借品牌色辨識 */}
+
+      <h3 className="font-serif font-bold text-jp-text text-lg leading-tight">{point.name}</h3>
+
+      {point.desc && (
+        <>
+          <div className="flex items-center gap-2 mt-2.5 mb-1.5">
+            <span className="text-2xs font-serif font-bold uppercase tracking-[0.2em] text-muted shrink-0">關於</span>
+            <div className="h-[1px] flex-1 bg-hairline" />
+          </div>
+          <p className="text-xs text-secondary font-serif leading-relaxed whitespace-pre-line">{point.desc}</p>
+        </>
+      )}
+
       {url && (
-        <button
-          type="button"
-          onClick={() => openExternal(url)}
-          className="text-[13px] font-bold text-[#1a73e8] touch-manipulation"
-        >
-          ↗ 開啟 Google Maps 導航
-        </button>
+        <>
+          <div className="h-[1px] bg-hairline mt-3 mb-2" />
+          {/* 刻意用 Google 藍（非站內 jp-green）：示意這顆會開啟 Google 產品，借品牌色辨識 */}
+          <button
+            type="button"
+            onClick={() => openExternal(url)}
+            className="text-[13px] font-serif font-bold text-[#1a73e8] touch-manipulation inline-flex items-center gap-1"
+          >
+            <Navigation size={13} />
+            Google Maps 導航
+          </button>
+        </>
       )}
     </div>
   )
