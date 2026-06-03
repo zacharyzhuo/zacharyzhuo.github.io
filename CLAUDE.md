@@ -289,16 +289,22 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 | 欄 | 正確型別 | 怎麼寫 |
 |---|---|---|
 | `date`（所有 tab） | **日期（DATE）** | `USER_ENTERED` 寫 `6/5`；整欄 numberFormat `type=DATE`（現用 `m/d`）。gviz 輸出 `6/4`，resolveTripDate 吃 `M/D`／`YYYY/MM/DD` |
-| `itinerary.time`、`accommodation.check_in`/`check_out` | **時間（TIME）** | 整欄 numberFormat `type=TIME, pattern=hh:mm`，再 `USER_ENTERED` 寫 `09:50`。gviz 輸出乾淨 `09:50`（已驗）。**只放真時鐘時間**；模糊時間（`evening`、待定）**留空**或寫進 `description`／`note`，**不要**在 time 欄塞文字（會冒出 `'` 又被 gviz 吐空） |
+| `itinerary.time` | **文字（整欄一致）** | 此欄實務上**混了真時鐘（`09:50`）與非時鐘標籤（`晚上`/`上午`/`下午`/`晚餐`/`備選`）**，且這些標籤要照常顯示在時間軸。**整欄一律當文字**：`USER_ENTERED` 寫字串，並把該欄資料範圍 numberFormat 設 `TEXT`（防之後在 UI 輸入 `14:00` 又被自動轉成 TIME 型別、破壞「整欄文字」）。gviz 對「全文字欄」照吐所有值（含 `09:50` 與 `晚上`），安全。**切勿只把部分格轉成真 TIME 型別** → 見下方「同一欄不可混型別」 |
+| `accommodation.check_in`/`check_out` | **時間（TIME）** | 這兩欄是 100% 乾淨時鐘時間、無文字標籤 → 整欄 numberFormat `type=TIME, pattern=hh:mm`，再 `USER_ENTERED` 寫 `09:50`。gviz 輸出乾淨 `09:50`（已驗） |
 | `lat` / `lng` | **數字（Number）** | `USER_ENTERED` 寫數字字串 `10.4070429`（成 number；gviz 輸出數字） |
 | `flights.time`、`hours` 等含**區間/中文**的自由文字 | **文字** | 內容非單一可轉換值（`07:00 - 09:50`、`06:30 – 10:30`、`停留 40 分鐘`）→ Sheets 不會自動轉、本來就無 `'`，直接 `USER_ENTERED` 寫 |
 | 其餘文字欄（`name`/`address`/`link`/`description`/`note`/`type`/`area`/…） | 文字 | `USER_ENTERED`；內容非「整格可轉換」不會出現 `'`，免特別處理 |
 
+**同一欄不可混型別（核心鐵則，實測）**：gviz 對一欄只推定**一種**型別，把不符的格吐成空字串。所以真正的規則不是「time 一定要 TIME」，而是「**整欄同型別**」。
+- 把 `itinerary.time` 的時鐘格轉成真 TIME、卻保留 `晚上`/`上午` 文字格 → gviz 判整欄為時間型 → **那些文字格被吐成空**（時間軸時間標籤消失）。
+- 實測（拋棄式 sheet 驗證）：**全文字欄**（`16:00` 與 `晚上` 都 stringValue）→ gviz 全部照吐；**混型別欄**（`16:00` 是 numberValue＋`晚上` 是 stringValue）→ `晚上` 被吐成 `''`。
+- 結論：`itinerary.time` 維持**整欄文字**。只有「該欄 100% 是乾淨時鐘時間」（如 `accommodation.check_in/check_out`）才用真 TIME 型別。
+
 **通則**：
 - 寫 cell 一律 `valueInputOption: USER_ENTERED`（**不要 `RAW`**）；URL 也才會變連結。
-- 要把某欄設成特定型別（`date`→DATE、`time`/`check_in`/`check_out`→TIME、純數字欄→NUMBER）：先用 `batchUpdate` 的 `repeatCell` 設整欄 `userEnteredFormat.numberFormat`（`{type, pattern}`），再 `USER_ENTERED` 寫值。`time` 欄只放真時間，非時間的值留空。
+- 要把某欄設成特定型別（`date`→DATE、`check_in`/`check_out`→TIME、`lat`/`lng`→NUMBER、`itinerary.time`→TEXT）：先用 `batchUpdate` 的 `repeatCell` 設該欄資料範圍 `userEnteredFormat.numberFormat`（`{type, pattern}`；TEXT 型別用 `{type:"TEXT"}`），再 `USER_ENTERED` 寫值。
 - **寫後必驗**：`curl 'https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:csv&sheet=<tab>'`，確認新列該填的欄**非空**、值正確。
-- 偵測殘留 forced-text：`spreadsheets.get` 帶 `includeGridData` 看 `userEnteredValue` 是否為 `stringValue` 但內容是純數字/純 `HH:MM`/純日期（這種就是型別錯）。
+- 偵測殘留 forced-text：`spreadsheets.get` 帶 `includeGridData` 看 `userEnteredValue` 是否為 `stringValue` 但內容是純數字/純日期（這種就是型別錯）。**例外**：`itinerary.time` 的 `stringValue` 純 `HH:MM` 是**刻意的全欄文字**，不是錯。
 - **要在某天中間插列**（保持時間順序，而非丟到表尾）：用 `batchUpdate` 的 `insertDimension`（指定分頁 `sheetId`、`ROWS`、`startIndex`/`endIndex`）插空列，再 `values.update` 寫入；itinerary **無 `day` 欄**，日由 `date` 推。
 
 ---
@@ -320,7 +326,7 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 
 地圖點來自**四個 tab**（皆需填 `lat`/`lng`，有座標才上圖）：
 
-- **`itinerary` tab**：有日期 → 依 `type` 歸 `food`/`attraction`/`shopping`；**空 `date` → `backup`（備選，不分 type）**；`transport`/`hotel` **不上圖**（住宿改由 accommodation tab 提供，避免重複）。
+- **`itinerary` tab**：有日期 → 依 `type` 歸 `food`/`attraction`/`shopping`；**空 `date` → `backup`（備選，不分 type）**；**有日期的 `transport`/`hotel` → `routeOnly` 點：只進「路線」模式（讓整天動線含機場/港口/飯店 check-in），不進「探索」**（交通非探索點；住宿的探索點改由 accommodation tab 提供，避免重複）。著色用各自 type ink（transport 藍鼠 / hotel 藤鼠）。判斷在 `toMapPoints`（`pointBucket` 維持對 transport/hotel 回 null 不變，routeOnly 在 `toMapPoints` 內另判）。
 - **`food` tab**：全部歸 `food` bucket（`day=null`，只進探索）。
 - **`shopping` tab**：全部歸 `shopping` bucket（`day=null`，只進探索；建議只填建築標頭列）。
 - **`accommodation` tab**：全部歸 `hotel` bucket（`day=null`，只進探索）。是住宿的唯一地圖來源。
@@ -356,9 +362,21 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 
 itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shopping/accommodation）點若與既有點**同 bucket 同座標（5 位小數）**則去重 — 涵蓋 list-vs-itinerary 與 list-vs-list 重複。itinerary 點彼此**不**去重（同旅館的早餐/午餐各算一個停留）。組裝在 `TripPage`：`mergeMapPoints(toMapPoints(itinerary), [...listToMapPoints(food,'food'), ...listToMapPoints(shopping,'shopping'), ...listToMapPoints(accommodation,'hotel')])`。
 
+> **`routeOnly` 點不當去重種子**：`mergeMapPoints` 的 `seen` 只用「非 routeOnly 的 itinerary 點」建立。否則 itinerary 的住宿 routeOnly 點會把 accommodation tab 同址住宿點去掉，害探索模式看不到住宿。兩者並存：路線模式顯示 itinerary 那顆（有 day），探索模式顯示 accommodation 那顆（day=null）。
+
 ### 路線模式
 
-只取**選中那天有座標的點**按 `time` 排序，畫編號 marker + 品牌綠虛線（綠=動線語意，非分類色）。清單（food/shopping）點 `day=null` 自然不進路線。要看哪天由 modal 內的 `DayNav` 選（預設 `activeDay`）。
+只取**選中那天有座標的點**（含 routeOnly 的交通/住宿）按 `time` 排序，畫編號 marker + 品牌綠虛線（綠=動線語意，非分類色）。清單（food/shopping/accommodation）點 `day=null` 自然不進路線。要看哪天由 modal 內的 `DayNav` 選（預設 `activeDay`）。
+
+> **路線 = 「那天怎麼移動」，跨國/跨海長線是 OK 的**（產品定義）。抵達/離境日的跨國交通列（機場接送、出發國機場）**照填座標**，路線會 fit 到跨國範圍、拉一條跨海線呈現整天移動 —— 這是刻意的，**不要**為了避免長線而把那些列留空。
+
+**逐站 stepper（前進/後退）**：路線模式底部置中一顆玻璃膠囊 `‹  3/7  ›`。
+- state `focusIdx`（`null` = 總覽）。換天(DayNav)/切模式 → 自動重置回總覽（`useEffect` on `[routeDay, mode]`）。
+- **›** 前進：總覽 → 第 1 點；之後 +1，clamp 在最後一點。**‹** 後退：總覽 → **最後一點**；之後 -1，clamp 在第 1 點。索引邏輯抽成純函式 `nextFocusIndex(current, dir, total)`（`lib/maps.js`，有測試）。
+- 中間 `n/total` 點一下 → 回總覽。
+- 相機：總覽 `fitBounds` 全部點；聚焦 `flyTo(zoom 16)` + 開該點 popup（route marker 需存 `markerRefs`）。`FitBounds` 元件只在**探索模式**掛載，路線相機完全由 stepper 的 `useEffect` 控（總覽 fit / 聚焦 flyTo），避免兩者打架。
+- ⚠️ **膠囊容器用 `.frosted-glass-panel`（靜態毛玻璃），不要套 `.frosted-glass-button`**：後者的 `:active` 是 `scale(0.9)` 配 `--ease-spring`（overshoot），套在「裝多顆按鈕的容器」上會讓整顆膠囊一按就彈來彈去、裡面 ‹ › 難點。`.frosted-glass-panel` 材質同 frosted-glass-button 靜止態但**無** `:active` 彈簧。press 彈簧只屬於**單一**可點元件；內層 ‹ › 用瞬時 `active:scale-90` 即可。
+- 相機動畫：`flyTo`/`fitBounds` 都帶 `{ duration: 0.6 / 0.5 }` 上限（預設弧線在遠點會飛很久）；聚焦的 popup 用 `map.once('moveend', …)` 在移動結束才開（不會飛到一半就跳出）。
 
 ### 顏色 / marker
 

@@ -518,6 +518,19 @@ a:focus-visible,
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
+/* 靜態毛玻璃面板：給「裝多顆按鈕」的浮動控制（如路線 stepper 膠囊）。
+   材質同 frosted-glass-button 靜止態，但**無** :active scale 彈簧
+   （容器整顆彈會害裡面的按鈕跑掉、難點）。press 彈簧只屬於單一可點元件。 */
+.frosted-glass-panel {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: var(--glass-button);
+  -webkit-backdrop-filter: var(--glass-button);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 8px 32px 0 rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
 /* 通用 press 微彈：點下 squish、放開 Q 彈回彈。套在可點卡片 / 選單項 / CTA。
    prefers-reduced-motion 由全域 reset 自動降級為瞬時。 */
 .press-springy {

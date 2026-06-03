@@ -6,6 +6,7 @@ import {
   haversineMeters,
   sortByDistance,
   routePoints,
+  nextFocusIndex,
   formatDistance,
   buildMapsUrl,
   listToMapPoints,
@@ -57,15 +58,23 @@ describe('toMapPoints', () => {
     { name: '備選咖啡', type: 'food', _day: null, lat: '35.66', lng: '139.71' },
     { name: '無座標的點', type: 'food', _day: 1, lat: '', lng: '' },
     { name: '飯店', type: 'hotel', _day: 1, lat: '35.6', lng: '139.7' },
+    { name: '機場', type: 'transport', _day: 1, lat: '35.55', lng: '139.78', time: '08:00' },
   ]
-  it('keeps only rows with valid coords AND a non-null bucket', () => {
+  it('keeps rows with valid coords; transport/hotel with day become route-only points', () => {
     const pts = toMapPoints(rows)
-    expect(pts.map(p => p.name)).toEqual(['明治神宮', '一蘭', '備選咖啡'])
+    expect(pts.map(p => p.name)).toEqual(['明治神宮', '一蘭', '備選咖啡', '飯店', '機場'])
+  })
+  it('flags transport/hotel-with-day as routeOnly (bucket = type); others not routeOnly', () => {
+    const byName = Object.fromEntries(toMapPoints(rows).map(p => [p.name, p]))
+    expect(byName['飯店']).toMatchObject({ bucket: 'hotel', routeOnly: true })
+    expect(byName['機場']).toMatchObject({ bucket: 'transport', routeOnly: true })
+    expect(byName['明治神宮'].routeOnly).toBe(false)
+    expect(byName['備選咖啡']).toMatchObject({ bucket: 'backup', routeOnly: false })
   })
   it('carries the right fields incl bucket and day', () => {
     const meiji = toMapPoints(rows)[0]
     expect(meiji).toMatchObject({
-      name: '明治神宮', lat: 35.6764, lng: 139.6993, bucket: 'attraction',
+      name: '明治神宮', lat: 35.6764, lng: 139.6993, bucket: 'attraction', routeOnly: false,
       day: 1, time: '10:00', link: 'https://maps.app.goo.gl/x', desc: '森林神社',
     })
   })
@@ -112,6 +121,25 @@ describe('routePoints', () => {
   ]
   it('keeps only the given day, sorted by time, untimed last', () => {
     expect(routePoints(pts, 1).map(p => p.name)).toEqual(['A', 'B', 'noTime'])
+  })
+})
+
+describe('nextFocusIndex', () => {
+  it('from overview: next→first, prev→last', () => {
+    expect(nextFocusIndex(null, 1, 7)).toBe(0)
+    expect(nextFocusIndex(null, -1, 7)).toBe(6)
+  })
+  it('steps ±1 when focused', () => {
+    expect(nextFocusIndex(2, 1, 7)).toBe(3)
+    expect(nextFocusIndex(2, -1, 7)).toBe(1)
+  })
+  it('clamps at both ends (no wrap)', () => {
+    expect(nextFocusIndex(6, 1, 7)).toBe(6)
+    expect(nextFocusIndex(0, -1, 7)).toBe(0)
+  })
+  it('returns null when no points', () => {
+    expect(nextFocusIndex(null, 1, 0)).toBeNull()
+    expect(nextFocusIndex(2, 1, 0)).toBeNull()
   })
 })
 
@@ -175,5 +203,10 @@ describe('mergeMapPoints', () => {
       { id: 'x2', name: 'Breakfast', bucket: 'food', lat: 10.30982, lng: 123.91942, day: 4 },
     ]
     expect(mergeMapPoints(itin, []).map((p) => p.name)).toEqual(['Breakfast', 'Breakfast'])
+  })
+  it('route-only itinerary points do NOT dedup same-coord list points (accommodation stays for explore)', () => {
+    const itin = [{ id: 'h', name: 'Hotel(itin)', bucket: 'hotel', lat: 10.3, lng: 123.9, day: 1, routeOnly: true }]
+    const list = [{ id: 'a', name: 'Hotel(acc)', bucket: 'hotel', lat: 10.3, lng: 123.9, day: null }]
+    expect(mergeMapPoints(itin, list).map((p) => p.name)).toEqual(['Hotel(itin)', 'Hotel(acc)'])
   })
 })

@@ -33,19 +33,29 @@ export function pointBucket(row) {
   return null
 }
 
-/** 把 normalized itinerary 轉成地圖點（只留「有座標」且「bucket 非 null」者）。 */
+/**
+ * 把 normalized itinerary 轉成地圖點（只留有座標者）。
+ * `transport` / `hotel` 且有日期 → 標 `routeOnly`：只進「路線」模式（整天動線含
+ * 機場 / 港口 / 飯店），不進「探索」（交通非探索點；住宿改由 accommodation tab 供探索）。
+ * bucket 用其 type 著色（transport 藍鼠 / hotel 藤鼠）。其餘照 pointBucket。
+ */
 export function toMapPoints(normalized) {
   if (!Array.isArray(normalized)) return []
   return normalized.reduce((acc, row) => {
     const coords = parseLatLng(row)
-    const bucket = pointBucket(row)
-    if (!coords || !bucket) return acc
+    if (!coords) return acc
+    const hasDay = row._day !== null && row._day !== undefined
+    const type = row.type || 'attraction'
+    const routeOnly = hasDay && (type === 'transport' || type === 'hotel')
+    const bucket = routeOnly ? type : pointBucket(row)
+    if (!bucket) return acc
     acc.push({
       id: `${row.name || ''}-${row._day ?? 'x'}-${row.time || ''}-${coords.lat}-${coords.lng}`,
       name: row.name || '',
       lat: coords.lat,
       lng: coords.lng,
       bucket,
+      routeOnly,
       type: row.type || 'attraction',
       link: row.link || '',
       address: row.address || '',
@@ -89,6 +99,23 @@ export function routePoints(points, day) {
     .sort((a, b) => timeKey(a.time) - timeKey(b.time))
 }
 
+/**
+ * 路線 stepper 的下一個 focus index。
+ *  - `current === null`（總覽）→ next 跳第一點(0)、prev 跳最後一點(total-1)
+ *  - 已聚焦 → ±1，兩端 clamp（不跨界、不 wrap）
+ *  - total <= 0 → null（沒有可聚焦的點）
+ * @param {number|null} current 目前聚焦 index（null = 總覽）
+ * @param {1|-1} dir 1=前進 / -1=後退
+ * @param {number} total 該天點數
+ * @returns {number|null}
+ */
+export function nextFocusIndex(current, dir, total) {
+  if (!Number.isFinite(total) || total <= 0) return null
+  if (current === null || current === undefined) return dir > 0 ? 0 : total - 1
+  const next = current + (dir > 0 ? 1 : -1)
+  return Math.max(0, Math.min(total - 1, next))
+}
+
 /** 距離顯示：<1km 取整到 10m，否則 km 一位小數。 */
 export function formatDistance(m) {
   if (!Number.isFinite(m)) return ''
@@ -130,7 +157,9 @@ const locationKey = (p) => `${p.bucket}-${p.lat.toFixed(5)}-${p.lng.toFixed(5)}`
  * 注意：itinerary 點彼此不去重（同一旅館的早餐/午餐視為各自的停留）。
  */
 export function mergeMapPoints(itineraryPoints, listPoints) {
-  const seen = new Set(itineraryPoints.map(locationKey))
+  // route-only 點（itinerary 的交通/住宿）不當去重種子：否則會把 accommodation tab
+  // 的同址住宿點去掉，導致探索模式看不到住宿。
+  const seen = new Set(itineraryPoints.filter((p) => !p.routeOnly).map(locationKey))
   const extra = []
   for (const p of listPoints) {
     const key = locationKey(p)

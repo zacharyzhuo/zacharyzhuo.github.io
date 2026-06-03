@@ -2,9 +2,9 @@ import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { Crosshair, MapPin, Navigation } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Crosshair, MapPin, Navigation } from 'lucide-react'
 import { getCategory, BRAND_INK, BACKUP_INK } from '../../lib/categories.js'
-import { sortByDistance, routePoints, buildMapsUrl } from '../../lib/maps.js'
+import { sortByDistance, routePoints, nextFocusIndex, buildMapsUrl } from '../../lib/maps.js'
 import { openExternal } from '../../lib/openExternal.js'
 import { tap as hapticTap, bump } from '../../lib/haptic.js'
 import { markerIcon, numberedIcon, meIcon } from './mapIcons.js'
@@ -15,7 +15,7 @@ import EmptyState from '../ui/EmptyState.jsx'
 
 const TOKYO = [35.6762, 139.6503]
 const BUCKETS = ['food', 'shopping', 'attraction', 'hotel', 'backup']
-const BUCKET_LABEL = { food: '美食', attraction: '景點', shopping: '購物', hotel: '住宿', backup: '備選' }
+const BUCKET_LABEL = { food: '美食', attraction: '景點', shopping: '購物', hotel: '住宿', backup: '備選', transport: '交通' }
 
 // Leaflet 在「開啟時才長出來」的容器裡需重新量尺寸，否則圖磚渲染成灰塊。
 function InvalidateOnMount() {
@@ -113,6 +113,7 @@ function popupNode(point) {
 export default function TripMap({ points, days = [], activeDay = null }) {
   const [mode, setMode] = useState('explore')
   const [routeDay, setRouteDay] = useState(activeDay ?? days[0]?.day ?? null)
+  const [focusIdx, setFocusIdx] = useState(null) // 路線逐站 stepper：null = 總覽
   const [active, setActive] = useState(() => new Set(BUCKETS))
   const [userPos, setUserPos] = useState(null)
   const [geoStatus, setGeoStatus] = useState('idle') // idle|locating|ok|error
@@ -120,7 +121,8 @@ export default function TripMap({ points, days = [], activeDay = null }) {
   const mapRef = useRef(null)
   const markerRefs = useRef({})
 
-  const explorePoints = useMemo(() => points.filter((p) => active.has(p.bucket)), [points, active])
+  // 探索排除 route-only（交通/住宿動線點只屬於路線模式）
+  const explorePoints = useMemo(() => points.filter((p) => !p.routeOnly && active.has(p.bucket)), [points, active])
   const routePts = useMemo(() => (routeDay != null ? routePoints(points, routeDay) : []), [points, routeDay])
 
   const shown = mode === 'route' ? routePts : explorePoints
@@ -163,6 +165,33 @@ export default function TripMap({ points, days = [], activeDay = null }) {
   }, [])
 
   const switchMode = useCallback((m) => setMode(m), [])
+
+  // 換天 / 切模式 → stepper 回總覽
+  useEffect(() => { setFocusIdx(null) }, [routeDay, mode])
+
+  const stepRoute = useCallback((dir) => {
+    bump()
+    setFocusIdx((cur) => nextFocusIndex(cur, dir, routePts.length))
+  }, [routePts.length])
+
+  const backToOverview = useCallback(() => { hapticTap(); setFocusIdx(null) }, [])
+
+  // 路線相機：總覽 fit 全部；聚焦則 flyTo 該點並開 popup
+  useEffect(() => {
+    if (mode !== 'route' || !routePts.length) return
+    const map = mapRef.current
+    if (!map) return
+    if (focusIdx === null) {
+      map.fitBounds(L.latLngBounds(routePts.map((p) => [p.lat, p.lng])), { padding: [44, 44], maxZoom: 16, duration: 0.5 })
+      return
+    }
+    const p = routePts[focusIdx]
+    if (!p) return
+    map.flyTo([p.lat, p.lng], 16, { duration: 0.6 }) // 上限 0.6s，避免遠點弧線飛太久
+    const openPopup = () => markerRefs.current[p.id]?.openPopup()
+    map.once('moveend', openPopup) // 移動結束才開 popup，不會飛到一半就跳出
+    return () => map.off('moveend', openPopup)
+  }, [focusIdx, mode, routePts])
 
   const initialCenter = positions[0] || (userPos ? [userPos.lat, userPos.lng] : TOKYO)
 
@@ -236,7 +265,7 @@ export default function TripMap({ points, days = [], activeDay = null }) {
             >
               <InvalidateOnMount />
               <InvalidateOnModeChange mode={mode} />
-              <FitBounds positions={positions} positionsKey={positionsKey} />
+              {mode === 'explore' && <FitBounds positions={positions} positionsKey={positionsKey} />}
               <TileLayer
                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                 attribution='&copy; OpenStreetMap &copy; CARTO'
@@ -268,7 +297,15 @@ export default function TripMap({ points, days = [], activeDay = null }) {
                     />
                   )}
                   {routePts.map((p, i) => (
-                    <Marker key={p.id} position={[p.lat, p.lng]} icon={numberedIcon(p.bucket, i + 1)}>
+                    <Marker
+                      key={p.id}
+                      position={[p.lat, p.lng]}
+                      icon={numberedIcon(p.bucket, i + 1)}
+                      ref={(el) => {
+                        if (el) markerRefs.current[p.id] = el
+                        else delete markerRefs.current[p.id]
+                      }}
+                    >
                       <Popup>{popupNode(p)}</Popup>
                     </Marker>
                   ))}
@@ -298,6 +335,38 @@ export default function TripMap({ points, days = [], activeDay = null }) {
                 onToggle={() => setNearbyOpen((o) => !o)}
                 onSelect={focusPoint}
               />
+            )}
+
+            {/* 路線逐站 stepper：‹ 3/7 › ，中間數字點一下回總覽 */}
+            {mode === 'route' && routePts.length > 0 && (
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-6 z-[600] flex items-center gap-0.5 frosted-glass-panel rounded-full p-1">
+                <button
+                  type="button"
+                  onClick={() => stepRoute(-1)}
+                  disabled={focusIdx === 0}
+                  className="w-10 h-10 grid place-items-center rounded-full text-jp-text active:scale-90 disabled:opacity-30 touch-manipulation"
+                  aria-label="上一站"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button
+                  type="button"
+                  onClick={backToOverview}
+                  className="min-w-[3.5rem] px-2 h-10 grid place-items-center font-serif font-bold text-sm tabular-nums text-jp-text active:scale-95 touch-manipulation"
+                  aria-label={focusIdx === null ? '總覽' : '回到總覽'}
+                >
+                  {focusIdx === null ? `${routePts.length} 站` : `${focusIdx + 1} / ${routePts.length}`}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => stepRoute(1)}
+                  disabled={focusIdx === routePts.length - 1}
+                  className="w-10 h-10 grid place-items-center rounded-full text-jp-text active:scale-90 disabled:opacity-30 touch-manipulation"
+                  aria-label="下一站"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
             )}
           </>
         )}
