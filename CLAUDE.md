@@ -278,6 +278,16 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - `lat` / `lng`：選填經緯度，給地圖用（歸「美食」分類）。有值才上圖
 - 若 `food` tab 無資料，fallback 為 `itinerary` 中 `type === 'food'` 的行程（由 `useFoodItems` 處理）。**注意**：地圖的美食點來自 **raw `food` tab**（非 `useFoodItems`），避免與 itinerary 的 food 重複計算
 
+### 寫入 sheet 的注意事項（gviz 型別陷阱）⚠️
+
+App 是透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 sheet，不是讀原始 cell。**gviz 會對每一欄推定單一型別，並把「不符該欄型別」的儲存格輸出成空字串**。這會咬到用 API/`gws` 寫資料的人：
+
+- **`date` 欄是 Date 型別**（既有列都是真日期）。若用 `gws ... values update/append` 搭 **`valueInputOption: RAW`** 寫 `"6/5"`，會存成**純文字**（cell 顯示 `'6/5`、靠左對齊）→ 型別不符 → **gviz 輸出空字串** → app 收到空 `date` → 該列 `_day=null` → **從當天時間軸消失**（且被地圖當「備選」點）。症狀：**Sheet 裡看得到、網頁卻不顯示**。
+- **修法 / 預設**：寫 `date` 欄（及任何含 Google Maps URL、要被 gviz 當特定型別的欄）一律用 **`valueInputOption: USER_ENTERED`**，讓 Sheets 解析成正確型別（`6/5`→真日期、URL→連結）。
+- **`lat`/`lng`** 是數字欄，RAW 寫數字字串目前 OK，但保險起見也用 `USER_ENTERED`。
+- **寫後必驗**：`curl 'https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:csv&sheet=itinerary'`，確認新列的 `date`（及該填的欄）**非空**。
+- **要在某天中間插列**（保持時間順序，而非丟到表尾）：用 `spreadsheets.batchUpdate` 的 `insertDimension`（指定該分頁 `sheetId`、`ROWS`、`startIndex`/`endIndex`）插入空列，再 `values.update` 寫入；注意 itinerary 內**沒有 `day` 欄**，日由 `date` 推。
+
 ---
 
 ## 地圖（TripMap）
