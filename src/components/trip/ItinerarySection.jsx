@@ -26,9 +26,9 @@ function timeToMinutes(str) {
 }
 
 // 今日時間軸上「現在 HH:MM」紅線標記。對齊新三欄（時間 | 軌道節點 | 內容）。
-function NowMarker({ time, innerRef }) {
+function NowMarker({ time }) {
   return (
-    <div ref={innerRef} className="flex gap-2.5 px-5 -mt-1 mb-3 items-center">
+    <div className="flex gap-2.5 px-5 -mt-1 mb-3 items-center">
       <span className="w-10 shrink-0 text-right text-2xs font-serif font-bold text-jp-red leading-none tabular-nums">
         {time}
       </span>
@@ -347,7 +347,6 @@ export default function ItinerarySection({ rows, dayDate }) {
   const [selected, setSelected] = useState(null)
   const cardTap = useCancelableTap()
   const [now, setNow] = useState(formatNowHHMM)
-  const nowMarkerRef = useRef(null)
   const isToday = dayDate && dayDate === formatToday()
 
   // 每分鐘 tick 一次，讓「現在」線會慢慢往下移
@@ -373,15 +372,6 @@ export default function ItinerarySection({ rows, dayDate }) {
     })
     return idx === -1 ? mainRows.length : idx
   }, [isToday, mainRows, now])
-
-  // 切到今天的當天，自動 scroll 到「現在」標記
-  useEffect(() => {
-    if (!isToday || !nowMarkerRef.current) return
-    const id = setTimeout(() => {
-      nowMarkerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }, 200)
-    return () => clearTimeout(id)
-  }, [isToday, dayDate])
 
   const spotsByParent = useMemo(
     () =>
@@ -409,7 +399,7 @@ export default function ItinerarySection({ rows, dayDate }) {
 
           return (
             <Fragment key={`${row.time}:${row.name}`}>
-              {nowIdx === i && <NowMarker time={now} innerRef={nowMarkerRef} />}
+              {nowIdx === i && <NowMarker time={now} />}
             <div
               className="flex gap-2.5 px-5 group"
             >
@@ -510,7 +500,7 @@ export default function ItinerarySection({ rows, dayDate }) {
           )
         })}
         {/* 全部時間都過了 → 把「現在」標記放在最後 */}
-        {isToday && nowIdx === mainRows.length && <NowMarker time={now} innerRef={nowMarkerRef} />}
+        {isToday && nowIdx === mainRows.length && <NowMarker time={now} />}
       </div>
 
       <DetailModal
