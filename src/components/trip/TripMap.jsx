@@ -273,6 +273,7 @@ export default function TripMap({ points, days = [], activeDay = null }) {
                   attribution='&copy; OpenStreetMap contributors'
                   subdomains="abc"
                   maxZoom={19}
+                  crossOrigin="anonymous"
                 />
               ) : (
                 <TileLayer
@@ -281,6 +282,7 @@ export default function TripMap({ points, days = [], activeDay = null }) {
                   attribution='&copy; OpenStreetMap &copy; CARTO'
                   subdomains="abcd"
                   maxZoom={20}
+                  crossOrigin="anonymous"
                 />
               )}
 

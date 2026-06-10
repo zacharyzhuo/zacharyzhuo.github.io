@@ -51,6 +51,26 @@ registerRoute(
   })
 )
 
+// 地圖圖磚（CARTO Positron / OSM）— 圖資幾乎不變，CacheFirst：同區域第二次起零流量（漫遊省流量），
+// 弱網/離線時舊圖磚仍可顯示。OSM tile policy 本就要求 client 善用快取。
+// 1500 張 × 每張 ~20-60KB ≈ 30-50MB，超出配額時 purgeOnQuotaError 自動清這個 cache。
+registerRoute(
+  ({ url }) =>
+    url.hostname.endsWith('.basemaps.cartocdn.com') ||
+    url.hostname.endsWith('.tile.openstreetmap.org'),
+  new CacheFirst({
+    cacheName: 'map-tiles',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({
+        maxEntries: 1500,
+        maxAgeSeconds: 60 * 60 * 24 * 30,
+        purgeOnQuotaError: true,
+      }),
+    ],
+  })
+)
+
 // Google Fonts CSS — 字重變動時要新版，stale-while-revalidate
 registerRoute(
   ({ url }) => url.origin === 'https://fonts.googleapis.com',

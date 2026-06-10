@@ -329,6 +329,8 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 - `transit` = **OSM 標準圖**（`tile.openstreetmap.org`）：原生顯示車站 icon、站名、地鐵/鐵道路線（日本 OSM 資料完整，規劃交通用）。
 - 用 keyed `<TileLayer>` 條件切換；切換不影響其他狀態。OSM 圖 `maxZoom=19`、Positron `maxZoom=20`。
 
+**圖磚快取（省漫遊流量）**：`sw.js` 對兩個 tile host（`*.basemaps.cartocdn.com` / `*.tile.openstreetmap.org`）做 `CacheFirst`（cache name `map-tiles`，30 天、上限 1500 張、`purgeOnQuotaError`）→ 同區域第二次起零流量，弱網/離線顯示舊圖磚。兩個 `TileLayer` 都帶 `crossOrigin="anonymous"`（兩家 CDN 皆回 `Access-Control-Allow-Origin: *`），讓快取存的是 CORS response 而非 opaque response（opaque 在配額計算會被灌水）。首次瀏覽新區域的流量是固有成本，省不掉。
+
 ### 單一入口、modal 內兩種模式（同一個 `TripMap` 元件）
 
 - **入口**：行程頁 header **右上角**的地圖 icon（與左上漢堡對稱）；`mapPoints` 為空時不顯示。DayBanner **沒有**地圖按鈕。
