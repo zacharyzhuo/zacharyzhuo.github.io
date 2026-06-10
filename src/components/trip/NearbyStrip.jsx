@@ -22,7 +22,7 @@ export default function NearbyStrip({ ranked, status, onSelect }) {
 
   if (status === 'locating' || status === 'error') {
     return (
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-6 z-[600] bg-white rounded-full shadow-md px-4 py-2">
+      <div className="absolute left-1/2 -translate-x-1/2 bottom-6 z-[600] frosted-glass-panel rounded-full px-4 py-2">
         <span className="text-sm font-serif text-muted">
           {status === 'locating' ? '定位中…' : '無法取得位置（權限被拒或逾時）'}
         </span>
@@ -33,7 +33,7 @@ export default function NearbyStrip({ ranked, status, onSelect }) {
   // status === 'ok'
   if (!ranked.length) {
     return (
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-6 z-[600] bg-white rounded-full shadow-md px-4 py-2">
+      <div className="absolute left-1/2 -translate-x-1/2 bottom-6 z-[600] frosted-glass-panel rounded-full px-4 py-2">
         <span className="text-sm font-serif text-muted">附近沒有可顯示的點</span>
       </div>
     )
@@ -47,7 +47,7 @@ export default function NearbyStrip({ ranked, status, onSelect }) {
             key={p.id}
             type="button"
             onClick={() => onSelect(p)}
-            className="snap-start flex-none w-44 bg-white rounded-2xl shadow-md px-3.5 py-2.5 text-left active:scale-[0.97] transition-transform touch-manipulation"
+            className="snap-start flex-none w-44 glass-card press-springy relative rounded-2xl px-3.5 py-2.5 text-left touch-manipulation"
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-sm font-serif font-bold text-jp-text truncate">{p.name}</span>

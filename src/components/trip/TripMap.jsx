@@ -332,7 +332,7 @@ export default function TripMap({ points, days = [], activeDay = null }) {
             <button
               type="button"
               onClick={() => { hapticTap(); setBasemap((b) => (b === 'simple' ? 'transit' : 'simple')) }}
-              className="absolute top-3 right-3 z-[601] inline-flex items-center gap-1.5 px-3 h-9 rounded-full bg-white/90 backdrop-blur shadow-md text-jp-text text-xs font-serif font-bold active:scale-95 touch-manipulation"
+              className="frosted-glass-button absolute top-3 right-3 z-[601] inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-jp-text text-xs font-serif font-bold touch-manipulation"
               aria-label={basemap === 'simple' ? '切換到交通底圖（顯示車站）' : '切換回簡約底圖'}
             >
               <Layers size={15} />
@@ -341,16 +341,22 @@ export default function TripMap({ points, days = [], activeDay = null }) {
 
             {/* locate button（探索模式才有意義）；底部出現膠囊/卡片條時抬高，不被蓋住 */}
             {mode === 'explore' && (
-              <button
-                type="button"
-                onClick={locate}
-                className={`absolute right-4 z-[601] w-12 h-12 rounded-full bg-white shadow-lg grid place-items-center text-jp-green active:scale-95 touch-manipulation transition-[bottom] duration-300 ${
+              /* bottom 位移動畫放外層 wrapper：frosted-glass-button 自帶 transition（transform 彈簧），
+                 若直接在按鈕上加 transition-[bottom] 會互相覆蓋 */
+              <div
+                className={`absolute right-4 z-[601] transition-[bottom] duration-300 ${
                   geoStatus === 'idle' ? 'bottom-6' : 'bottom-[112px]'
                 }`}
-                aria-label="定位我的位置"
               >
-                <Crosshair size={22} />
-              </button>
+                <button
+                  type="button"
+                  onClick={locate}
+                  className="frosted-glass-button w-12 h-12 rounded-full grid place-items-center text-jp-green touch-manipulation"
+                  aria-label="定位我的位置"
+                >
+                  <Crosshair size={22} />
+                </button>
+              </div>
             )}
 
             {mode === 'explore' && (
