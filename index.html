@@ -5,10 +5,10 @@
     <link rel="icon" type="image/png" href="/gokigen_panda_icon.png" />
     <link rel="apple-touch-icon" href="/gokigen_panda_icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <!-- ⚠️ 勿加 apple-mobile-web-app-capable / apple-mobile-web-app-status-bar-style：
-         新版 iOS 對 status-bar-style "default" 的解釋是「跟隨系統外觀」（深色模式 = 黑狀態列），
-         且該值在「加入主畫面」當下被捕捉、事後改網頁無效 —— 加了反而把狀態列鎖成會變黑（踩過）。
-         也勿加 color-scheme / 帶 media 的 theme-color 變體：維持與已驗證會白的版本相同的最簡形狀。 -->
+    <!-- iOS 26 的 PWA 狀態列強制跟隨系統外觀（深色=黑），頁面端無法控制（2026-06-12 整晚實測，
+         fixed 層/wrapper 背景/theme-color 各種寫法/color-scheme/apple meta 含重裝全試過、全無效）。
+         勿再加 apple-mobile-web-app-* meta（重裝時被捕捉、徒增變因）；head 維持最簡形狀。
+         詳見 CLAUDE.md「iOS 26 PWA 狀態列結論」。 -->
     <meta name="theme-color" content="#FBFAF5" />
     <title>Trip Diaries</title>
     <meta name="description" content="個人旅行記錄與行程規劃" />
