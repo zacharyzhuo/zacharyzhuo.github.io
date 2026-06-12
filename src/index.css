@@ -603,6 +603,13 @@ a:focus-visible,
   transition: transform 0.22s var(--ease-spring);
 }
 
+/* 寬文字 pill 的收斂版 lift（如地圖底圖切換鈕）：
+   frosted-glass-button 的 1.1 lift 在寬元件上像素位移大、回彈顯得跳，
+   材質變化（變透/邊緣高光/投影）照舊，只把縮放收到 1.03。 */
+.frosted-glass-button.press-calm:active {
+  transform: scale(1.03);
+}
+
 /* 方向性 squish（iOS26 stepper 液態手感）：按 ‹ 膠囊往左鼓、按 › 往右鼓。
    壓扁變寬（scaleX↑ scaleY↓）、transform-origin 錨在「對側」→ 形變朝按壓方向長出去。
    與被禁止的「整顆均勻 scale 彈跳」不同：小幅度（7%）且方向性，內鍵位移 <10px 不影響按壓。

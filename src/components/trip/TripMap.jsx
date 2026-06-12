@@ -218,11 +218,13 @@ export default function TripMap({ points, days = [], activeDay = null }) {
             />
           </div>
           {/* 底圖切換：簡約（Positron）↔ 交通（OSM 標準圖，看得到車站/鐵道）。
-              放 segmented 同列左側，鏡像右側 BottomSheet 的關閉鈕 */}
+              放 segmented 同列左側，鏡像右側 BottomSheet 的關閉鈕。
+              垂直置中用 inset-y-0 + my-auto（勿用 top-1/2 -translate-y-1/2）：
+              frosted-glass-button:active 的 scale transform 會蓋掉 translate、按下會跳位 */}
           <button
             type="button"
             onClick={() => { hapticTap(); setBasemap((b) => (b === 'simple' ? 'transit' : 'simple')) }}
-            className="pointer-events-auto frosted-glass-button absolute left-5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-jp-text text-xs font-serif font-bold touch-manipulation"
+            className="pointer-events-auto frosted-glass-button press-calm absolute left-5 inset-y-0 my-auto inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-jp-text text-xs font-serif font-bold touch-manipulation"
             aria-label={basemap === 'simple' ? '切換到交通底圖（顯示車站）' : '切換回簡約底圖'}
           >
             <Layers size={15} />
