@@ -108,7 +108,7 @@ export default function TripCard({ trip, variant = 'normal' }) {
         <div
           className="rounded-xl p-4 text-left"
           style={{
-            background: 'rgba(249,248,244,0.55)',
+            background: 'rgba(251,250,245,0.55)',
             backdropFilter: 'blur(12px) saturate(160%)',
             WebkitBackdropFilter: 'blur(12px) saturate(160%)',
             border: '1px solid rgba(255,255,255,0.35)',

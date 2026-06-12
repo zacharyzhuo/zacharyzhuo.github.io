@@ -411,12 +411,14 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 
 ## UI / Design System
 
-- **底色**：`#F9F8F4`（米白）
-- **Accent**：`#5C6E58`（抹茶綠）
+- **底色**：`#FBFAF5`（米白）＋**和紙染め背景**：`body::before`（fixed，「紙の光」白暈 + 四個 radial 色斑）＋ `body::after`（fixed，feTurbulence 和紙噪點 opacity 0.035）。目的是給全站玻璃「隨時有東西可糊」——純米白底下 backdrop-filter 糊單色等於沒糊，透明感讀不出來。色斑固定不隨內容捲動（玻璃捲過色彩才持續現形）；用 fixed 偽元素是因 iOS Safari 不支援 `background-attachment: fixed`。
+  - **當日分類連動染**：四個色斑顏色吃 `--wash-a/b/c/d` 變數（`@property` 註冊 `<color>`，換值 0.9s crossfade）。行程頁由 `useDayWash(dayItinerary)`（`hooks/useDayWash.js`）依當天行程的分類組成設定 body inline style（純函式 `washColorsForDay` 在 `lib/wash.js`，有測試：3 類以上 `[c1,c2,c3,c1]`、2 類交替、1 類配品牌綠水彩、空天/首頁用 CSS 預設水彩）。
+  - **染色色票鐵則**：染色用 `categories.js` 各分類的 `wash`（高明度水彩版 `'R, G, B'`），**勿直接用 ink** —— ink 是文字色（明度低），當染色拉濃會讀成髒灰陰影；濃度感用彩度與 alpha 撐，不能用暗度撐。調濃淡只動 `body::before` 的 alpha / `lib/wash.js` 的 `SLOT_ALPHAS`，勿在個別元件下墊色補償。
+- **Accent**：`#5E8C61`（明るい抹茶）
 - **文字色**：主要 `#2C2C2C`（`text-jp-text`）；次要/註記用**語意 token**：`text-secondary`（次要正文，= 原 stone-600）、`text-muted`（小標/註記，= 原 stone-500）。這兩個 + `bg-hairline`/`border-hairline`（1px 分隔線，= 原 stone-200）都在 `tailwind.config.js` 定義成 `var(--text-secondary / --text-muted / --hairline)`，變數在 `index.css :root`。**新次要文字一律用 `text-secondary`/`text-muted`，勿再散用 `text-stone-500/600` 或已退役的 `jp-sub`**。這層是深色模式地基：未來只要在 `:root`（或 `.dark`）覆蓋這幾個變數即可一次翻，元件不用動。`text-stone-400`（更淡的 icon/placeholder）、`text-stone-700`（status pill）屬不同層級，未納入。
 - **字型**：全站 `"Noto Serif JP"`（font-serif），所有文字元素應帶 `font-serif`
 - **字級**：micro eyebrow / 大寫 caps 標籤用 `text-2xs`（tailwind token，0.625rem），勿再用 `text-[10px]/[11px]` arbitrary value
-- **Frosted glass（毛玻璃）**：本站玻璃材質是 frosted glass / glassmorphism（`backdrop-filter: blur/saturate/contrast` + 高光邊框），**非** iOS 26 那種有邊緣折射扭曲的 Liquid Glass。原因（2026-06 查證）：真折射唯一路線是 SVG `feDisplacementMap` + `backdrop-filter: url(#filter)`，**至今仍 Chromium-only**；Safari（本站 iOS PWA 主場）不支援且無支援跡象，`@supports` 還會誤報 true。故折射不追，**改追 iOS26 的互動語言**（press lift、拖拉跟手、彈簧吸附，見下方 press 微彈）。玻璃 `backdrop-filter` 組合集中在 `index.css` 的 `:root` token，**勿再散寫 blur/saturate/contrast 數值**。語意 token：`--glass-nav`（DayNav）、`--glass-card`（行程卡）、`--glass-overlay`（BottomSheet + Sidebar）、`--glass-button` / `--glass-button-lifted`（小鈕 press 抬起時更強 frosted）、`--glass-tab` / `--glass-tab-active` / `--glass-tab-lifted`（press 放大時更強 frosted）。`.glass-card` **不畫白色外框/高光線**（`border: none`、無 inset 白高光、底色 `rgba(255,255,255,0.4)`），只靠下方柔和投影 `0 6px 18px rgba(0,0,0,0.08)` 做分離。原因：在彩色模糊背景（BottomSheet 透出 banner）上，白框/白高光會描出搶眼白邊。若日後覺得玻璃感不夠可加極淡高光，但勿回到舊的 0.6 border / 0.8 inset 白框。
+- **Frosted glass（毛玻璃）**：本站玻璃材質是 frosted glass / glassmorphism（`backdrop-filter: blur/saturate/contrast` + 高光邊框），**非** iOS 26 那種有邊緣折射扭曲的 Liquid Glass。原因（2026-06 查證）：真折射唯一路線是 SVG `feDisplacementMap` + `backdrop-filter: url(#filter)`，**至今仍 Chromium-only**；Safari（本站 iOS PWA 主場）不支援且無支援跡象，`@supports` 還會誤報 true。故折射不追，**改追 iOS26 的互動語言**（press lift、拖拉跟手、彈簧吸附，見下方 press 微彈）。玻璃 `backdrop-filter` 組合集中在 `index.css` 的 `:root` token，**勿再散寫 blur/saturate/contrast 數值**。語意 token：`--glass-nav`（DayNav）、`--glass-card`（行程卡）、`--glass-overlay`（BottomSheet + Sidebar）、`--glass-button` / `--glass-button-lifted`（小鈕 press 抬起時更強 frosted）、`--glass-tab` / `--glass-tab-active` / `--glass-tab-lifted`（press 放大時更強 frosted）。`.glass-card` **不畫白色外框/高光線**（`border: none`、無 inset 白高光、底色 `rgba(255,255,255,0.5)`），只靠下方柔和投影 `0 6px 18px rgba(0,0,0,0.08)` 做分離。原因：在彩色模糊背景（BottomSheet 透出 banner）上，白框/白高光會描出搶眼白邊。若日後覺得玻璃感不夠可加極淡高光，但勿回到舊的 0.6 border / 0.8 inset 白框。
 - CSS utility classes：`frosted-tab-track`、`frosted-tab-btn`、`frosted-tab-pill`、`frosted-glass-button`、`press-springy`、`.safe-area-inset`、`.safe-area-bottom`、`.scrollbar-hide`、`.glass-card`、`.glass-bottom-sheet`、`.glass-sidebar`
 - **Q 彈動效**：iOS26 風格彈簧 token：`--ease-spring`（彈較多，小元件用，Tailwind `ease-spring`）、`--ease-spring-soft`（彈較少，大行程面板用，`ease-spring-soft`）。
   - **press 微彈（iOS26 lift 語言）**：可點離散元件（卡片 / 選單項 / CTA / icon 按鈕）套 `.press-springy`（按下**浮起** `scale(1.03)`、放開 Q 彈落回）或共用的 `.frosted-glass-button`（按下浮起 `scale(1.1)` + body 變近乎全透 + backdrop 切 `--glass-button-lifted` + 邊緣高光變亮 + 投影加深；press-in 0.22s 快彈、放開回 base 0.4s 彈簧）。可點玻璃卡（`glass-card press-springy` 並用）另有卡片版 lift：變更透 + 投影加深，**不切 backdrop**（大面積重繪會 jank）也**不加白框**。方向統一是「浮起」不是「壓扁」（舊的 squish scale(0.9/0.95) 已全面退役）。
@@ -430,23 +432,23 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 
 行程分類（`itinerary` 的 `type`）的 **label / icon / 顏色** 統一由 `src/lib/categories.js` 提供，**是唯一 source of truth**。新增分類或改色只動這個檔；**勿再散寫 Tailwind pastel（`blue-700` / `pink-500` …）或 raw hex**。
 
-配色為低彩度日本傳統「鼠色系」（和紙手帳調性），與品牌抹茶綠同一色族：
+配色為「明るい日本傳統色」（2026-06 由低彩鼠色系全族提彩提亮：低彩色配毛玻璃容易整面灰 —— blur 把背後顏色平均、低彩一平均就趨灰）。每個分類有 `ink`（文字/脊線/icon 色）與 `wash`（背景染色用高明度水彩版，`'R, G, B'` 字串）：
 
-| 分類 | 傳統色 | ink hex |
-|---|---|---|
-| `transport` 交通 | 藍鼠 | `#4E6171` |
-| `food` 美食 | 弁柄（赤陶） | `#9C5A43` |
-| `attraction` 景點 | 苔・橄欖 | `#656E3C` |
-| `shopping` 購物 | 葡萄鼠 | `#8A5A6E` |
-| `hotel` 住宿 | 藤鼠 | `#5E5E86` |
+| 分類 | 傳統色 | ink hex | wash (R, G, B) |
+|---|---|---|---|
+| `transport` 交通 | 縹 | `#5F8FB4` | `150, 185, 215` |
+| `food` 美食 | 朱（明るい弁柄） | `#C96B49` | `240, 172, 140` |
+| `attraction` 景點 | 若葉 | `#7C9B4E` | `178, 206, 138` |
+| `shopping` 購物 | 紅藤 | `#B279A2` | `218, 170, 204` |
+| `hotel` 住宿 | 藤紫 | `#7D82BC` | `176, 180, 232` |
 
-- **抹茶綠 `jp-green #5C6E58` 是全站唯一主 accent**（連結 / active / CTA / 進度條 / focus ring），**不當分類色用**；景點故意用偏黃橄欖色與品牌綠區隔，避免「品牌 or 分類」混淆。全站只有一種綠（先前 `prepare` 卡片誤用的 `#6B9080` 已統一為 `jp-green`）。
+- **`jp-green #5E8C61`（明るい抹茶）是全站唯一主 accent**（連結 / active / CTA / 進度條 / focus ring），**不當分類色用**；景點用偏黃的若葉與品牌綠區隔，避免「品牌 or 分類」混淆。品牌綠的水彩版是 `BRAND_WASH`（`150, 200, 164`）。
 - API：
   - `getCategory(type)`：回 `{ label, en, icon, ink }`（`en` 為大寫英文，給編輯排版 eyebrow 用），未知 type 退回景點。
   - `categoryChipStyle(type)` / `chipStyle(ink)`：**淡玻璃 chip**（文字 ink / 邊框 ink@40% / 底 ink@10%），搭配 className `border backdrop-blur-sm rounded`。用於小標籤。
   - `categorySolidStyle(type)` / `solidStyle(ink)`：**實心**（底 ink / 字白）。目前無引用（航班色帶已改半透明、側欄改純 icon），保留 API 供未來實心場景。
   - `categoryInk(type)`：純 ink 色（給脊線、節點底色等）。
-  - `BRAND_INK`：品牌抹茶綠（= `jp-green` `#5C6E58`）的 JS 字面值，給 inline style 餵 `chipStyle` / `solidStyle` 用（Tailwind class 不適用時）；勿再散寫 `#5C6E58`。
+  - `BRAND_INK`：品牌綠（= `jp-green` `#5E8C61`）的 JS 字面值，給 inline style 餵 `chipStyle` / `solidStyle` 用（Tailwind class 不適用時）；勿再散寫 hex。`BRAND_WASH`：品牌綠水彩版（染色用）。
 - 引用處：`ItinerarySection`（時間軸節點 + 脊線 + eyebrow + modal 編輯排版）、`ShoppingSection`（樓層 `FloorTag` 用淡 chip）、`FoodSection`（店名前弁柄色點）、`TripInfoSection`（航班登機證色帶用 transport 半透明淡色 + 深色字、航線用 transport ink；行前準備玻璃連結卡用 jp-green 外連 icon；住宿 hotel/airbnb 同屬住宿分類，同色靠文字區分）、`TripPage` 的 `MENU_ITEMS`（側欄 icon，**純色 icon 無圓底**）。
 - **日期是 metadata 不是分類**，勿套分類色：航班日期在登機證色帶上（transport 深色字）、住宿日期在 eyebrow 的 `STAY · <date>`。
 - 側欄 `MENU_ITEMS` 的 icon = **純分類色 icon（無圓底）**，`iconStyle` 為 `{ color: categoryInk(...) }`（與時間軸軌道同語言），Sidebar 以 `style={iconStyle}` 套用。

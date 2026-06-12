@@ -6,9 +6,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        'jp-bg': '#F9F8F4',
+        'jp-bg': '#FBFAF5',
         'jp-text': '#2C2C2C',
-        'jp-green': '#5C6E58',
+        'jp-green': '#5E8C61',
         'jp-red': '#B93632',
         'jp-light-gray': '#E5E5E5',
         // 語意文字/線條 token，背後吃 CSS 變數（深色模式時只改 :root 變數即可一次翻）。

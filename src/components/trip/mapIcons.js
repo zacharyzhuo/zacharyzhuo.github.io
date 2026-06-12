@@ -10,7 +10,7 @@ export function markerIcon(bucket) {
       className: '',
       iconSize: [18, 18],
       iconAnchor: [9, 9],
-      html: `<span style="display:block;width:14px;height:14px;border-radius:50%;border:2.5px solid ${BACKUP_INK};background:rgba(249,248,244,0.7);box-shadow:0 1px 3px rgba(0,0,0,0.25)"></span>`,
+      html: `<span style="display:block;width:14px;height:14px;border-radius:50%;border:2.5px solid ${BACKUP_INK};background:rgba(251,250,245,0.7);box-shadow:0 1px 3px rgba(0,0,0,0.25)"></span>`,
     })
   }
   return L.divIcon({

@@ -10,6 +10,7 @@ import { useEasterEgg } from '../hooks/useEasterEgg.js'
 import { pickInitialDay, formatDayLabel } from '../lib/tripDate.js'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 import { useDays, useFoodItems, useNormalizedDays, useNormalizedItinerary } from '../hooks/useTripDerived.js'
+import { useDayWash } from '../hooks/useDayWash.js'
 import { categoryInk, BRAND_INK } from '../lib/categories.js'
 import { toMapPoints, listToMapPoints, mergeMapPoints } from '../lib/maps.js'
 import { TripSkeleton, SectionSkeleton } from '../components/ui/Skeletons.jsx'
@@ -164,6 +165,9 @@ export default function TripPage() {
   const prevDayItinerary = useMemo(() => prevDayObj ? filterDayItinerary(prevDayObj.day) : [], [normalizedItinerary, prevDayObj])
   const nextDayItinerary = useMemo(() => nextDayObj ? filterDayItinerary(nextDayObj.day) : [], [normalizedItinerary, nextDayObj])
 
+  // 當日分類連動染：背景色斑跟著當天行程的分類組成走（換天 0.9s crossfade）
+  useDayWash(dayItinerary)
+
   const foodItems = useFoodItems(food, itinerary)
   const mapPoints = useMemo(
     () => mergeMapPoints(
@@ -207,7 +211,7 @@ export default function TripPage() {
 
   if (!trip) {
     return (
-      <div className="bg-jp-bg min-h-screen safe-area-inset flex flex-col items-center justify-center">
+      <div className="min-h-screen safe-area-inset flex flex-col items-center justify-center">
         <ErrorState
           title="找不到此行程"
           message="可能網址有誤或行程已下架"
@@ -224,7 +228,7 @@ export default function TripPage() {
   const pullIndicatorOpacity = refreshing ? 1 : Math.min(1, pullY / triggerThreshold)
 
   return (
-    <div className="min-h-screen bg-jp-bg text-jp-text font-serif pb-12 safe-area-inset relative">
+    <div className="min-h-screen text-jp-text font-serif pb-12 safe-area-inset relative">
       {/* Pull-to-refresh indicator：floating，不平移內容（避免干擾 day swipe transform） */}
       {showPullIndicator && (
         <div

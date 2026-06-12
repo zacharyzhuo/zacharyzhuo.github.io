@@ -32,12 +32,14 @@ export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripN
         <div className="absolute inset-0 bg-gradient-to-br from-stone-500 to-stone-700" />
       )}
       {/* 不蓋遮罩：照片保持鮮明，文字可讀性改靠緊貼字緣的多層暗色光暈陰影（見下方 textShadow） */}
-      {/* 底部漸層淡入 jp-bg，與下方 itinerary 自然接縫（功能性，疊在 scrim 之上確保接縫乾淨） */}
+      {/* 底部漸層淡入 jp-bg，與下方 itinerary 自然接縫（功能性，疊在 scrim 之上確保接縫乾淨）。
+          終點刻意半透明（0.94）而非全不透明：背景是和紙染め（非純米白），
+          不透明米白會在 banner 底緣形成一條亮帶色塊斷層 */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(to bottom, transparent 55%, rgba(249, 248, 244, 0.7) 88%, rgb(249, 248, 244) 100%)',
+            'linear-gradient(to bottom, transparent 55%, rgba(251, 250, 245, 0.6) 86%, rgba(251, 250, 245, 0.94) 100%)',
         }}
       />
       <div

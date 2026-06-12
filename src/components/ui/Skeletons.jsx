@@ -9,7 +9,7 @@ function Bar({ className = '' }) {
 /** 行程頁全頁骨架：header + 日期導航 + banner + 時間軸卡片 */
 export function TripSkeleton() {
   return (
-    <div className="bg-jp-bg min-h-screen safe-area-inset" role="status" aria-busy="true">
+    <div className="min-h-screen safe-area-inset" role="status" aria-busy="true">
       <span className="sr-only">載入行程中…</span>
 
       {/* Header */}

@@ -251,7 +251,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       if (m) m.remove()
       const restored = document.createElement('meta')
       restored.name = 'theme-color'
-      restored.content = '#F9F8F4'
+      restored.content = '#FBFAF5'
       document.head.appendChild(restored)
     }
   }, [isOpen, hasStartedTransition, showTransition])

@@ -8,7 +8,7 @@
    blur 刻意偏低以保留「透光感」（看得穿背後內容），可讀性靠各 class 的
    背景不透明度補；saturate/contrast 也拉回接近中性，避免把背景糊成霧。 */
 :root {
-  --jp-green: #5C6E58;
+  --jp-green: #5E8C61;
 
   /* 語意文字/線條 token（深色模式時覆蓋這幾個即可一次翻全站）。
      目前值 = 原 stone-600 / stone-500 / stone-200，外觀零變化。 */
@@ -17,10 +17,10 @@
   --hairline: #e7e5e4;       /* stone-200：1px 分隔線 / timeline 連接線（淡，與設計預覽一致） */
 
   /* 鍵盤焦點 ring */
-  --glass-focus-ring: rgba(92, 110, 88, 0.6);
+  --glass-focus-ring: rgba(94, 140, 97, 0.6);
 
   /* 玻璃濾鏡分層（依用途，非依數值） */
-  --glass-nav: blur(5px) saturate(140%);
+  --glass-nav: blur(9px) saturate(140%);
   --glass-card: blur(6px) saturate(130%);
   --glass-overlay: blur(4px) saturate(140%);
   --glass-button: blur(6px) saturate(150%);
@@ -39,7 +39,7 @@
 }
 
 body {
-  background-color: #F9F8F4;
+  background-color: #FBFAF5;
   color: #2C2C2C;
   font-family: "Noto Serif JP", "Hiragino Mincho ProN", serif;
   -webkit-font-smoothing: antialiased;
@@ -51,6 +51,78 @@ body {
   -webkit-touch-callout: none;
   /* 點擊高亮也一併關掉，讓 tap 更乾淨 */
   -webkit-tap-highlight-color: transparent;
+}
+
+/* ── 和紙染め背景（全站玻璃的「透明感」來源） ──────────────────
+   玻璃的透明感來自「背後有東西可糊」：純米白底下 backdrop-filter 糊單色
+   等於沒糊。這兩層 fixed 偽元素在米白底上染四個品牌色族的低彩度色斑
+   （抹茶 / 弁柄 / 藤鼠 / 橄欖）＋極淡和紙噪點；內容捲動時色斑不動，
+   全站玻璃（DayNav / 卡片 / 膠囊 / BottomSheet）隨時捲過色彩。
+   - 用 fixed 偽元素而非 background-attachment: fixed（iOS Safari 不支援後者）。
+   - 純靜態 paint，無動畫無 JS，效能零負擔。
+   - 深色模式日後翻轉時，這兩層的色值也要一併換組深色染。 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* 第一層「紙の光」：中央偏上的暖白暈染，維持內容區米白明亮。
+     色斑「濃而收邊」：峰值高、擴散窄、推向四角。
+     ⚠️ 色票是分類的「高明度水彩版」（categories.js 的 wash，明度 ~65-72%），
+     不是 ink 本色 —— ink 是文字色（明度低偏灰），直接當染色拉濃會讀成
+     「髒灰陰影」而非色彩；濃度感要用彩度與 alpha 撐，不能用暗度撐。
+
+     四個色斑顏色吃 --wash-a/b/c/d 變數（當日分類連動染）：
+     TripPage 依當天行程的分類組成設定 body inline style，換天時由下方
+     @property 註冊的 transition 做 0.9s crossfade；HomePage / 未設定時
+     用 var() fallback（= @property initial-value，品牌色族的預設水彩）。 */
+  background:
+    radial-gradient(70vmax 52vmax at 50% 26%, rgba(255, 253, 248, 0.5), transparent 70%),
+    radial-gradient(44vmax 34vmax at 92% 0%, var(--wash-a, rgba(140, 200, 158, 0.42)), transparent 64%),
+    radial-gradient(38vmax 32vmax at -8% 28%, var(--wash-b, rgba(248, 184, 146, 0.36)), transparent 64%),
+    radial-gradient(44vmax 38vmax at 108% 64%, var(--wash-c, rgba(172, 182, 235, 0.34)), transparent 66%),
+    radial-gradient(36vmax 30vmax at 4% 102%, var(--wash-d, rgba(206, 220, 130, 0.34)), transparent 64%);
+  transition:
+    --wash-a 0.9s ease,
+    --wash-b 0.9s ease,
+    --wash-c 0.9s ease,
+    --wash-d 0.9s ease;
+}
+
+/* 染色變數註冊成 <color> 才能 transition（換天 crossfade）。
+   initial-value = HomePage / 未設定時的預設水彩（品牌色族）。
+   不支援 @property 的舊瀏覽器：上方 var() fallback 接手，換色改為瞬切（可接受降級）。 */
+@property --wash-a {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(140, 200, 158, 0.42);
+}
+@property --wash-b {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(248, 184, 146, 0.36);
+}
+@property --wash-c {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(172, 182, 235, 0.34);
+}
+@property --wash-d {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(206, 220, 130, 0.34);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
+  /* 灰噪點是均勻灰紗，太重會把米白壓暗壓髒 —— 寧低勿高 */
+  opacity: 0.035;
 }
 
 /* 例外：表單輸入框與顯式標記為可選取的內容仍要能反白 / 複製 */
@@ -457,7 +529,9 @@ a:focus-visible,
 
 /* DayNav sticky header Frosted glass */
 .glass-day-nav {
-  background: rgba(249, 248, 244, 0.6);
+  /* 奶白底壓低讓和紙染め透過（與上方 header 同調、消除色塊斷層）；
+     可讀性由較高的 blur（--glass-nav 9px）補回（sticky 蓋在 banner 照片上時） */
+  background: rgba(251, 250, 245, 0.4);
   backdrop-filter: var(--glass-nav);
   -webkit-backdrop-filter: var(--glass-nav);
   /* 底邊只留一條極淺 hairline 過渡，不要二次白光 */
@@ -467,7 +541,8 @@ a:focus-visible,
 
 /* 行程卡片 Frosted glass */
 .glass-card {
-  background: rgba(255, 255, 255, 0.4);
+  /* 0.5：明るい和紙主題下卡片更白更亮（原 0.4），與更彩的染色背景拉開層次 */
+  background: rgba(255, 255, 255, 0.5);
   backdrop-filter: var(--glass-card);
   -webkit-backdrop-filter: var(--glass-card);
   /* 不畫任何白色外框/高光線：在彩色模糊背景上會描出明顯白邊。
@@ -566,7 +641,7 @@ a:focus-visible,
     box-shadow 0.25s ease;
 }
 .glass-card.press-springy:active {
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.3);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
 }
 
@@ -605,6 +680,17 @@ a:focus-visible,
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
+/* 關閉狀態的 sheet 殼：translate-y-full 後頂緣剛好貼在 layout viewport 底線，
+   iOS Safari 半透明工具列（visual viewport 之外）會把圓角頂緣透出來。
+   解法：關閉動畫（300ms ease-out）跑完後 visibility 隱藏。
+   transition 覆蓋 Tailwind 的 transition-transform（本 class 在 utilities 之後，cascade 勝出），
+   transform 部分維持與原 close 動畫相同的 300ms ease-out。
+   開啟時 class 被移除，visibility 立即恢復（開啟態的 transition 不含 visibility）。 */
+.sheet-hidden {
+  visibility: hidden;
+  transition: transform 300ms cubic-bezier(0, 0, 0.2, 1), visibility 0s linear 300ms;
+}
+
 /* Bottom sheet 玻璃卡片（DetailModal 用）- Frosted glass 模擬 */
 .glass-bottom-sheet {
   /* position 由使用端的 Tailwind `absolute` 設定（單層延伸 frost）；
@@ -612,7 +698,7 @@ a:focus-visible,
   overflow: hidden;
   /* 透光感：blur 由 --glass-overlay token 控（偏低，看得穿背後）；
      底色 0.42 補足可讀性，這是透光 vs sheet 內文字可讀的取捨點。 */
-  background: rgba(249, 248, 244, 0.42);
+  background: rgba(251, 250, 245, 0.42);
   backdrop-filter: var(--glass-overlay);
   -webkit-backdrop-filter: var(--glass-overlay);
   border-radius: 2rem 2rem 0 0;
@@ -650,7 +736,7 @@ a:focus-visible,
   /* position 由使用端的 Tailwind `absolute` 設定（單層延伸 frost）；勿設 relative，見 glass-bottom-sheet 註解 */
   overflow: hidden;
   /* 底色 0.42：blur 降低後補足選單文字可讀性（背後是頁面內容） */
-  background: rgba(249, 248, 244, 0.42);
+  background: rgba(251, 250, 245, 0.42);
   backdrop-filter: var(--glass-overlay);
   -webkit-backdrop-filter: var(--glass-overlay);
   border-radius: 0 2rem 2rem 0;
