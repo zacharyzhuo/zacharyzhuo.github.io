@@ -150,7 +150,7 @@ function DetailModal({ row, spots, onClose }) {
     setIsDragging(true)
   }
 
-  const onPillTouchEnd = () => {
+  const onPillTouchEnd = (e) => {
     if (touchStartY.current === null) return
     const elapsed = Math.max(1, Date.now() - touchStartTime.current)
     const velocity = dragYRef.current / elapsed
@@ -159,14 +159,20 @@ function DetailModal({ row, spots, onClose }) {
     setIsDragging(false)
     setDragY(0)
     dragYRef.current = 0
-    if (captured > 120 || velocity > 0.5) onCloseRef.current()
+    if (captured > 120 || velocity > 0.5) {
+      // 擋掉 iOS 在 touchend 後於同座標補發的 synthetic click：
+      // sheet 滑走後那個 click 會落在底下的行程卡上，誤開別張卡
+      if (e?.cancelable) e.preventDefault()
+      onCloseRef.current()
+    }
   }
 
   const sheetClass = [
     'fixed inset-x-0 bottom-0 z-50 transform',
     // 開啟用 Q 彈彈簧（overshoot 由單層延伸玻璃覆蓋，無縫），關閉維持乾淨 ease-out
     isDragging ? '' : (isOpen ? 'transition-transform duration-500 ease-spring-soft' : 'transition-transform duration-300 ease-out'),
-    dragY === 0 ? (isOpen ? 'translate-y-0' : 'translate-y-full') : '',
+    // sheet-hidden：關閉動畫結束後 visibility 隱藏，避免 Safari 工具列透出貼在視窗底線的圓角頂緣
+    dragY === 0 ? (isOpen ? 'translate-y-0' : 'translate-y-full sheet-hidden') : '',
   ].filter(Boolean).join(' ')
 
   const current = row || displayRow

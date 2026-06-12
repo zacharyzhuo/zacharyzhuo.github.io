@@ -75,15 +75,16 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
       }
     }
 
-    const onTouchEnd = () => {
+    const onTouchEnd = (e) => {
       if (!contentDragActiveRef.current) return
       contentDragActiveRef.current = false
-      handleDragRelease()
+      handleDragRelease(e)
     }
 
     el.addEventListener('touchstart', onTouchStart, { passive: true })
     el.addEventListener('touchmove', onTouchMove, { passive: false })
-    el.addEventListener('touchend', onTouchEnd, { passive: true })
+    // touchend 需 non-passive：拖關成立時 preventDefault 擋 iOS synthetic click（見 handleDragRelease）
+    el.addEventListener('touchend', onTouchEnd, { passive: false })
     el.addEventListener('touchcancel', onTouchEnd, { passive: true })
     return () => {
       el.removeEventListener('touchstart', onTouchStart)
@@ -93,7 +94,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
     }
   }, [isDragging])
 
-  const handleDragRelease = () => {
+  const handleDragRelease = (e) => {
     if (touchStartY.current === null) return
     const elapsed = Math.max(1, Date.now() - touchStartTime.current)
     const velocity = dragYRef.current / elapsed
@@ -102,7 +103,11 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
     setIsDragging(false)
     setDragY(0)
     dragYRef.current = 0
-    if (captured > 120 || velocity > 0.5) onCloseRef.current()
+    if (captured > 120 || velocity > 0.5) {
+      // 擋掉 iOS 在 touchend 後補發的 synthetic click（sheet 滑走後會誤點底下內容）
+      if (e?.cancelable) e.preventDefault()
+      onCloseRef.current()
+    }
   }
 
   const onHeaderTouchStart = (e) => {
@@ -115,7 +120,8 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
     'fixed inset-x-0 bottom-0 z-50',
     // 開啟用 Q 彈彈簧（overshoot 由單層延伸玻璃覆蓋，無縫），關閉維持乾淨 ease-out
     isDragging ? '' : (isOpen ? 'transition-transform duration-500 ease-spring-soft' : 'transition-transform duration-300 ease-out'),
-    dragY === 0 ? (isOpen ? 'translate-y-0' : 'translate-y-full') : '',
+    // sheet-hidden：關閉動畫結束後 visibility 隱藏，避免 Safari 工具列透出貼在視窗底線的圓角頂緣
+    dragY === 0 ? (isOpen ? 'translate-y-0' : 'translate-y-full sheet-hidden') : '',
   ].filter(Boolean).join(' ')
 
   return (

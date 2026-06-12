@@ -28,10 +28,17 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
   const scrollRef = useRef(null)
 
   useEffect(() => {
-    if (!scrollRef.current) return
-    const activeBtn = scrollRef.current.querySelector('[data-active="true"]')
+    const el = scrollRef.current
+    if (!el) return
+    const activeBtn = el.querySelector('[data-active="true"]')
     if (!activeBtn) return
-    activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+    // 勿用 scrollIntoView：iOS Safari 對 sticky 容器內的元素會連「整頁垂直」
+    // 一起捲到它的文流位置（header 下方），造成換天時頁面莫名跳進行程卡。
+    // 改為只捲水平容器自己，把 active chip 置中。
+    const elRect = el.getBoundingClientRect()
+    const btnRect = activeBtn.getBoundingClientRect()
+    const delta = (btnRect.left + btnRect.width / 2) - (elRect.left + elRect.width / 2)
+    el.scrollTo({ left: el.scrollLeft + delta, behavior: 'smooth' })
   }, [activeDay])
 
   return (
