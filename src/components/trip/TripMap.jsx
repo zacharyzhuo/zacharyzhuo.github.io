@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { ChevronLeft, ChevronRight, Crosshair, Layers, MapPin, Navigation } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Clock, Crosshair, Layers, MapPin, Navigation } from 'lucide-react'
 import { getCategory, BRAND_INK, BACKUP_INK } from '../../lib/categories.js'
 import { sortByDistance, routePoints, nextFocusIndex, buildMapsUrl } from '../../lib/maps.js'
 import { openExternal } from '../../lib/openExternal.js'
@@ -75,6 +75,13 @@ function popupNode(point) {
 
       <h3 className="font-serif font-bold text-jp-text text-lg leading-tight">{point.name}</h3>
 
+      {point.hours && (
+        <div className="flex items-center gap-1 mt-1.5 text-2xs text-muted font-serif">
+          <Clock size={11} className="shrink-0" />
+          <span>{point.hours}</span>
+        </div>
+      )}
+
       {point.desc && (
         <>
           <div className="flex items-center gap-2 mt-2.5 mb-1.5">
@@ -82,6 +89,23 @@ function popupNode(point) {
             <div className="h-[1px] flex-1 bg-hairline" />
           </div>
           <p className="text-xs text-secondary font-serif leading-relaxed whitespace-pre-line">{point.desc}</p>
+        </>
+      )}
+
+      {point.members?.length > 0 && (
+        <>
+          <div className="flex items-center gap-2 mt-2.5 mb-1.5">
+            <span className="text-2xs font-serif font-bold uppercase tracking-[0.2em] text-muted shrink-0">店家</span>
+            <div className="h-[1px] flex-1 bg-hairline" />
+          </div>
+          <ul className="text-xs text-secondary font-serif leading-relaxed space-y-0.5">
+            {point.members.map((m) => (
+              <li key={`${m.floor}-${m.name}`} className="flex items-baseline gap-1.5">
+                {m.floor && <span className="text-2xs text-muted tabular-nums shrink-0">{m.floor}</span>}
+                <span>{m.name}</span>
+              </li>
+            ))}
+          </ul>
         </>
       )}
 

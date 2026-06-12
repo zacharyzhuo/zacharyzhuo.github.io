@@ -60,6 +60,7 @@ export function toMapPoints(normalized) {
       link: row.link || '',
       address: row.address || '',
       desc: row.description || row.note || '',
+      hours: row.hours || '',
       time: row.time || '',
       day: row._day ?? null,
     })
@@ -123,8 +124,8 @@ export function formatDistance(m) {
 }
 
 /**
- * food / shopping 清單列 → 地圖點。清單點無日期（day=null）→ 只進探索模式，不進路線。
- * bucket 固定為呼叫端指定（'food' 或 'shopping'）。
+ * food / accommodation 清單列 → 地圖點。清單點無日期（day=null）→ 只進探索模式，不進路線。
+ * bucket 固定為呼叫端指定（'food' 或 'hotel'）。shopping 改用 shoppingToMapPoints（一棟一點聚合）。
  */
 export function listToMapPoints(rows, bucket) {
   if (!Array.isArray(rows)) return []
@@ -142,11 +143,98 @@ export function listToMapPoints(rows, bucket) {
       link: row.link || '',
       address: row.address || '',
       desc: row.description || row.note || '',
+      hours: row.hours || '',
       time: '',
       day: null,
     })
     return acc
   }, [])
+}
+
+/**
+ * shopping tab → 地圖點，**一棟建築聚合成一點**（popup 標題 = building、
+ * 內文列同棟店家名單）。資料慣例：同棟的第一筆列填 building + lat/lng，
+ * 其餘列座標留白。防呆（實際資料不一定照慣例）：
+ *  - 座標不在第一筆 → 群組內任一筆有座標即可上圖（取第一個有效座標）
+ *  - 同棟多筆重複填座標 → 仍聚合成一點（多餘座標忽略）
+ *  - 不同點座標相同（5 位小數）→ 合併成一點、店家名單聯集（含獨立店被吸入同址建築）
+ *  - building-meta 列（name === building 且無 floor，同 ShoppingSection.groupItems）
+ *    只餵標頭的 hours/link/description，不列入店家名單
+ * 無 building 的獨立店維持單點。清單點 day=null → 只進探索模式。
+ */
+export function shoppingToMapPoints(rows) {
+  if (!Array.isArray(rows)) return []
+
+  // 1) 依 building 分組（保持首見順序）；獨立店各自成組
+  const groups = new Map()
+  rows.forEach((row, i) => {
+    const building = String(row?.building ?? '').trim()
+    const name = String(row?.name ?? '').trim()
+    if (!building && !name) return
+    const key = building ? `b:${building}` : `s:${name}:${i}`
+    if (!groups.has(key)) groups.set(key, { title: building || name, isBuilding: !!building, rows: [] })
+    groups.get(key).rows.push(row)
+  })
+
+  // 2) 每組 → 一個點（組內無任何座標則不上圖）
+  const points = []
+  for (const g of groups.values()) {
+    let coords = null
+    for (const row of g.rows) {
+      coords = parseLatLng(row)
+      if (coords) break
+    }
+    if (!coords) continue
+    const isMeta = (row) =>
+      g.isBuilding && String(row?.name ?? '').trim() === g.title && !String(row?.floor ?? '').trim()
+    const headerRow = g.rows.find(isMeta) || g.rows[0]
+    const members = g.isBuilding
+      ? g.rows
+          .filter((row) => !isMeta(row))
+          .map((row) => ({ name: String(row?.name ?? '').trim(), floor: String(row?.floor ?? '').trim() }))
+          .filter((m) => m.name)
+      : []
+    points.push({
+      id: `shopping-${g.title}-${coords.lat}-${coords.lng}`,
+      name: g.title,
+      lat: coords.lat,
+      lng: coords.lng,
+      bucket: 'shopping',
+      type: 'shopping',
+      link: headerRow.link || '',
+      address: headerRow.address || '',
+      desc: headerRow.description || headerRow.note || '',
+      hours: headerRow.hours || '',
+      members,
+      time: '',
+      day: null,
+    })
+  }
+
+  // 3) 同座標（5 位小數）合併：先到者當標頭，後到者整組降為店家名單
+  const merged = []
+  const idxByCoord = new Map()
+  for (const p of points) {
+    const ck = `${p.lat.toFixed(5)}-${p.lng.toFixed(5)}`
+    const at = idxByCoord.get(ck)
+    if (at === undefined) {
+      idxByCoord.set(ck, merged.length)
+      merged.push(p)
+      continue
+    }
+    const base = merged[at]
+    const incoming = [{ name: p.name, floor: '' }, ...p.members].filter(
+      (m) => m.name && m.name !== base.name && !base.members.some((b) => b.name === m.name)
+    )
+    merged[at] = {
+      ...base,
+      members: [...base.members, ...incoming],
+      desc: base.desc || p.desc,
+      hours: base.hours || p.hours,
+      link: base.link || p.link,
+    }
+  }
+  return merged
 }
 
 const locationKey = (p) => `${p.bucket}-${p.lat.toFixed(5)}-${p.lng.toFixed(5)}`

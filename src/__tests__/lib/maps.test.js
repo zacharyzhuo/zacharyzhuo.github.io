@@ -10,6 +10,7 @@ import {
   formatDistance,
   buildMapsUrl,
   listToMapPoints,
+  shoppingToMapPoints,
   mergeMapPoints,
 } from '../../lib/maps.js'
 
@@ -177,7 +178,96 @@ describe('listToMapPoints', () => {
     expect(pts).toHaveLength(1)
     expect(pts[0]).toMatchObject({ name: 'Zubuchon', bucket: 'food', type: 'food', day: null, link: 'https://x', desc: 'lechon' })
   })
+  it('carries hours when filled (empty string when not)', () => {
+    const pts = listToMapPoints([
+      { name: '一蘭', lat: '33.59', lng: '130.40', hours: '24h' },
+      { name: '無時間', lat: '33.60', lng: '130.41' },
+    ], 'food')
+    expect(pts[0].hours).toBe('24h')
+    expect(pts[1].hours).toBe('')
+  })
   it('returns [] for non-array', () => { expect(listToMapPoints(null, 'food')).toEqual([]) })
+})
+
+describe('shoppingToMapPoints', () => {
+  it('aggregates same-building rows into one point: title = building, members = store names', () => {
+    const rows = [
+      { building: 'Mina Tenjin', name: '3COINS＋', floor: 'B1F', hours: '10:00 - 20:00', lat: '33.592837', lng: '130.3983198', link: 'https://maps/3coins' },
+      { building: 'Mina Tenjin', name: 'UNIQLO', floor: '1F-2F' },
+      { building: 'Mina Tenjin', name: 'GU', floor: '3F' },
+    ]
+    const pts = shoppingToMapPoints(rows)
+    expect(pts).toHaveLength(1)
+    expect(pts[0]).toMatchObject({
+      name: 'Mina Tenjin', bucket: 'shopping', day: null,
+      lat: 33.592837, lng: 130.3983198, hours: '10:00 - 20:00', link: 'https://maps/3coins',
+    })
+    expect(pts[0].members).toEqual([
+      { name: '3COINS＋', floor: 'B1F' },
+      { name: 'UNIQLO', floor: '1F-2F' },
+      { name: 'GU', floor: '3F' },
+    ])
+  })
+  it('defensive: coords on a non-first row of the building still puts the building on the map', () => {
+    const rows = [
+      { building: 'PARCO', name: 'BEAMS', floor: '1F' },
+      { building: 'PARCO', name: 'HARE', floor: '3F', lat: '33.5909', lng: '130.3984' },
+    ]
+    const pts = shoppingToMapPoints(rows)
+    expect(pts).toHaveLength(1)
+    expect(pts[0]).toMatchObject({ name: 'PARCO', lat: 33.5909, lng: 130.3984 })
+  })
+  it('defensive: duplicate coords on several rows of the same building still aggregate to one point', () => {
+    const rows = [
+      { building: 'AMU', name: 'BEAMS', floor: '3F', lat: '33.5899', lng: '130.4206' },
+      { building: 'AMU', name: 'MUJI', floor: '6F', lat: '33.5899', lng: '130.4206' },
+    ]
+    const pts = shoppingToMapPoints(rows)
+    expect(pts).toHaveLength(1)
+    expect(pts[0].members.map((m) => m.name)).toEqual(['BEAMS', 'MUJI'])
+  })
+  it('building-meta row (name === building, no floor) feeds header but is not a member', () => {
+    const rows = [
+      { building: '博多阪急', name: '博多阪急', floor: '', hours: '10:00 - 20:00', description: 'EMS 寄回首選', lat: '33.59', lng: '130.42' },
+      { building: '博多阪急', name: 'BEAMS', floor: '3F' },
+    ]
+    const pts = shoppingToMapPoints(rows)
+    expect(pts[0]).toMatchObject({ name: '博多阪急', hours: '10:00 - 20:00', desc: 'EMS 寄回首選' })
+    expect(pts[0].members).toEqual([{ name: 'BEAMS', floor: '3F' }])
+  })
+  it('name === building WITH floor is a member (whole-building store spanning floors)', () => {
+    const rows = [
+      { building: 'ZARA', name: 'ZARA', floor: '1F-3F', lat: '33.5883', lng: '130.3964' },
+    ]
+    const pts = shoppingToMapPoints(rows)
+    expect(pts[0].members).toEqual([{ name: 'ZARA', floor: '1F-3F' }])
+  })
+  it('standalone stores (no building) stay as single points with hours and no members', () => {
+    const rows = [
+      { building: '', name: 'HOKA', hours: '11:00 - 20:00', lat: '33.5907', lng: '130.3975' },
+    ]
+    const pts = shoppingToMapPoints(rows)
+    expect(pts[0]).toMatchObject({ name: 'HOKA', hours: '11:00 - 20:00' })
+    expect(pts[0].members).toEqual([])
+  })
+  it('merges points at identical 5dp coords (standalone absorbed into same-coord building)', () => {
+    const rows = [
+      { building: 'KITTE', name: 'UNIQLO', floor: '8F', lat: '33.5888254', lng: '130.4193965' },
+      { building: '', name: '同址獨立店', lat: '33.5888254', lng: '130.4193965' },
+    ]
+    const pts = shoppingToMapPoints(rows)
+    expect(pts).toHaveLength(1)
+    expect(pts[0].name).toBe('KITTE')
+    expect(pts[0].members.map((m) => m.name)).toEqual(['UNIQLO', '同址獨立店'])
+  })
+  it('building with no coords on any row does not go on the map', () => {
+    const rows = [
+      { building: '大名區', name: '獨立店家A', floor: '' },
+      { building: '大名區', name: '獨立店家B', floor: '' },
+    ]
+    expect(shoppingToMapPoints(rows)).toEqual([])
+  })
+  it('returns [] for non-array', () => { expect(shoppingToMapPoints(null)).toEqual([]) })
 })
 
 describe('mergeMapPoints', () => {

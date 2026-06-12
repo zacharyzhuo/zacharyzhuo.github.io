@@ -273,7 +273,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - `building` 有值：合併顯示在同名建築的 block（第一筆為建築標頭，其 `hours`/`link`/`description` 代表整棟）
 - **building-meta 列**：某筆 `name === building` 且 `floor` 空白時，視為「描述整棟」的 meta 列，只餵建築標頭（description/hours/link），**不再重複列為子店**（避免標頭與子店名稱重複）。但 `name === building` 卻**有樓層**（如整棟店橫跨 `B2～8F`）的列仍當子店，好讓樓層範圍照常顯示。判斷在 `groupItems`
 - `description`：店家備註（選填，有值才顯示），顯示於店名與 `hours` 之間的淡色副文（`text-secondary`）。standalone 卡、building 標頭、building 子店列三處皆支援。把原本硬塞在 `name` 後面的括號補充（如「伴手禮一站・芒果乾/otap」）改填這欄，店名可回到單行
-- `lat` / `lng`：選填經緯度，給地圖用（歸「購物」分類）。建議只在**建築標頭列**填（一棟一個點）；同棟分店留白即可（地圖會依座標去重）
+- `lat` / `lng`：選填經緯度，給地圖用（歸「購物」分類）。**建議只在建築的第一筆列填（一棟一個點）**；同棟其他列留白即可。地圖端由 `shoppingToMapPoints` 做**一棟一點聚合**（popup 標題 = building、內文列同棟店家名單），且有防呆：座標填在非第一筆、同棟多筆重複填座標、不同列同座標（5 位小數）都會收斂成一點，不會出現重複 marker
 
 **`food` tab**
 
@@ -347,7 +347,7 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 
 - **`itinerary` tab**：有日期 → 依 `type` 歸 `food`/`attraction`/`shopping`；**空 `date` → `backup`（備選，不分 type）**；**有日期的 `transport`/`hotel` → `routeOnly` 點：只進「路線」模式（讓整天動線含機場/港口/飯店 check-in），不進「探索」**（交通非探索點；住宿的探索點改由 accommodation tab 提供，避免重複）。著色用各自 type ink（transport 藍鼠 / hotel 藤鼠）。判斷在 `toMapPoints`（`pointBucket` 維持對 transport/hotel 回 null 不變，routeOnly 在 `toMapPoints` 內另判）。
 - **`food` tab**：全部歸 `food` bucket（`day=null`，只進探索）。
-- **`shopping` tab**：全部歸 `shopping` bucket（`day=null`，只進探索；建議只填建築標頭列）。
+- **`shopping` tab**：全部歸 `shopping` bucket（`day=null`，只進探索）。**經 `shoppingToMapPoints` 聚合：一棟建築一個點**——依 `building` 分組（無 building 的獨立店單點），popup 標題用 building、內文「店家」區列同棟所有店名（含樓層）；building-meta 列（`name === building` 且無 floor）只餵標頭 hours/link/description、不入名單（同 ShoppingSection.groupItems）。防呆：座標不在第一筆 → 群組內任一筆有座標即可上圖；同棟多筆重複填座標 → 仍一點；任兩點同座標（5dp）→ 合併、名單聯集。
 - **`accommodation` tab**：全部歸 `hotel` bucket（`day=null`，只進探索）。是住宿的唯一地圖來源。
 
 探索模式 5 顆篩選 chip（置中、毛玻璃 `.frosted-glass-button` 樣式，分類色在文字＋邊框）：**美食 / 購物 / 景點 / 住宿 / 備選**（順序即 `BUCKETS` 常數）。每個點屬於剛好一個 bucket。
@@ -379,7 +379,7 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 
 ### 去重（`mergeMapPoints`）
 
-itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shopping/accommodation）點若與既有點**同 bucket 同座標（5 位小數）**則去重 — 涵蓋 list-vs-itinerary 與 list-vs-list 重複。itinerary 點彼此**不**去重（同旅館的早餐/午餐各算一個停留）。組裝在 `TripPage`：`mergeMapPoints(toMapPoints(itinerary), [...listToMapPoints(food,'food'), ...listToMapPoints(shopping,'shopping'), ...listToMapPoints(accommodation,'hotel')])`。
+itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shopping/accommodation）點若與既有點**同 bucket 同座標（5 位小數）**則去重 — 涵蓋 list-vs-itinerary 與 list-vs-list 重複。itinerary 點彼此**不**去重（同旅館的早餐/午餐各算一個停留）。組裝在 `TripPage`：`mergeMapPoints(toMapPoints(itinerary), [...listToMapPoints(food,'food'), ...shoppingToMapPoints(shopping), ...listToMapPoints(accommodation,'hotel')])`（shopping 先經建築聚合，再進 mergeMapPoints 與 itinerary 去重）。
 
 > **`routeOnly` 點不當去重種子**：`mergeMapPoints` 的 `seen` 只用「非 routeOnly 的 itinerary 點」建立。否則 itinerary 的住宿 routeOnly 點會把 accommodation tab 同址住宿點去掉，害探索模式看不到住宿。兩者並存：路線模式顯示 itinerary 那顆（有 day），探索模式顯示 accommodation 那顆（day=null）。
 
@@ -400,13 +400,14 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 ### 顏色 / marker
 
 - marker 顏色取自 `categories.js`：food/attraction/shopping 用各自 ink；**備選用 `BACKUP_INK`（中性墨灰 `#6B6B66`，非品牌綠、非分類色）+ 空心環**。
+- popup（`popupNode`）結構：eyebrow（分類）→ 標題 → **`hours` 小列（Clock icon，有填才顯示；來源 = itinerary/food 的 `hours` 欄、購物為建築標頭列的 `hours`）** → 髮絲線「關於」desc → **（購物聚合點）髮絲線「店家」名單（樓層 muted 前綴 + 店名）** → Maps CTA。
 - Google Maps 導航連結：優先用該點 `link`（地點頁）；無 `link` 才退用 `name+address` 搜尋字串（**不用裸經緯度**）。`buildMapsUrl` 在 `lib/maps.js`，開連結走 `openExternal`（PWA 相容）。
 - 「離你最近」（`NearbyStrip`）：`navigator.geolocation` + `haversineMeters` 排序。**定位鈕只負責相機**（flyTo 我的位置 + 紅點），最近清單改成**底部一排可橫滑的小卡**（無把手、不蓋半屏、不像第二層 modal；locating/error 顯示置中小膠囊）。底部有卡片/膠囊時定位鈕自動抬高（`bottom-6`→`bottom-[112px]`）避免被蓋。點卡片 `flyTo`+開 popup。**勿**再把它做成會滑上來的 BottomSheet（會與外層地圖 modal 衝突）。
 
 ### 已知限制 / 雷
 
 - Leaflet 在「開啟時才長出來」「切模式高度改變」的容器需 `map.invalidateSize()`（`InvalidateOnMount` / `InvalidateOnModeChange` 處理），否則圖磚渲染成灰塊/灰條。
-- 純函式（`parseLatLng`/`pointBucket`/`toMapPoints`/`listToMapPoints`/`mergeMapPoints`/`haversineMeters`/`sortByDistance`/`routePoints`/`formatDistance`/`buildMapsUrl`）集中在 `lib/maps.js` 並有測試；Leaflet 元件本身以手動驗收為主。
+- 純函式（`parseLatLng`/`pointBucket`/`toMapPoints`/`listToMapPoints`/`shoppingToMapPoints`/`mergeMapPoints`/`haversineMeters`/`sortByDistance`/`routePoints`/`formatDistance`/`buildMapsUrl`）集中在 `lib/maps.js` 並有測試；Leaflet 元件本身以手動驗收為主。
 
 ---
 

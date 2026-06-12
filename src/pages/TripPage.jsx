@@ -11,7 +11,7 @@ import { pickInitialDay, formatDayLabel } from '../lib/tripDate.js'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 import { useDays, useFoodItems, useNormalizedDays, useNormalizedItinerary } from '../hooks/useTripDerived.js'
 import { categoryInk, BRAND_INK } from '../lib/categories.js'
-import { toMapPoints, listToMapPoints, mergeMapPoints } from '../lib/maps.js'
+import { toMapPoints, listToMapPoints, shoppingToMapPoints, mergeMapPoints } from '../lib/maps.js'
 import { TripSkeleton, SectionSkeleton } from '../components/ui/Skeletons.jsx'
 import ErrorState from '../components/ui/ErrorState.jsx'
 import Sidebar from '../components/layout/Sidebar.jsx'
@@ -170,7 +170,7 @@ export default function TripPage() {
       toMapPoints(normalizedItinerary),
       [
         ...listToMapPoints(food, 'food'),
-        ...listToMapPoints(shopping, 'shopping'),
+        ...shoppingToMapPoints(shopping),
         ...listToMapPoints(accommodation, 'hotel'),
       ]
     ),
