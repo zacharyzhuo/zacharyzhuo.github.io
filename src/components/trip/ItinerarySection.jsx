@@ -435,10 +435,10 @@ export default function ItinerarySection({ rows, dayDate }) {
                   aria-label={`${row.time} ${label} ${row.name} 詳情`}
                   className="glass-card press-springy relative rounded-2xl py-4 pr-4 pl-4 h-full w-full flex flex-row gap-3 items-start text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
                 >
-                  {/* 内側淡彩：卡片玻璃自帶從脊線暈開的分類色淡彩（有色玻璃感）。
+                  {/* 内側淡彩（定案）：卡片玻璃自帶從脊線暈開的分類色淡彩（有色玻璃感）。
                       用 categories.js 的 wash（高明度水彩版）；內容層需 relative 才疊在淡彩上。
-                      （曾試過：包住整卡的 radial 橢圓 alpha 0.55 → 太重不自然；
-                       下緣色影（C 變體）→ 與此 D 變體比較中） */}
+                      （曾試過並淘汰：包住整卡的 radial 橢圓 alpha 0.55 → 太重不自然；
+                       下緣色影 → 見 git 1d970bd） */}
                   <div
                     aria-hidden="true"
                     className="absolute inset-0 pointer-events-none"

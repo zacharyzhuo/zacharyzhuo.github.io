@@ -414,7 +414,7 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 
 - **底色**：`#FBFAF5`（米白）＋ `body::after`（fixed，feTurbulence 和紙噪點 opacity 0.035）。
   - **分類色「内側淡彩」（玻璃透明感的色彩來源）**：行程卡玻璃內帶一抹從脊線往右暈開的分類 `wash` 色淡彩（`ItinerarySection`，卡內 `absolute inset-0` linear-gradient 0.2→透明；內容層與縮圖需 `relative` 疊在淡彩上），像有色玻璃。營業時間 badge 底色刻意極淡（`white/15`），不透明白底會在淡彩上蓋出白斑。
-  - **歷史教訓（勿走回頭路）**：(1) 「固定在 viewport 四角的色斑背景」（含當日分類連動染 `--wash-a/b/c/d` @property crossfade）→ 固定位置與內容無關、低明度色票像髒灰陰影、與 DayNav/banner 形成色塊斷層，整組拆除。(2) 「包住整卡的 radial 橢圓光暈（alpha 0.55）」→ 太重、形狀與卡片無關不自然。(3) 下緣色影（C 變體）與內側淡彩（D 變體）皆出自 5 變體對照 demo，目前套用 D 實機比較中（C 的實作在 git history `1d970bd`，要切回拿那版的 glow div 即可）。
+  - **歷史教訓（勿走回頭路）**：(1) 「固定在 viewport 四角的色斑背景」（含當日分類連動染 `--wash-a/b/c/d` @property crossfade）→ 固定位置與內容無關、低明度色票像髒灰陰影、與 DayNav/banner 形成色塊斷層，整組拆除。(2) 「包住整卡的 radial 橢圓光暈（alpha 0.55）」→ 太重、形狀與卡片無關不自然。(3) 下緣色影（C 變體）也試過，user 實機比較後**定案內側淡彩（D）**（C 的實作留在 git history `1d970bd`）。
   - **光暈色票鐵則**：光暈用 `categories.js` 各分類的 `wash`（高明度水彩版 `'R, G, B'`），**勿直接用 ink** —— ink 是文字色（明度低），拉濃會讀成髒灰陰影；濃度感用彩度與 alpha 撐，不能用暗度撐。
 - **Accent**：`#5E8C61`（明るい抹茶）
 - **文字色**：主要 `#2C2C2C`（`text-jp-text`）；次要/註記用**語意 token**：`text-secondary`（次要正文，= 原 stone-600）、`text-muted`（小標/註記，= 原 stone-500）。這兩個 + `bg-hairline`/`border-hairline`（1px 分隔線，= 原 stone-200）都在 `tailwind.config.js` 定義成 `var(--text-secondary / --text-muted / --hairline)`，變數在 `index.css :root`。**新次要文字一律用 `text-secondary`/`text-muted`，勿再散用 `text-stone-500/600` 或已退役的 `jp-sub`**。這層是深色模式地基：未來只要在 `:root`（或 `.dark`）覆蓋這幾個變數即可一次翻，元件不用動。`text-stone-400`（更淡的 icon/placeholder）、`text-stone-700`（status pill）屬不同層級，未納入。
