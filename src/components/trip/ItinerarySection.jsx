@@ -216,14 +216,14 @@ function DetailModal({ row, spots, onClose }) {
         {current && (
           <>
 
-          {/* Drag pill handle */}
+          {/* Drag pill handle：浮在內容上（內容用負 margin 墊到底下），同 BottomSheet noScroll 的語言 */}
           <div
             ref={pillRef}
-            className="flex justify-center pt-3 pb-2 touch-manipulation select-none flex-shrink-0"
+            className="relative z-10 flex justify-center pt-3 pb-2 touch-manipulation select-none flex-shrink-0"
             onTouchStart={onPillTouchStart}
             onTouchEnd={onPillTouchEnd}
           >
-            <div className="w-10 h-1 rounded-full bg-stone-300/60" />
+            <div className="w-10 h-1 rounded-full bg-stone-400/70" />
           </div>
 
           <button
@@ -236,7 +236,9 @@ function DetailModal({ row, spots, onClose }) {
             <X size={20} />
           </button>
 
-          <div className="overflow-y-auto overscroll-contain px-8 pb-32 flex-1 pt-6">
+          {/* -mt-6 = 把手條高度（pt-3 + pill 4px + pb-2 = 24px）：內容上緣墊到 pill 背後，
+              捲動時滑進把手底下，消除把手與內容間的裁切硬線；pt-12 補回原本的內容起點（24+24=48px） */}
+          <div className="overflow-y-auto overscroll-contain px-8 pb-32 flex-1 -mt-6 pt-12">
             {/* 彩色 eyebrow（分類） */}
             <div className="flex items-baseline gap-2 mb-2">
               <span className="text-sm font-serif font-bold" style={{ color: categoryInk(current.type) }}>

@@ -105,10 +105,13 @@ src/
 | `isOpen` | 控制顯示 |
 | `onClose` | 關閉回調（亦會被 ESC、下拉手勢觸發） |
 | `title` | 標題文字（同時用於 `aria-labelledby`） |
-| `noScroll` | 固定高度 `h-[79vh]`，子元件自行管理捲動，供浮動 tab 使用 |
+| `noScroll` | 固定高度 `h-[79vh]`（`tall` 時見下），子元件自行管理捲動，供浮動 tab 使用。**內容一律滿版鋪到 sheet 頂**（`absolute inset-0` + 與 glass 同弧度的 `rounded-t-[2rem]` 裁切）：把手 pill 浮在內容上（header `z-[660]`、pill 深色 `stone-400/70`），捲動內容滑進 pill 底下，把手與內容間無玻璃縫 |
 | `noStickyTitle` | 不顯示固定標題；標題改由子元件在 scroll 區頂端自行渲染（可隨內容捲動） |
+| `tall` | 高度改 `calc(100dvh - env(safe-area-inset-top) - 5rem)`：頂緣切齊頁面 header icon（漢堡 / 地圖鈕）下緣。地圖 sheet 用 |
 
 a11y：BottomSheet 與 ItinerarySection 的 DetailModal 都套用 `useModalA11y`，自動處理 ESC、focus trap 與 focus 還原。
+
+DetailModal（高度內容驅動 `min-h-[40vh] max-h-[85vh]`，無法 absolute 滿版）用**負 margin 等價手法**做同一套「把手浮在內容上」：捲動區 `-mt-6`（= 把手條 24px）墊到 pill 背後、`pt-12` 補回內容起點，pill `relative z-10` + 深色。
 
 採 `noScroll noStickyTitle` 的 section（ShoppingSection / FoodSection / ChecklistSection）統一結構：
 
@@ -322,7 +325,7 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 
 ## 地圖（TripMap）
 
-行程頁的地圖功能，`src/components/trip/TripMap.jsx`，包在 **tall 版 `BottomSheet`（`h-[92vh]`）** 裡，用 **react-leaflet v5 + leaflet**，以 `React.lazy` 切出 chunk。
+行程頁的地圖功能，`src/components/trip/TripMap.jsx`，包在 **tall 版 `BottomSheet`** 裡，用 **react-leaflet v5 + leaflet**，以 `React.lazy` 切出 chunk。**tall 高度 = `calc(100dvh - env(safe-area-inset-top) - 5rem)`**：頂緣切齊頁面 header icon（漢堡 / 地圖鈕）下緣（safe-top + pt-8 32px + 鈕高 48px = 5rem），不再用 92vh 頂到接近滿屏。noScroll sheet 內容一律滿版鋪到頂（見 BottomSheet props）→ 地圖直達 sheet 圓角頂、把手 pill 浮在圖磚上，TripMap 的懸浮控制列因此用 `pt-8` 讓出 pill 空間、與右上關閉鈕（`top-8`）同列對齊。
 
 **底圖切換（`Layers` 鈕，懸浮在 SegmentedControl 同列左側、鏡像右側 sheet 關閉鈕；`basemap` state，免 key）**：
 - `simple`（預設）= **CARTO Positron**（`light_all`）：和紙簡約調性，但**幾乎不顯示車站/POI**。

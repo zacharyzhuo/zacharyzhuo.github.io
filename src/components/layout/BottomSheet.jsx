@@ -144,21 +144,24 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
         style={dragY !== 0 ? { transform: `translateY(${dragY}px)` } : undefined}
       >
         {/* 單一毛玻璃層：往下延伸超過停駐邊（-bottom-56），開啟 overshoot / 反向拉都由「同一塊」
-            玻璃覆蓋 → 構造上無接縫（取代舊的 glass-overshoot-fill 貼塊）。內容層疊在上面、不帶 backdrop。 */}
-        <div className={`relative ${tall ? 'h-[92vh]' : 'h-[79vh]'}`}>
+            玻璃覆蓋 → 構造上無接縫（取代舊的 glass-overshoot-fill 貼塊）。內容層疊在上面、不帶 backdrop。
+            tall 高度 = 切齊頁面 header icon（漢堡 / 地圖鈕）下緣：safe-area-top + pt-8(32px) + 鈕高 48px = safe + 5rem。 */}
+        <div className={`relative ${tall ? 'h-[calc(100dvh_-_env(safe-area-inset-top)_-_5rem)]' : 'h-[79vh]'}`}>
           <div aria-hidden="true" className="glass-bottom-sheet absolute inset-0 -bottom-56 pointer-events-none" />
           <div className="relative h-full flex flex-col">
 
-          {/* Drag handle 區：pill + 標題列整片皆可拖；hitbox 從 pill 的 4px 擴大到整個 header（約 56px+） */}
+          {/* Drag handle 區：pill + 標題列整片皆可拖；hitbox 從 pill 的 4px 擴大到整個 header（約 56px+）。
+              noScroll（滿版內容）時內容墊在底下，header 抬 z 讓 pill 浮在內容上，
+              pill 用較深色換取在淺色內容（地圖圖磚 / 卡片）上的可見度。 */}
           <div
             ref={headerDragRef}
-            className="touch-manipulation select-none cursor-grab active:cursor-grabbing"
+            className={`touch-manipulation select-none cursor-grab active:cursor-grabbing ${noScroll ? 'relative z-[660]' : ''}`}
             onTouchStart={onHeaderTouchStart}
             onTouchEnd={handleDragRelease}
             onTouchCancel={handleDragRelease}
           >
             <div className="flex justify-center pt-3 pb-2">
-              <div className="w-10 h-1 rounded-full bg-stone-300/60" />
+              <div className={`w-10 h-1 rounded-full ${noScroll ? 'bg-stone-400/70' : 'bg-stone-300/60'}`} />
             </div>
             {noScroll && !noStickyTitle && (
               <div className="px-8 pt-2 pb-4 flex-shrink-0">
@@ -187,7 +190,9 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
           </button>
 
           {noScroll ? (
-            <div className="flex-1 min-h-0">{children}</div>
+            /* 滿版內容鋪到 sheet 頂（含把手背後），消除把手與內容間的玻璃縫；
+               捲動內容會滑進 pill 底下、裁在與 glass 同弧度的圓角內。 */
+            <div className="absolute inset-0 overflow-hidden rounded-t-[2rem]">{children}</div>
           ) : (
             <div ref={contentScrollRef} className="overflow-y-auto overscroll-contain px-8 pb-10 space-y-4 flex-1 pt-2">
               {children}

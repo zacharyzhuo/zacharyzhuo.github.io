@@ -228,8 +228,10 @@ export default function TripMap({ points, days = [], activeDay = null }) {
   return (
     <div className="relative h-full overflow-hidden rounded-t-[2rem]">
       {/* header 懸浮在地圖上（地圖滿版）：避免「控制列自帶全寬色帶 + 地圖」
-          上下相接的色塊斷層；控制元件各自是玻璃膠囊，浮在圖上。 */}
-      <div className="absolute inset-x-0 top-0 z-[650] pt-2 pointer-events-none">
+          上下相接的色塊斷層；控制元件各自是玻璃膠囊，浮在圖上。
+          pt-8：flush 模式下地圖鋪到 sheet 頂，讓出 BottomSheet 把手 pill 的空間，
+          並與右上關閉鈕（top-8）同列對齊。 */}
+      <div className="absolute inset-x-0 top-0 z-[650] pt-8 pointer-events-none">
         <h2 className="sr-only">行程地圖</h2>
         <div className="relative flex justify-center mb-2 px-5">
           <div className="pointer-events-auto">
