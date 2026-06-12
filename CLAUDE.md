@@ -413,8 +413,8 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 ## UI / Design System
 
 - **底色**：`#FBFAF5`（米白）＋ `body::after`（fixed，feTurbulence 和紙噪點 opacity 0.035）。
-  - **分類色光暈（玻璃透明感的色彩來源）**：行程卡背後墊一層該分類 `wash` 色的 radial-gradient（`ItinerarySection`，絕對定位微微外溢出卡緣、偏脊線側），卡片的 backdrop blur 把它糊開 = **卡片像在發分類色的光**，且光跟內容捲動（捲過 DayNav 時玻璃也有色可糊）。純 gradient 無 filter，每卡一層不傷效能。
-  - **歷史教訓（勿走回頭路）**：曾做過「固定在 viewport 四角的色斑背景」（含當日分類連動染 `--wash-a/b/c/d` @property crossfade），被嫌：固定位置與內容無關、低明度色票像髒灰陰影、與 DayNav/banner 形成色塊斷層 → 已整組拆除，改為內容錨定的卡片光暈。
+  - **分類色「色影」（玻璃透明感的色彩來源）**：行程卡下緣墊一層該分類 `wash` 色的 radial-gradient（`ItinerarySection`，定位在卡片下半、延伸進卡距間隙），**像卡片把分類色的光打在下方紙面上**（彩色柔影）。卡片本身保持乾淨，色彩用影子的語言表達；光跟內容捲動。純 gradient 無 filter，每卡一層不傷效能。
+  - **歷史教訓（勿走回頭路）**：(1) 「固定在 viewport 四角的色斑背景」（含當日分類連動染 `--wash-a/b/c/d` @property crossfade）→ 固定位置與內容無關、低明度色票像髒灰陰影、與 DayNav/banner 形成色塊斷層，整組拆除。(2) 「包住整卡的 radial 橢圓光暈（alpha 0.55）」→ 太重、形狀與卡片無關不自然，改為下緣色影（用戶從 5 變體對照 demo 選定）。
   - **光暈色票鐵則**：光暈用 `categories.js` 各分類的 `wash`（高明度水彩版 `'R, G, B'`），**勿直接用 ink** —— ink 是文字色（明度低），拉濃會讀成髒灰陰影；濃度感用彩度與 alpha 撐，不能用暗度撐。
 - **Accent**：`#5E8C61`（明るい抹茶）
 - **文字色**：主要 `#2C2C2C`（`text-jp-text`）；次要/註記用**語意 token**：`text-secondary`（次要正文，= 原 stone-600）、`text-muted`（小標/註記，= 原 stone-500）。這兩個 + `bg-hairline`/`border-hairline`（1px 分隔線，= 原 stone-200）都在 `tailwind.config.js` 定義成 `var(--text-secondary / --text-muted / --hairline)`，變數在 `index.css :root`。**新次要文字一律用 `text-secondary`/`text-muted`，勿再散用 `text-stone-500/600` 或已退役的 `jp-sub`**。這層是深色模式地基：未來只要在 `:root`（或 `.dark`）覆蓋這幾個變數即可一次翻，元件不用動。`text-stone-400`（更淡的 icon/placeholder）、`text-stone-700`（status pill）屬不同層級，未納入。
