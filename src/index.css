@@ -591,6 +591,17 @@ a:focus-visible,
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
 }
 
+/* 無玻璃材質的純 press lift：給「玻璃容器內」的小按鈕（如地圖 stepper ‹ ›）。
+   容器本身勿彈（見 frosted-glass-panel 註解），press 彈簧屬於內層單一按鈕。
+   節奏同 frosted-glass-button：press-in 0.22s 快彈、放開回 0.4s 彈簧 Q 彈落回。 */
+.press-lift {
+  transition: transform 0.4s var(--ease-spring);
+}
+.press-lift:active {
+  transform: scale(1.15);
+  transition: transform 0.22s var(--ease-spring);
+}
+
 /* 深色背景的毛玻璃按鈕（用於 Instagram 風格） */
 .frosted-glass-button-dark {
   background: rgba(0, 0, 0, 0.2);
@@ -846,7 +857,8 @@ a:focus-visible,
   .frosted-tab-pill.lifted .frosted-tab-pill-fill,
   .frosted-glass-button:active,
   .frosted-glass-button-dark:active,
-  .press-springy:active {
+  .press-springy:active,
+  .press-lift:active {
     transform: none;
   }
 }

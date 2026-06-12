@@ -427,18 +427,6 @@ export default function ItinerarySection({ rows, dayDate }) {
               </div>
 
               <div className="flex-1 min-w-0 pb-7 relative">
-                {/* 分類色「色影」：光集中在卡片下緣、像卡片把分類色的光打在下方紙面上
-                    （彩色柔影）。卡片本身保持乾淨，色彩用影子的語言表達。
-                    用 categories.js 的 wash（高明度水彩版）。
-                    純 radial-gradient 無 filter，每張卡一層也不傷效能。
-                    （曾用包住整卡的 radial 橢圓 alpha 0.55 → 被嫌太重、形狀與卡片無關不自然） */}
-                <div
-                  aria-hidden="true"
-                  className="absolute -inset-x-1.5 top-[55%] bottom-0.5 pointer-events-none"
-                  style={{
-                    background: `radial-gradient(72% 90% at 50% 30%, rgba(${categoryWash(row.type)}, 0.38), transparent 78%)`,
-                  }}
-                />
                 <button
                   type="button"
                   onPointerDown={cardTap.onPointerDown}
@@ -447,6 +435,17 @@ export default function ItinerarySection({ rows, dayDate }) {
                   aria-label={`${row.time} ${label} ${row.name} 詳情`}
                   className="glass-card press-springy relative rounded-2xl py-4 pr-4 pl-4 h-full w-full flex flex-row gap-3 items-start text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
                 >
+                  {/* 内側淡彩：卡片玻璃自帶從脊線暈開的分類色淡彩（有色玻璃感）。
+                      用 categories.js 的 wash（高明度水彩版）；內容層需 relative 才疊在淡彩上。
+                      （曾試過：包住整卡的 radial 橢圓 alpha 0.55 → 太重不自然；
+                       下緣色影（C 變體）→ 與此 D 變體比較中） */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background: `linear-gradient(100deg, rgba(${categoryWash(row.type)}, 0.2), rgba(${categoryWash(row.type)}, 0.05) 45%, transparent 70%)`,
+                    }}
+                  />
                   {/* 分類色細脊線（2px 半透） */}
                   <span
                     aria-hidden="true"
@@ -454,7 +453,7 @@ export default function ItinerarySection({ rows, dayDate }) {
                     style={{ backgroundColor: `${categoryInk(row.type)}80` }}
                   />
 
-                  <div className="flex-1 min-w-0 flex flex-col">
+                  <div className="relative flex-1 min-w-0 flex flex-col">
                   <span
                     className="text-2xs font-serif font-bold uppercase tracking-[0.15em] mb-1"
                     style={{ color: categoryInk(row.type) }}
@@ -469,8 +468,9 @@ export default function ItinerarySection({ rows, dayDate }) {
                     </p>
                   )}
 
+                  {/* hours badge 的 bg 刻意極淡（white/15）：不透明白底會在卡片的分類色淡彩上蓋出一塊白斑 */}
                   {row.hours && (
-                    <div className="flex items-center gap-1.5 text-xs text-muted font-serif mb-3 bg-white/40 backdrop-blur-sm border border-white/50 w-fit px-2 py-1 rounded-full tabular-nums">
+                    <div className="flex items-center gap-1.5 text-xs text-muted font-serif mb-3 bg-white/15 backdrop-blur-sm border border-white/35 w-fit px-2 py-1 rounded-full tabular-nums">
                       <Clock size={12} />
                       <span>{row.hours}</span>
                     </div>
@@ -508,7 +508,7 @@ export default function ItinerarySection({ rows, dayDate }) {
                       height={64}
                       loading="lazy"
                       decoding="async"
-                      className="w-16 h-16 rounded-xl object-cover shrink-0 bg-stone-200"
+                      className="relative w-16 h-16 rounded-xl object-cover shrink-0 bg-stone-200"
                     />
                   )}
                 </button>
