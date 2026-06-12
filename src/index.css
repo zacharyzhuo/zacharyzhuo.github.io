@@ -60,6 +60,16 @@ body {
 }
 
 
+/* 頁面最外層 wrapper 的不透明和紙底（米白 + 噪點）。
+   ⚠️ iOS 26 PWA 的狀態列 letterbox 取樣只認「元素」的不透明背景，
+   不會退回 body canvas（Safari 瀏覽器會，所以瀏覽器正常、PWA 黑條）——
+   每個滿版頁面 wrapper（HomePage / TripPage / ErrorBoundary / Skeletons）
+   都必須鋪這個 class，勿再拿掉（拿掉 = 深色模式 PWA 狀態列變黑，踩了一整晚）。 */
+.bg-washi {
+  background-color: #FBFAF5;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.018'/></svg>");
+}
+
 /* 例外：表單輸入框與顯式標記為可選取的內容仍要能反白 / 複製 */
 input,
 textarea,

@@ -207,7 +207,7 @@ export default function TripPage() {
 
   if (!trip) {
     return (
-      <div className="min-h-screen safe-area-inset flex flex-col items-center justify-center">
+      <div className="bg-washi min-h-screen safe-area-inset flex flex-col items-center justify-center">
         <ErrorState
           title="找不到此行程"
           message="可能網址有誤或行程已下架"
@@ -224,7 +224,7 @@ export default function TripPage() {
   const pullIndicatorOpacity = refreshing ? 1 : Math.min(1, pullY / triggerThreshold)
 
   return (
-    <div className="min-h-screen text-jp-text font-serif pb-12 safe-area-inset relative">
+    <div className="bg-washi min-h-screen text-jp-text font-serif pb-12 safe-area-inset relative">
       {/* Pull-to-refresh indicator：floating，不平移內容（避免干擾 day swipe transform） */}
       {showPullIndicator && (
         <div

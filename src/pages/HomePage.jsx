@@ -51,7 +51,7 @@ export default function HomePage() {
   const indicatorRotation = refreshing ? 'animate-spin' : ''
 
   return (
-    <div className="min-h-screen safe-area-inset relative overflow-x-hidden">
+    <div className="bg-washi min-h-screen safe-area-inset relative overflow-x-hidden">
       {/* Pull-to-refresh indicator：覆蓋在頂端，隨拉動距離淡入 */}
       {showIndicator && (
         <div
