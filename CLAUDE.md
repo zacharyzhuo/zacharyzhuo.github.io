@@ -394,7 +394,7 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 - **›** 前進：總覽 → 第 1 點；之後 +1，clamp 在最後一點。**‹** 後退：總覽 → **最後一點**；之後 -1，clamp 在第 1 點。索引邏輯抽成純函式 `nextFocusIndex(current, dir, total)`（`lib/maps.js`，有測試）。
 - 中間 `n/total` 點一下 → 回總覽。
 - 相機：總覽 `fitBounds` 全部點；聚焦 `flyTo(zoom 16)` + 開該點 popup（route marker 需存 `markerRefs`）。`FitBounds` 元件只在**探索模式**掛載，路線相機完全由 stepper 的 `useEffect` 控（總覽 fit / 聚焦 flyTo），避免兩者打架。
-- ⚠️ **膠囊容器用 `.frosted-glass-panel`（靜態毛玻璃），不要套 `.frosted-glass-button`**：後者的 `:active` 是 lift（`scale(1.1)` + 變透）配 `--ease-spring`（overshoot），套在「裝多顆按鈕的容器」上會讓整顆膠囊一按就彈來彈去、裡面 ‹ › 難點。`.frosted-glass-panel` 材質同 frosted-glass-button 靜止態但**無** `:active` 彈簧。press 彈簧只屬於**單一**可點元件；內層 ‹ › 套 `.press-lift`（無玻璃材質的純 lift 彈簧：press-in 0.22s 快彈、放開 0.4s Q 彈落回）。
+- ⚠️ **膠囊容器用 `.frosted-glass-panel`（靜態毛玻璃），不要套 `.frosted-glass-button`**：後者的 `:active` 是 lift（`scale(1.1)` + 變透）配 `--ease-spring`（overshoot），套在「裝多顆按鈕的容器」上會讓整顆膠囊一按就彈來彈去、裡面 ‹ › 難點。`.frosted-glass-panel` 材質同 frosted-glass-button 靜止態但**無** `:active` 彈簧。press 彈簧只屬於**單一**可點元件；內層 ‹ › 套 `.press-lift`（無玻璃材質的純 lift 彈簧：press-in 0.22s 快彈、放開 0.4s Q 彈落回）。膠囊另有**方向性 squish**（`.stepper-squish` + `dir-left/right` + `pressed`）：按 ‹ 往左鼓、按 › 往右鼓（scaleX 1.07 / scaleY 0.93，origin 錨對側）—— 與被禁止的「整顆均勻 scale 彈跳」不同，小幅度方向性形變不影響按壓；`dir-*` 在放開後保留（origin 不跳，回彈從同錨點收回）。⚠️ squish 的 scale 與置中的 `-translate-x-1/2` 都是 transform，**必須分兩層**（外層定位、內層形變），疊同層會互相覆蓋。
 - 相機動畫：`flyTo`/`fitBounds` 都帶 `{ duration: 0.6 / 0.5 }` 上限（預設弧線在遠點會飛很久）；聚焦的 popup 用 `map.once('moveend', …)` 在移動結束才開（不會飛到一半就跳出）。
 
 ### 顏色 / marker

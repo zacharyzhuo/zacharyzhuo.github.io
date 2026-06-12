@@ -174,6 +174,12 @@ export default function TripMap({ points, days = [], activeDay = null }) {
     setFocusIdx((cur) => nextFocusIndex(cur, dir, routePts.length))
   }, [routePts.length])
 
+  // stepper 膠囊方向性 squish：dir 保留到放開後（origin 不跳），pressed 控制形變
+  const [stepDir, setStepDir] = useState(null) // 'left' | 'right'
+  const [stepPressed, setStepPressed] = useState(false)
+  const pressStep = useCallback((dir) => { setStepDir(dir); setStepPressed(true) }, [])
+  const releaseStep = useCallback(() => setStepPressed(false), [])
+
   const backToOverview = useCallback(() => { hapticTap(); setFocusIdx(null) }, [])
 
   // 路線相機：總覽 fit 全部；聚焦則 flyTo 該點並開 popup
@@ -370,12 +376,23 @@ export default function TripMap({ points, days = [], activeDay = null }) {
               <NearbyStrip ranked={ranked} status={geoStatus} onSelect={focusPoint} />
             )}
 
-            {/* 路線逐站 stepper：‹ 3/7 › ，中間數字點一下回總覽 */}
+            {/* 路線逐站 stepper：‹ 3/7 › ，中間數字點一下回總覽。
+                外層只管定位（translate 置中）、內層管 squish 形變：
+                兩者都是 transform，疊在同一層會互相覆蓋（squish 會吃掉置中位移） */}
             {mode === 'route' && routePts.length > 0 && (
-              <div className="absolute left-1/2 -translate-x-1/2 bottom-6 z-[600] flex items-center gap-0.5 frosted-glass-panel rounded-full p-1">
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-6 z-[600]">
+              <div
+                className={`flex items-center gap-0.5 frosted-glass-panel rounded-full p-1 stepper-squish ${
+                  stepDir ? `dir-${stepDir}` : ''
+                } ${stepPressed ? 'pressed' : ''}`}
+              >
                 <button
                   type="button"
                   onClick={() => stepRoute(-1)}
+                  onPointerDown={() => pressStep('left')}
+                  onPointerUp={releaseStep}
+                  onPointerCancel={releaseStep}
+                  onPointerLeave={releaseStep}
                   disabled={focusIdx === 0}
                   className="w-10 h-10 grid place-items-center rounded-full text-jp-text press-lift disabled:opacity-30 touch-manipulation"
                   aria-label="上一站"
@@ -393,12 +410,17 @@ export default function TripMap({ points, days = [], activeDay = null }) {
                 <button
                   type="button"
                   onClick={() => stepRoute(1)}
+                  onPointerDown={() => pressStep('right')}
+                  onPointerUp={releaseStep}
+                  onPointerCancel={releaseStep}
+                  onPointerLeave={releaseStep}
                   disabled={focusIdx === routePts.length - 1}
                   className="w-10 h-10 grid place-items-center rounded-full text-jp-text press-lift disabled:opacity-30 touch-manipulation"
                   aria-label="下一站"
                 >
                   <ChevronRight size={20} />
                 </button>
+              </div>
               </div>
             )}
           </>

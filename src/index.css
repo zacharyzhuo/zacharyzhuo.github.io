@@ -592,13 +592,32 @@ a:focus-visible,
 }
 
 /* 無玻璃材質的純 press lift：給「玻璃容器內」的小按鈕（如地圖 stepper ‹ ›）。
-   容器本身勿彈（見 frosted-glass-panel 註解），press 彈簧屬於內層單一按鈕。
+   容器本身勿做「整顆均勻 scale 彈跳」（見 frosted-glass-panel 註解），
+   press 彈簧屬於內層單一按鈕。
    節奏同 frosted-glass-button：press-in 0.22s 快彈、放開回 0.4s 彈簧 Q 彈落回。 */
 .press-lift {
   transition: transform 0.4s var(--ease-spring);
 }
 .press-lift:active {
   transform: scale(1.15);
+  transition: transform 0.22s var(--ease-spring);
+}
+
+/* 方向性 squish（iOS26 stepper 液態手感）：按 ‹ 膠囊往左鼓、按 › 往右鼓。
+   壓扁變寬（scaleX↑ scaleY↓）、transform-origin 錨在「對側」→ 形變朝按壓方向長出去。
+   與被禁止的「整顆均勻 scale 彈跳」不同：小幅度（7%）且方向性，內鍵位移 <10px 不影響按壓。
+   dir-* 與 pressed 分開：放開時只移除 pressed、保留 dir-*，origin 不跳、回彈動畫從同一錨點收回。 */
+.stepper-squish {
+  transition: transform 0.4s var(--ease-spring);
+}
+.stepper-squish.dir-left {
+  transform-origin: right center;
+}
+.stepper-squish.dir-right {
+  transform-origin: left center;
+}
+.stepper-squish.pressed {
+  transform: scaleX(1.07) scaleY(0.93);
   transition: transform 0.22s var(--ease-spring);
 }
 
@@ -858,7 +877,8 @@ a:focus-visible,
   .frosted-glass-button:active,
   .frosted-glass-button-dark:active,
   .press-springy:active,
-  .press-lift:active {
+  .press-lift:active,
+  .stepper-squish.pressed {
     transform: none;
   }
 }
