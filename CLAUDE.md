@@ -412,8 +412,8 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 
 ## UI / Design System
 
-- **底色**：`#FBFAF5`（米白）＋ `body::after`（fixed，feTurbulence 和紙噪點 + **米白 background-color**）。
-  - **iOS 26 狀態列鐵則**：WebKit 已忽略 `theme-color`，PWA 狀態列/底欄顏色從頁面**取樣**——預設取 body 的 background-color，但畫面上有 shown 的 **fixed 元素**時改取該元素的 background-color。**任何蓋滿視窗的 fixed 背景層都必須帶米白底色**，否則狀態列被塗黑（踩過：fixed 噪點層只有 background-image 沒 background-color，上線後 PWA 狀態列整晚黑條）。`index.html` 的 `color-scheme: light` + 雙模式 `theme-color` + `apple-mobile-web-app-status-bar-style: default` 仍保留（給舊版 iOS / splash）。
+- **底色**：`#FBFAF5`（米白）＋ feTurbulence 和紙噪點，兩者都直接在 **body 自己的 background** 上（噪點隨頁捲動，均勻噪點察覺不到）。
+  - **iOS 26 狀態列鐵則**：WebKit 已忽略 `theme-color`，PWA 狀態列/底欄顏色從頁面**取樣**——預設取 body 的 background-color，但畫面上有 shown 的 **fixed 元素**時改取該元素的 background-color。**全站不可有蓋滿視窗的 fixed 背景層**（即使是帶米白底色的偽元素，實測一樣害狀態列變黑），背景紋理一律放 body background。踩過兩次：fixed 噪點層上線後 PWA 狀態列整晚黑條。`index.html` 的 `color-scheme: light` + 雙模式 `theme-color` + `apple-mobile-web-app-status-bar-style: default` 仍保留（給舊版 iOS / splash）。
   - **分類色「内側淡彩」（玻璃透明感的色彩來源）**：行程卡玻璃內帶一抹從脊線往右暈開的分類 `wash` 色淡彩（`ItinerarySection`，卡內 `absolute inset-0` linear-gradient 0.2→透明；內容層與縮圖需 `relative` 疊在淡彩上），像有色玻璃。營業時間 badge 底色刻意極淡（`white/15`），不透明白底會在淡彩上蓋出白斑。
   - **歷史教訓（勿走回頭路）**：(1) 「固定在 viewport 四角的色斑背景」（含當日分類連動染 `--wash-a/b/c/d` @property crossfade）→ 固定位置與內容無關、低明度色票像髒灰陰影、與 DayNav/banner 形成色塊斷層，整組拆除。(2) 「包住整卡的 radial 橢圓光暈（alpha 0.55）」→ 太重、形狀與卡片無關不自然。(3) 下緣色影（C 變體）也試過，user 實機比較後**定案內側淡彩（D）**（C 的實作留在 git history `1d970bd`）。
   - **光暈色票鐵則**：光暈用 `categories.js` 各分類的 `wash`（高明度水彩版 `'R, G, B'`），**勿直接用 ink** —— ink 是文字色（明度低），拉濃會讀成髒灰陰影；濃度感用彩度與 alpha 撐，不能用暗度撐。
