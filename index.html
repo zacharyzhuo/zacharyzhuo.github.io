@@ -5,7 +5,14 @@
     <link rel="icon" type="image/png" href="/gokigen_panda_icon.png" />
     <link rel="apple-touch-icon" href="/gokigen_panda_icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#FBFAF5" />
+    <!-- 本站刻意純淺色：明確宣告 color-scheme + 兩種外觀模式同一個 theme-color，
+         否則 iOS 深色模式下 standalone PWA 不採用淺色 theme-color、狀態列會變黑 -->
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBFAF5" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#FBFAF5" />
+    <!-- iOS 加入主畫面的狀態列樣式（default = 淺底深字）；style 在加入主畫面當下被快取，改了要移除重加 -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Trip Diaries</title>
     <meta name="description" content="個人旅行記錄與行程規劃" />
 
