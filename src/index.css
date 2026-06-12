@@ -24,6 +24,8 @@
   --glass-card: blur(6px) saturate(130%);
   --glass-overlay: blur(4px) saturate(140%);
   --glass-button: blur(6px) saturate(150%);
+  /* press 抬起時的小鈕：body 近乎全透，靠更強 backdrop 做 lensing（iOS26 lift 語言，比照 --glass-tab-lifted） */
+  --glass-button-lifted: blur(12px) saturate(170%);
   --glass-tab: blur(8px) saturate(120%);
   --glass-tab-active: blur(8px) saturate(140%);
   /* press 放大時的膠囊：更強 frosted（body 幾乎全透，靠 backdrop 把後面糊掉 = Slack 玻璃感） */
@@ -510,12 +512,25 @@ a:focus-visible,
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
-/* 按下：squish；放開時 transform transition 的彈簧讓它 Q 彈回彈 */
+/* 按下：iOS26 lift —— 浮起微放大、body 變近乎全透（玻璃感交給更強 backdrop）、
+   邊緣高光變亮（擬折射的「邊緣有光」暗示）、投影加深拉遠（離表面更高）。
+   press-in 用較短彈簧快速回饋；放開落回 base 的 0.4s 彈簧 Q 彈。
+   backdrop-filter 不進 transition（重繪昂貴，瞬切，同 frosted-tab-pill.lifted 做法）。 */
 .frosted-glass-button:active {
-  transform: scale(0.9);
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: var(--glass-button-lifted);
+  -webkit-backdrop-filter: var(--glass-button-lifted);
+  border-color: rgba(255, 255, 255, 0.65);
   box-shadow:
-    0 4px 20px 0 rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 0 18px rgba(255, 255, 255, 0.12),
+    0 12px 30px 0 rgba(0, 0, 0, 0.14);
+  transition:
+    transform 0.22s var(--ease-spring),
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 /* 靜態毛玻璃面板：給「裝多顆按鈕」的浮動控制（如路線 stepper 膠囊）。
@@ -531,13 +546,28 @@ a:focus-visible,
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* 通用 press 微彈：點下 squish、放開 Q 彈回彈。套在可點卡片 / 選單項 / CTA。
+/* 通用 press 微彈：iOS26 lift —— 按下「浮起」微放大、放開 Q 彈落回。
+   套在可點卡片 / 選單項 / CTA。卡片量體大，1.03 已足夠明顯，勿再加大。
    prefers-reduced-motion 由全域 reset 自動降級為瞬時。 */
 .press-springy {
   transition: transform 0.4s var(--ease-spring);
 }
 .press-springy:active {
-  transform: scale(0.95);
+  transform: scale(1.03);
+}
+
+/* 可點玻璃卡（glass-card + press-springy 並用）：lift 語言的卡片版。
+   不切 backdrop（大面積換 blur 會整卡重繪，iOS 易 jank）、不加白框
+   （glass-card 刻意無框），只用「body 變更透 + 投影加深拉遠」表達抬起。 */
+.glass-card.press-springy {
+  transition:
+    transform 0.4s var(--ease-spring),
+    background-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.glass-card.press-springy:active {
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
 }
 
 /* 深色背景的毛玻璃按鈕（用於 Instagram 風格） */
@@ -565,11 +595,14 @@ a:focus-visible,
   transform: translateY(-1px);
 }
 
+/* 深色版同樣走 lift 語言：浮起微放大 + 變更透 + 邊緣高光變亮 */
 .frosted-glass-button-dark:active {
-  transform: translateY(0);
+  transform: scale(1.06);
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(255, 255, 255, 0.35);
   box-shadow:
-    0 4px 20px 0 rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 12px 30px 0 rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 /* Bottom sheet 玻璃卡片（DetailModal 用）- Frosted glass 模擬 */
@@ -778,7 +811,10 @@ a:focus-visible,
   .frosted-tab-pill-fill {
     transition: none;
   }
-  .frosted-tab-pill.lifted .frosted-tab-pill-fill {
+  .frosted-tab-pill.lifted .frosted-tab-pill-fill,
+  .frosted-glass-button:active,
+  .frosted-glass-button-dark:active,
+  .press-springy:active {
     transform: none;
   }
 }

@@ -370,7 +370,7 @@ export default function TripMap({ points, days = [], activeDay = null }) {
                   type="button"
                   onClick={() => stepRoute(-1)}
                   disabled={focusIdx === 0}
-                  className="w-10 h-10 grid place-items-center rounded-full text-jp-text active:scale-90 disabled:opacity-30 touch-manipulation"
+                  className="w-10 h-10 grid place-items-center rounded-full text-jp-text active:scale-110 disabled:opacity-30 touch-manipulation"
                   aria-label="上一站"
                 >
                   <ChevronLeft size={20} />
@@ -378,7 +378,7 @@ export default function TripMap({ points, days = [], activeDay = null }) {
                 <button
                   type="button"
                   onClick={backToOverview}
-                  className="min-w-[3.5rem] px-2 h-10 grid place-items-center font-serif font-bold text-sm tabular-nums text-jp-text active:scale-95 touch-manipulation"
+                  className="min-w-[3.5rem] px-2 h-10 grid place-items-center font-serif font-bold text-sm tabular-nums text-jp-text active:scale-105 touch-manipulation"
                   aria-label={focusIdx === null ? '總覽' : '回到總覽'}
                 >
                   {focusIdx === null ? `${routePts.length} 站` : `${focusIdx + 1} / ${routePts.length}`}
@@ -387,7 +387,7 @@ export default function TripMap({ points, days = [], activeDay = null }) {
                   type="button"
                   onClick={() => stepRoute(1)}
                   disabled={focusIdx === routePts.length - 1}
-                  className="w-10 h-10 grid place-items-center rounded-full text-jp-text active:scale-90 disabled:opacity-30 touch-manipulation"
+                  className="w-10 h-10 grid place-items-center rounded-full text-jp-text active:scale-110 disabled:opacity-30 touch-manipulation"
                   aria-label="下一站"
                 >
                   <ChevronRight size={20} />
