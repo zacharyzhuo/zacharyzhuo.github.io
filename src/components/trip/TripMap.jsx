@@ -251,9 +251,10 @@ export default function TripMap({ points, days = [], activeDay = null }) {
           </div>
         )}
         {mode === 'route' && days.length > 0 && (
-          /* 浮動玻璃膠囊包 bare DayNav：圓角懸浮元件沒有「全寬色帶上下緣」的斷層問題 */
-          <div className="pointer-events-auto mx-4 frosted-glass-panel rounded-2xl overflow-hidden">
-            <DayNav bare days={days} activeDay={routeDay} onSelect={setRouteDay} />
+          /* 浮動玻璃膠囊包 bare+compact DayNav：單行「五 05」緊湊版（兩層式直向太高擋地圖）；
+             w-fit 置中、天數多時內部可橫滑 */
+          <div className="pointer-events-auto mx-auto w-fit max-w-[calc(100%-2rem)] frosted-glass-panel rounded-full overflow-hidden">
+            <DayNav bare compact days={days} activeDay={routeDay} onSelect={setRouteDay} />
           </div>
         )}
       </div>

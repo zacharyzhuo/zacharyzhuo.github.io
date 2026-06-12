@@ -22,13 +22,17 @@ function getDayOfMonth(dateStr) {
  *   onSelect: (day: number) => void,
  *   easterEggIcon?: React.ReactNode,
  *   easterEggDay?: number,
- *   bare?: boolean
+ *   bare?: boolean,
+ *   compact?: boolean
  * }} props
  * bare：不渲染 glass-day-nav 全寬色帶（無底/無框/無陰影/非 sticky），
  * 給「已經有自己玻璃容器」的場景用（如地圖 modal 的懸浮膠囊），
  * 避免全寬色帶在地圖上形成上下斷層。
+ * compact：單行緊湊版（「五 05」一行 baseline 排列，高 ~44px），給地圖路線模式用 ——
+ * 兩層式（週幾＋大數字）直向太高會擋地圖。選中態沿用本家的文字語言：
+ * 紅字週幾＋深色日期（不用品牌綠膠囊，user 明確指定）。
  */
-export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easterEggDay, bare = false }) {
+export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easterEggDay, bare = false, compact = false }) {
   const scrollRef = useRef(null)
 
   useEffect(() => {
@@ -53,12 +57,34 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
         style={{ WebkitOverflowScrolling: 'touch', scrollPaddingInline: '50%' }}
       >
         {/* inline-flex + min-w-full：天數少時 justify-center 置中；天數多溢出時 inner div 自然展開，兩側都能捲到 */}
-        <div className="inline-flex items-center justify-center min-w-full box-border px-6 py-4">
+        <div className={`inline-flex items-center justify-center min-w-full box-border ${compact ? 'px-1.5 py-0.5' : 'px-6 py-4'}`}>
         {days.map(({ day, date }) => {
           const isActive = activeDay === day
           const isEasterDay = easterEggDay !== undefined && day === easterEggDay
           const dow = getDayOfWeek(date)
           const dom = getDayOfMonth(date)
+
+          if (compact) {
+            return (
+              <button
+                key={day}
+                data-active={isActive}
+                data-day={day}
+                onClick={() => { if (!isActive) tap(); onSelect(day) }}
+                className="grid place-items-center px-2.5 min-h-[44px] flex-shrink-0 touch-manipulation relative snap-center"
+                aria-label={`選擇第 ${day} 天`}
+              >
+                <span className="flex items-baseline gap-1">
+                  <span className={`text-xs font-serif ${isActive ? 'text-jp-red font-bold' : 'text-muted'}`}>
+                    {dow || `D${day}`}
+                  </span>
+                  <span className={`text-sm font-serif font-bold leading-none tabular-nums ${isActive ? 'text-jp-text' : 'text-stone-400'}`}>
+                    {dom || String(day).padStart(2, '0')}
+                  </span>
+                </span>
+              </button>
+            )
+          }
 
           return (
             <button

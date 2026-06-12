@@ -336,7 +336,7 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 - **入口**：行程頁 header **右上角**的地圖 icon（與左上漢堡對稱）；`mapPoints` 為空時不顯示。DayBanner **沒有**地圖按鈕。
 - 打開後**預設探索模式**，頂部一顆 `SegmentedControl`（探索 / 路線）切換：
   - **探索**：全部點、跨日、可分類篩選（chip 列）、定位找最近。
-  - **路線**：頂部 chip 列換成 **`DayNav`（複用行程頁那顆，`bare` 變體 + `frosted-glass-panel` 圓角膠囊包裹）**，預設選中**開啟當下背景頁那天**（`activeDay`），可在 modal 內換天瀏覽各日動線（換天只改地圖，不動背景頁）。
+  - **路線**：頂部 chip 列換成 **`DayNav`（複用行程頁那顆，`bare` + `compact` 變體 + `frosted-glass-panel` 圓膠囊、w-fit 置中）**，預設選中**開啟當下背景頁那天**（`activeDay`），可在 modal 內換天瀏覽各日動線（換天只改地圖，不動背景頁）。`compact` = 單行「五 05」緊湊版（高 ~44px）：行程頁的兩層式（週幾＋大數字）直向 ~90px 在地圖上太擋；選中態沿用紅字週幾＋深色日期（**不用品牌綠膠囊**，user 指定）。
   - **header 懸浮在地圖上**（地圖滿版、控制各自是玻璃膠囊浮在圖上，z-[650]）：勿改回「header 區塊 + 地圖」上下堆疊 —— 全寬控制列色帶與地圖相接會有色塊斷層（踩過）。`zoomControl` 關閉（左上 zoom 鈕會被懸浮 Layers 鈕蓋住）。`DayNav` 的 `bare` prop = 無 glass 色帶/非 sticky，給「自己有玻璃容器」的場景。
 
 `TripMap` 接 `points` / `days` / `activeDay` 三個 prop；`mode` 與 `routeDay` 都是元件內部 state（每次開啟重置為探索 + 背景當天）。
