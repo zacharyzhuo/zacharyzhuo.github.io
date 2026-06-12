@@ -21,10 +21,14 @@ function getDayOfMonth(dateStr) {
  *   activeDay: number,
  *   onSelect: (day: number) => void,
  *   easterEggIcon?: React.ReactNode,
- *   easterEggDay?: number
+ *   easterEggDay?: number,
+ *   bare?: boolean
  * }} props
+ * bare：不渲染 glass-day-nav 全寬色帶（無底/無框/無陰影/非 sticky），
+ * 給「已經有自己玻璃容器」的場景用（如地圖 modal 的懸浮膠囊），
+ * 避免全寬色帶在地圖上形成上下斷層。
  */
-export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easterEggDay }) {
+export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easterEggDay, bare = false }) {
   const scrollRef = useRef(null)
 
   useEffect(() => {
@@ -42,7 +46,7 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
   }, [activeDay])
 
   return (
-    <div className="glass-day-nav sticky top-0 z-20 overflow-hidden">
+    <div className={bare ? 'overflow-hidden' : 'glass-day-nav sticky top-0 z-20 overflow-hidden'}>
       <div
         ref={scrollRef}
         className="overflow-x-auto scrollbar-hide snap-x snap-mandatory"

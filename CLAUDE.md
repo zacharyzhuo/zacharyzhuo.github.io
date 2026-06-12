@@ -324,7 +324,7 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 
 行程頁的地圖功能，`src/components/trip/TripMap.jsx`，包在 **tall 版 `BottomSheet`（`h-[92vh]`）** 裡，用 **react-leaflet v5 + leaflet**，以 `React.lazy` 切出 chunk。
 
-**底圖切換（右上 `Layers` 鈕，`basemap` state，免 key）**：
+**底圖切換（`Layers` 鈕，懸浮在 SegmentedControl 同列左側、鏡像右側 sheet 關閉鈕；`basemap` state，免 key）**：
 - `simple`（預設）= **CARTO Positron**（`light_all`）：和紙簡約調性，但**幾乎不顯示車站/POI**。
 - `transit` = **OSM 標準圖**（`tile.openstreetmap.org`）：原生顯示車站 icon、站名、地鐵/鐵道路線（日本 OSM 資料完整，規劃交通用）。
 - 用 keyed `<TileLayer>` 條件切換；切換不影響其他狀態。OSM 圖 `maxZoom=19`、Positron `maxZoom=20`。
@@ -336,7 +336,8 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 - **入口**：行程頁 header **右上角**的地圖 icon（與左上漢堡對稱）；`mapPoints` 為空時不顯示。DayBanner **沒有**地圖按鈕。
 - 打開後**預設探索模式**，頂部一顆 `SegmentedControl`（探索 / 路線）切換：
   - **探索**：全部點、跨日、可分類篩選（chip 列）、定位找最近。
-  - **路線**：頂部 chip 列換成 **`DayNav`（複用行程頁那顆）**，預設選中**開啟當下背景頁那天**（`activeDay`），可在 modal 內換天瀏覽各日動線（換天只改地圖，不動背景頁）。
+  - **路線**：頂部 chip 列換成 **`DayNav`（複用行程頁那顆，`bare` 變體 + `frosted-glass-panel` 圓角膠囊包裹）**，預設選中**開啟當下背景頁那天**（`activeDay`），可在 modal 內換天瀏覽各日動線（換天只改地圖，不動背景頁）。
+  - **header 懸浮在地圖上**（地圖滿版、控制各自是玻璃膠囊浮在圖上，z-[650]）：勿改回「header 區塊 + 地圖」上下堆疊 —— 全寬控制列色帶與地圖相接會有色塊斷層（踩過）。`zoomControl` 關閉（左上 zoom 鈕會被懸浮 Layers 鈕蓋住）。`DayNav` 的 `bare` prop = 無 glass 色帶/非 sticky，給「自己有玻璃容器」的場景。
 
 `TripMap` 接 `points` / `days` / `activeDay` 三個 prop；`mode` 與 `routeDay` 都是元件內部 state（每次開啟重置為探索 + 背景當天）。
 
@@ -411,9 +412,10 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 
 ## UI / Design System
 
-- **底色**：`#FBFAF5`（米白）＋**和紙染め背景**：`body::before`（fixed，「紙の光」白暈 + 四個 radial 色斑）＋ `body::after`（fixed，feTurbulence 和紙噪點 opacity 0.035）。目的是給全站玻璃「隨時有東西可糊」——純米白底下 backdrop-filter 糊單色等於沒糊，透明感讀不出來。色斑固定不隨內容捲動（玻璃捲過色彩才持續現形）；用 fixed 偽元素是因 iOS Safari 不支援 `background-attachment: fixed`。
-  - **當日分類連動染**：四個色斑顏色吃 `--wash-a/b/c/d` 變數（`@property` 註冊 `<color>`，換值 0.9s crossfade）。行程頁由 `useDayWash(dayItinerary)`（`hooks/useDayWash.js`）依當天行程的分類組成設定 body inline style（純函式 `washColorsForDay` 在 `lib/wash.js`，有測試：3 類以上 `[c1,c2,c3,c1]`、2 類交替、1 類配品牌綠水彩、空天/首頁用 CSS 預設水彩）。
-  - **染色色票鐵則**：染色用 `categories.js` 各分類的 `wash`（高明度水彩版 `'R, G, B'`），**勿直接用 ink** —— ink 是文字色（明度低），當染色拉濃會讀成髒灰陰影；濃度感用彩度與 alpha 撐，不能用暗度撐。調濃淡只動 `body::before` 的 alpha / `lib/wash.js` 的 `SLOT_ALPHAS`，勿在個別元件下墊色補償。
+- **底色**：`#FBFAF5`（米白）＋ `body::after`（fixed，feTurbulence 和紙噪點 opacity 0.035）。
+  - **分類色光暈（玻璃透明感的色彩來源）**：行程卡背後墊一層該分類 `wash` 色的 radial-gradient（`ItinerarySection`，絕對定位微微外溢出卡緣、偏脊線側），卡片的 backdrop blur 把它糊開 = **卡片像在發分類色的光**，且光跟內容捲動（捲過 DayNav 時玻璃也有色可糊）。純 gradient 無 filter，每卡一層不傷效能。
+  - **歷史教訓（勿走回頭路）**：曾做過「固定在 viewport 四角的色斑背景」（含當日分類連動染 `--wash-a/b/c/d` @property crossfade），被嫌：固定位置與內容無關、低明度色票像髒灰陰影、與 DayNav/banner 形成色塊斷層 → 已整組拆除，改為內容錨定的卡片光暈。
+  - **光暈色票鐵則**：光暈用 `categories.js` 各分類的 `wash`（高明度水彩版 `'R, G, B'`），**勿直接用 ink** —— ink 是文字色（明度低），拉濃會讀成髒灰陰影；濃度感用彩度與 alpha 撐，不能用暗度撐。
 - **Accent**：`#5E8C61`（明るい抹茶）
 - **文字色**：主要 `#2C2C2C`（`text-jp-text`）；次要/註記用**語意 token**：`text-secondary`（次要正文，= 原 stone-600）、`text-muted`（小標/註記，= 原 stone-500）。這兩個 + `bg-hairline`/`border-hairline`（1px 分隔線，= 原 stone-200）都在 `tailwind.config.js` 定義成 `var(--text-secondary / --text-muted / --hairline)`，變數在 `index.css :root`。**新次要文字一律用 `text-secondary`/`text-muted`，勿再散用 `text-stone-500/600` 或已退役的 `jp-sub`**。這層是深色模式地基：未來只要在 `:root`（或 `.dark`）覆蓋這幾個變數即可一次翻，元件不用動。`text-stone-400`（更淡的 icon/placeholder）、`text-stone-700`（status pill）屬不同層級，未納入。
 - **字型**：全站 `"Noto Serif JP"`（font-serif），所有文字元素應帶 `font-serif`
@@ -442,13 +444,13 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 | `shopping` 購物 | 紅藤 | `#B279A2` | `218, 170, 204` |
 | `hotel` 住宿 | 藤紫 | `#7D82BC` | `176, 180, 232` |
 
-- **`jp-green #5E8C61`（明るい抹茶）是全站唯一主 accent**（連結 / active / CTA / 進度條 / focus ring），**不當分類色用**；景點用偏黃的若葉與品牌綠區隔，避免「品牌 or 分類」混淆。品牌綠的水彩版是 `BRAND_WASH`（`150, 200, 164`）。
+- **`jp-green #5E8C61`（明るい抹茶）是全站唯一主 accent**（連結 / active / CTA / 進度條 / focus ring），**不當分類色用**；景點用偏黃的若葉與品牌綠區隔，避免「品牌 or 分類」混淆。
 - API：
   - `getCategory(type)`：回 `{ label, en, icon, ink }`（`en` 為大寫英文，給編輯排版 eyebrow 用），未知 type 退回景點。
   - `categoryChipStyle(type)` / `chipStyle(ink)`：**淡玻璃 chip**（文字 ink / 邊框 ink@40% / 底 ink@10%），搭配 className `border backdrop-blur-sm rounded`。用於小標籤。
   - `categorySolidStyle(type)` / `solidStyle(ink)`：**實心**（底 ink / 字白）。目前無引用（航班色帶已改半透明、側欄改純 icon），保留 API 供未來實心場景。
   - `categoryInk(type)`：純 ink 色（給脊線、節點底色等）。
-  - `BRAND_INK`：品牌綠（= `jp-green` `#5E8C61`）的 JS 字面值，給 inline style 餵 `chipStyle` / `solidStyle` 用（Tailwind class 不適用時）；勿再散寫 hex。`BRAND_WASH`：品牌綠水彩版（染色用）。
+  - `BRAND_INK`：品牌綠（= `jp-green` `#5E8C61`）的 JS 字面值，給 inline style 餵 `chipStyle` / `solidStyle` 用（Tailwind class 不適用時）；勿再散寫 hex。`categoryWash(type)`：分類水彩色 `'R, G, B'`（卡片光暈用）。
 - 引用處：`ItinerarySection`（時間軸節點 + 脊線 + eyebrow + modal 編輯排版）、`ShoppingSection`（樓層 `FloorTag` 用淡 chip）、`FoodSection`（店名前弁柄色點）、`TripInfoSection`（航班登機證色帶用 transport 半透明淡色 + 深色字、航線用 transport ink；行前準備玻璃連結卡用 jp-green 外連 icon；住宿 hotel/airbnb 同屬住宿分類，同色靠文字區分）、`TripPage` 的 `MENU_ITEMS`（側欄 icon，**純色 icon 無圓底**）。
 - **日期是 metadata 不是分類**，勿套分類色：航班日期在登機證色帶上（transport 深色字）、住宿日期在 eyebrow 的 `STAY · <date>`。
 - 側欄 `MENU_ITEMS` 的 icon = **純分類色 icon（無圓底）**，`iconStyle` 為 `{ color: categoryInk(...) }`（與時間軸軌道同語言），Sidebar 以 `style={iconStyle}` 套用。

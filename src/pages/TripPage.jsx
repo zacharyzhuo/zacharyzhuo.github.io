@@ -10,7 +10,6 @@ import { useEasterEgg } from '../hooks/useEasterEgg.js'
 import { pickInitialDay, formatDayLabel } from '../lib/tripDate.js'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 import { useDays, useFoodItems, useNormalizedDays, useNormalizedItinerary } from '../hooks/useTripDerived.js'
-import { useDayWash } from '../hooks/useDayWash.js'
 import { categoryInk, BRAND_INK } from '../lib/categories.js'
 import { toMapPoints, listToMapPoints, mergeMapPoints } from '../lib/maps.js'
 import { TripSkeleton, SectionSkeleton } from '../components/ui/Skeletons.jsx'
@@ -164,9 +163,6 @@ export default function TripPage() {
   const dayItinerary = useMemo(() => filterDayItinerary(activeDay), [normalizedItinerary, activeDay])
   const prevDayItinerary = useMemo(() => prevDayObj ? filterDayItinerary(prevDayObj.day) : [], [normalizedItinerary, prevDayObj])
   const nextDayItinerary = useMemo(() => nextDayObj ? filterDayItinerary(nextDayObj.day) : [], [normalizedItinerary, nextDayObj])
-
-  // 當日分類連動染：背景色斑跟著當天行程的分類組成走（換天 0.9s crossfade）
-  useDayWash(dayItinerary)
 
   const foodItems = useFoodItems(food, itinerary)
   const mapPoints = useMemo(

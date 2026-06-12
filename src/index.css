@@ -53,67 +53,13 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ── 和紙染め背景（全站玻璃的「透明感」來源） ──────────────────
-   玻璃的透明感來自「背後有東西可糊」：純米白底下 backdrop-filter 糊單色
-   等於沒糊。這兩層 fixed 偽元素在米白底上染四個品牌色族的低彩度色斑
-   （抹茶 / 弁柄 / 藤鼠 / 橄欖）＋極淡和紙噪點；內容捲動時色斑不動，
-   全站玻璃（DayNav / 卡片 / 膠囊 / BottomSheet）隨時捲過色彩。
+/* ── 和紙噪點（全站紙感）──────────────────
+   極淡的 feTurbulence 噪點 fixed 在 viewport 上。
+   色彩層不在這裡：玻璃的「透明感」來源是行程卡背後的「分類色光暈」
+   （ItinerarySection，per-card radial，跟著內容捲動 = 卡片發分類色的光），
+   不再用固定在背景四角的色斑（曾做過：固定色斑與內容無關、被嫌像髒陰影/斷層）。
    - 用 fixed 偽元素而非 background-attachment: fixed（iOS Safari 不支援後者）。
-   - 純靜態 paint，無動畫無 JS，效能零負擔。
-   - 深色模式日後翻轉時，這兩層的色值也要一併換組深色染。 */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  /* 第一層「紙の光」：中央偏上的暖白暈染，維持內容區米白明亮。
-     色斑「濃而收邊」：峰值高、擴散窄、推向四角。
-     ⚠️ 色票是分類的「高明度水彩版」（categories.js 的 wash，明度 ~65-72%），
-     不是 ink 本色 —— ink 是文字色（明度低偏灰），直接當染色拉濃會讀成
-     「髒灰陰影」而非色彩；濃度感要用彩度與 alpha 撐，不能用暗度撐。
-
-     四個色斑顏色吃 --wash-a/b/c/d 變數（當日分類連動染）：
-     TripPage 依當天行程的分類組成設定 body inline style，換天時由下方
-     @property 註冊的 transition 做 0.9s crossfade；HomePage / 未設定時
-     用 var() fallback（= @property initial-value，品牌色族的預設水彩）。 */
-  background:
-    radial-gradient(70vmax 52vmax at 50% 26%, rgba(255, 253, 248, 0.5), transparent 70%),
-    radial-gradient(44vmax 34vmax at 92% 0%, var(--wash-a, rgba(140, 200, 158, 0.42)), transparent 64%),
-    radial-gradient(38vmax 32vmax at -8% 28%, var(--wash-b, rgba(248, 184, 146, 0.36)), transparent 64%),
-    radial-gradient(44vmax 38vmax at 108% 64%, var(--wash-c, rgba(172, 182, 235, 0.34)), transparent 66%),
-    radial-gradient(36vmax 30vmax at 4% 102%, var(--wash-d, rgba(206, 220, 130, 0.34)), transparent 64%);
-  transition:
-    --wash-a 0.9s ease,
-    --wash-b 0.9s ease,
-    --wash-c 0.9s ease,
-    --wash-d 0.9s ease;
-}
-
-/* 染色變數註冊成 <color> 才能 transition（換天 crossfade）。
-   initial-value = HomePage / 未設定時的預設水彩（品牌色族）。
-   不支援 @property 的舊瀏覽器：上方 var() fallback 接手，換色改為瞬切（可接受降級）。 */
-@property --wash-a {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: rgba(140, 200, 158, 0.42);
-}
-@property --wash-b {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: rgba(248, 184, 146, 0.36);
-}
-@property --wash-c {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: rgba(172, 182, 235, 0.34);
-}
-@property --wash-d {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: rgba(206, 220, 130, 0.34);
-}
-
+   - 深色模式日後翻轉時，噪點透明度可能需要調整。 */
 body::after {
   content: "";
   position: fixed;

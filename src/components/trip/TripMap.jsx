@@ -196,21 +196,35 @@ export default function TripMap({ points, days = [], activeDay = null }) {
   const initialCenter = positions[0] || (userPos ? [userPos.lat, userPos.lng] : TOKYO)
 
   return (
-    <div className="flex flex-col h-full overflow-hidden rounded-t-[2rem]">
-      {/* header：模式切換（探索＝分類 chip 列 / 路線＝DayNav 換天） */}
-      <div className="flex-none pt-2">
+    <div className="relative h-full overflow-hidden rounded-t-[2rem]">
+      {/* header 懸浮在地圖上（地圖滿版）：避免「控制列自帶全寬色帶 + 地圖」
+          上下相接的色塊斷層；控制元件各自是玻璃膠囊，浮在圖上。 */}
+      <div className="absolute inset-x-0 top-0 z-[650] pt-2 pointer-events-none">
         <h2 className="sr-only">行程地圖</h2>
-        <div className="flex justify-center mb-2 px-5">
-          <SegmentedControl
-            tabs={[{ key: 'explore', label: '探索' }, { key: 'route', label: '路線' }]}
-            value={mode}
-            onChange={switchMode}
-            itemClassName="px-5"
-            ariaLabel="地圖模式"
-          />
+        <div className="relative flex justify-center mb-2 px-5">
+          <div className="pointer-events-auto">
+            <SegmentedControl
+              tabs={[{ key: 'explore', label: '探索' }, { key: 'route', label: '路線' }]}
+              value={mode}
+              onChange={switchMode}
+              itemClassName="px-5"
+              ariaLabel="地圖模式"
+            />
+          </div>
+          {/* 底圖切換：簡約（Positron）↔ 交通（OSM 標準圖，看得到車站/鐵道）。
+              放 segmented 同列左側，鏡像右側 BottomSheet 的關閉鈕 */}
+          <button
+            type="button"
+            onClick={() => { hapticTap(); setBasemap((b) => (b === 'simple' ? 'transit' : 'simple')) }}
+            className="pointer-events-auto frosted-glass-button absolute left-5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-jp-text text-xs font-serif font-bold touch-manipulation"
+            aria-label={basemap === 'simple' ? '切換到交通底圖（顯示車站）' : '切換回簡約底圖'}
+          >
+            <Layers size={15} />
+            {basemap === 'simple' ? '簡約' : '交通'}
+          </button>
         </div>
         {mode === 'explore' && (
-          <div className="flex flex-wrap gap-2 justify-center px-5 pb-3">
+          <div className="pointer-events-auto flex flex-wrap gap-2 justify-center px-5 pb-3">
             {BUCKETS.map((b) => {
               const on = active.has(b)
               const ink = b === 'backup' ? BACKUP_INK : getCategory(b).ink
@@ -231,12 +245,15 @@ export default function TripMap({ points, days = [], activeDay = null }) {
           </div>
         )}
         {mode === 'route' && days.length > 0 && (
-          <DayNav days={days} activeDay={routeDay} onSelect={setRouteDay} />
+          /* 浮動玻璃膠囊包 bare DayNav：圓角懸浮元件沒有「全寬色帶上下緣」的斷層問題 */
+          <div className="pointer-events-auto mx-4 frosted-glass-panel rounded-2xl overflow-hidden">
+            <DayNav bare days={days} activeDay={routeDay} onSelect={setRouteDay} />
+          </div>
         )}
       </div>
 
-      {/* map */}
-      <div className="relative flex-1 min-h-0">
+      {/* map（滿版，控制列浮在上面） */}
+      <div className="relative h-full">
         {shown.length === 0 ? (
           <div className="absolute inset-0 flex items-center justify-center">
             {mode === 'explore' && points.length > 0 ? (
@@ -255,11 +272,12 @@ export default function TripMap({ points, days = [], activeDay = null }) {
           </div>
         ) : (
           <>
+            {/* zoomControl 關閉：左上 zoom 鈕會被懸浮的底圖切換鈕蓋住；觸控雙指縮放 / 滾輪即可 */}
             <MapContainer
               ref={mapRef}
               center={initialCenter}
               zoom={14}
-              zoomControl={true}
+              zoomControl={false}
               className="absolute inset-0 h-full w-full"
               style={{ background: '#eceae3' }}
             >
@@ -327,17 +345,6 @@ export default function TripMap({ points, days = [], activeDay = null }) {
 
               {userPos && <Marker position={[userPos.lat, userPos.lng]} icon={meIcon()} />}
             </MapContainer>
-
-            {/* 底圖切換：簡約（Positron）↔ 交通（OSM 標準圖，看得到車站/鐵道，規劃日本行程用） */}
-            <button
-              type="button"
-              onClick={() => { hapticTap(); setBasemap((b) => (b === 'simple' ? 'transit' : 'simple')) }}
-              className="frosted-glass-button absolute top-3 right-3 z-[601] inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-jp-text text-xs font-serif font-bold touch-manipulation"
-              aria-label={basemap === 'simple' ? '切換到交通底圖（顯示車站）' : '切換回簡約底圖'}
-            >
-              <Layers size={15} />
-              {basemap === 'simple' ? '簡約' : '交通'}
-            </button>
 
             {/* locate button（探索模式才有意義）；底部出現膠囊/卡片條時抬高，不被蓋住 */}
             {mode === 'explore' && (

@@ -11,8 +11,9 @@ import { Camera, Utensils, ShoppingBag, Train, Hotel } from 'lucide-react'
  * jp-green（明るい抹茶 #5E8C61）保留給「全站主 accent」（連結、active、CTA、進度條、
  * focus ring），不當分類色用；景點用偏黃的若葉與品牌綠區隔，避免「品牌 or 分類」混淆。
  *
- * `wash` 是該分類的高明度水彩版（'R, G, B' 字串，給背景染色 rgba 組裝用）。
- * ⚠️ 染色不可直接用 ink：ink 是文字色（明度低），當染色拉濃會讀成髒灰陰影。
+ * `wash` 是該分類的高明度水彩版（'R, G, B' 字串），給行程卡背後的
+ * 「分類色光暈」（ItinerarySection）組 rgba 用。
+ * ⚠️ 光暈/染色不可直接用 ink：ink 是文字色（明度低），拉濃會讀成髒灰陰影。
  */
 export const CATEGORIES = {
   transport:  { label: '交通', en: 'TRANSPORT',  icon: Train,        ink: '#5F8FB4', wash: '150, 185, 215' }, // 縹 hanada
@@ -24,9 +25,6 @@ export const CATEGORIES = {
 
 /** 品牌綠（= jp-green，明るい抹茶）。給 JS inline style 用（Tailwind class 不適用、需餵 chip/solid helper 時）。 */
 export const BRAND_INK = '#5E8C61'
-
-/** 品牌綠的水彩版（背景染色用，同 CATEGORIES[*].wash 格式）。 */
-export const BRAND_WASH = '150, 200, 164'
 
 /**
  * 備選點（itinerary 空 date）在地圖上的顏色：中性墨灰（利休鼠調）。
@@ -73,4 +71,9 @@ export function categorySolidStyle(type) {
 /** 分類 ink 純色（給 icon 色、實心圓底等用）。 */
 export function categoryInk(type) {
   return getCategory(type).ink
+}
+
+/** 分類水彩色（'R, G, B' 字串），給卡片背後的分類色光暈組 rgba 用。 */
+export function categoryWash(type) {
+  return getCategory(type).wash
 }

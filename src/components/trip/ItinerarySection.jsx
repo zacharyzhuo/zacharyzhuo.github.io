@@ -9,7 +9,7 @@ import { useCancelableTap } from '../../hooks/useCancelableTap.js'
 import { formatToday } from '../../lib/tripDate.js'
 import { resist } from '../../lib/gesture.js'
 import { openExternal } from '../../lib/openExternal.js'
-import { getCategory, categoryChipStyle, categoryInk, chipStyle, BRAND_INK } from '../../lib/categories.js'
+import { getCategory, categoryChipStyle, categoryInk, categoryWash, chipStyle, BRAND_INK } from '../../lib/categories.js'
 import EmptyState from '../ui/EmptyState.jsx'
 
 function formatNowHHMM() {
@@ -426,7 +426,18 @@ export default function ItinerarySection({ rows, dayDate }) {
                 {!isLast && <div className="w-[1.5px] bg-hairline flex-1 mt-1" />}
               </div>
 
-              <div className="flex-1 min-w-0 pb-7">
+              <div className="flex-1 min-w-0 pb-7 relative">
+                {/* 分類色光暈：墊在玻璃卡正下方、微微外溢出卡緣，
+                    卡片的 backdrop blur 把它糊開 = 卡片像在發分類色的光。
+                    用 categories.js 的 wash（高明度水彩版），偏向脊線側（左）。
+                    純 radial-gradient 無 filter，每張卡一層也不傷效能。 */}
+                <div
+                  aria-hidden="true"
+                  className="absolute -inset-x-4 -top-3 bottom-3 pointer-events-none"
+                  style={{
+                    background: `radial-gradient(58% 64% at 30% 46%, rgba(${categoryWash(row.type)}, 0.55), transparent 72%)`,
+                  }}
+                />
                 <button
                   type="button"
                   onPointerDown={cardTap.onPointerDown}
