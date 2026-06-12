@@ -66,9 +66,15 @@ body::after {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
-  /* 灰噪點是均勻灰紗，太重會把米白壓暗壓髒 —— 寧低勿高 */
-  opacity: 0.035;
+  /* ⚠️ iOS 26 鐵則：WebKit 已忽略 theme-color，狀態列/底欄顏色改從頁面取樣 ——
+     預設取 body 的 background-color，但畫面上有「shown 的 fixed 元素」時改取
+     該 fixed 元素的 background-color。這層 fixed 噪點必須帶米白底色，
+     否則（transparent）PWA 狀態列會被塗黑（踩過：2026-06-12 上線後整晚黑條）。
+     噪點濃度由 SVG 內 rect 的 opacity 控（0.018 ≈ 原 0.5×0.035 的等效值），
+     元素本身不設 opacity（會連底色一起變透、影響取樣）。
+     灰噪點是均勻灰紗，太重會把米白壓暗壓髒 —— 寧低勿高。 */
+  background-color: #FBFAF5;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.018'/></svg>");
 }
 
 /* 例外：表單輸入框與顯式標記為可選取的內容仍要能反白 / 複製 */
