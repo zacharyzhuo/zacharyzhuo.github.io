@@ -266,7 +266,7 @@ function DetailModal({ row, spots, onClose }) {
                 {current.time && current.address && <span className="text-stone-300">·</span>}
                 {current.address && (
                   <span className="inline-flex items-center gap-1 min-w-0">
-                    <MapPin size={13} className="text-jp-green shrink-0" />
+                    <MapPin size={13} className="shrink-0" style={{ color: categoryInk(current.type) }} />
                     <span className="truncate">{current.address}</span>
                   </span>
                 )}
@@ -483,7 +483,7 @@ export default function ItinerarySection({ rows, dayDate }) {
                     <div className="flex items-center gap-2 text-xs text-stone-400 font-serif mt-auto pt-2 min-w-0">
                       {row.address && (
                         <>
-                          <MapPin size={13} className="shrink-0 text-stone-400" />
+                          <MapPin size={13} className="shrink-0" style={{ color: categoryInk(row.type) }} />
                           <span className="truncate text-muted opacity-80 flex-1 min-w-0">
                             {row.address}
                           </span>
