@@ -193,7 +193,7 @@ function HotelTab({ accommodation }) {
 
               {h.address && (
                 <div className="flex items-center gap-1.5 text-sm text-muted font-serif">
-                  <MapPin size={13} className="text-jp-green shrink-0" />
+                  <MapPin size={13} className="shrink-0" style={{ color: categoryInk('hotel') }} />
                   <span className="min-w-0">{h.address}</span>
                 </div>
               )}
