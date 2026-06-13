@@ -21,7 +21,7 @@ Vite + React SPA，以 Google Sheets 作為 CMS，部署於 GitHub Pages。
 ```
 Google Sheets (Public)
 ├── Index Sheet        → 所有行程清單
-└── 每趟行程 Sheet     → flights / itinerary / accommodation / shopping / checklist / food / days / prepare
+└── 每趟行程 Sheet     → days / flights / prepare / accommodation / checklist / itinerary / shopping / food
 
          ↓ fetch CSV at runtime
          ↓   - module-level Map 快取（同 session 不重複 fetch）
@@ -212,6 +212,8 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 `name_en` 為空時自動從 `slug` 推算（例：`tokyo-hokkaido-2026-03` → `TOKYO HOKKAIDO TRIP`）。
 
 ### 每趟行程 Sheet（8 個 tab）
+
+> **新 sheet 的 tab 標準順序**（建立新行程 sheet 時一律照這個順序建 tab）：`days → flights → prepare → accommodation → checklist → itinerary → shopping → food`。Tab 順序**不影響程式**（app 一律以 tab **名稱**（gviz `sheet=<tab>`）抓資料），純粹是 Google Sheets UI 的編排慣例；`notion-trip-import` skill 會自動照此順序建立。
 
 **`prepare` tab**（行前準備，資料驅動）
 
