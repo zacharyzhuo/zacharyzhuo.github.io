@@ -2,7 +2,9 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { ShoppingBag, Clock, Navigation } from 'lucide-react'
 import EmptyState from '../ui/EmptyState.jsx'
 import SegmentedControl from '../ui/SegmentedControl.jsx'
-import { categoryChipStyle } from '../../lib/categories.js'
+import { categoryInk } from '../../lib/categories.js'
+
+const SHOP_INK = categoryInk('shopping')
 
 /**
  * Flat CSV rows → grouped display units.
@@ -57,114 +59,129 @@ function groupItems(rows) {
   return groups
 }
 
-/** 樓層索引 tag（購物色玻璃 chip）：有樓層顯示樓層，無樓層顯示一顆色點，min-width 維持對齊。 */
-function FloorTag({ floor }) {
+/** Google Maps 導航小鈕（玻璃圓鈕）。 */
+function NavButton({ name, link }) {
+  if (!link) return null
+  return (
+    <a
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="p-2.5 frosted-glass-button rounded-full text-secondary transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
+      onClick={e => e.stopPropagation()}
+      aria-label={`查看 ${name} 的位置`}
+    >
+      <Navigation size={15} />
+    </a>
+  )
+}
+
+/**
+ * 店家 meta 行：樓層（購物色，bold）· 營業時間（clock）。
+ * 樓層併入 meta（不再當左側固定欄），所以再長都只是這行文字、不撐版。
+ */
+function ShopMeta({ floor, hours }) {
+  if (!floor && !hours) return null
+  return (
+    <div className="flex items-center gap-1.5 text-sm text-muted font-serif mt-1 tabular-nums flex-wrap">
+      {floor && <span className="font-bold" style={{ color: SHOP_INK }}>{floor}</span>}
+      {floor && hours && <span className="opacity-40">·</span>}
+      {hours && (
+        <span className="flex items-center gap-1.5">
+          <Clock size={13} className="shrink-0" /> {hours}
+        </span>
+      )}
+    </div>
+  )
+}
+
+/**
+ * 購物色標記點（固定 8px，永不撐版）：內嵌在標題行（與美食卡同構，items-center 對齊）。
+ *  - solid（地點：建築標頭 / 獨棟店）= 實心
+ *  - ring（棟內店家）= 空心環，保留「建築 → 店家」階層
+ */
+function Marker({ variant = 'solid' }) {
   return (
     <span
-      className="shrink-0 min-w-[2.25rem] flex items-center justify-center px-2 py-1 rounded-lg border backdrop-blur-sm font-serif font-bold text-sm tabular-nums leading-none"
-      style={categoryChipStyle('shopping')}
-    >
-      {floor || <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60" />}
-    </span>
+      className={`w-2 h-2 rounded-full shrink-0 ${variant === 'ring' ? 'border-[1.5px]' : ''}`}
+      style={variant === 'ring' ? { borderColor: SHOP_INK } : { backgroundColor: SHOP_INK }}
+      aria-hidden="true"
+    />
+  )
+}
+
+/**
+ * 單一店家列：版型與 FoodSection 卡片一致 —— 標題（色點內嵌）→ meta（樓層·時間）
+ * → 描述（靠左緣、不縮排）。
+ *  - 預設（地點 / 獨棟店）：text-lg。
+ *  - compact（棟內店家）：標題降為 text-base、描述 text-sm，整體小一級表「附屬」。
+ */
+function ShopRow({ name, floor, hours, description, link, marker = 'solid', compact = false }) {
+  return (
+    <div className="flex-1 min-w-0">
+      <div className={`flex justify-between items-start ${compact ? 'mb-1.5' : 'mb-2'}`}>
+        <div className="min-w-0">
+          <h4
+            className={`font-bold text-jp-text font-serif flex items-center gap-2 ${
+              compact ? 'text-base leading-snug' : 'text-lg leading-tight'
+            }`}
+          >
+            <Marker variant={marker} />
+            {name}
+          </h4>
+          <ShopMeta floor={floor} hours={hours} />
+        </div>
+        <NavButton name={name} link={link} />
+      </div>
+      {description && (
+        <p className={`text-secondary leading-relaxed font-serif ${compact ? 'text-[13px]' : 'text-sm'}`}>
+          {description}
+        </p>
+      )}
+    </div>
   )
 }
 
 function StandaloneCard({ item }) {
   return (
-    <div className="glass-card relative rounded-xl px-4 py-3 overflow-hidden">
-      <div className="flex items-center gap-3">
-        {/* 樓層索引 tag 當左錨點（取代原本重複的袋子 icon） */}
-        <FloorTag floor={item.floor} />
-
-        <div className="flex-1 min-w-0">
-          <p className="font-bold text-jp-text font-serif text-base leading-snug">{item.name}</p>
-          {item.description && (
-            <p className="text-sm text-secondary leading-relaxed font-serif mt-1">{item.description}</p>
-          )}
-          {item.hours && (
-            <div className="flex items-center gap-1.5 text-sm text-secondary font-serif mt-1 tabular-nums">
-              <Clock size={13} className="shrink-0" /> {item.hours}
-            </div>
-          )}
-        </div>
-
-        {item.link && (
-          <a
-            href={item.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2.5 frosted-glass-button rounded-full text-secondary transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
-            onClick={e => e.stopPropagation()}
-            aria-label={`查看 ${item.name} 的位置`}
-          >
-            <Navigation size={15} />
-          </a>
-        )}
-      </div>
+    <div className="glass-card relative rounded-xl p-5 overflow-hidden">
+      <ShopRow
+        name={item.name}
+        floor={item.floor}
+        hours={item.hours}
+        description={item.description}
+        link={item.link}
+      />
     </div>
   )
 }
 
 function BuildingCard({ building }) {
   return (
-    <div className="glass-card relative rounded-xl px-4 py-3 overflow-hidden">
-      {/* Building header（無 icon，識別色交給下方樓層 tag） */}
-      <div className="flex justify-between items-center gap-2">
-        <div className="min-w-0">
-          <h3 className="font-bold text-jp-text font-serif text-base leading-snug">{building.name}</h3>
-          {building.description && (
-            <p className="text-sm text-secondary leading-relaxed font-serif mt-1">{building.description}</p>
-          )}
-          {building.hours && (
-            <span className="text-sm text-secondary font-serif mt-1 flex tabular-nums items-center gap-1.5">
-              <Clock size={13} className="shrink-0" /> {building.hours}
-            </span>
-          )}
-        </div>
-        {building.link && (
-          <a
-            href={building.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2.5 frosted-glass-button rounded-full text-secondary transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
-            onClick={e => e.stopPropagation()}
-            aria-label={`查看 ${building.name} 的位置`}
-          >
-            <Navigation size={15} />
-          </a>
-        )}
-      </div>
+    <div className="glass-card relative rounded-xl p-5 overflow-hidden">
+      {/* Building header（建築標頭＝一個地點，實心點；店家在下方用空心環） */}
+      <ShopRow
+        name={building.name}
+        hours={building.hours}
+        description={building.description}
+        link={building.link}
+        marker="solid"
+      />
 
-      {/* 子店：樓層 tag 起頭的清單 */}
+      {/* 子店：左側導引線 + 縮排，像從建築垂下的分枝；小一級字 + 空心環表「附屬」 */}
       {building.shops.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-hairline space-y-2.5">
+        <div className="mt-4 pl-4 border-l border-hairline space-y-4">
           {building.shops.map((shop, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <FloorTag floor={shop.floor} />
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm text-stone-700 font-serif leading-snug">{shop.name}</p>
-                {shop.description && (
-                  <p className="text-sm text-secondary leading-relaxed font-serif mt-0.5">{shop.description}</p>
-                )}
-                {shop.hours && (
-                  <div className="flex items-center gap-1.5 text-sm text-secondary font-serif mt-1 tabular-nums">
-                    <Clock size={13} className="shrink-0" /> {shop.hours}
-                  </div>
-                )}
-              </div>
-              {shop.link && (
-                <a
-                  href={shop.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2.5 frosted-glass-button rounded-full text-secondary touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
-                  onClick={e => e.stopPropagation()}
-                  aria-label={`查看 ${shop.name} 的位置`}
-                >
-                  <Navigation size={15} />
-                </a>
-              )}
-            </div>
+            <ShopRow
+              key={i}
+              name={shop.name}
+              floor={shop.floor}
+              hours={shop.hours}
+              description={shop.description}
+              link={shop.link}
+              marker="ring"
+              compact
+            />
           ))}
         </div>
       )}
@@ -211,7 +228,7 @@ export default function ShoppingSection({ rows }) {
     <div className="flex flex-col relative h-full">
       <div
         ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-hide px-8 pb-24 space-y-3 pt-2"
+        className="flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-hide px-8 pb-24 space-y-4 pt-2"
       >
         <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">逛街清單</h2>
         {grouped.length === 0 ? (
