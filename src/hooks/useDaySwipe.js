@@ -172,6 +172,10 @@ export function useDaySwipe({ days, activeDay, setActiveDay, enabled }) {
       onTouchStart,
       onTouchEnd,
       onTouchCancel: onTouchEnd,
+      // 垂直捲動交給原生（頁面照常捲），水平手勢保留給 swipe。
+      // 沒有這個，iOS 在可捲動頁面上會先把手勢仲裁成垂直捲動，
+      // 之後 touchmove 的 preventDefault 被忽略 → 內容多的天數左右滑失效。
+      style: { touchAction: 'pan-y' },
     },
     carouselRef,
     carouselStyle: {
