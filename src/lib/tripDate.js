@@ -172,6 +172,50 @@ export function getTripStatus(dates) {
 }
 
 /**
+ * 把 trips 分層成首頁版面用的兩區：
+ *   - nowNext：進行中 + 即將出發（active 排最前，再按出發日近→遠）
+ *   - pastByYear：已結束，按「出發年份」分組（年份新→舊；組內按結束日新→舊）
+ *
+ * 個人旅行記錄成長慢（一年幾趟），不需要重型篩選；分層 + 年份收納就夠。
+ *
+ * @param {Array<{ slug: string, dates: string }>} trips
+ * @returns {{ nowNext: Array, pastByYear: Array<{ year: string, trips: Array }> }}
+ */
+export function groupTrips(trips) {
+  if (!trips || trips.length === 0) return { nowNext: [], pastByYear: [] }
+
+  const enriched = trips.map(t => {
+    const { start, end } = parseTripDates(t.dates)
+    const { status } = getTripStatus(t.dates)
+    return { trip: t, start, end, status }
+  })
+
+  const nowNext = enriched
+    .filter(e => e.status === 'active' || e.status === 'upcoming')
+    .sort((a, b) => {
+      if (a.status !== b.status) return a.status === 'active' ? -1 : 1
+      return a.start.localeCompare(b.start) // 'YYYY/MM/DD' 字典序 = 日期序
+    })
+    .map(e => e.trip)
+
+  const past = enriched
+    .filter(e => e.status === 'past')
+    .sort((a, b) => b.end.localeCompare(a.end)) // 最近結束的在前
+
+  const byYear = new Map()
+  for (const e of past) {
+    const year = e.start.slice(0, 4) || '—'
+    if (!byYear.has(year)) byYear.set(year, [])
+    byYear.get(year).push(e.trip)
+  }
+  const pastByYear = [...byYear.entries()]
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([year, trips]) => ({ year, trips }))
+
+  return { nowNext, pastByYear }
+}
+
+/**
  * 從所有 trips 中挑「最相關」的一趟，給 PWA 啟動跳轉用。
  *   1. 今天落在某 trip 的日期區間 → 該 trip（旅行中）
  *   2. 否則挑「最近即將出發」的 trip（start > today）

@@ -1,15 +1,19 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { RefreshCw } from 'lucide-react'
 import { useTrips } from '../hooks/useTrips.js'
 import { usePullToRefresh } from '../hooks/usePullToRefresh.js'
 import { usePageMeta } from '../hooks/usePageMeta.js'
-import { pickActiveTrip } from '../lib/tripDate.js'
+import { pickActiveTrip, groupTrips } from '../lib/tripDate.js'
+import { categoryInk } from '../lib/categories.js'
 import TripCard from '../components/home/TripCard.jsx'
 import { HomeCardsSkeleton } from '../components/ui/Skeletons.jsx'
 import ErrorState from '../components/ui/ErrorState.jsx'
 
 const LAST_TRIP_KEY = 'lastTripSlug'
+
+// 過往索引條左側 accent 色：輪替分類色，讓年份列表有層次（純裝飾）
+const ACCENT_CYCLE = ['attraction', 'shopping', 'food', 'hotel', 'transport']
 
 export default function HomePage() {
   const { trips, loading, error, refresh } = useTrips()
@@ -19,6 +23,9 @@ export default function HomePage() {
   const redirectedRef = useRef(false)
 
   usePageMeta({ title: '行程列表' })
+
+  const { nowNext, pastByYear } = useMemo(() => groupTrips(trips), [trips])
+  const isEmpty = nowNext.length === 0 && pastByYear.length === 0
 
   // PWA / 直接訪問首頁時，根據「最後造訪」或「即將出發」的行程自動跳轉。
   // 帶 ?home=1 的進入點（從 trip page 主動返回）會跳過這個邏輯。
@@ -90,11 +97,43 @@ export default function HomePage() {
         )}
 
         {!loading && !error && (
-          <div className="space-y-4">
-            {trips.map(trip => (
-              <TripCard key={trip.slug} trip={trip} />
+          <div className="space-y-8">
+            {nowNext.length > 0 && (
+              <section>
+                <div className="flex items-center gap-2.5 mb-3.5 px-1">
+                  <span className="text-2xs tracking-[0.3em] uppercase text-jp-green font-serif font-bold">Now &amp; Next</span>
+                  <span className="flex-1 h-px bg-jp-green/25" />
+                </div>
+                <div className="space-y-4">
+                  {nowNext.map(trip => (
+                    <TripCard key={trip.slug} trip={trip} variant="feature" />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {pastByYear.map((group, gi) => (
+              <section key={group.year}>
+                <div className="flex items-center gap-3 mb-3 px-1">
+                  <span className="text-2xl font-serif font-bold text-jp-text tracking-wide leading-none">{group.year}</span>
+                  <span className="text-2xs tracking-[0.3em] uppercase text-muted font-serif font-bold">Past</span>
+                  <span className="flex-1 h-px bg-hairline" />
+                  <span className="text-xs text-muted font-serif">{group.trips.length} 趟</span>
+                </div>
+                <div className="space-y-3">
+                  {group.trips.map((trip, i) => (
+                    <TripCard
+                      key={trip.slug}
+                      trip={trip}
+                      variant="index"
+                      accentColor={categoryInk(ACCENT_CYCLE[(gi + i) % ACCENT_CYCLE.length])}
+                    />
+                  ))}
+                </div>
+              </section>
             ))}
-            {trips.length === 0 && (
+
+            {isEmpty && (
               <p className="text-center text-muted font-serif text-sm mt-12">尚無行程</p>
             )}
           </div>

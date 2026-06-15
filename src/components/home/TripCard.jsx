@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Calendar } from 'lucide-react'
+import { Calendar } from 'lucide-react'
 import { prefetchSheet } from '../../hooks/useSheetData.js'
 import { useCancelableTap } from '../../hooks/useCancelableTap.js'
 import { getTripStatus } from '../../lib/tripDate.js'
@@ -22,7 +22,11 @@ function prefetchTrip(sheetId) {
   scheduleIdle(() => TERTIARY_TABS.forEach(tab => prefetchSheet(sheetId, tab)))
 }
 
-function StatusPill({ status, daysToStart, daysFromEnd }) {
+// 壓在圖上的文字：靠多層陰影撐可讀性（同 DayBanner 手法），不靠玻璃浮層
+const TITLE_SHADOW = '0 1px 2px rgba(0,0,0,0.7), 0 2px 12px rgba(0,0,0,0.55)'
+const DATE_SHADOW = '0 1px 3px rgba(0,0,0,0.8), 0 1px 8px rgba(0,0,0,0.5)'
+
+function StatusPill({ status, daysToStart }) {
   if (status === 'active') {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-jp-red/95 text-white text-2xs font-serif font-bold uppercase tracking-widest shadow-sm">
@@ -46,84 +50,103 @@ function StatusPill({ status, daysToStart, daysFromEnd }) {
 }
 
 /**
+ * 首頁行程卡。
+ *   - feature：雜誌封面大卡（文字壓圖 + gradient scrim），給「進行中 / 即將出發」
+ *   - index：水平索引條（小縮圖 + 文字），給「過往」按年份收納
+ *
  * @param {{
  *   trip: { slug: string, name: string, dates: string, cover_image_url: string, sheet_id: string },
- *   variant?: 'hero' | 'normal' | 'compact',
+ *   variant?: 'feature' | 'index',
+ *   accentColor?: string,
  * }} props
  */
-export default function TripCard({ trip, variant = 'normal' }) {
+export default function TripCard({ trip, variant = 'feature', accentColor }) {
   const navigate = useNavigate()
   const tap = useCancelableTap()
-  const { status, daysToStart, daysFromEnd } = getTripStatus(trip.dates)
+  const { status, daysToStart } = getTripStatus(trip.dates)
 
-  // active 一律 hero；upcoming（30 天內）也用 hero；其他維持原狀
-  const effectiveVariant = variant === 'compact'
-    ? 'compact'
-    : status === 'active' || (status === 'upcoming' && daysToStart <= 30)
-      ? 'hero'
-      : status === 'past'
-        ? 'compact'
-        : 'normal'
+  const handlers = {
+    onPointerDown: tap.onPointerDown,
+    onPointerUp: tap.onPointerUp,
+    onClick: tap.guard(() => navigate(`/trip/${trip.slug}`)),
+    onMouseEnter: () => prefetchTrip(trip.sheet_id),
+    onTouchStart: () => prefetchTrip(trip.sheet_id),
+    'aria-label': `查看 ${trip.name} 行程`,
+  }
 
-  const heightClass = effectiveVariant === 'hero' ? 'h-72' : effectiveVariant === 'compact' ? 'h-44' : 'h-56'
-  const cardOpacity = effectiveVariant === 'compact' ? 'opacity-85' : ''
+  // ── 索引條（過往）──
+  if (variant === 'index') {
+    return (
+      <button
+        {...handlers}
+        className="w-full relative flex items-stretch rounded-2xl overflow-hidden bg-washi shadow-[0_4px_12px_rgba(0,0,0,0.07)] press-springy touch-manipulation opacity-90"
+      >
+        <span className="w-1 flex-shrink-0" style={{ background: status === 'active' ? '#B93632' : accentColor }} />
+        <span className="w-[104px] flex-shrink-0 overflow-hidden bg-stone-200">
+          {trip.cover_image_url ? (
+            <img
+              src={trip.cover_image_url}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover"
+              style={{ filter: 'saturate(0.9)' }}
+            />
+          ) : (
+            <span className="block w-full h-full bg-stone-200" />
+          )}
+        </span>
+        <span className="flex-1 min-w-0 px-4 py-3.5 flex flex-col justify-center text-left">
+          <span className="flex items-center justify-between gap-2 mb-1.5">
+            <span className="font-serif font-bold text-jp-text text-base truncate">{trip.name}</span>
+            <StatusPill status={status} daysToStart={daysToStart} />
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-muted font-serif tabular-nums">
+            <Calendar size={12} className="flex-shrink-0" />
+            {trip.dates}
+          </span>
+        </span>
+      </button>
+    )
+  }
 
+  // ── 雜誌封面大卡（進行中 / 即將出發）──
   return (
     <button
-      onPointerDown={tap.onPointerDown}
-      onPointerUp={tap.onPointerUp}
-      onClick={tap.guard(() => navigate(`/trip/${trip.slug}`))}
-      onMouseEnter={() => prefetchTrip(trip.sheet_id)}
-      onTouchStart={() => prefetchTrip(trip.sheet_id)}
-      className={`w-full relative rounded-2xl overflow-hidden touch-manipulation group bg-stone-200 press-springy ${heightClass} ${cardOpacity}`}
-      aria-label={`查看 ${trip.name} 行程`}
+      {...handlers}
+      className={`w-full relative block rounded-2xl overflow-hidden bg-stone-200 press-springy touch-manipulation group aspect-[3/2] ${status === 'active' ? 'trip-halo' : ''}`}
     >
-      {/* Cover image */}
       {trip.cover_image_url ? (
         <img
           src={trip.cover_image_url}
           alt={trip.name}
           width={800}
-          height={effectiveVariant === 'hero' ? 600 : 450}
+          height={534}
           loading="lazy"
           decoding="async"
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          style={status === 'past' ? { filter: 'saturate(0.85)' } : undefined}
         />
       ) : (
         <div className="absolute inset-0 bg-stone-200" />
       )}
 
-      {/* Active trip：加一層紅色微光暈，視覺上「跳出來」 */}
-      {status === 'active' && (
-        <div className="absolute inset-0 ring-2 ring-jp-red/30 rounded-2xl pointer-events-none" />
-      )}
+      {/* gradient scrim：底部窄而濃，鎖住文字、保留中上段清透 */}
+      <div className="absolute inset-0 trip-scrim pointer-events-none" />
 
-      {/* Status pill 浮在右上角 */}
+      {/* Status pill 浮右上 */}
       <div className="absolute top-3 right-3 z-10">
-        <StatusPill status={status} daysToStart={daysToStart} daysFromEnd={daysFromEnd} />
+        <StatusPill status={status} daysToStart={daysToStart} />
       </div>
 
-      {/* Glass info overlay — bottom */}
-      <div className="absolute inset-x-0 bottom-0 p-4">
-        <div
-          className="rounded-xl p-4 text-left"
-          style={{
-            background: 'rgba(251,250,245,0.55)',
-            backdropFilter: 'blur(12px) saturate(160%)',
-            WebkitBackdropFilter: 'blur(12px) saturate(160%)',
-            border: '1px solid rgba(255,255,255,0.35)',
-          }}
-        >
-          <div className="flex items-center gap-2 mb-1">
-            <MapPin size={14} className="text-jp-green flex-shrink-0" />
-            <h3 className={`font-serif font-bold text-stone-900 leading-tight ${effectiveVariant === 'hero' ? 'text-xl' : 'text-lg'}`}>
-              {trip.name}
-            </h3>
-          </div>
-          <div className="flex items-center gap-2">
-            <Calendar size={12} className="text-stone-700 flex-shrink-0" />
-            <span className="text-xs text-stone-700 font-serif tabular-nums">{trip.dates}</span>
-          </div>
+      {/* 文字壓底，無 block 浮層 */}
+      <div className="absolute inset-x-0 bottom-0 px-5 pb-4 text-left">
+        <h3 className="font-serif font-bold text-white text-xl leading-tight" style={{ textShadow: TITLE_SHADOW }}>
+          {trip.name}
+        </h3>
+        <div className="flex items-center gap-1.5 mt-1 text-white/95 text-sm font-serif tabular-nums" style={{ textShadow: DATE_SHADOW }}>
+          <Calendar size={13} className="flex-shrink-0" />
+          {trip.dates}
         </div>
       </div>
     </button>

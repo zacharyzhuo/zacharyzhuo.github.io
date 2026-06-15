@@ -75,14 +75,41 @@ export function SectionSkeleton({ bottomBar = true }) {
   )
 }
 
-/** 首頁卡片清單骨架（不含 header，直接塞進既有 main） */
+/** 首頁卡片清單骨架（不含 header，直接塞進既有 main）。
+    鏡射新版面：Now & Next 大卡 + 年份分組索引條。 */
 export function HomeCardsSkeleton() {
   return (
-    <div className="space-y-4" role="status" aria-busy="true">
+    <div className="space-y-8" role="status" aria-busy="true">
       <span className="sr-only">載入行程列表中…</span>
-      <Bar className="w-full h-72 rounded-2xl" />
-      <Bar className="w-full h-56 rounded-2xl" />
-      <Bar className="w-full h-56 rounded-2xl" />
+
+      {/* Now & Next：區段標題 + 雜誌封面大卡 */}
+      <section>
+        <div className="flex items-center gap-2.5 mb-3.5 px-1">
+          <Bar className="w-20 h-2.5 rounded" />
+          <span className="flex-1 h-px bg-hairline" />
+        </div>
+        <Bar className="w-full aspect-[3/2] rounded-2xl" />
+      </section>
+
+      {/* 年份分組：年份標題 + 索引條 */}
+      <section>
+        <div className="flex items-center gap-3 mb-3 px-1">
+          <Bar className="w-12 h-6 rounded-md" />
+          <Bar className="w-10 h-2.5 rounded" />
+          <span className="flex-1 h-px bg-hairline" />
+        </div>
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-stretch rounded-2xl overflow-hidden bg-stone-200/40 h-[76px]">
+              <Bar className="w-[104px] h-full" />
+              <div className="flex-1 px-4 py-3.5 flex flex-col justify-center gap-2">
+                <Bar className="w-32 h-3.5 rounded" />
+                <Bar className="w-40 h-3 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   )
 }

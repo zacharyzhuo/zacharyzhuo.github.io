@@ -7,6 +7,7 @@ import {
   pickInitialDay,
   pickActiveTrip,
   formatToday,
+  groupTrips,
 } from '../../lib/tripDate.js'
 
 describe('parseTripDates', () => {
@@ -240,5 +241,44 @@ describe('formatToday', () => {
 
   it('returns padded YYYY/MM/DD', () => {
     expect(formatToday()).toBe('2026/06/04')
+  })
+})
+
+describe('groupTrips', () => {
+  function stubToday(yyyymmdd) {
+    const [y, m, d] = yyyymmdd.split('/').map(Number)
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(y, m - 1, d))
+  }
+  afterAll(() => {
+    vi.useRealTimers()
+  })
+
+  const trips = [
+    { slug: 'past-2025-a', dates: '2025/11/02 - 11/07' },
+    { slug: 'active', dates: '2026/06/12 - 06/18' },
+    { slug: 'past-2026', dates: '2026/03/05 - 03/12' },
+    { slug: 'upcoming-far', dates: '2026/09/01 - 09/05' },
+    { slug: 'upcoming-near', dates: '2026/08/11 - 08/20' },
+    { slug: 'past-2025-b', dates: '2025/04/04 - 04/06' },
+  ]
+
+  it('nowNext: active first, then upcoming by start ascending', () => {
+    stubToday('2026/06/15')
+    const { nowNext } = groupTrips(trips)
+    expect(nowNext.map(t => t.slug)).toEqual(['active', 'upcoming-near', 'upcoming-far'])
+  })
+
+  it('pastByYear: years descending, trips within a year by end descending', () => {
+    stubToday('2026/06/15')
+    const { pastByYear } = groupTrips(trips)
+    expect(pastByYear.map(g => g.year)).toEqual(['2026', '2025'])
+    expect(pastByYear[0].trips.map(t => t.slug)).toEqual(['past-2026'])
+    expect(pastByYear[1].trips.map(t => t.slug)).toEqual(['past-2025-a', 'past-2025-b'])
+  })
+
+  it('returns empty structure for empty / nullish input', () => {
+    expect(groupTrips([])).toEqual({ nowNext: [], pastByYear: [] })
+    expect(groupTrips(null)).toEqual({ nowNext: [], pastByYear: [] })
   })
 })
