@@ -149,6 +149,13 @@ export default function TripPage() {
     initialDayPickedRef.current = true
   }, [days])
 
+  // 切天 = 換到新畫面，捲回頂端從該天 banner 看起，不繼承上一天的捲動位置。
+  // 涵蓋 swipe 與 DayNav 兩種切天（皆最終改 activeDay）；swipe 的歸位正好在
+  // activeDay 改變那刻發生，舊天滑走、新天從頂端出現，instant 回頂最連貫。
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [activeDay])
+
   // 三欄輪播：prev / current / next 的 metadata + itinerary
   const activeDayIdx = useMemo(() => days.findIndex(d => d.day === activeDay), [days, activeDay])
   const prevDayObj = activeDayIdx > 0 ? days[activeDayIdx - 1] : null
