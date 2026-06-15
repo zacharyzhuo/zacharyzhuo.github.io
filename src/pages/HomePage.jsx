@@ -5,15 +5,11 @@ import { useTrips } from '../hooks/useTrips.js'
 import { usePullToRefresh } from '../hooks/usePullToRefresh.js'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 import { pickActiveTrip, groupTrips } from '../lib/tripDate.js'
-import { categoryInk } from '../lib/categories.js'
 import TripCard from '../components/home/TripCard.jsx'
 import { HomeCardsSkeleton } from '../components/ui/Skeletons.jsx'
 import ErrorState from '../components/ui/ErrorState.jsx'
 
 const LAST_TRIP_KEY = 'lastTripSlug'
-
-// 過往索引條左側 accent 色：輪替分類色，讓年份列表有層次（純裝飾）
-const ACCENT_CYCLE = ['attraction', 'shopping', 'food', 'hotel', 'transport']
 
 export default function HomePage() {
   const { trips, loading, error, refresh } = useTrips()
@@ -77,10 +73,10 @@ export default function HomePage() {
         style={{ transform: `translateY(${pullY}px)` }}
         className={pullY === 0 ? 'transition-transform duration-200 ease-out' : ''}
       >
-      {/* Header */}
+      {/* Header：與 trip page 一致 — 英文 caps eyebrow 在上、中文大標在下 */}
       <header className="px-6 pt-8 pb-6">
-        <h1 className="text-3xl font-serif font-bold text-jp-text">Trip Diaries</h1>
-        <p className="text-sm text-muted font-serif mt-1">旅行記錄</p>
+        <p className="text-xs tracking-[0.25em] uppercase text-stone-400 font-serif font-medium mb-2">Trip Diaries</p>
+        <h1 className="text-3xl font-serif font-bold text-jp-text tracking-[0.04em]">旅行記錄</h1>
       </header>
 
       {/* Content */}
@@ -112,7 +108,7 @@ export default function HomePage() {
               </section>
             )}
 
-            {pastByYear.map((group, gi) => (
+            {pastByYear.map((group) => (
               <section key={group.year}>
                 <div className="flex items-center gap-3 mb-3 px-1">
                   <span className="text-2xl font-serif font-bold text-jp-text tracking-wide leading-none">{group.year}</span>
@@ -121,13 +117,8 @@ export default function HomePage() {
                   <span className="text-xs text-muted font-serif">{group.trips.length} 趟</span>
                 </div>
                 <div className="space-y-3">
-                  {group.trips.map((trip, i) => (
-                    <TripCard
-                      key={trip.slug}
-                      trip={trip}
-                      variant="index"
-                      accentColor={categoryInk(ACCENT_CYCLE[(gi + i) % ACCENT_CYCLE.length])}
-                    />
+                  {group.trips.map((trip) => (
+                    <TripCard key={trip.slug} trip={trip} variant="index" />
                   ))}
                 </div>
               </section>

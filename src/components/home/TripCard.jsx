@@ -57,10 +57,9 @@ function StatusPill({ status, daysToStart }) {
  * @param {{
  *   trip: { slug: string, name: string, dates: string, cover_image_url: string, sheet_id: string },
  *   variant?: 'feature' | 'index',
- *   accentColor?: string,
  * }} props
  */
-export default function TripCard({ trip, variant = 'feature', accentColor }) {
+export default function TripCard({ trip, variant = 'feature' }) {
   const navigate = useNavigate()
   const tap = useCancelableTap()
   const { status, daysToStart } = getTripStatus(trip.dates)
@@ -81,7 +80,6 @@ export default function TripCard({ trip, variant = 'feature', accentColor }) {
         {...handlers}
         className="w-full relative flex items-stretch rounded-2xl overflow-hidden bg-washi shadow-[0_4px_12px_rgba(0,0,0,0.07)] press-springy touch-manipulation opacity-90"
       >
-        <span className="w-1 flex-shrink-0" style={{ background: status === 'active' ? '#B93632' : accentColor }} />
         <span className="w-[104px] flex-shrink-0 overflow-hidden bg-stone-200">
           {trip.cover_image_url ? (
             <img
