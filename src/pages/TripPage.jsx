@@ -42,7 +42,7 @@ function getYearMonth(dates) {
 }
 
 function slugToEnglish(slug) {
-  const base = slug.replace(/-\d{4}-\d{2}$/, '').replace(/-/g, ' ')
+  const base = slug.replace(/^\d{4}-\d{2}-/, '').replace(/-/g, ' ')
   return base.toUpperCase() + ' TRIP'
 }
 

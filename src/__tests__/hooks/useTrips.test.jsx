@@ -10,7 +10,7 @@ vi.stubEnv('VITE_INDEX_SHEET_ID', 'index-sheet-id')
 const INDEX_ID = 'index-sheet-id'
 const BASE_URL = `https://docs.google.com/spreadsheets/d/${INDEX_ID}/gviz/tq`
 
-const CSV_WITH_DRAFT = `"slug","name","dates","cover_image_url","sheet_id","status"\n"fukuoka-2026-01","福岡","2026/01/10 - 01/14","https://img.example.com/fuk.jpg","sheet-fuk","published"\n"draft-trip","Draft","2026/06","","sheet-draft","draft"`
+const CSV_WITH_DRAFT = `"slug","name","dates","cover_image_url","sheet_id","status"\n"2026-01-fukuoka","福岡","2026/01/10 - 01/14","https://img.example.com/fuk.jpg","sheet-fuk","published"\n"draft-trip","Draft","2026/06","","sheet-draft","draft"`
 
 const server = setupServer(
   http.get(BASE_URL, () => HttpResponse.text(CSV_WITH_DRAFT))
@@ -29,7 +29,7 @@ describe('useTrips', () => {
     const { result } = renderHook(() => useTrips())
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.trips).toHaveLength(1)
-    expect(result.current.trips[0].slug).toBe('fukuoka-2026-01')
+    expect(result.current.trips[0].slug).toBe('2026-01-fukuoka')
   })
 
   it('sets error on fetch failure', async () => {

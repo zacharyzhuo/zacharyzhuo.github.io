@@ -93,7 +93,7 @@ src/
 │   ├── tripDate.js                  # 旅程日期相關純函式
 │   └── maps.js                      # 地圖純函式（座標解析 / bucket / haversine / 路線排序 / Maps URL / 去重合併）
 ├── trips/
-│   └── tokyo-hokkaido-2026-03/
+│   └── 2026-03-tokyo-hokkaido/
 │       └── extras.jsx               # 求婚彩蛋（僅此行程）
 └── App.jsx
 ```
@@ -148,7 +148,7 @@ DetailModal（高度內容驅動 `min-h-[40vh] max-h-[85vh]`，無法 absolute �
 const extras = await import(`../trips/${trip.slug}/extras.jsx`).catch(() => null)
 ```
 
-找不到時回傳 `null`，不影響通用流程。`tokyo-hokkaido-2026-03/extras.jsx` 匯出：
+找不到時回傳 `null`，不影響通用流程。`2026-03-tokyo-hokkaido/extras.jsx` 匯出：
 - `easterEggDay`：觸發彩蛋的天數（Day 4）
 - `HeartIcon`：愛心 icon 組件
 - `ProposalModal`：求婚彩蛋 modal
@@ -200,7 +200,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 | 欄位 | 說明 | 範例 |
 |---|---|---|
-| `slug` | 行程唯一識別碼（用於 URL） | `fukuoka-2026-01` |
+| `slug` | 行程唯一識別碼（用於 URL，格式 `yyyy-mm-destination`；Google Sheet 檔名須與 slug 完全一致） | `2026-01-fukuoka` |
 | `name` | 行程顯示名稱（中文） | `福岡` |
 | `name_en` | 英文副標題（選填，用於 header 與 sidebar） | `Fukuoka` |
 | `destination_country` | 目的地國家代碼（選填，目前程式未使用，保留欄位） | `JP` |
@@ -209,7 +209,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 | `sheet_id` | 該行程 Google Sheet 的 ID | `1BxiMVs...` |
 | `status` | `published` 或 `draft` | `published` |
 
-`name_en` 為空時自動從 `slug` 推算（例：`tokyo-hokkaido-2026-03` → `TOKYO HOKKAIDO TRIP`）。
+`name_en` 為空時自動從 `slug` 推算（去掉開頭的 `yyyy-mm-` 後轉大寫，例：`2026-03-tokyo-hokkaido` → `TOKYO HOKKAIDO TRIP`）。
 
 ### 每趟行程 Sheet（8 個 tab）
 
