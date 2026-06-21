@@ -213,7 +213,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 ### 每趟行程 Sheet（8 個 tab）
 
-> **新 sheet 的 tab 標準順序**（建立新行程 sheet 時一律照這個順序建 tab）：`days → flights → prepare → accommodation → checklist → itinerary → shopping → food`。Tab 順序**不影響程式**（app 一律以 tab **名稱**（gviz `sheet=<tab>`）抓資料），純粹是 Google Sheets UI 的編排慣例；`notion-trip-import` skill 會自動照此順序建立。
+> **新 sheet 的 tab 標準順序**（建立新行程 sheet 時一律照這個順序建 tab）：`days → flights → prepare → accommodation → checklist → itinerary → shopping → food`。Tab 順序**不影響程式**（app 一律以 tab **名稱**（gviz `sheet=<tab>`）抓資料），純粹是 Google Sheets UI 的編排慣例。
 
 **`prepare` tab**（行前準備，資料驅動）
 
@@ -320,6 +320,7 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 - 寫 cell 一律 `valueInputOption: USER_ENTERED`（**不要 `RAW`**）；URL 也才會變連結。
 - 要把某欄設成特定型別（`date`→DATE、`check_in`/`check_out`→TIME、`lat`/`lng`→NUMBER、`itinerary.time`→TEXT）：先用 `batchUpdate` 的 `repeatCell` 設該欄資料範圍 `userEnteredFormat.numberFormat`（`{type, pattern}`；TEXT 型別用 `{type:"TEXT"}`），再 `USER_ENTERED` 寫值。
 - **寫後必驗**：`curl 'https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:csv&sheet=<tab>'`，確認新列該填的欄**非空**、值正確。
+- **新建 sheet 必須先設「知道連結的任何人可檢視」**：gviz CSV 端點需要 sheet 對外可讀，否則回傳的是 Google 登入 HTML 而非 CSV，app 端會讀不到資料（症狀：sheet 有資料、網頁全空）。建立後執行 `gws drive permissions create --params "{\"fileId\":\"<ID>\"}" --json '{"role":"reader","type":"anyone"}'`。既有 trip sheet 已分享過則免重設。gviz 另有數分鐘快取，剛寫完可能讀到舊值，要即時驗證改用 `gws sheets +read`。
 - 偵測殘留 forced-text：`spreadsheets.get` 帶 `includeGridData` 看 `userEnteredValue` 是否為 `stringValue` 但內容是純數字/純日期（這種就是型別錯）。**例外**：`itinerary.time` 的 `stringValue` 純 `HH:MM` 是**刻意的全欄文字**，不是錯。
 - **要在某天中間插列**（保持時間順序，而非丟到表尾）：用 `batchUpdate` 的 `insertDimension`（指定分頁 `sheetId`、`ROWS`、`startIndex`/`endIndex`）插空列，再 `values.update` 寫入；itinerary **無 `day` 欄**，日由 `date` 推。
 
