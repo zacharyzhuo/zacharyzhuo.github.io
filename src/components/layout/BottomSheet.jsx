@@ -146,7 +146,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
         {/* 單一毛玻璃層：往下延伸超過停駐邊（-bottom-56），開啟 overshoot / 反向拉都由「同一塊」
             玻璃覆蓋 → 構造上無接縫（取代舊的 glass-overshoot-fill 貼塊）。內容層疊在上面、不帶 backdrop。
             tall 高度 = 切齊頁面 header icon（漢堡 / 地圖鈕）下緣：safe-area-top + pt-8(32px) + 鈕高 48px = safe + 5rem。 */}
-        <div className={`relative ${tall ? 'h-[calc(100dvh_-_env(safe-area-inset-top)_-_5rem)]' : 'h-[79vh]'}`}>
+        <div className={`glass-sheet-frame relative ${tall ? 'h-[calc(100dvh_-_env(safe-area-inset-top)_-_5rem)]' : 'h-[79vh]'}`}>
           <div aria-hidden="true" className="glass-bottom-sheet absolute inset-0 -bottom-56 pointer-events-none" />
           <div className="relative h-full flex flex-col">
 

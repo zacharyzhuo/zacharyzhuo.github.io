@@ -110,7 +110,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
       >
         {/* 單一毛玻璃層：往左延伸超過停駐邊（-left-40），開啟 overshoot / 反向拉由「同一塊」玻璃覆蓋 → 無接縫。
             內容層疊在上面、不帶 backdrop。 */}
-        <div className="relative h-full w-full">
+        <div className="glass-sidebar-frame relative h-full w-full">
           <div aria-hidden="true" className="glass-sidebar absolute inset-0 -left-40 pointer-events-none" />
           <div className="relative h-full w-full flex flex-col">
           <div className="p-6 flex justify-between items-center">

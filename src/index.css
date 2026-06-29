@@ -712,6 +712,11 @@ a:focus-visible,
   backdrop-filter: var(--glass-overlay);
   -webkit-backdrop-filter: var(--glass-overlay);
   border-radius: 2rem 2rem 0 0;
+  /* iOS WebKit：backdrop-filter 的 backing layer 是整塊矩形，不吃 border-radius+overflow:hidden 的圓角裁切，
+     圓角外的三角區會 fallback 成不透明黑（iPhone PWA 上地圖 sheet 上方圓角黑邊）。
+     clip-path 在合成器層裁切、會連 backdrop-filter backing 一起裁掉 → 消除黑角。
+     代價：clip-path 會裁掉 outset box-shadow，故開啟態的分離陰影改掛在外層 .glass-sheet-frame。 */
+  clip-path: inset(0 round 2rem 2rem 0 0);
   /* 邊只留頂部與左右 hairline，避免疊光 */
   border-top: 1px solid rgba(120, 113, 108, 0.08);
   border-left: 1px solid rgba(120, 113, 108, 0.08);
@@ -722,7 +727,9 @@ a:focus-visible,
      多個 sheet 殼疊加 = 底部「好幾層」陰影。改為僅 aria-hidden="false" 時生效。 */
 }
 
-[aria-hidden="false"] .glass-bottom-sheet {
+/* 分離陰影改掛外層 frame：glass-bottom-sheet 的 clip-path 會裁掉自身 outset 陰影，
+   而 frame 無 clip-path，向上的分離陰影才留得住。 */
+[aria-hidden="false"] .glass-sheet-frame {
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.05);
 }
 
@@ -750,15 +757,20 @@ a:focus-visible,
   backdrop-filter: var(--glass-overlay);
   -webkit-backdrop-filter: var(--glass-overlay);
   border-radius: 0 2rem 2rem 0;
+  /* 同 glass-bottom-sheet：iOS WebKit 的 backdrop-filter backing 不吃 border-radius+overflow:hidden 的圓角裁切，
+     圓角外的三角區會 fallback 成黑。clip-path 在合成器層裁切、連 backdrop-filter 一起裁 → 消除右側圓角黑邊。
+     round 順序為 top-left top-right bottom-right bottom-left（同 border-radius shorthand）。
+     代價：clip-path 會裁掉 outset box-shadow，故開啟態的分離陰影改掛在外層 .glass-sidebar-frame。 */
+  clip-path: inset(0 round 0 2rem 2rem 0);
   /* 右側只留一條極淺 hairline，避免疊出白光暈 */
   border-right: 1px solid rgba(120, 113, 108, 0.08);
   border-top: none;
   border-bottom: none;
   border-left: none;
-  /* 同 glass-bottom-sheet：向右外陰影只在開啟時掛上，避免 -translate-x-full 藏起時滲出左緣。 */
 }
 
-[aria-hidden="false"] .glass-sidebar {
+/* 分離陰影改掛外層 frame：glass-sidebar 的 clip-path 會裁掉自身 outset 陰影。 */
+[aria-hidden="false"] .glass-sidebar-frame {
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.04);
 }
 
