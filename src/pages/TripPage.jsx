@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Menu, Info, ClipboardList, ShoppingBag, Utensils, RefreshCw, Map as MapIcon } from 'lucide-react'
 import { useTrips } from '../hooks/useTrips.js'
 import { useSheetData } from '../hooks/useSheetData.js'
@@ -57,18 +57,37 @@ function getTripNameEn(trip, slug) {
 export default function TripPage() {
   const { slug } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { trips, loading: tripsLoading } = useTrips()
   const trip = trips.find(t => t.slug === slug)
 
   const [activeDay, setActiveDay] = useState(1)
   const initialDayPickedRef = useRef(false)
 
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [activeModal, setActiveModal] = useState(null)
+  // 疊層 UI（側欄 / 四個 modal / 地圖 / 行程詳情）不用各自 boolean state，改由 location.state.panel
+  // 單一值衍生，讓 Android 手勢 / 瀏覽器上一頁能正確關掉最上層，而非直接離開頁面（見 CLAUDE.md「瀏覽器歷史整合」）。
+  const panel = location.state?.panel ?? null
+  const sidebarOpen = panel === 'sidebar'
+  const activeModal = ['info', 'checklist', 'shopping', 'food'].includes(panel) ? panel : null
+  const mapOpen = panel === 'map'
+  const detailState = panel === 'detail' ? location.state : null
   const [extras, setExtras] = useState(null)
-  const [mapOpen, setMapOpen] = useState(false)
-  const openMap = useCallback(() => setMapOpen(true), [])
-  const closeMap = useCallback(() => setMapOpen(false), [])
+
+  // 開啟＝push 一筆新 history；關閉（X／ESC／backdrop／拖曳關閉）一律 navigate(-1)，
+  // 讓 UI 關閉動作與瀏覽器上一頁行為完全一致，不會兩者狀態打架。
+  const openPanel = useCallback((key) => {
+    navigate(`${location.pathname}${location.search}`, { state: { panel: key } })
+  }, [navigate, location.pathname, location.search])
+  const closePanel = useCallback(() => { navigate(-1) }, [navigate])
+  // Sidebar → 選單項目：replace 蓋掉 sidebar 那筆 entry，上一頁會直接回到頁面本身，
+  // 不會先經過「sidebar 開啟」的中繼態。
+  const replacePanel = useCallback((key) => {
+    navigate(`${location.pathname}${location.search}`, { state: { panel: key }, replace: true })
+  }, [navigate, location.pathname, location.search])
+  const openMap = useCallback(() => openPanel('map'), [openPanel])
+  const openDetail = useCallback((day, key) => {
+    navigate(`${location.pathname}${location.search}`, { state: { panel: 'detail', day, detailKey: key } })
+  }, [navigate, location.pathname, location.search])
 
   // 各 sheet tab data
   const flightsHook = useSheetData(trip?.sheet_id, 'flights')
@@ -142,12 +161,33 @@ export default function TripPage() {
   const normalizedDays = useNormalizedDays(daysData, trip?.dates)
   const days = useDays(normalizedItinerary, trip?.dates)
 
-  // 第一次拿到 itinerary 時自動跳「今天」對應的 day（user 手動切過後不再覆蓋）
+  // 第一次拿到 itinerary 時決定初始 day：優先讀 URL 的 ?d=（clamp 到有效範圍），
+  // 讀不到／超界才退回原本「今天」自動選 day 邏輯（user 手動切過後不再覆蓋）。
   useEffect(() => {
     if (initialDayPickedRef.current || days.length === 0) return
-    setActiveDay(pickInitialDay(days))
+    const dParam = Number(new URLSearchParams(location.search).get('d'))
+    let initial
+    if (Number.isInteger(dParam)) {
+      const clamped = Math.min(Math.max(dParam, 1), days.length)
+      initial = days.some(d => d.day === clamped) ? clamped : pickInitialDay(days)
+    } else {
+      initial = pickInitialDay(days)
+    }
+    setActiveDay(initial)
     initialDayPickedRef.current = true
-  }, [days])
+  }, [days, location.search])
+
+  // activeDay → ?d=<1-based>，replace 避免灑 history；只在真的改變時才寫入 URL
+  useEffect(() => {
+    if (!initialDayPickedRef.current) return
+    const params = new URLSearchParams(location.search)
+    if (params.get('d') === String(activeDay)) return
+    params.set('d', String(activeDay))
+    navigate({ pathname: location.pathname, search: params.toString() }, { replace: true, state: location.state })
+    // 只在 activeDay 改變時同步一次；day 變動時 sidebar/modal/地圖理應已關閉，
+    // 刻意不把 location/navigate 列進 deps，避免 URL 被我們自己的 replace 觸發二次同步
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeDay])
 
   // 切天 = 換到新畫面，捲回頂端從該天 banner 看起，不繼承上一天的捲動位置。
   // 涵蓋 swipe 與 DayNav 兩種切天（皆最終改 activeDay）；swipe 的歸位正好在
@@ -214,14 +254,14 @@ export default function TripPage() {
 
   if (!trip) {
     return (
-      <div className="bg-washi min-h-screen safe-area-inset flex flex-col items-center justify-center">
+      <main id="main" tabIndex={-1} className="bg-washi min-h-screen safe-area-inset flex flex-col items-center justify-center">
         <ErrorState
           title="找不到此行程"
           message="可能網址有誤或行程已下架"
           actionLabel="回行程列表"
           onAction={() => navigate('/?home=1')}
         />
-      </div>
+      </main>
     )
   }
 
@@ -247,11 +287,11 @@ export default function TripPage() {
         </div>
       )}
 
-      <div>
+      <main id="main" tabIndex={-1} className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="relative pt-8 pb-4 px-6 flex items-center justify-between">
           <button
-            onClick={() => setSidebarOpen(true)}
+            onClick={() => openPanel('sidebar')}
             className="p-3 frosted-glass-button rounded-full text-muted touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="開啟選單"
           >
@@ -304,7 +344,7 @@ export default function TripPage() {
             {/* Prev panel：absolute 放在左側 (right-full)，不參與高度 */}
             {prevDayObj && (
               <div className="absolute top-0 right-full w-full overflow-hidden">
-                <DayPanel dayObj={prevDayObj} dayMeta={prevDayMeta} itinerary={prevDayItinerary} tripName={trip.name} />
+                <DayPanel dayObj={prevDayObj} dayMeta={prevDayMeta} itinerary={prevDayItinerary} tripName={trip.name} detailState={detailState} onOpenDetail={openDetail} onCloseDetail={closePanel} />
               </div>
             )}
             {/* Current panel：normal flow，撐整個 carousel 高度 */}
@@ -314,29 +354,32 @@ export default function TripPage() {
               itinerary={dayItinerary}
               tripName={trip.name}
               isCurrent
+              detailState={detailState}
+              onOpenDetail={openDetail}
+              onCloseDetail={closePanel}
             />
             {/* Next panel：absolute 放在右側 (left-full)，不參與高度 */}
             {nextDayObj && (
               <div className="absolute top-0 left-full w-full overflow-hidden">
-                <DayPanel dayObj={nextDayObj} dayMeta={nextDayMeta} itinerary={nextDayItinerary} tripName={trip.name} />
+                <DayPanel dayObj={nextDayObj} dayMeta={nextDayMeta} itinerary={nextDayItinerary} tripName={trip.name} detailState={detailState} onOpenDetail={openDetail} onCloseDetail={closePanel} />
               </div>
             )}
           </div>
         </div>
-      </div>
+      </main>
 
       {/* Sidebar */}
       <Sidebar
         isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        onSelect={(key) => { setActiveModal(key); setSidebarOpen(false) }}
+        onClose={closePanel}
+        onSelect={replacePanel}
         sections={MENU_ITEMS}
         tripNameEn={tripNameEn}
         countryCode={trip.destination_country}
       />
 
       {/* Section Modals */}
-      <BottomSheet isOpen={activeModal === 'info'} onClose={() => setActiveModal(null)} title="旅程資訊" noScroll noStickyTitle>
+      <BottomSheet isOpen={activeModal === 'info'} onClose={closePanel} title="旅程資訊" noScroll noStickyTitle>
         {activeModal === 'info' && (
           <Suspense fallback={<SectionSkeleton />}>
             {flightsHook.loading || accommodationHook.loading || prepareHook.loading
@@ -346,7 +389,7 @@ export default function TripPage() {
         )}
       </BottomSheet>
 
-      <BottomSheet isOpen={activeModal === 'checklist'} onClose={() => setActiveModal(null)} title="行李清單" noScroll noStickyTitle>
+      <BottomSheet isOpen={activeModal === 'checklist'} onClose={closePanel} title="行李清單" noScroll noStickyTitle>
         {activeModal === 'checklist' && (
           <Suspense fallback={<SectionSkeleton bottomBar={false} />}>
             {checklistHook.loading
@@ -356,7 +399,7 @@ export default function TripPage() {
         )}
       </BottomSheet>
 
-      <BottomSheet isOpen={activeModal === 'shopping'} onClose={() => setActiveModal(null)} title="逛街清單" noScroll noStickyTitle>
+      <BottomSheet isOpen={activeModal === 'shopping'} onClose={closePanel} title="逛街清單" noScroll noStickyTitle>
         {activeModal === 'shopping' && (
           <Suspense fallback={<SectionSkeleton />}>
             {shoppingHook.loading
@@ -366,7 +409,7 @@ export default function TripPage() {
         )}
       </BottomSheet>
 
-      <BottomSheet isOpen={activeModal === 'food'} onClose={() => setActiveModal(null)} title="美食清單" noScroll noStickyTitle>
+      <BottomSheet isOpen={activeModal === 'food'} onClose={closePanel} title="美食清單" noScroll noStickyTitle>
         {activeModal === 'food' && (
           <Suspense fallback={<SectionSkeleton />}>
             {foodHook.loading
@@ -377,7 +420,7 @@ export default function TripPage() {
       </BottomSheet>
 
       {/* Map */}
-      <BottomSheet isOpen={mapOpen} onClose={closeMap} title="行程地圖" noScroll noStickyTitle tall>
+      <BottomSheet isOpen={mapOpen} onClose={closePanel} title="行程地圖" noScroll noStickyTitle tall>
         {mapOpen && (
           <Suspense fallback={<SectionSkeleton />}>
             <TripMap points={mapPoints} days={days} activeDay={activeDay} />
@@ -398,7 +441,7 @@ export default function TripPage() {
 }
 
 // 單一日 panel：banner + itinerary list；dayObj 為 null 時整格不渲染（給三欄第一/末日用）
-function DayPanel({ dayObj, dayMeta, itinerary, tripName, isCurrent = false }) {
+function DayPanel({ dayObj, dayMeta, itinerary, tripName, isCurrent = false, detailState, onOpenDetail, onCloseDetail }) {
   if (!dayObj) return null
   return (
     <div className="overflow-hidden">
@@ -409,10 +452,18 @@ function DayPanel({ dayObj, dayMeta, itinerary, tripName, isCurrent = false }) {
         dateLabel={formatDayLabel(dayObj.date)}
         tripName={tripName}
         eager={isCurrent}
+        date={dayObj.date}
+        dayNumber={dayObj.day}
       />
       <div className="h-6" />
       <div className="mt-2">
-        <ItinerarySection rows={itinerary} dayDate={dayObj.date} />
+        <ItinerarySection
+          rows={itinerary}
+          dayDate={dayObj.date}
+          detailKey={detailState?.day === dayObj.day ? detailState.detailKey : null}
+          onOpenDetail={(key) => onOpenDetail(dayObj.day, key)}
+          onCloseDetail={onCloseDetail}
+        />
       </div>
     </div>
   )

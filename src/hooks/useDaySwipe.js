@@ -35,6 +35,8 @@ export function useDaySwipe({ days, activeDay, setActiveDay, enabled }) {
   const dragXRef = useRef(0)
   const dragStartRef = useRef(null)
   const dragHorizontalRef = useRef(null)
+  // commit 後（滑出動畫進行中）鎖住，避免第二次 swipe 在動畫跑到一半時搶跑
+  const animatingRef = useRef(false)
 
   // 用 refs 鎖住最新值，listener 才不用因為 days/activeDay/enabled 變動就重掛
   const daysRef = useRef(days)
@@ -47,7 +49,7 @@ export function useDaySwipe({ days, activeDay, setActiveDay, enabled }) {
   useEffect(() => { setActiveDayRef.current = setActiveDay }, [setActiveDay])
 
   const onTouchStart = useCallback((e) => {
-    if (!enabledRef.current || daysRef.current.length <= 1) return
+    if (!enabledRef.current || daysRef.current.length <= 1 || animatingRef.current) return
     const t = e.touches[0]
     dragStartRef.current = { x: t.clientX, y: t.clientY, time: Date.now() }
     dragHorizontalRef.current = null
@@ -116,6 +118,7 @@ export function useDaySwipe({ days, activeDay, setActiveDay, enabled }) {
 
     const commitTo = (nextIdx, direction) => {
       bump()
+      animatingRef.current = true
       setIsDragging(false)
       setDragX(direction * window.innerWidth)
       // 動畫跑完才換內容 + 歸零（無 transition）
@@ -123,7 +126,10 @@ export function useDaySwipe({ days, activeDay, setActiveDay, enabled }) {
         setIsCarouselAnimating(true)
         setActiveDayRef.current(days[nextIdx].day)
         setDragX(0)
-        requestAnimationFrame(() => requestAnimationFrame(() => setIsCarouselAnimating(false)))
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          setIsCarouselAnimating(false)
+          animatingRef.current = false
+        }))
       }, 300)
     }
 

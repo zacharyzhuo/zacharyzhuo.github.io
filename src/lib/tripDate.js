@@ -127,6 +127,39 @@ export function formatDayLabel(fullDate) {
 }
 
 /**
+ * DayBanner 的大標籤：只有該天日期真的是「今天」才顯示「今日行程」，否則顯示「DAY N」。
+ *
+ * @param {string} dateStr 該 banner 對應的完整日期 'YYYY/MM/DD'
+ * @param {number} dayNumber 第幾天（1-indexed）
+ * @param {string} [today] 預設今天（測試可注入固定值）
+ * @returns {string}
+ */
+export function bannerLabel(dateStr, dayNumber, today = formatToday()) {
+  if (dateStr && dateStr === today) return '今日行程'
+  return `DAY ${dayNumber}`
+}
+
+/**
+ * 從行程日期字串算出總天數（inclusive）。給首頁過往卡片顯示「N 天」取代原本的「回顧」字樣。
+ * 解析不出來（格式異常 / 空字串）回傳 null。
+ *
+ * @param {string} datesStr 'YYYY/MM/DD - MM/DD' 或跨年 'YYYY/MM/DD - YYYY/MM/DD'
+ * @returns {number|null}
+ */
+export function tripDays(datesStr) {
+  const { start, end } = parseTripDates(datesStr)
+  if (!start || !end) return null
+  const startSegs = start.split('/').map(Number)
+  const endSegs = end.split('/').map(Number)
+  if (startSegs.length !== 3 || endSegs.length !== 3) return null
+  if ([...startSegs, ...endSegs].some(n => !Number.isFinite(n))) return null
+  const startMs = new Date(startSegs[0], startSegs[1] - 1, startSegs[2]).getTime()
+  const endMs = new Date(endSegs[0], endSegs[1] - 1, endSegs[2]).getTime()
+  const days = Math.round((endMs - startMs) / 86400000) + 1
+  return days >= 1 ? days : null
+}
+
+/**
  * 根據今日日期決定預設選中的 day。
  *   - 今天剛好是某一天 → 那一天
  *   - 否則（旅程未開始 / 已結束 / 中間缺日）→ Day 1

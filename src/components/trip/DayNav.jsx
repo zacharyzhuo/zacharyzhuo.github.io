@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { tap } from '../../lib/haptic.js'
+import { formatToday } from '../../lib/tripDate.js'
 
 function getDayOfWeek(dateStr) {
   if (!dateStr) return ''
@@ -29,8 +30,8 @@ function getDayOfMonth(dateStr) {
  * 給「已經有自己玻璃容器」的場景用（如地圖 modal 的懸浮膠囊），
  * 避免全寬色帶在地圖上形成上下斷層。
  * compact：單行緊湊版（「五 05」一行 baseline 排列，高 ~44px），給地圖路線模式用 ——
- * 兩層式（週幾＋大數字）直向太高會擋地圖。選中態沿用本家的文字語言：
- * 紅字週幾＋深色日期（不用品牌綠膠囊，user 明確指定）。
+ * 兩層式（週幾＋大數字）直向太高會擋地圖。文字語言：紅字週幾只標記「今天」欄
+ * （與選中態無關）；選中但非今天＝深色粗體週幾；不用品牌綠膠囊（user 明確指定）。
  */
 export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easterEggDay, bare = false, compact = false }) {
   const scrollRef = useRef(null)
@@ -60,9 +61,12 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
         <div className={`inline-flex items-center justify-center min-w-full box-border ${compact ? 'px-1.5 py-0.5' : 'px-6 py-4'}`}>
         {days.map(({ day, date }) => {
           const isActive = activeDay === day
+          // 紅色只標記「今天」欄（與選中態獨立）；選中另用深色粗體表示。
+          const isToday = date === formatToday()
           const isEasterDay = easterEggDay !== undefined && day === easterEggDay
           const dow = getDayOfWeek(date)
           const dom = getDayOfMonth(date)
+          const dowClass = isToday ? 'text-jp-red font-bold' : (isActive ? 'text-jp-text font-bold' : 'text-muted')
 
           if (compact) {
             return (
@@ -75,7 +79,7 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
                 aria-label={`選擇第 ${day} 天`}
               >
                 <span className="flex items-baseline gap-1">
-                  <span className={`text-xs font-serif ${isActive ? 'text-jp-red font-bold' : 'text-muted'}`}>
+                  <span className={`text-xs font-serif ${dowClass}`}>
                     {dow || `D${day}`}
                   </span>
                   <span className={`text-sm font-serif font-bold leading-none tabular-nums ${isActive ? 'text-jp-text' : 'text-stone-400'}`}>
@@ -99,9 +103,7 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
                 easterEggIcon
               ) : (
                 <>
-                  <span className={`text-xs tracking-widest uppercase font-serif ${
-                    isActive ? 'text-jp-red font-bold' : 'text-muted'
-                  }`}>
+                  <span className={`text-xs tracking-widest uppercase font-serif ${dowClass}`}>
                     {dow ? `週${dow}` : `Day${day}`}
                   </span>
                   <span className={`text-2xl font-serif leading-none tabular-nums ${
@@ -109,7 +111,7 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
                   }`}>
                     {dom || String(day).padStart(2, '0')}
                   </span>
-                  {isActive && <div className="w-1 h-1 bg-jp-red rounded-full mt-1" />}
+                  {isActive && <div className={`w-1 h-1 rounded-full mt-1 ${isToday ? 'bg-jp-red' : 'bg-jp-text'}`} />}
                 </>
               )}
             </button>

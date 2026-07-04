@@ -77,7 +77,7 @@ function popupNode(point) {
 
       {point.hours && (
         <div className="flex items-center gap-1 mt-1.5 text-2xs text-muted font-serif">
-          <Clock size={11} className="shrink-0" />
+          <Clock size={11} className="shrink-0" aria-hidden="true" />
           <span>{point.hours}</span>
         </div>
       )}
@@ -118,7 +118,7 @@ function popupNode(point) {
             onClick={() => openExternal(url)}
             className="text-[13px] font-serif font-bold text-[#1a73e8] touch-manipulation inline-flex items-center gap-1"
           >
-            <Navigation size={13} />
+            <Navigation size={13} aria-hidden="true" />
             Google Maps 導航
           </button>
         </>
@@ -300,8 +300,8 @@ export default function TripMap({ points, days = [], activeDay = null }) {
             ) : (
               <EmptyState
                 icon={MapPin}
-                title={mode === 'route' ? '這天還沒有地圖座標' : '尚無地圖座標'}
-                hint="在 Google Sheet 的 itinerary tab 填 lat / lng 即可上圖"
+                title={mode === 'route' ? '這天還沒有標記地點' : '尚無地圖座標'}
+                hint={mode === 'route' ? undefined : '在 Google Sheet 的 itinerary tab 填 lat / lng 即可上圖'}
               />
             )}
           </div>
@@ -350,7 +350,7 @@ export default function TripMap({ points, days = [], activeDay = null }) {
                       else delete markerRefs.current[p.id]
                     }}
                   >
-                    <Popup>{popupNode(p)}</Popup>
+                    <Popup autoPanPaddingTopLeft={[16, 120]} autoPanPaddingBottomRight={[16, 90]}>{popupNode(p)}</Popup>
                   </Marker>
                 ))}
 
@@ -372,7 +372,7 @@ export default function TripMap({ points, days = [], activeDay = null }) {
                         else delete markerRefs.current[p.id]
                       }}
                     >
-                      <Popup>{popupNode(p)}</Popup>
+                      <Popup autoPanPaddingTopLeft={[16, 120]} autoPanPaddingBottomRight={[16, 90]}>{popupNode(p)}</Popup>
                     </Marker>
                   ))}
                 </>

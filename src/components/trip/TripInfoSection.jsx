@@ -50,7 +50,7 @@ function FlightsTab({ flights }) {
   return (
     <div>
       <h3 className="text-base font-bold text-secondary uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
-        <Plane size={18} /> 航班資訊
+        <Plane size={18} aria-hidden="true" /> 航班資訊
       </h3>
       <div className="space-y-4">
         {flights.map((f, i) => {
@@ -67,7 +67,7 @@ function FlightsTab({ flights }) {
                 style={{ backgroundColor: `${categoryInk('transport')}33`, color: categoryInk('transport') }}
               >
                 <span className="font-serif font-bold tracking-wide flex items-center gap-2">
-                  <Plane size={15} className="rotate-90" />
+                  <Plane size={15} className="rotate-90" aria-hidden="true" />
                   {f.flight_no}
                 </span>
                 <span className="font-serif font-bold text-sm tabular-nums opacity-75">{f.date}</span>
@@ -83,7 +83,7 @@ function FlightsTab({ flights }) {
                     <div className="text-sm text-secondary font-serif">{from}</div>
                   </div>
                   {/* 航線：端點/線/飛機用 transport 色（currentColor） */}
-                  <div className="flex items-center" style={{ color: categoryInk('transport') }}>
+                  <div className="flex items-center" style={{ color: categoryInk('transport') }} aria-hidden="true">
                     <div className="w-2.5 h-2.5 rounded-full border-2 border-current" />
                     <div className="w-12 h-[1px] bg-current opacity-50" />
                     <Plane size={18} className="rotate-90" />
@@ -98,7 +98,7 @@ function FlightsTab({ flights }) {
                 {(f.carry_on || f.checked_bag) && (
                   <div className="mt-4 pt-4 border-t border-jp-green/20">
                     <div className="flex items-start gap-2">
-                      <Luggage size={16} className="text-muted mt-0.5 flex-shrink-0" />
+                      <Luggage size={16} className="text-muted mt-0.5 flex-shrink-0" aria-hidden="true" />
                       <div className="text-sm text-secondary leading-relaxed whitespace-pre-line font-serif">
                         {[
                           f.carry_on && `手提行李：${f.carry_on}`,
@@ -134,7 +134,7 @@ function PrepareTab({ items }) {
   return (
     <div>
       <h3 className="text-base font-bold text-secondary uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
-        <ClipboardList size={18} /> 行前準備
+        <ClipboardList size={18} aria-hidden="true" /> 行前準備
       </h3>
       <div className="space-y-3">
         {items.map((item, i) => (
@@ -150,7 +150,7 @@ function PrepareTab({ items }) {
               <h4 className="text-lg font-serif font-bold text-jp-text mb-0.5 leading-snug">{item.label}</h4>
               {item.description && <p className="text-sm text-muted font-serif leading-relaxed">{item.description}</p>}
             </div>
-            {item.url && <ExternalLink size={20} className="text-jp-green shrink-0" />}
+            {item.url && <ExternalLink size={20} className="text-jp-green shrink-0" aria-hidden="true" />}
           </button>
         ))}
       </div>
@@ -167,7 +167,7 @@ function HotelTab({ accommodation }) {
   return (
     <div>
       <h3 className="text-base font-bold text-secondary uppercase tracking-widest mb-4 flex items-center gap-2 font-serif">
-        <Hotel size={18} /> 住宿資訊
+        <Hotel size={18} aria-hidden="true" /> 住宿資訊
       </h3>
       <div className="space-y-6">
         {accommodation.map((h, i) => (
@@ -193,7 +193,7 @@ function HotelTab({ accommodation }) {
 
               {h.address && (
                 <div className="flex items-center gap-1.5 text-sm text-muted font-serif">
-                  <MapPin size={13} className="shrink-0" style={{ color: categoryInk('hotel') }} />
+                  <MapPin size={13} className="shrink-0" style={{ color: categoryInk('hotel') }} aria-hidden="true" />
                   <span className="min-w-0">{h.address}</span>
                 </div>
               )}
@@ -241,7 +241,7 @@ function HotelTab({ accommodation }) {
                     }}
                     aria-label="查看住宿位置"
                   >
-                    <Navigation size={16} />
+                    <Navigation size={16} aria-hidden="true" />
                     Google Maps 導航
                   </button>
                 </div>

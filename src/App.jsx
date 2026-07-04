@@ -14,10 +14,30 @@ function ScrollToTop() {
   return null
 }
 
+// 跳到主要內容：預設視覺隱藏，鍵盤 focus 到才顯示（sr-only + focus:not-sr-only）。
+// 用 HashRouter 時不能靠原生 `#fragment` 錨點捲動（hash 已被路由佔用，瀏覽器對 `#main`
+// 的處理會跟 router 打架），改為 preventDefault 後手動 focus() 目標的 <main id="main">。
+function SkipLink() {
+  const handleClick = (e) => {
+    e.preventDefault()
+    document.getElementById('main')?.focus()
+  }
+  return (
+    <a
+      href="#main"
+      onClick={handleClick}
+      className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[2000] focus:px-4 focus:py-2 focus:rounded-full focus:bg-jp-green focus:text-white focus:font-serif focus:font-bold focus:shadow-lg"
+    >
+      跳到主要內容
+    </a>
+  )
+}
+
 export default function App() {
   return (
     <ErrorBoundary>
       <HashRouter>
+        <SkipLink />
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<HomePage />} />

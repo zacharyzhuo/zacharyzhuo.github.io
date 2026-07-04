@@ -117,7 +117,8 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
   }
 
   const sheetClass = [
-    'fixed inset-x-0 bottom-0 z-50',
+    // max-w-2xl mx-auto：桌面寬螢幕置中收窄（inset-x-0 + max-width + margin:auto 置中技巧），行動裝置滿版不受影響
+    'fixed inset-x-0 bottom-0 z-50 max-w-2xl mx-auto',
     // 開啟用 Q 彈彈簧（overshoot 由單層延伸玻璃覆蓋，無縫），關閉維持乾淨 ease-out
     isDragging ? '' : (isOpen ? 'transition-transform duration-500 ease-spring-soft' : 'transition-transform duration-300 ease-out'),
     // sheet-hidden：關閉動畫結束後 visibility 隱藏，避免 Safari 工具列透出貼在視窗底線的圓角頂緣

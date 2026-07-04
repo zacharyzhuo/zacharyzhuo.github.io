@@ -55,9 +55,11 @@ export default function FoodSection({ rows }) {
           {Object.entries(byCategory).map(([category, items]) => (
             <div key={category}>
               {category && (
-                <h3 className="text-xs font-bold text-secondary font-serif uppercase tracking-widest mb-4 pb-2">
-                  {category}
-                </h3>
+                <div className="flex items-center gap-2.5 mb-4">
+                  <span className="font-serif font-bold text-jp-text text-base">{category}</span>
+                  <span className="text-2xs text-muted font-serif">{items.length} 項</span>
+                  <span className="flex-1 h-px bg-hairline" />
+                </div>
               )}
               <div className="space-y-4">
                 {items.map((row, i) => (
@@ -80,13 +82,13 @@ export default function FoodSection({ rows }) {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start mb-2">
                         <div className="min-w-0">
-                          <h4 className="font-bold text-jp-text font-serif text-lg leading-tight flex items-center gap-2">
+                          <h3 className="font-bold text-jp-text font-serif text-lg leading-tight flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: categoryInk('food') }} aria-hidden="true" />
                             {row.name}
-                          </h4>
+                          </h3>
                           {(row.hours || row.time) && (
                             <span className="text-sm text-secondary font-serif mt-1 flex items-center gap-1.5 tabular-nums">
-                              <Clock size={13} className="shrink-0" /> {row.hours || row.time}
+                              <Clock size={13} className="shrink-0" aria-hidden="true" /> {row.hours || row.time}
                             </span>
                           )}
                         </div>

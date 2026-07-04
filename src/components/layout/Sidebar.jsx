@@ -114,7 +114,10 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
           <div aria-hidden="true" className="glass-sidebar absolute inset-0 -left-40 pointer-events-none" />
           <div className="relative h-full w-full flex flex-col">
           <div className="p-6 flex justify-between items-center">
-            <h2 id={titleId} className="text-xl font-serif font-bold text-jp-text">Trip Menu</h2>
+            <div>
+              <p className="text-2xs tracking-[0.25em] uppercase text-muted font-serif font-medium mb-1">TRIP MENU</p>
+              <h2 id={titleId} className="text-xl font-serif font-bold text-jp-text">行程選單</h2>
+            </div>
             <button
               onPointerDown={tap.onPointerDown}
               onPointerUp={tap.onPointerUp}
@@ -133,7 +136,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
                   key={key}
                   onPointerDown={tap.onPointerDown}
                   onPointerUp={tap.onPointerUp}
-                  onClick={tap.guard(() => { onSelect(key); onClose() })}
+                  onClick={tap.guard(() => onSelect(key))}
                   className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/20 transition-colors text-left group press-springy"
                 >
                   <div

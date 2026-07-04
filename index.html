@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/gokigen_panda_icon.png" />
     <link rel="apple-touch-icon" href="/gokigen_panda_icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <!-- iOS 26 的 PWA 狀態列強制跟隨系統外觀（深色=黑），頁面端無法控制（2026-06-12 整晚實測，
          fixed 層/wrapper 背景/theme-color 各種寫法/color-scheme/apple meta 含重裝全試過、全無效）。
          勿再加 apple-mobile-web-app-* meta（重裝時被捕捉、徒增變因）；head 維持最簡形狀。
@@ -27,12 +27,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      // 禁用雙指放大縮小（iOS Safari 10+ 忽略 user-scalable=no，需 JS 補充）
-      document.addEventListener('touchmove', function(e) {
-        if (e.touches.length > 1) e.preventDefault()
-      }, { passive: false })
-    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

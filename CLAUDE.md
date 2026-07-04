@@ -51,51 +51,42 @@ Vite + React SPA (GitHub Pages)
 src/
 ├── components/
 │   ├── layout/
-│   │   ├── Sidebar.jsx              # 抽屜導航（含 MENU_ITEMS 清單）
-│   │   └── BottomSheet.jsx          # 共用底部彈出層（tall 變體：h-[92vh]，供地圖用）
+│   │   ├── Sidebar.jsx              # 抽屜導航（選單項目由 TripPage 的 MENU_ITEMS 經 sections prop 傳入）
+│   │   ├── BottomSheet.jsx          # 共用底部彈出層（tall 變體：calc(100dvh - env(safe-area-inset-top) - 5rem)，供地圖用）
+│   │   └── ExchangeRate.jsx         # Sidebar 內嵌匯率小工具（useExchangeRate + countryCode，見 destination_country）
 │   ├── home/
 │   │   └── TripCard.jsx             # 首頁行程卡片（毛玻璃風格）
 │   ├── trip/
-│   │   ├── DayNav.jsx               # 日期橫向導航列
-│   │   ├── DayBanner.jsx            # 每日 banner 圖 + 標題
-│   │   ├── ItinerarySection.jsx     # 每日行程（含 DetailModal）
-│   │   ├── TripInfoSection.jsx      # 旅程資訊（航班 / 行前準備 / 住宿，三 tab）
-│   │   ├── ShoppingSection.jsx      # 購物清單（area tabs + building 分組）
-│   │   ├── FoodSection.jsx          # 美食清單（area tabs + category 分組）
-│   │   ├── ChecklistSection.jsx     # 打包清單（localStorage 持久化 + 進度條）
-│   │   ├── TripMap.jsx              # 行程地圖（探索 + 路線；單一入口，路線用 DayNav 換天；react-leaflet + CARTO 底圖）
-│   │   ├── NearbyStrip.jsx          # 探索模式「離你最近」底部橫向卡片條（geolocation + haversine；非第二層 modal）
-│   │   └── mapIcons.js              # 地圖 marker divIcon 工廠（實心彩點 / 編號點 / 備選空心墨灰環 / 我的位置）
+│   │   ├── DayNav.jsx / DayBanner.jsx / ItinerarySection.jsx（含 DetailModal）/ TripInfoSection.jsx
+│   │   ├── ShoppingSection.jsx / FoodSection.jsx / ChecklistSection.jsx
+│   │   └── TripMap.jsx / NearbyStrip.jsx / mapIcons.js
 │   └── ui/
-│       ├── SegmentedControl.jsx     # 玻璃膠囊分段控制器（移動膠囊 + 拖拉跟手 + 自適應降級）
-│       ├── Skeletons.jsx            # 冷啟動載入骨架（TripSkeleton 全頁 / HomeCardsSkeleton 卡片）
-│       ├── EmptyState.jsx           # 共用空狀態（icon + 標題 + hint）
-│       ├── ErrorBoundary.jsx        # React error boundary
-│       └── ErrorState.jsx           # 共用錯誤畫面（icon + 訊息 + action）
+│       └── SegmentedControl.jsx / Skeletons.jsx / EmptyState.jsx / ErrorBoundary.jsx / ErrorState.jsx
 ├── pages/
 │   ├── HomePage.jsx                 # 行程列表頁（PWA 啟動會嘗試自動跳轉）
-│   └── TripPage.jsx                 # 行程詳細頁（通用）
+│   └── TripPage.jsx                 # 行程詳細頁（通用；含 MENU_ITEMS 定義，側欄選單來源）
 ├── hooks/
-│   ├── useSheetData.js              # fetch 單一 Sheet tab，記憶體 + SWR 快取
-│   ├── useTrips.js                  # fetch index sheet
-│   ├── useScrollLock.js             # body scroll lock（reference counting）
-│   ├── useModalA11y.js              # modal a11y：ESC 關閉、focus trap、focus restore
-│   ├── usePageMeta.js               # 動態 document.title + OG meta
-│   ├── useTripDerived.js            # useNormalizedItinerary / useNormalizedDays / useDays / useFoodItems
-│   ├── usePullToRefresh.js          # 下拉刷新手勢
-│   └── useSegmentedDrag.js          # 分段控制器膠囊量測 + pointer 拖拉跟手 + 降級判斷（含 rubberBand/nearestIndex 純函式）
+│   ├── useSheetData.js / useTrips.js / useScrollLock.js / useModalA11y.js / usePageMeta.js
+│   ├── useTripDerived.js / usePullToRefresh.js / useSegmentedDrag.js
+│   ├── useCancelableTap.js          # 按下滑出取消手勢
+│   ├── useDaySwipe.js               # 三欄輪播左右滑動切日
+│   ├── useEasterEgg.js              # 求婚彩蛋連續點擊觸發（REQUIRED_CLICKS=9, CLICK_GAP_MS=2000）
+│   ├── useExchangeRate.js           # fetch + 快取匯率
+│   └── useRevalidateOnVisible.js    # PWA 回前景背景重抓
 ├── lib/
-│   ├── sheets.js                    # CSV 解析工具（parseCSV、sheetURL）
-│   ├── env.js                       # 集中讀取 + 驗證 Vite env
-│   ├── haptic.js                    # navigator.vibrate 包裝（tap/bump/success）
-│   ├── swrCache.js                  # localStorage 版 stale-while-revalidate
-│   ├── categories.js                # 行程分類色彩單一 source of truth（label/icon/ink + chip 樣式 + BACKUP_INK）
-│   ├── tripDate.js                  # 旅程日期相關純函式
-│   └── maps.js                      # 地圖純函式（座標解析 / bucket / haversine / 路線排序 / Maps URL / 去重合併）
+│   ├── sheets.js / env.js / haptic.js / swrCache.js / categories.js / tripDate.js / maps.js
+│   ├── currency.js                  # 匯率純函式（國家碼→幣別、換算、格式化）
+│   ├── gesture.js                   # resist() rubber-band 拉伸
+│   └── openExternal.js              # 外部連結開啟包裝（PWA 相容）
 ├── trips/
 │   └── 2026-03-tokyo-hokkaido/
-│       └── extras.jsx               # 求婚彩蛋（僅此行程）
-└── App.jsx
+│       ├── extras.jsx               # 求婚彩蛋（僅此行程）
+│       └── extras/
+│           ├── data.js              # PROPOSAL_PHOTOS + isVideoUrl
+│           └── HeartIcon.jsx / ShareSheet.jsx / ContactAvatar.jsx
+├── App.jsx
+├── main.jsx                         # React entry；registerSW + onRegisteredSW（回前景/30min 檢查更新版本）
+└── sw.js                            # PWA service worker 原始碼（NetworkFirst/CacheFirst 快取策略，見上方「資料流」段落）
 ```
 
 ### BottomSheet Props
@@ -110,6 +101,8 @@ src/
 | `tall` | 高度改 `calc(100dvh - env(safe-area-inset-top) - 5rem)`：頂緣切齊頁面 header icon（漢堡 / 地圖鈕）下緣。地圖 sheet 用 |
 
 a11y：BottomSheet 與 ItinerarySection 的 DetailModal 都套用 `useModalA11y`，自動處理 ESC、focus trap 與 focus 還原。
+
+**桌面寬螢幕置中（`max-w-2xl mx-auto`）**：BottomSheet 與 DetailModal 的外層固定容器都是 `inset-x-0`（左右貼齊 0），額外加上 `max-w-2xl mx-auto` 即可在桌面寬螢幕收窄置中、行動裝置滿版不受影響（`inset-x-0` + `max-width` + `margin:auto` 是標準的 fixed 元素置中技巧）。HomePage / TripPage 的內容欄（header + main）同套 `max-w-2xl mx-auto`，washi 背景維持滿版鋪滿。Sidebar（`fixed inset-y-0 left-0 w-64`）不受此規則影響，維持固定寬度貼左。
 
 DetailModal（高度內容驅動 `min-h-[40vh] max-h-[85vh]`，無法 absolute 滿版）用**負 margin 等價手法**做同一套「把手浮在內容上」：捲動區 `-mt-6`（= 把手條 24px）墊到 pill 背後、`pt-12` 補回內容起點，pill `relative z-10` + 深色。
 
@@ -134,26 +127,43 @@ DetailModal（高度內容驅動 `min-h-[40vh] max-h-[85vh]`，無法 absolute �
 | `shopping` | 逛街清單 |
 | `food` | 美食清單 |
 
+### 瀏覽器歷史整合（sidebar / modal / 地圖 / detail）— 2026-07-04
+
+`TripPage` 的疊層 UI（側欄 `sidebarOpen`、四個 `activeModal`、地圖 `mapOpen`，以及 `ItinerarySection` 的 `DetailModal`）**不用各自的 boolean state**，改由 `location.state.panel` 單一值衍生（`'sidebar' | 'info' | 'checklist' | 'shopping' | 'food' | 'map' | 'detail'`），讓 Android 手勢 / 瀏覽器上一頁能正確「關掉最上層」而不是直接離開頁面：
+
+- **開啟**：`navigate(pathname + search, { state: { panel } })`（push，新增一筆 history entry）。
+- **關閉**（X 鈕 / ESC / backdrop / 拖曳關閉手勢）：一律 `navigate(-1)`，讓 UI 的關閉動作跟瀏覽器上一頁行為完全一致，不會兩者狀態打架。
+- **Sidebar → 選單項目**：用 `replace: true` 蓋掉 sidebar 那筆 entry（而非疊加新一筆），所以從選單項目按上一頁會直接回到行程頁本身，不會先經過「sidebar 開啟」的中繼態。
+- **`ItinerarySection` 的 `DetailModal`**：改為可選受控（`detailKey`/`onOpenDetail`/`onCloseDetail` 皆為選填，未帶時退回原本內部 `useState`，既有的 render-only smoke test 不需包 Router）。`TripPage` 把 `detailKey` 組成 `${dayDate}|${row.time}|${row.name}` 塞進同一個 `location.state`（連同 `day`），靠 `dayDate` 保證跨日不撞號、靠 `day` 比對確保三欄輪播中 prev/current/next 只有對應那個 day panel 會渲染 modal。
+- **`activeDay` ↔ `?d=<1-based>`**：查詢字串同步用 `replace: true`（不灑 history），只在值真的改變時才寫入；掛載時讀回並 clamp 到 `[1, days.length]`，讀不到或超界則退回原本「今天」自動選 day 邏輯。純 `navigate({ pathname, search })`，不碰 hash 結構，HashRouter 相容。
+
 ### 行前準備（資料驅動）
 
 「行前準備」tab 由 trip sheet 的 **`prepare` tab** 驅動（不再寫死國家）。`TripInfoSection` 接收 `prepare` prop（rows），`PrepareTab` 把每筆 render 成**玻璃連結卡**（`glass-card` + 深色標題 + `text-muted` 副標 + jp-green `ExternalLink` icon，與全站卡片同語言；不再是大面積實心綠塊）；無資料則顯示「尚無行前準備項目」空狀態。Visit Japan Web、簽證申請、入境/海關表單、eSIM 等都是其中一筆資料列。
 
-> index sheet 的 `destination_country` 欄位目前**未被程式使用**（行前準備改資料驅動後不再需要它 gate）；欄位保留無妨，未來若有其他國家限定功能可再用。
+> `destination_country`：行前準備 tab 已不再用它 gate；但驅動 Sidebar 底部即時匯率 widget（`ExchangeRate` → `resolveCurrency`，見 `src/lib/currency.js` / `src/hooks/useExchangeRate.js`）。
 
 ### Trip Extras 機制（求婚彩蛋）
 
-`TripPage.jsx` 在渲染時嘗試 dynamic import：
+`TripPage.jsx` 用 `useEffect`（keyed on `slug`，含 `cancelled` guard）嘗試 dynamic import：
 
 ```js
-const extras = await import(`../trips/${trip.slug}/extras.jsx`).catch(() => null)
+useEffect(() => {
+  if (!slug) { setExtras(null); return }
+  let cancelled = false
+  import(`../trips/${slug}/extras.jsx`)
+    .then(m => { if (!cancelled) setExtras(m.default) })
+    .catch(() => { if (!cancelled) setExtras(null) })
+  return () => { cancelled = true }
+}, [slug])
 ```
 
-找不到時回傳 `null`，不影響通用流程。`2026-03-tokyo-hokkaido/extras.jsx` 匯出：
+找不到時 `setExtras(null)`，不影響通用流程。`2026-03-tokyo-hokkaido/extras.jsx` 匯出：
 - `easterEggDay`：觸發彩蛋的天數（Day 4）
 - `HeartIcon`：愛心 icon 組件
 - `ProposalModal`：求婚彩蛋 modal
 
-彩蛋觸發條件：在已選取的 `easterEggDay` 上**連續快速點擊 9 次**（每次間隔 < 2s）。
+彩蛋觸發邏輯抽成 `hooks/useEasterEgg.js`：在已選取的 `easterEggDay` 上**連續快速點擊 9 次**（每次間隔 < 2s；常數 `REQUIRED_CLICKS`/`CLICK_GAP_MS`）觸發。
 
 ---
 
@@ -163,7 +173,7 @@ const extras = await import(`../trips/${trip.slug}/extras.jsx`).catch(() => null
 
 `useSheetData` 採兩層快取：
 
-1. **Module-level `Map`**（`promiseCache`）：同一 session（JS context）重複請求秒回，**無自動 revalidate**。
+1. **Module-level `Map`**（`promiseCache`）：同一 session（JS context）重複請求秒回，**無被動/定時的自動 revalidate**（見下方「回前景自動刷新」：resume 事件會主動清這層，非被動 revalidate）。
 2. **localStorage SWR (`lib/swrCache.js`)**：
    - 命中時立即回傳 cached data 給 UI（瞬開）
    - 拿到新資料再覆蓋並寫回 cache
@@ -174,13 +184,14 @@ const extras = await import(`../trips/${trip.slug}/extras.jsx`).catch(() => null
 iOS「加入桌面」的 PWA 背景恢復是 **warm resume**：不重載頁面、JS context 還活著，所以 `promiseCache` 與「靠 mount 觸發的 fetch」都不會重跑 → 不整個關掉就一直看到舊資料 / 舊版本。
 
 對策（`hooks/useRevalidateOnVisible.js`：背景 >10s 後回前景才觸發，避免短暫切換猛打網路）：
-- **資料**：`useSheetData` / `useTrips` 掛 `useRevalidateOnVisible` → 回前景時 **`revalidateSheet`（只清 in-memory `promiseCache`，保留 localStorage）+ bump refetchTick** 背景靜默重抓，**不重載整頁**。localStorage（冷啟動瞬開、離線 fallback）與 SW 的圖片/字型 CacheFirst **完全不受影響**。
-  - 注意區分：`invalidateSheet`（pull-to-refresh 用，**連 localStorage 一起清**）vs `revalidateSheet`（resume 用，**只清 in-memory**）。
+- **資料**：`useSheetData` / `useTrips` 掛 `useRevalidateOnVisible` → 回前景時**背景靜默重抓 + bump refetchTick，不重載整頁**。`useSheetData` 額外呼叫 `revalidateSheet`（只清 in-memory `promiseCache`，保留 localStorage）；`useTrips` 沒有 promiseCache 這層，單純 bump tick 讓 `useEffect` 重新 fetch（localStorage 快取一樣保留、成功後才覆蓋）。localStorage（冷啟動瞬開、離線 fallback）與 SW 的圖片/字型 CacheFirst **完全不受影響**。
+  - 注意區分：`invalidateSheet`（pull-to-refresh 用，**連 localStorage 一起清**）vs `revalidateSheet`（resume 用，**只清 in-memory**，僅 `useSheetData` 會呼叫）。
 - **App 版本**：`main.jsx` 的 `onRegisteredSW` 除了 30 分鐘 interval，另加 `visibilitychange→visible` 時 `registration.update()`；有新版照 `registerType:'autoUpdate'` + `onNeedRefresh→updateSW(true)` **靜默自動重載**。
+- **SW 網路層（兩層 JS 快取之下還有第三層）**：`sw.js` 對同一批 gviz CSV 請求（`docs.google.com/.../gviz/tq`）也做 `NetworkFirst`（5s timeout、1 天 maxAge、50 筆上限）。`invalidateSheet`/`revalidateSheet` **都不會清這層**，弱網時 pull-to-refresh 仍可能吐出 SW 快取的舊 response。
 
 ### 行程列表排序
 
-首頁行程排序為 Index Sheet 的**反向順序**（越後面的 row 排越上面）。
+首頁行程排序**不是**單純反轉 Index Sheet 順序：`useTrips` 仍對原始 rows `.reverse()`，但實際顯示順序由 `groupTrips`（`lib/tripDate.js`）決定 — **Now & Next**：進行中最前，其餘按出發日期近到遠；**Past**：按年分組（新到舊），組內按結束日期新到舊。
 
 ### PWA 啟動自動跳轉（HomePage）
 
@@ -202,14 +213,14 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 |---|---|---|
 | `slug` | 行程唯一識別碼（用於 URL，格式 `yyyy-mm-destination`；Google Sheet 檔名須與 slug 完全一致） | `2026-01-fukuoka` |
 | `name` | 行程顯示名稱（中文） | `福岡` |
-| `name_en` | 英文副標題（選填，用於 header 與 sidebar） | `Fukuoka` |
-| `destination_country` | 目的地國家代碼（選填，目前程式未使用，保留欄位） | `JP` |
+| `name_en` | 英文副標題（選填，用於 header 與 sidebar；**不論填寫或自動推算，一律強制轉大寫並補 `' TRIP'` 後綴**） | `Fukuoka` |
+| `destination_country` | 目的地國家代碼（選填；行前準備 tab 不再用它 gate，但驅動 Sidebar 匯率 widget，見上方「行前準備」小節） | `JP` |
 | `dates` | 旅行日期範圍 | `2026/01/10 - 01/14` |
 | `cover_image_url` | 封面圖片 URL | `https://...` |
 | `sheet_id` | 該行程 Google Sheet 的 ID | `1BxiMVs...` |
 | `status` | `published` 或 `draft` | `published` |
 
-`name_en` 為空時自動從 `slug` 推算（去掉開頭的 `yyyy-mm-` 後轉大寫，例：`2026-03-tokyo-hokkaido` → `TOKYO HOKKAIDO TRIP`）。
+`name_en` 無論手動填寫或留空，都會經 `getTripNameEn` 強制轉大寫並補 `' TRIP'` 後綴（已是該後綴結尾則不重複加）：填 `Fukuoka` 實際顯示為 `FUKUOKA TRIP`；留空則自動從 `slug` 推算（去掉開頭的 `yyyy-mm-` 後轉大寫），例：`2026-03-tokyo-hokkaido` → `TOKYO HOKKAIDO TRIP`。
 
 ### 每趟行程 Sheet（8 個 tab）
 
@@ -241,7 +252,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 `type` 可選值：`hotel`、`airbnb`
 `lat` / `lng`：選填經緯度，給地圖用（歸「住宿」分類）。有值才上圖。
-`date`：check-in 日期，UI 上會以 badge 形式顯示在卡片頂端（同 flight 卡片樣式）。
+`date`：check-in 日期，顯示於卡片頂部 eyebrow 列（`STAY · <date>`，與型別標籤同行的髮絲文字），非獨立 badge，款式與 flight 卡片的滿版色帶不同。
 
 **`checklist` tab**
 
@@ -264,7 +275,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - `hours`：營業時間，顯示於卡片底部小 badge
 - `address`：Google Maps 導航查詢字串（`link` 有值時優先用 `link`）
 - `parent`：**子項目專用**，填入父卡片的 `name`（字串完全比對）。有值的 row 不出現在主時間軸，改顯示在父卡片 modal 的「街道亮點」區。排序：`food → attraction → shopping`；父卡片底部自動出現「N 個亮點」badge
-- `image`：選填縮圖（完整 URL 或 `/trips/<slug>/...` 絕對路徑）。**資料驅動、與 type 無關**：有值才顯示。卡片右側 64×64 圓角縮圖；點開 modal 時頂部顯示為 hero 圖。`lazy` 載入。
+- `image`：選填縮圖（完整 URL，貼 Cloudinary 圖床連結；`/trips/<slug>/...` 舊慣例已移除，填了會 404，見下方「靜態資源路徑」）。**資料驅動、與 type 無關**：有值才顯示。卡片右側 64×64 圓角縮圖；點開 modal 時頂部顯示為 hero 圖。`lazy` 載入。
 - `lat` / `lng`：選填經緯度（從 Google Maps 複製貼上，兩欄分開）。給「地圖」功能（見下方）戳點用，有值才上圖。詳見 **地圖（TripMap）** 一節。
 
 **`shopping` tab**
@@ -288,7 +299,7 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 - `area`：浮動 tab 分區（空白則不顯示 area tabs）
 - `category`：分組標題（空白則不分組）
 - `description`：店家描述（程式碼同時支援 `note` 欄位名稱）
-- `image`：選填縮圖（完整 URL 或絕對路徑），有值才顯示在卡片左側 64×64 圓角；`lazy` 載入
+- `image`：選填縮圖（完整 URL，貼 Cloudinary 圖床連結），有值才顯示在卡片左側 64×64 圓角；`lazy` 載入
 - `lat` / `lng`：選填經緯度，給地圖用（歸「美食」分類）。有值才上圖
 - 若 `food` tab 無資料，fallback 為 `itinerary` 中 `type === 'food'` 的行程（由 `useFoodItems` 處理）。**注意**：地圖的美食點來自 **raw `food` tab**（非 `useFoodItems`），避免與 itinerary 的 food 重複計算
 
@@ -296,33 +307,13 @@ PWA 從根目錄 `/` 啟動時，HomePage 會自動跳轉到「最相關」的�
 
 ### 寫入 sheet 的型別政策（MUST 遵守）⚠️
 
-App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 sheet。**gviz 會對每一欄推定單一型別，並把「不符該欄型別」的儲存格輸出成空字串**。所以每個 cell 必須是「該欄正確的型別」，否則資料會在 app 端消失或錯亂。
+App 透過 **gviz CSV 端點**讀 sheet；gviz 對每欄推定**單一**型別，型別不符的 cell 會被輸出成**空字串**（症狀：Sheet 裡看得到、網頁卻不顯示）。鐵則：
+- **整欄同型別**：`itinerary.time` 整欄文字（混了時鐘與 `晚上` 類標籤）；`date` 整欄 DATE；`accommodation.check_in`/`check_out` 整欄 TIME；`lat`/`lng` 數字
+- 任何 cell 第一個字元不可是 `'`（forced-text = 型別沒設對）
+- 寫入一律 `valueInputOption: USER_ENTERED`（**不要 `RAW`**）
+- **寫後必驗** gviz CSV；新建 sheet 必須先開「知道連結的任何人可檢視」
 
-**踩過的雷**：用 `valueInputOption: RAW` 把 `"6/5"` 寫進 `date` 欄 → 存成**純文字**（cell 顯示 `'6/5`、靠左對齊）→ gviz 認定 date 欄是 Date 型別、把這個文字格輸出成**空字串** → app 收到空 `date` → 該列 `_day=null` → **從當天時間軸消失**（並被地圖當「備選」點）。症狀：**Sheet 裡看得到、網頁卻不顯示**。
-
-**鐵則：任何 cell 的第一個字元都不該是 `'`（forced-text）。出現 `'` 代表型別沒設對。** 各欄正確型別：
-
-| 欄 | 正確型別 | 怎麼寫 |
-|---|---|---|
-| `date`（所有 tab） | **日期（DATE）** | `USER_ENTERED` 寫 `6/5`；整欄 numberFormat `type=DATE`（現用 `m/d`）。gviz 輸出 `6/4`，resolveTripDate 吃 `M/D`／`YYYY/MM/DD` |
-| `itinerary.time` | **文字（整欄一致）** | 此欄實務上**混了真時鐘（`09:50`）與非時鐘標籤（`晚上`/`上午`/`下午`/`晚餐`/`備選`）**，且這些標籤要照常顯示在時間軸。**整欄一律當文字**：`USER_ENTERED` 寫字串，並把該欄資料範圍 numberFormat 設 `TEXT`（防之後在 UI 輸入 `14:00` 又被自動轉成 TIME 型別、破壞「整欄文字」）。gviz 對「全文字欄」照吐所有值（含 `09:50` 與 `晚上`），安全。**切勿只把部分格轉成真 TIME 型別** → 見下方「同一欄不可混型別」 |
-| `accommodation.check_in`/`check_out` | **時間（TIME）** | 這兩欄是 100% 乾淨時鐘時間、無文字標籤 → 整欄 numberFormat `type=TIME, pattern=hh:mm`，再 `USER_ENTERED` 寫 `09:50`。gviz 輸出乾淨 `09:50`（已驗） |
-| `lat` / `lng` | **數字（Number）** | `USER_ENTERED` 寫數字字串 `10.4070429`（成 number；gviz 輸出數字） |
-| `flights.time`、`hours` 等含**區間/中文**的自由文字 | **文字** | 內容非單一可轉換值（`07:00 - 09:50`、`06:30 – 10:30`、`停留 40 分鐘`）→ Sheets 不會自動轉、本來就無 `'`，直接 `USER_ENTERED` 寫 |
-| 其餘文字欄（`name`/`address`/`link`/`description`/`note`/`type`/`area`/…） | 文字 | `USER_ENTERED`；內容非「整格可轉換」不會出現 `'`，免特別處理 |
-
-**同一欄不可混型別（核心鐵則，實測）**：gviz 對一欄只推定**一種**型別，把不符的格吐成空字串。所以真正的規則不是「time 一定要 TIME」，而是「**整欄同型別**」。
-- 把 `itinerary.time` 的時鐘格轉成真 TIME、卻保留 `晚上`/`上午` 文字格 → gviz 判整欄為時間型 → **那些文字格被吐成空**（時間軸時間標籤消失）。
-- 實測（拋棄式 sheet 驗證）：**全文字欄**（`16:00` 與 `晚上` 都 stringValue）→ gviz 全部照吐；**混型別欄**（`16:00` 是 numberValue＋`晚上` 是 stringValue）→ `晚上` 被吐成 `''`。
-- 結論：`itinerary.time` 維持**整欄文字**。只有「該欄 100% 是乾淨時鐘時間」（如 `accommodation.check_in/check_out`）才用真 TIME 型別。
-
-**通則**：
-- 寫 cell 一律 `valueInputOption: USER_ENTERED`（**不要 `RAW`**）；URL 也才會變連結。
-- 要把某欄設成特定型別（`date`→DATE、`check_in`/`check_out`→TIME、`lat`/`lng`→NUMBER、`itinerary.time`→TEXT）：先用 `batchUpdate` 的 `repeatCell` 設該欄資料範圍 `userEnteredFormat.numberFormat`（`{type, pattern}`；TEXT 型別用 `{type:"TEXT"}`），再 `USER_ENTERED` 寫值。
-- **寫後必驗**：`curl 'https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:csv&sheet=<tab>'`，確認新列該填的欄**非空**、值正確。
-- **新建 sheet 必須先設「知道連結的任何人可檢視」**：gviz CSV 端點需要 sheet 對外可讀，否則回傳的是 Google 登入 HTML 而非 CSV，app 端會讀不到資料（症狀：sheet 有資料、網頁全空）。建立後執行 `gws drive permissions create --params "{\"fileId\":\"<ID>\"}" --json '{"role":"reader","type":"anyone"}'`。既有 trip sheet 已分享過則免重設。gviz 另有數分鐘快取，剛寫完可能讀到舊值，要即時驗證改用 `gws sheets +read`。
-- 偵測殘留 forced-text：`spreadsheets.get` 帶 `includeGridData` 看 `userEnteredValue` 是否為 `stringValue` 但內容是純數字/純日期（這種就是型別錯）。**例外**：`itinerary.time` 的 `stringValue` 純 `HH:MM` 是**刻意的全欄文字**，不是錯。
-- **要在某天中間插列**（保持時間順序，而非丟到表尾）：用 `batchUpdate` 的 `insertDimension`（指定分頁 `sheetId`、`ROWS`、`startIndex`/`endIndex`）插空列，再 `values.update` 寫入；itinerary **無 `day` 欄**，日由 `date` 推。
+完整型別表、numberFormat 設定步驟、驗證/偵錯指令、插列方法：**見 `docs/sheet-data-entry.md`**——動手寫 sheet 前先讀完它。
 
 ---
 
@@ -342,7 +333,7 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 - **入口**：行程頁 header **右上角**的地圖 icon（與左上漢堡對稱）；`mapPoints` 為空時不顯示。DayBanner **沒有**地圖按鈕。
 - 打開後**預設探索模式**，頂部一顆 `SegmentedControl`（探索 / 路線）切換：
   - **探索**：全部點、跨日、可分類篩選（chip 列）、定位找最近。
-  - **路線**：頂部 chip 列換成 **`DayNav`（複用行程頁那顆，`bare` + `compact` 變體 + `frosted-glass-panel` 圓膠囊、w-fit 置中）**，預設選中**開啟當下背景頁那天**（`activeDay`），可在 modal 內換天瀏覽各日動線（換天只改地圖，不動背景頁）。`compact` = 單行「五 05」緊湊版（高 ~44px）：行程頁的兩層式（週幾＋大數字）直向 ~90px 在地圖上太擋；選中態沿用紅字週幾＋深色日期（**不用品牌綠膠囊**，user 指定）。
+  - **路線**：頂部 chip 列換成 **`DayNav`（複用行程頁那顆，`bare` + `compact` 變體 + `frosted-glass-panel` 圓膠囊、w-fit 置中）**，預設選中**開啟當下背景頁那天**（`activeDay`），可在 modal 內換天瀏覽各日動線（換天只改地圖，不動背景頁）。`compact` = 單行「五 05」緊湊版（高 ~44px）：行程頁的兩層式（週幾＋大數字）直向 ~90px 在地圖上太擋；文字語言見下方「DayNav 紅字語意」（**不用品牌綠膠囊**，user 指定）。
   - **header 懸浮在地圖上**（地圖滿版、控制各自是玻璃膠囊浮在圖上，z-[650]）：勿改回「header 區塊 + 地圖」上下堆疊 —— 全寬控制列色帶與地圖相接會有色塊斷層（踩過）。`zoomControl` 關閉（左上 zoom 鈕會被懸浮 Layers 鈕蓋住）。`DayNav` 的 `bare` prop = 無 glass 色帶/非 sticky，給「自己有玻璃容器」的場景。
 
 `TripMap` 接 `points` / `days` / `activeDay` 三個 prop；`mode` 與 `routeDay` 都是元件內部 state（每次開啟重置為探索 + 背景當天）。
@@ -385,7 +376,7 @@ App 透過 **gviz CSV 端點**（`.../gviz/tq?tqx=out:csv&sheet=<tab>`）讀 she
 
 ### 去重（`mergeMapPoints`）
 
-itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shopping/accommodation）點若與既有點**同 bucket 同座標（5 位小數）**則去重 — 涵蓋 list-vs-itinerary 與 list-vs-list 重複。itinerary 點彼此**不**去重（同旅館的早餐/午餐各算一個停留）。組裝在 `TripPage`：`mergeMapPoints(toMapPoints(itinerary), [...listToMapPoints(food,'food'), ...shoppingToMapPoints(shopping), ...listToMapPoints(accommodation,'hotel')])`（shopping 先經建築聚合，再進 mergeMapPoints 與 itinerary 去重）。
+itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shopping/accommodation）點若與既有點**同 bucket 同座標（5 位小數）**則去重 — 涵蓋 list-vs-itinerary 與 list-vs-list 重複。itinerary 點彼此**不**去重（同旅館的早餐/午餐各算一個停留）。組裝在 `TripPage`：`mergeMapPoints(toMapPoints(normalizedItinerary), [...listToMapPoints(food,'food'), ...shoppingToMapPoints(shopping), ...listToMapPoints(accommodation,'hotel')])`（shopping 先經建築聚合，再進 mergeMapPoints 與 itinerary 去重）。
 
 > **`routeOnly` 點不當去重種子**：`mergeMapPoints` 的 `seen` 只用「非 routeOnly 的 itinerary 點」建立。否則 itinerary 的住宿 routeOnly 點會把 accommodation tab 同址住宿點去掉，害探索模式看不到住宿。兩者並存：路線模式顯示 itinerary 那顆（有 day），探索模式顯示 accommodation 那顆（day=null）。
 
@@ -413,17 +404,17 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 ### 已知限制 / 雷
 
 - Leaflet 在「開啟時才長出來」「切模式高度改變」的容器需 `map.invalidateSize()`（`InvalidateOnMount` / `InvalidateOnModeChange` 處理），否則圖磚渲染成灰塊/灰條。
-- 純函式（`parseLatLng`/`pointBucket`/`toMapPoints`/`listToMapPoints`/`shoppingToMapPoints`/`mergeMapPoints`/`haversineMeters`/`sortByDistance`/`routePoints`/`formatDistance`/`buildMapsUrl`）集中在 `lib/maps.js` 並有測試；Leaflet 元件本身以手動驗收為主。
+- 純函式（`parseLatLng`/`pointBucket`/`toMapPoints`/`listToMapPoints`/`shoppingToMapPoints`/`mergeMapPoints`/`haversineMeters`/`sortByDistance`/`routePoints`/`nextFocusIndex`/`formatDistance`/`buildMapsUrl`）集中在 `lib/maps.js` 並有測試；Leaflet 元件本身以手動驗收為主。
 
 ---
 
 ## UI / Design System
 
 - **底色**：`#FBFAF5`（米白）＋ feTurbulence 和紙噪點，兩者都直接在 **body 自己的 background** 上（噪點隨頁捲動，均勻噪點察覺不到）。
-  - **iOS 26 PWA 狀態列結論（2026-06-12 整晚實測，勿再追）**：主畫面 web app 的狀態列 letterbox **強制跟隨系統外觀**（深色模式 = 黑、淺色 = 白），頁面端**無法控制**。已逐一實測否決：fixed 背景層有無、wrapper 不透明背景、單一/雙 media `theme-color`、`color-scheme: light`、`apple-mobile-web-app-status-bar-style`（含移除後重裝）——全部無效；同一頁面在 Safari 瀏覽器的 tab 染色卻正常（米白）。head 維持最簡形狀（單一 `theme-color`，**勿加 apple-mobile-web-app-\* meta**，加了只會在重裝時被捕捉、徒增變因）。WebKit 在 iOS 26.x 持續改這塊，未來版本可再驗證；真正的長期解是做深色模式（token 地基已鋪）。
+  - **iOS 26 PWA 狀態列結論（勿再追）**：狀態列 letterbox 強制跟隨系統外觀，頁面端**無法控制**；方案已窮舉否決，實測過程見 `docs/decisions.md` 的 status-bar 條。head 維持最簡形狀：單一 `theme-color`，**勿加 `apple-mobile-web-app-*` meta**；長期解是深色模式（token 地基已鋪）。
   - 滿版頁面 wrapper 仍一律鋪 `.bg-washi`（米白 + 噪點）：這是紙感紋理的載體（噪點不再用 fixed 偽元素層）。
   - **分類色「内側淡彩」（玻璃透明感的色彩來源）**：行程卡玻璃內帶一抹從脊線往右暈開的分類 `wash` 色淡彩（`ItinerarySection`，卡內 `absolute inset-0` linear-gradient 0.2→透明；內容層與縮圖需 `relative` 疊在淡彩上），像有色玻璃。營業時間 badge 底色刻意極淡（`white/15`），不透明白底會在淡彩上蓋出白斑。
-  - **歷史教訓（勿走回頭路）**：(1) 「固定在 viewport 四角的色斑背景」（含當日分類連動染 `--wash-a/b/c/d` @property crossfade）→ 固定位置與內容無關、低明度色票像髒灰陰影、與 DayNav/banner 形成色塊斷層，整組拆除。(2) 「包住整卡的 radial 橢圓光暈（alpha 0.55）」→ 太重、形狀與卡片無關不自然。(3) 下緣色影（C 變體）也試過，user 實機比較後**定案內側淡彩（D）**（C 的實作留在 git history `1d970bd`）。
+  - **歷史教訓（勿走回頭路）**：四角色斑背景、包卡 radial 光暈、下緣色影（C 變體）三案皆已否決，**定案內側淡彩（D）**；否決原因與 git 位置見 `docs/decisions.md` 的 background-glow 條。
   - **光暈色票鐵則**：光暈用 `categories.js` 各分類的 `wash`（高明度水彩版 `'R, G, B'`），**勿直接用 ink** —— ink 是文字色（明度低），拉濃會讀成髒灰陰影；濃度感用彩度與 alpha 撐，不能用暗度撐。
 - **Accent**：`#5E8C61`（明るい抹茶）
 - **文字色**：主要 `#2C2C2C`（`text-jp-text`）；次要/註記用**語意 token**：`text-secondary`（次要正文，= 原 stone-600）、`text-muted`（小標/註記，= 原 stone-500）。這兩個 + `bg-hairline`/`border-hairline`（1px 分隔線，= 原 stone-200）都在 `tailwind.config.js` 定義成 `var(--text-secondary / --text-muted / --hairline)`，變數在 `index.css :root`。**新次要文字一律用 `text-secondary`/`text-muted`，勿再散用 `text-stone-500/600` 或已退役的 `jp-sub`**。這層是深色模式地基：未來只要在 `:root`（或 `.dark`）覆蓋這幾個變數即可一次翻，元件不用動。`text-stone-400`（更淡的 icon/placeholder）、`text-stone-700`（status pill）屬不同層級，未納入。
@@ -431,16 +422,17 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 - **字級**：micro eyebrow / 大寫 caps 標籤用 `text-2xs`（tailwind token，0.625rem），勿再用 `text-[10px]/[11px]` arbitrary value
 - **Frosted glass（毛玻璃）**：本站玻璃材質是 frosted glass / glassmorphism（`backdrop-filter: blur/saturate/contrast` + 高光邊框），**非** iOS 26 那種有邊緣折射扭曲的 Liquid Glass，這是**刻意取捨**而非無法做到。
 
-  - **修正舊結論（2026-06-26 查證 glass.outpacestudios.com）**：先前記「真折射唯一路線是 `feDisplacementMap` + `backdrop-filter: url(#filter)`、Chromium-only、Safari 無解」**只對了一半**。`backdrop-filter: url()`（扭曲背後的 backdrop）確實仍 Chromium-only；但**一般 `filter: url()`（扭曲元素自己的內容）含 `feDisplacementMap` 在 Safari / Firefox 都支援**。真折射可走的 Safari 相容路線是「**refract a copy**」：在玻璃面板內塞一份**背景的複製品**（釘在與真背景相同位置），對這份複製品套一般 `filter: url(#glass)`。Outpace 的 chain = `feImage`（runtime 算出的位移圖 blob，依 squircle 圓頂 + Snell IOR 1.5 + 圓角 SDF）→ 3× `feDisplacementMap` 不同 scale（RGB 色散）→ recombine → `feGaussianBlur`，另疊一層 `backdrop-filter: blur` 當底霜。
-  - **為何本站仍不追**：refract-a-copy 只在「背景是**已知、靜態、可複製、可釘位**的單張圖」時划算。本站玻璃面浮在**會捲動的異質內容**（itinerary 清單 / banner / Leaflet canvas tile）上，要逐 frame 複製背後 DOM 並對齊 + 多層 SVG filter 在 iOS Safari 重算 → 成本與 jank 都不值（連現在 drag 都得拔 `backdrop-filter` 逃生）。**通用 nav/sheet/card 維持 frosted 是正解**；真折射只在**單一玻璃面 × 固定背景**的點狀亮點（如 DayBanner hero 塊、求婚彩蛋等 one-off）才考慮，且動手前須在目標 iPhone PWA 實機測 FPS/發熱。
-  - 故全站 frosted 折射不追，**改追 iOS26 的互動語言**（press lift、拖拉跟手、彈簧吸附，見下方 press 微彈）。玻璃 `backdrop-filter` 組合集中在 `index.css` 的 `:root` token，**勿再散寫 blur/saturate/contrast 數值**。語意 token：`--glass-nav`（DayNav）、`--glass-card`（行程卡）、`--glass-overlay`（BottomSheet + Sidebar）、`--glass-button` / `--glass-button-lifted`（小鈕 press 抬起時更強 frosted）、`--glass-tab` / `--glass-tab-active` / `--glass-tab-lifted`（press 放大時更強 frosted）。`.glass-card` **不畫白色外框/高光線**（`border: none`、無 inset 白高光、底色 `rgba(255,255,255,0.5)`），只靠下方柔和投影 `0 6px 18px rgba(0,0,0,0.08)` 做分離。原因：在彩色模糊背景（BottomSheet 透出 banner）上，白框/白高光會描出搶眼白邊。若日後覺得玻璃感不夠可加極淡高光，但勿回到舊的 0.6 border / 0.8 inset 白框。
+  - **真折射不追（研究已做完，勿重查）**：Safari 相容的「refract-a-copy」路線存在，但只適合「單一玻璃面 × 固定靜態背景」的 one-off（如 DayBanner hero、求婚彩蛋），且動手前須在目標 iPhone PWA 實機測 FPS/發熱；本站玻璃浮在會捲動的異質內容上，成本與 jank 不值。完整研究（Outpace filter chain、瀏覽器支援矩陣）見 `docs/decisions.md` 的 glass-refraction 條。
+  - 全站維持 frosted，**改追 iOS26 的互動語言**（press lift、拖拉跟手、彈簧吸附，見下方 press 微彈）。玻璃 `backdrop-filter` 組合集中在 `index.css` 的 `:root` token，**勿再散寫 blur/saturate/contrast 數值**。語意 token：`--glass-nav`（DayNav）、`--glass-card`（行程卡）、`--glass-overlay`（BottomSheet + Sidebar）、`--glass-button` / `--glass-button-lifted`（小鈕 press 抬起時更強 frosted）、`--glass-tab` / `--glass-tab-active` / `--glass-tab-lifted`（press 放大時更強 frosted）。`.glass-card` **不畫白色外框/高光線**（`border: none`、無 inset 白高光、底色 `rgba(255,255,255,0.5)`），只靠下方柔和投影 `0 6px 18px rgba(0,0,0,0.08)` 做分離。原因：在彩色模糊背景（BottomSheet 透出 banner）上，白框/白高光會描出搶眼白邊。若日後覺得玻璃感不夠可加極淡高光，但勿回到舊的 0.6 border / 0.8 inset 白框。
 - CSS utility classes：`frosted-tab-track`、`frosted-tab-btn`、`frosted-tab-pill`、`frosted-glass-button`、`press-springy`、`.safe-area-inset`、`.safe-area-bottom`、`.scrollbar-hide`、`.glass-card`、`.glass-bottom-sheet`、`.glass-sidebar`
 - **Q 彈動效**：iOS26 風格彈簧 token：`--ease-spring`（彈較多，小元件用，Tailwind `ease-spring`）、`--ease-spring-soft`（彈較少，大行程面板用，`ease-spring-soft`）。
   - **press 微彈（iOS26 lift 語言）**：可點離散元件（卡片 / 選單項 / CTA / icon 按鈕）套 `.press-springy`（按下**浮起** `scale(1.03)`、放開 Q 彈落回）或共用的 `.frosted-glass-button`（按下浮起 `scale(1.1)` + body 變近乎全透 + backdrop 切 `--glass-button-lifted` + 邊緣高光變亮 + 投影加深；press-in 0.22s 快彈、放開回 base 0.4s 彈簧）。可點玻璃卡（`glass-card press-springy` 並用）另有卡片版 lift：變更透 + 投影加深，**不切 backdrop**（大面積重繪會 jank）也**不加白框**。方向統一是「浮起」不是「壓扁」（舊的 squish scale(0.9/0.95) 已全面退役）。
   - **面板開啟彈跳**：BottomSheet / Sidebar / ItinerarySection 詳情 sheet 開啟用 `ease-spring-soft`（overshoot），**關閉維持 `ease-out`**（關閉不彈）。overshoot / 反向拉會把面板頂出停駐邊露縫；**解法是「單層延伸玻璃」**：面板拆成 `frame（relative）> 單一 .glass-bottom-sheet/.glass-sidebar frost 層（absolute inset-0，往停駐邊用 `-bottom-56`/`-left-40` 延伸超過畫面）> 內容層（relative，不帶 backdrop，疊在 frost 上）`。因為是**同一塊** backdrop-filter，構造上無接縫（勿再用兩塊相鄰 backdrop 貼縫，必有色差縫）。內容層需 `overflow-hidden rounded-t-[2rem]` 把內容裁到圓角；frost 的 box-shadow 用 `[aria-hidden="false"] .glass-*`（後代選擇器，frost 已非直接子層）。
   - **反向拖拉拉伸**：拖拉關閉手勢往反方向拉時，用 `lib/gesture.js` 的 `resist()`（阻尼、上限 24px）做 rubber-band 拉伸，放開由開啟彈簧彈回；只從拖拉把手（pill/header）觸發，內容區反向拉是捲動。close 判定加了方向 guard（反向快速甩不關）。
   - **勿無差別灑**：進度條、fade、骨架、列表整列不套。`prefers-reduced-motion` 由全域 reset 自動降為瞬時（縫也不會出現）。
-- **按下滑出取消（`useCancelableTap`）**：選中類可點元件（TripCard、ItinerarySection 卡片、Sidebar 選單項）用 `hooks/useCancelableTap.js`：按下 setPointerCapture，放開時 `isPointInRect` 判定放開點是否仍在元件內，滑出去放開＝取消，避免長按/誤觸。呼叫一次回傳 `{ onPointerDown, onPointerUp, guard }`，`guard(fn)` 包原本 onClick，可服務 `.map()` 清單（同時只按一個）。原生 onClick 保留給鍵盤無障礙。ChecklistSection 已自帶距離式（移動 >10px 不 toggle）取消，不重複套。
+- **按下滑出取消（`useCancelableTap`）**：選中類可點元件（TripCard、ItinerarySection 卡片、Sidebar 選單項）用 `hooks/useCancelableTap.js`：按下 setPointerCapture，放開時 `isPointInRect` 判定放開點是否仍在元件內，滑出去放開＝取消，避免長按/誤觸。呼叫一次回傳 `{ onPointerDown, onPointerUp, guard, guardLink }`，`guard(fn)` 包原本 onClick，可服務 `.map()` 清單（同時只按一個）。原生 onClick 保留給鍵盤無障礙。ChecklistSection 已自帶距離式（移動 >10px 不 toggle）取消，不重複套。
+  - **`guardLink`**：`TripCard`（首頁行程卡）改用 react-router `<Link>`（原生右鍵/開新分頁語意，取代舊的 `<button onClick={navigate(...)}>`），取消時對 click event 呼叫 `preventDefault()` 擋掉導航；但 modifier 鍵（cmd/ctrl/shift/alt）或非左鍵點擊一律略過不攔截，保留 cmd-click/中鍵開新分頁的原生行為。
+  - 過往卡片 status pill 不再顯示「回顧」，改用 `tripDays()`（`lib/tripDate.js`）算出的行程天數（如「5 天」）；日期格式異常算不出來則不顯示 pill。
 - **分段控制器（SegmentedControl）**：所有分段 tab（TripInfoSection / FoodSection / ShoppingSection）統一用 `src/components/ui/SegmentedControl.jsx`，**勿再各自手寫 `frosted-tab-track` markup**。玻璃感由**單一移動膠囊** `.frosted-tab-pill` 呈現（`.frosted-tab-btn.active` 只負責文字色），膠囊 width/transform 由 `useSegmentedDrag` 量測各 segment 實際 rect 設定。支援 pointer 拖拉跟手：按下任一段都可起手（非選中段按下即切換並滑行過去），按著一路滑可跨段、**拖拉中即時 `onChange` 切換畫面內容**，跨段 haptic、放開吸附（6px 門檻、邊緣 rubber-band）。拖拉期間 `isDraggingRef` 讓 value 變化的 reposition 讓位，避免跟手位置被搶。切換時短暫加 `.traveling`（透明玻璃態滑行）、按住/拖拉加 `.lifted`（放大超出邊界 + 更透）、`.dragging` 移除膠囊 `backdrop-filter`（iOS Safari 防 jank 逃生艙）。內容超寬時自動降級為「可橫向捲動 + 點按」
 
 ### 分類色彩系統（`src/lib/categories.js`）
@@ -477,7 +469,8 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 - **美食卡（FoodSection）= 縮圖 + 色點**：店名前一顆弁柄色小圓點當分類標記；有 `image` 時左側縮圖。
 - **行程 modal（DetailModal）= 編輯排版**：彩色 eyebrow（`label` + `en`）→ 標題（`text-2xl`，同住宿卡）→ 一行 meta（`時間 · 地點`，**無地址不顯示**，已修掉 placeholder）→ 有 `image` 才放 hero 圖 → 髮絲線 eyebrow 分隔的「關於此處 / 街道亮點」。不再用 bordered pill。
 - **住宿卡（HotelTab）= 編輯排版**（同 modal 家族）：eyebrow（子型別 `飯店/Airbnb` + `STAY · <入住日>`，hotel 藤鼠色）→ 大標（飯店名）→ 地址 meta → 髮絲線「入住資訊」+ check-in/out **等寬兩欄 + 置中分隔線** → Maps CTA。不再用 type chip / date badge。
-- **DayBanner（每日 banner）**：照片上**不蓋暗色遮罩**（中央 scrim 會讓整張照片發灰）；文字可讀性改靠**多層 text-shadow 暗色光暈**，小字（日期 / 今日行程 / 副標）用更緊更深的 `SMALL_TEXT_SHADOW`、大標用容器較柔的光暈即可。底部保留淡入米白漸層做與下方行程區的接縫。勿再加回中央暗色 scrim。
+- **DayBanner（每日 banner）**：照片上**不蓋暗色遮罩**（中央 scrim 會讓整張照片發灰）；文字可讀性改靠**多層 text-shadow 暗色光暈**，小字（日期 / 今日行程 / 副標）用更緊更深的 `SMALL_TEXT_SHADOW`、大標用容器較柔的光暈即可。底部保留淡入米白漸層做與下方行程區的接縫。勿再加回中央暗色 scrim。頂部小標題不再寫死「今日行程」：由 `bannerLabel(dateStr, dayNumber, today)`（`lib/tripDate.js`）依這個 banner 對應的日期是否真的是今天動態決定，是今天才顯示「今日行程」，否則顯示「DAY N」。
+- **DayNav 紅字語意（今天 vs. 選中）**：`jp-red` 只標記「今天」那一欄（週幾文字 + 選中時的圓點），與是否被選中無關；選中但非今天＝深色粗體（`text-jp-text font-bold`），選中且今天＝紅字粗體。圓點只在選中時出現，顏色今天用 `bg-jp-red`、非今天用深色中性（`bg-jp-text`）。regular / compact 兩變體皆同此語意，與 `ItinerarySection` 的 `NowMarker`（紅＝現在/今日/live）一致。
 
 ### 行程時間軸（ItinerarySection）
 
@@ -493,11 +486,13 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 ### Accessibility 原則
 
 - 所有可點擊卡片用 `<button type="button">` 而非 `<div onClick>`，並加 `aria-label`
-- Modal 都套 `useModalA11y`：`role="dialog"` + `aria-modal="true"` + `aria-labelledby` + ESC 關閉 + focus trap
+- Modal 都套 `useModalA11y`：`role="dialog"` + `aria-modal="true"` + `aria-labelledby` + ESC 關閉 + focus trap。例外：求婚彩蛋 `ProposalModal` 因原生複雜手勢/輸入流程，不套 `useModalA11y`，只手動 ESC + `role="dialog"` + `aria-modal` + `aria-label`，刻意不做 focus trap（signed off 2026-07-04）
 - 觸控目標 ≥ 44×44（iOS HIG），按鈕統一加 `touch-manipulation`
-- ChecklistSection 的 `<li>` 是 `role="checkbox"` + `tabIndex=0` + `Enter/Space` 切換
+- 每個 ChecklistSection 項目是 `<li>` 包一個 `<button type="button" role="checkbox" aria-checked={isChecked}>`；role/aria-checked 掛在 button 上，靠原生 button 語意取得 focus 與 Enter/Space，不需額外 tabIndex 或 keydown handler
 - **Focus**：`index.css` 只關閉滑鼠 `:focus`，全域保留 `:focus-visible`（jp-green ring，token `--glass-focus-ring`）；勿用 `outline-none` 而不補替代
 - **捲動容器**：modal / section 的 `overflow-y-auto` 一律加 `overscroll-contain`，避免捲動鏈結到背後頁面
+- **雙指縮放（pinch zoom）維持開放**：`index.html` 的 viewport meta **不設** `maximum-scale`/`user-scalable=no`（2026-07-04 起，先前鎖死違反「使用者可自行放大」的 a11y 基本需求），也沒有攔截 `touchmove`/`gesturestart` 的 JS。雙擊誤觸縮放由互動元件的 `touch-action: manipulation` 抑制，不需額外攔截。
+- **Skip link**：`App.jsx` 的 `SkipLink` 是 Router 內第一個可 focus 元素，`sr-only focus:not-sr-only`，目標 `<main id="main" tabIndex={-1}>`（HomePage / TripPage 各自的主內容容器）。HashRouter 下不能用原生 `#fragment` 錨點捲動（hash 已被路由佔用），改為 onClick `preventDefault()` 後手動 `focus()`。
 
 ### 觸覺回饋（lib/haptic.js）
 
@@ -507,7 +502,7 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 | `bump()` | 15ms | 開啟 modal、切換日期 |
 | `success([10,30,10])` | pattern | 完成關鍵操作 |
 
-包裝 `navigator.vibrate`，不支援的環境（含 iOS Safari）silent fail。
+依平台分流：iOS Safari 不支援 `navigator.vibrate`，改用 Safari 17.4+ `<input type="checkbox" switch>` trick 觸發 Taptic Engine（非 silent fail；`tap()`/`bump()` 在 iOS 上實為同一次單擊）；Android/其他環境 fallback `navigator.vibrate()`，該路徑不支援時才真正 silent fail。
 
 ### SEO / 分享
 
@@ -516,7 +511,7 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 
 ### 靜態資源路徑
 
-圖片、音樂等靜態資源放於 `public/trips/<slug>/`，以絕對路徑存取：`/trips/<slug>/images/D1.jpg`
+`public/trips/<slug>/` 慣例已於 2026-05-31 移除，現無此目錄。行程照片全面改用下方 Cloudinary 外部圖床；唯一殘留本地靜態資源是求婚彩蛋的 `public/proposal-photos/`（扁平結構，不分 slug）。`itinerary`/`food` 的 `image` 欄實作上是原樣 `src={row.image}`，貼 Cloudinary 完整 URL 即可，無路徑慣例可言。
 
 ### 外部圖片（Cloudinary）
 
@@ -540,8 +535,7 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 
 ## 部署
 
-GitHub Actions push to master → Vite build → 部署至 GitHub Pages（非 `gh-pages` 分支）。
-`public/.nojekyll` 防止 GitHub Pages 啟動 Jekyll。
+GitHub Actions push to master → `npm ci` → **`npm test`（gate，測試沒過不繼續 build）** → Vite build → 部署至 GitHub Pages（`actions/upload-pages-artifact` + `actions/deploy-pages`，非 legacy `gh-pages` 分支）。走 `deploy-pages` 本來就不會跑 Jekyll，不需要 `.nojekyll`（該檔已移除）。
 
 ---
 

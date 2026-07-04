@@ -8,6 +8,8 @@ import {
   pickActiveTrip,
   formatToday,
   groupTrips,
+  bannerLabel,
+  tripDays,
 } from '../../lib/tripDate.js'
 
 describe('parseTripDates', () => {
@@ -280,5 +282,45 @@ describe('groupTrips', () => {
   it('returns empty structure for empty / nullish input', () => {
     expect(groupTrips([])).toEqual({ nowNext: [], pastByYear: [] })
     expect(groupTrips(null)).toEqual({ nowNext: [], pastByYear: [] })
+  })
+})
+
+describe('bannerLabel', () => {
+  it('returns 今日行程 when the banner date is today', () => {
+    expect(bannerLabel('2026/06/04', 2, '2026/06/04')).toBe('今日行程')
+  })
+
+  it('returns DAY N when the banner date is not today', () => {
+    expect(bannerLabel('2026/06/05', 3, '2026/06/04')).toBe('DAY 3')
+  })
+
+  it('handles cross-year comparisons (same M/D, different year is not today)', () => {
+    expect(bannerLabel('2025/06/04', 1, '2026/06/04')).toBe('DAY 1')
+    expect(bannerLabel('2027/01/01', 5, '2027/01/01')).toBe('今日行程')
+  })
+
+  it('falls back to DAY N when date is missing', () => {
+    expect(bannerLabel('', 4, '2026/06/04')).toBe('DAY 4')
+    expect(bannerLabel(undefined, 4, '2026/06/04')).toBe('DAY 4')
+  })
+})
+
+describe('tripDays', () => {
+  it('computes inclusive day count for a shortened-end range', () => {
+    expect(tripDays('2026/01/10 - 01/14')).toBe(5)
+  })
+
+  it('computes inclusive day count across a year boundary', () => {
+    expect(tripDays('2024/12/28 - 2025/01/05')).toBe(9)
+  })
+
+  it('returns 1 for a single-day trip', () => {
+    expect(tripDays('2026/03/05')).toBe(1)
+  })
+
+  it('returns null for malformed / empty input', () => {
+    expect(tripDays('')).toBeNull()
+    expect(tripDays(undefined)).toBeNull()
+    expect(tripDays('not a date')).toBeNull()
   })
 })

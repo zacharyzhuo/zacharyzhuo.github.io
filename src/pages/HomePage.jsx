@@ -71,7 +71,7 @@ export default function HomePage() {
       )}
       <div
         style={{ transform: `translateY(${pullY}px)` }}
-        className={pullY === 0 ? 'transition-transform duration-200 ease-out' : ''}
+        className={`max-w-2xl mx-auto ${pullY === 0 ? 'transition-transform duration-200 ease-out' : ''}`}
       >
       {/* Header：與 trip page 一致 — 英文 caps eyebrow 在上、中文大標在下 */}
       <header className="px-6 pt-8 pb-6">
@@ -80,7 +80,7 @@ export default function HomePage() {
       </header>
 
       {/* Content */}
-      <main className="px-4 pb-8">
+      <main id="main" tabIndex={-1} className="px-4 pb-8">
         {loading && <HomeCardsSkeleton />}
 
         {error && (

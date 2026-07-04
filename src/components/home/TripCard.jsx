@@ -1,8 +1,8 @@
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Calendar } from 'lucide-react'
 import { prefetchSheet } from '../../hooks/useSheetData.js'
 import { useCancelableTap } from '../../hooks/useCancelableTap.js'
-import { getTripStatus } from '../../lib/tripDate.js'
+import { getTripStatus, tripDays } from '../../lib/tripDate.js'
 
 // Tier 1：主畫面馬上要的（itinerary 排程 + days 標題/banner）→ 立即併發
 const CRITICAL_TABS = ['itinerary', 'days']
@@ -26,7 +26,7 @@ function prefetchTrip(sheetId) {
 const TITLE_SHADOW = '0 1px 2px rgba(0,0,0,0.7), 0 2px 12px rgba(0,0,0,0.55)'
 const DATE_SHADOW = '0 1px 3px rgba(0,0,0,0.8), 0 1px 8px rgba(0,0,0,0.5)'
 
-function StatusPill({ status, daysToStart }) {
+function StatusPill({ status, daysToStart, dates }) {
   if (status === 'active') {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-jp-red/95 text-white text-2xs font-serif font-bold uppercase tracking-widest shadow-sm">
@@ -42,9 +42,12 @@ function StatusPill({ status, daysToStart }) {
       </span>
     )
   }
+  // 過往行程：顯示行程天數取代原本的「回顧」字樣；日期格式異常算不出來就不顯示 pill
+  const days = tripDays(dates)
+  if (days == null) return null
   return (
     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-stone-200/90 text-stone-700 text-2xs font-serif font-medium uppercase tracking-widest">
-      回顧
+      {days} 天
     </span>
   )
 }
@@ -60,14 +63,14 @@ function StatusPill({ status, daysToStart }) {
  * }} props
  */
 export default function TripCard({ trip, variant = 'feature' }) {
-  const navigate = useNavigate()
   const tap = useCancelableTap()
   const { status, daysToStart } = getTripStatus(trip.dates)
 
   const handlers = {
+    to: `/trip/${trip.slug}`,
     onPointerDown: tap.onPointerDown,
     onPointerUp: tap.onPointerUp,
-    onClick: tap.guard(() => navigate(`/trip/${trip.slug}`)),
+    onClick: tap.guardLink(),
     onMouseEnter: () => prefetchTrip(trip.sheet_id),
     onTouchStart: () => prefetchTrip(trip.sheet_id),
     'aria-label': `查看 ${trip.name} 行程`,
@@ -76,7 +79,7 @@ export default function TripCard({ trip, variant = 'feature' }) {
   // ── 索引條（過往）──
   if (variant === 'index') {
     return (
-      <button
+      <Link
         {...handlers}
         className="w-full relative flex items-stretch rounded-2xl overflow-hidden bg-washi shadow-[0_4px_12px_rgba(0,0,0,0.07)] press-springy touch-manipulation opacity-90"
       >
@@ -85,6 +88,8 @@ export default function TripCard({ trip, variant = 'feature' }) {
             <img
               src={trip.cover_image_url}
               alt=""
+              width={104}
+              height={76}
               loading="lazy"
               decoding="async"
               className="w-full h-full object-cover"
@@ -97,20 +102,23 @@ export default function TripCard({ trip, variant = 'feature' }) {
         <span className="flex-1 min-w-0 px-4 py-3.5 flex flex-col justify-center text-left">
           <span className="flex items-center justify-between gap-2 mb-1.5">
             <span className="font-serif font-bold text-jp-text text-base truncate">{trip.name}</span>
-            <StatusPill status={status} daysToStart={daysToStart} />
+            <StatusPill status={status} daysToStart={daysToStart} dates={trip.dates} />
           </span>
           <span className="flex items-center gap-1.5 text-xs text-muted font-serif tabular-nums">
             <Calendar size={12} className="flex-shrink-0" />
             {trip.dates}
           </span>
+          {trip.subtitle && (
+            <span className="text-2xs text-muted font-serif truncate mt-1">{trip.subtitle}</span>
+          )}
         </span>
-      </button>
+      </Link>
     )
   }
 
   // ── 雜誌封面大卡（進行中 / 即將出發）──
   return (
-    <button
+    <Link
       {...handlers}
       className={`w-full relative block rounded-2xl overflow-hidden bg-stone-200 press-springy touch-manipulation group aspect-[3/2] ${status === 'active' ? 'trip-halo' : ''}`}
     >
@@ -120,7 +128,8 @@ export default function TripCard({ trip, variant = 'feature' }) {
           alt={trip.name}
           width={800}
           height={534}
-          loading="lazy"
+          loading="eager"
+          fetchPriority="high"
           decoding="async"
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           style={status === 'past' ? { filter: 'saturate(0.85)' } : undefined}
@@ -134,7 +143,7 @@ export default function TripCard({ trip, variant = 'feature' }) {
 
       {/* Status pill 浮右上 */}
       <div className="absolute top-3 right-3 z-10">
-        <StatusPill status={status} daysToStart={daysToStart} />
+        <StatusPill status={status} daysToStart={daysToStart} dates={trip.dates} />
       </div>
 
       {/* 文字壓底，無 block 浮層 */}
@@ -147,6 +156,6 @@ export default function TripCard({ trip, variant = 'feature' }) {
           {trip.dates}
         </div>
       </div>
-    </button>
+    </Link>
   )
 }

@@ -6,10 +6,13 @@ function Bar({ className = '' }) {
   return <div className={`bg-stone-200/80 animate-pulse ${className}`} />
 }
 
-/** 行程頁全頁骨架：header + 日期導航 + banner + 時間軸卡片 */
+/** 行程頁全頁骨架：header + 日期導航 + banner + 時間軸卡片。
+    id="main" + tabIndex={-1}：TripPage 載入中會直接 return 這個骨架、不經過真正的
+    <main id="main">，skip link 在這個瞬間點擊會找不到目標而 no-op；骨架自己頂上
+    同一個 id 讓目標隨時存在。 */
 export function TripSkeleton() {
   return (
-    <div className="bg-washi min-h-screen safe-area-inset" role="status" aria-busy="true">
+    <main id="main" tabIndex={-1} className="bg-washi min-h-screen safe-area-inset" role="status" aria-busy="true">
       <span className="sr-only">載入行程中…</span>
 
       {/* Header */}
@@ -48,7 +51,7 @@ export function TripSkeleton() {
           </div>
         ))}
       </div>
-    </div>
+    </main>
   )
 }
 

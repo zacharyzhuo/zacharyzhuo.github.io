@@ -31,5 +31,17 @@ export function useCancelableTap() {
     fn?.(e)
   }
 
-  return { onPointerDown, onPointerUp, guard }
+  // 給 <a>/<Link> 用：取消時對 click event 呼叫 preventDefault() 擋掉原生導航；
+  // 但 modifier 鍵（cmd/ctrl/shift/alt）或非左鍵點擊一律略過，保留瀏覽器「開新分頁」原生行為。
+  const guardLink = (fn) => (e) => {
+    if (releasedOutsideRef.current) {
+      releasedOutsideRef.current = false
+      const hasModifierOrNonPrimary = e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0
+      if (!hasModifierOrNonPrimary) e.preventDefault()
+      return
+    }
+    fn?.(e)
+  }
+
+  return { onPointerDown, onPointerUp, guard, guardLink }
 }

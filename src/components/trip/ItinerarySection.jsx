@@ -168,7 +168,8 @@ function DetailModal({ row, spots, onClose }) {
   }
 
   const sheetClass = [
-    'fixed inset-x-0 bottom-0 z-50 transform',
+    // max-w-2xl mx-auto：桌面寬螢幕置中收窄（inset-x-0 + max-width + margin:auto 置中技巧），行動裝置滿版不受影響
+    'fixed inset-x-0 bottom-0 z-50 transform max-w-2xl mx-auto',
     // 開啟用 Q 彈彈簧（overshoot 由單層延伸玻璃覆蓋，無縫），關閉維持乾淨 ease-out
     isDragging ? '' : (isOpen ? 'transition-transform duration-500 ease-spring-soft' : 'transition-transform duration-300 ease-out'),
     // sheet-hidden：關閉動畫結束後 visibility 隱藏，避免 Safari 工具列透出貼在視窗底線的圓角頂緣
@@ -347,12 +348,21 @@ function DetailModal({ row, spots, onClose }) {
 /**
  * @param {{
  *   rows: Array,
- *   dayDate?: string  // 此 panel 對應的完整日期 'YYYY/MM/DD'，等於今天時插入「現在」標記
+ *   dayDate?: string,  // 此 panel 對應的完整日期 'YYYY/MM/DD'，等於今天時插入「現在」標記
+ *   detailKey?: string|null,     // 選填：外部（TripPage，經瀏覽器歷史）控制目前開啟的詳情項目
+ *   onOpenDetail?: (key: string) => void, // 選填：點卡片時呼叫，不提供則退回內部 state（原本行為）
+ *   onCloseDetail?: () => void,           // 選填：關閉時呼叫，不提供則退回內部 state
  * }} props
  * rows 包含主行程 row（無 parent）以及子項目 row（有 parent = 父 row 的 name）
+ *
+ * detailKey/onOpenDetail 為一組：兩者都給時視為「受控」（TripPage 把開啟狀態掛進瀏覽器歷史，
+ * 見 CLAUDE.md「瀏覽器歷史整合」），否則維持原本的內部 useState（例如既有的 smoke test 未帶路由）。
+ * key 格式 `${dayDate}|${row.time}|${row.name}`，靠 dayDate 保證跨日不撞號。
  */
-export default function ItinerarySection({ rows, dayDate }) {
-  const [selected, setSelected] = useState(null)
+export default function ItinerarySection({ rows, dayDate, detailKey = null, onOpenDetail, onCloseDetail }) {
+  const [localSelectedKey, setLocalSelectedKey] = useState(null)
+  const isControlled = typeof onOpenDetail === 'function'
+  const selectedKey = isControlled ? detailKey : localSelectedKey
   const cardTap = useCancelableTap()
   const [now, setNow] = useState(formatNowHHMM)
   const isToday = dayDate && dayDate === formatToday()
@@ -392,6 +402,26 @@ export default function ItinerarySection({ rows, dayDate }) {
         }, {}),
     [rows]
   )
+
+  const keyFor = (row) => `${dayDate}|${row.time}|${row.name}`
+
+  const openDetail = (row) => {
+    const key = keyFor(row)
+    if (isControlled) onOpenDetail(key)
+    else setLocalSelectedKey(key)
+  }
+  const closeDetail = () => {
+    if (isControlled) { onCloseDetail?.(); return }
+    setLocalSelectedKey(null)
+  }
+
+  const selected = useMemo(() => {
+    if (!selectedKey) return null
+    const found = mainRows.find(r => keyFor(r) === selectedKey)
+    if (!found) return null
+    return { row: found, spots: sortSpots(spotsByParent[found.name] ?? []) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedKey, mainRows, spotsByParent, dayDate])
 
   if (mainRows.length === 0) {
     return <EmptyState icon={Camera} title="此天尚無行程" hint="到 Google Sheets 的 itinerary 加幾筆，這裡就會出現時間軸。" />
@@ -433,7 +463,7 @@ export default function ItinerarySection({ rows, dayDate }) {
                   type="button"
                   onPointerDown={cardTap.onPointerDown}
                   onPointerUp={cardTap.onPointerUp}
-                  onClick={cardTap.guard(() => { setSelected({ row, spots }) })}
+                  onClick={cardTap.guard(() => openDetail(row))}
                   aria-label={`${row.time} ${label} ${row.name} 詳情`}
                   className="glass-card press-springy relative rounded-2xl py-4 pr-4 pl-4 h-full w-full flex flex-row gap-3 items-start text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
                 >
@@ -463,7 +493,7 @@ export default function ItinerarySection({ rows, dayDate }) {
                     {label}
                   </span>
 
-                  <h4 className="text-lg font-serif font-bold text-jp-text mb-1 leading-snug">{row.name}</h4>
+                  <h3 className="text-lg font-serif font-bold text-jp-text mb-1 leading-snug">{row.name}</h3>
                   {row.description && (
                     <p className="text-sm text-muted line-clamp-3 font-serif mb-2 leading-relaxed opacity-80">
                       {row.description}
@@ -526,7 +556,7 @@ export default function ItinerarySection({ rows, dayDate }) {
       <DetailModal
         row={selected?.row ?? null}
         spots={selected?.spots ?? []}
-        onClose={() => setSelected(null)}
+        onClose={closeDetail}
       />
     </>
   )

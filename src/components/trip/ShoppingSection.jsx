@@ -59,15 +59,23 @@ function groupItems(rows) {
   return groups
 }
 
-/** Google Maps 導航小鈕（玻璃圓鈕）。 */
-function NavButton({ name, link }) {
+/**
+ * Google Maps 導航小鈕。
+ *   - 預設（地點 / 獨棟店 / 建築標頭）：玻璃圓鈕。
+ *   - ghost（棟內子店）：無玻璃圓底的純 icon 鈕，視覺降噪但仍保留 ≥44px 點擊區。
+ */
+function NavButton({ name, link, ghost = false }) {
   if (!link) return null
   return (
     <a
       href={link}
       target="_blank"
       rel="noopener noreferrer"
-      className="p-2.5 frosted-glass-button rounded-full text-secondary transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
+      className={
+        ghost
+          ? 'p-2.5 text-stone-400 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0'
+          : 'p-2.5 frosted-glass-button rounded-full text-secondary transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0'
+      }
       onClick={e => e.stopPropagation()}
       aria-label={`查看 ${name} 的位置`}
     >
@@ -88,7 +96,7 @@ function ShopMeta({ floor, hours }) {
       {floor && hours && <span className="opacity-40">·</span>}
       {hours && (
         <span className="flex items-center gap-1.5">
-          <Clock size={13} className="shrink-0" /> {hours}
+          <Clock size={13} className="shrink-0" aria-hidden="true" /> {hours}
         </span>
       )}
     </div>
@@ -121,17 +129,17 @@ function ShopRow({ name, floor, hours, description, link, marker = 'solid', comp
     <div className="flex-1 min-w-0">
       <div className={`flex justify-between items-start ${compact ? 'mb-1.5' : 'mb-2'}`}>
         <div className="min-w-0">
-          <h4
+          <h3
             className={`font-bold text-jp-text font-serif flex items-center gap-2 ${
               compact ? 'text-base leading-snug' : 'text-lg leading-tight'
             }`}
           >
             <Marker variant={marker} />
             {name}
-          </h4>
+          </h3>
           <ShopMeta floor={floor} hours={hours} />
         </div>
-        <NavButton name={name} link={link} />
+        <NavButton name={name} link={link} ghost={compact} />
       </div>
       {description && (
         <p className={`text-secondary leading-relaxed font-serif ${compact ? 'text-[13px]' : 'text-sm'}`}>

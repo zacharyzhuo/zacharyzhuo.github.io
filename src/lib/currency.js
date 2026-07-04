@@ -44,5 +44,10 @@ export function formatRate(value) {
   else if (abs >= 10) digits = 1
   else if (abs >= 1) digits = 2
   else digits = 4
-  return value.toFixed(digits)
+  // useGrouping: false 保留原本 toFixed 的輸出形狀（無千分位逗號）
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+    useGrouping: false,
+  }).format(value)
 }

@@ -141,7 +141,7 @@ export default function ChecklistSection({ rows, slug }) {
                   <div className="h-1 rounded-full bg-stone-200/60 overflow-hidden mb-3">
                     <div
                       key={isCelebrating ? `${category}-celebrating` : category}
-                      className={`h-full bg-jp-green transition-all duration-300 ease-out${isCelebrating ? ' bar-celebrate' : ''}`}
+                      className={`h-full bg-jp-green transition-[width] duration-300 ease-out${isCelebrating ? ' bar-celebrate' : ''}`}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -169,7 +169,7 @@ export default function ChecklistSection({ rows, slug }) {
                               <Check size={12} strokeWidth={3} />
                             </div>
                             <span className={`text-base font-serif transition-colors leading-tight ${
-                              isChecked ? 'text-stone-400 line-through' : 'text-jp-text'
+                              isChecked ? 'text-muted line-through' : 'text-jp-text'
                             }`}>
                               {item}
                             </span>

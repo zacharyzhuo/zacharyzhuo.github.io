@@ -1,3 +1,5 @@
+import { bannerLabel } from '../../lib/tripDate.js'
+
 /**
  * @param {{
  *   bannerUrl?: string,
@@ -6,14 +8,17 @@
  *   dateLabel?: string,  // 例：'06/04 · 週四'
  *   tripName?: string,   // 用來判斷 title === tripName 時隱藏 subtitle 避免重複
  *   eager?: boolean,     // 當前日 panel 設 true：圖片改 eager + fetchpriority high（above-the-fold）
+ *   date?: string,       // 此 banner 對應的完整日期 'YYYY/MM/DD'，給 bannerLabel 判斷是否為今天
+ *   dayNumber?: number,  // 第幾天，非今天時顯示「DAY N」
  * }} props
  */
 // 小字（日期 / 今日行程 / 副標）筆畫細、又常壓在亮色天空上，靠更緊更深的陰影撐可讀；大標夠粗用容器的光暈即可。
-const SMALL_TEXT_SHADOW = '0 1px 2px rgba(0,0,0,0.85), 0 0 4px rgba(0,0,0,0.6)'
+const SMALL_TEXT_SHADOW = '0 1px 1px rgba(0,0,0,0.95), 0 1px 2px rgba(0,0,0,0.85), 0 0 4px rgba(0,0,0,0.6)'
 
-export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripName, eager = false }) {
+export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripName, eager = false, date, dayNumber }) {
   // subtitle 跟 trip 主名稱重複時隱藏（例：subtitle="宿霧" / tripName="宿霧"）
   const showSubtitle = subtitle && subtitle !== tripName && subtitle !== title
+  const eyebrowLabel = bannerLabel(date, dayNumber)
 
   return (
     <div className="relative rounded-none overflow-hidden h-36 group">
@@ -53,7 +58,7 @@ export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripN
         )}
         <div className="flex items-center gap-2 text-2xs tracking-[0.2em] uppercase mb-1.5 font-serif" style={{ textShadow: SMALL_TEXT_SHADOW }}>
           <span className="w-5 h-[1px] bg-white drop-shadow-[0_0_2px_rgba(0,0,0,0.6)]" />
-          <span>今日行程</span>
+          <span>{eyebrowLabel}</span>
           <span className="w-5 h-[1px] bg-white drop-shadow-[0_0_2px_rgba(0,0,0,0.6)]" />
         </div>
         {title && (
