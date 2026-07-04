@@ -999,9 +999,18 @@ a:focus-visible,
 }
 
 /* ── 登機證撕票口（FlightsTab）────────────────────────────
-   fallback：mask 挖半圓。WebKit 的 mask 裁不到 backdrop-filter 的 backing layer，
-   鏤空處會殘留卡片自身的一層薄霜（看起來像蒙了一層膜）。 */
+   挖洞：支援 shape() 的引擎用 clip-path（邊緣較銳利），其餘 fallback mask。
+
+   ⚠️ 這張卡不帶 backdrop-filter（覆蓋 .glass-card）：iOS WebKit 對「巢狀在
+   frosted sheet 捲動容器內」的卡片，mask 與 clip-path 都裁不到 backdrop-filter
+   的 backing layer（sheet 頂層的 clip-path 黑角解法在這層失效，實機驗證過），
+   鏤空處會殘留一層薄霜。卡片本就疊在已 frosted 的 sheet 上，自身再 blur 的
+   視覺增益趨近於零 → 直接關掉 backing 來源、以稍高底色不透明度補足，
+   鏤空在所有引擎都保證乾淨。 */
 .flight-ticket {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: rgba(255, 255, 255, 0.64);
   -webkit-mask-image: radial-gradient(circle 9px at left 44px, transparent 8.5px, #000 9px),
     radial-gradient(circle 9px at right 44px, transparent 8.5px, #000 9px);
   mask-image: radial-gradient(circle 9px at left 44px, transparent 8.5px, #000 9px),
