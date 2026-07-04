@@ -999,18 +999,25 @@ a:focus-visible,
 }
 
 /* ── 登機證撕票口（FlightsTab）────────────────────────────
-   挖洞：支援 shape() 的引擎用 clip-path（邊緣較銳利），其餘 fallback mask。
+   挖洞用 mask（radial-gradient 半圓，幾何在所有引擎穩定；shape() 的 arc 在
+   正半圓為退化 case，cw/ccw 選邊跨引擎不穩且會產生 clip 區外凸 artifact，
+   已試過並否決，勿再改回 clip-path 挖洞）。
 
-   ⚠️ 這張卡不帶 backdrop-filter（覆蓋 .glass-card）：iOS WebKit 對「巢狀在
-   frosted sheet 捲動容器內」的卡片，mask 與 clip-path 都裁不到 backdrop-filter
-   的 backing layer（sheet 頂層的 clip-path 黑角解法在這層失效，實機驗證過），
-   鏤空處會殘留一層薄霜。卡片本就疊在已 frosted 的 sheet 上，自身再 blur 的
-   視覺增益趨近於零 → 直接關掉 backing 來源、以稍高底色不透明度補足，
-   鏤空在所有引擎都保證乾淨。 */
+   「薄膜感」的三個來源都在這裡拔除：
+   1. 卡片自身 backdrop-filter：iOS WebKit 對巢狀在 frosted sheet 捲動容器內的
+      卡片，mask/clip-path 都裁不到 backing layer，鏤空處殘霜（實機驗證）。
+      卡片本就疊在已 frosted 的 sheet 上，自身 blur 增益趨近零 → 關掉，
+      以稍高底色不透明度補足。
+   2. 卡片自身 box-shadow：與外層 wrapper 投影重複，且 iOS 對其圓角裁切不可信。
+   3. ::before 的 6% 白 sheen：正好蓋在 y=44 撕票口上。
+
+   剩下洞裡看到的是 sheet 本身的毛玻璃 —— 那是設計（洞透到的「桌面」就是
+   frosted sheet），靠 ::after 的打孔內緣陰影把它讀成「真的孔」。 */
 .flight-ticket {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   background: rgba(255, 255, 255, 0.64);
+  box-shadow: none;
   -webkit-mask-image: radial-gradient(circle 9px at left 44px, transparent 8.5px, #000 9px),
     radial-gradient(circle 9px at right 44px, transparent 8.5px, #000 9px);
   mask-image: radial-gradient(circle 9px at left 44px, transparent 8.5px, #000 9px),
@@ -1021,29 +1028,19 @@ a:focus-visible,
   mask-composite: intersect;
 }
 
-/* shape() 版（Safari 18.4+ / Chrome 135+）：clip-path 在合成器層裁切、連 backdrop-filter
-   backing 一起裁（同 .glass-bottom-sheet 黑角解法），鏤空處真正透出背景、無殘膜。
-   輪廓 = rounded-2xl（16px 圓角）矩形 + 兩側 y=44（色帶下緣）r=9px 凹半圓。
-   繞行方向順時針：四角凸圓弧 cw、撕票口凹圓弧 ccw。 */
-@supports (clip-path: shape(from 0 0, line to 100% 0, close)) {
-  .flight-ticket {
-    -webkit-mask-image: none;
-    mask-image: none;
-    clip-path: shape(
-      from 16px 0,
-      line to calc(100% - 16px) 0,
-      arc to 100% 16px of 16px cw,
-      line to 100% 35px,
-      arc to 100% 53px of 9px ccw,
-      line to 100% calc(100% - 16px),
-      arc to calc(100% - 16px) 100% of 16px cw,
-      line to 16px 100%,
-      arc to 0 calc(100% - 16px) of 16px cw,
-      line to 0 53px,
-      arc to 0 35px of 9px ccw,
-      line to 0 16px,
-      arc to 16px 0 of 16px cw,
-      close
-    );
-  }
+.flight-ticket::before {
+  content: none;
+}
+
+/* 打孔深度提示：沿兩個半圓孔的外緣一圈細內陰影（畫在卡片上、蓋過色帶與虛線，
+   孔內部分被 mask 一起挖掉，只留卡面上的環）。真門票的孔看起來「空」，
+   靠的是邊緣陰影，不是孔裡的內容。 */
+.flight-ticket::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle 14px at 0 44px, rgba(0, 0, 0, 0) 9px, rgba(0, 0, 0, 0.14) 9.5px, rgba(0, 0, 0, 0) 13px),
+    radial-gradient(circle 14px at 100% 44px, rgba(0, 0, 0, 0) 9px, rgba(0, 0, 0, 0.14) 9.5px, rgba(0, 0, 0, 0) 13px);
 }

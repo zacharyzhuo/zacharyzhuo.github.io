@@ -464,7 +464,7 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 
 **脊線是行程時間軸卡的專屬招牌，其他 section 用不同裝置表達分類色**：
 
-- **航班卡（FlightsTab）= 登機證**：頂部 transport **半透明淡色色帶**（`${categoryInk('transport')}33` ≈ 20% 底 + transport ink 深色字，清透不再大面積實心，色帶固定高 `h-11`=44px），色帶下接**撕票口**（虛線 + 兩側用 CSS `mask`（`FLIGHT_NOTCH_STYLE`，雙 radial-gradient + `mask-composite: intersect` / `-webkit-mask-composite: source-in`）在 y=44 挖真半圓鏤空，透出底層 sheet）；再接玻璃機身區，航線（端點/線/飛機）用 transport ink（`categoryInk` + `currentColor`）。⚠️ mask 會連投影一起裁掉，故外層另包 wrapper 掛 box-shadow；WebKit 下 `mask` 不會裁 `backdrop-filter`，鏤空處會殘留卡片自身的一層淡霜（已知限制）。
+- **航班卡（FlightsTab）= 登機證**：頂部 transport **半透明淡色色帶**（`${categoryInk('transport')}33` ≈ 20% 底 + transport ink 深色字，清透不再大面積實心，色帶固定高 `h-11`=44px），色帶下接**撕票口**（虛線 + 兩側用 CSS `mask`（`.flight-ticket`，見 index.css；雙 radial-gradient + `mask-composite: intersect`）在 y=44 挖真半圓鏤空，透出底層 sheet）；再接機身區，航線（端點/線/飛機）用 transport ink（`categoryInk` + `currentColor`）。⚠️ mask 會連投影一起裁掉，故外層另包 wrapper 掛 box-shadow。**撕票口「薄膜感」已於 2026-07-04 解決**（`.flight-ticket` 覆蓋 `.glass-card`）：卡片自身 backdrop-filter / box-shadow / ::before sheen 全拔（iOS 對巢狀卡片的 mask/clip-path 都裁不到 backdrop backing，實機驗證；底色以 0.64 補償），並以 `::after` 沿孔緣畫打孔內陰影。⚠️ 勿改用 `clip-path: shape()` 挖洞：正半圓 arc 是退化 case，cw/ccw 跨引擎選邊不穩、會產生 clip 外凸 artifact（已試過否決）。洞內看到的乳白是 sheet 本身的 frost，屬設計而非 bug。
 - **逛街卡（ShoppingSection）= 索引 tag**：樓層 `FloorTag`（購物色淡 chip）當左錨點，**不再用重複的袋子 icon**；無樓層時 tag 內顯示一顆色點維持對齊。建築卡標頭無 icon，識別色交給下方樓層 tag。
 - **美食卡（FoodSection）= 縮圖 + 色點**：店名前一顆弁柄色小圓點當分類標記；有 `image` 時左側縮圖。
 - **行程 modal（DetailModal）= 編輯排版**：彩色 eyebrow（`label` + `en`）→ 標題（`text-2xl`，同住宿卡）→ 一行 meta（`時間 · 地點`，**無地址不顯示**，已修掉 placeholder）→ 有 `image` 才放 hero 圖 → 髮絲線 eyebrow 分隔的「關於此處 / 街道亮點」。不再用 bordered pill。
