@@ -7,16 +7,9 @@ import { openExternal } from '../../lib/openExternal.js'
 import { categoryInk } from '../../lib/categories.js'
 
 // 登機證撕票口：在色帶下緣（y=44px，對應色帶高度 h-11）兩側挖「真的」半圓鏤空，
-// 透出底層 BottomSheet 背景（用 mask，非貼色塊）。外層需另包 wrapper 保住投影（mask 會連陰影一起裁掉）。
-const FLIGHT_NOTCH = 'radial-gradient(circle 9px at left 44px, transparent 8.5px, #000 9px), radial-gradient(circle 9px at right 44px, transparent 8.5px, #000 9px)'
-const FLIGHT_NOTCH_STYLE = {
-  WebkitMaskImage: FLIGHT_NOTCH,
-  maskImage: FLIGHT_NOTCH,
-  WebkitMaskRepeat: 'no-repeat',
-  maskRepeat: 'no-repeat',
-  WebkitMaskComposite: 'source-in',
-  maskComposite: 'intersect',
-}
+// 透出底層 BottomSheet 背景。樣式在 index.css 的 .flight-ticket：
+// 支援 shape() 的引擎用 clip-path（連 backdrop-filter backing 一起裁，鏤空無殘膜），
+// 其餘 fallback 到 mask。外層仍需 wrapper 保住投影（mask/clip-path 都會裁掉自身陰影）。
 
 const INFO_TABS = [
   { key: 'flights', label: '航班資訊' },
@@ -60,7 +53,7 @@ function FlightsTab({ flights }) {
           return (
             // wrapper 只負責投影（mask 會裁掉陰影，故投影掛在沒被 mask 的外層）
             <div key={i} className="rounded-2xl" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.07)' }}>
-            <div className="glass-card relative rounded-2xl overflow-hidden" style={FLIGHT_NOTCH_STYLE}>
+            <div className="glass-card relative rounded-2xl overflow-hidden flight-ticket">
               {/* 登機證色帶：transport 半透明淡色 + 深色字（清透版，不再大面積實心）。h-11=44px 對應撕票口 y */}
               <div
                 className="flex justify-between items-center px-5 h-11"

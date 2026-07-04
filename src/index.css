@@ -997,3 +997,44 @@ a:focus-visible,
   display: inline-block;
   animation: check-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
+
+/* ── 登機證撕票口（FlightsTab）────────────────────────────
+   fallback：mask 挖半圓。WebKit 的 mask 裁不到 backdrop-filter 的 backing layer，
+   鏤空處會殘留卡片自身的一層薄霜（看起來像蒙了一層膜）。 */
+.flight-ticket {
+  -webkit-mask-image: radial-gradient(circle 9px at left 44px, transparent 8.5px, #000 9px),
+    radial-gradient(circle 9px at right 44px, transparent 8.5px, #000 9px);
+  mask-image: radial-gradient(circle 9px at left 44px, transparent 8.5px, #000 9px),
+    radial-gradient(circle 9px at right 44px, transparent 8.5px, #000 9px);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+/* shape() 版（Safari 18.4+ / Chrome 135+）：clip-path 在合成器層裁切、連 backdrop-filter
+   backing 一起裁（同 .glass-bottom-sheet 黑角解法），鏤空處真正透出背景、無殘膜。
+   輪廓 = rounded-2xl（16px 圓角）矩形 + 兩側 y=44（色帶下緣）r=9px 凹半圓。
+   繞行方向順時針：四角凸圓弧 cw、撕票口凹圓弧 ccw。 */
+@supports (clip-path: shape(from 0 0, line to 100% 0, close)) {
+  .flight-ticket {
+    -webkit-mask-image: none;
+    mask-image: none;
+    clip-path: shape(
+      from 16px 0,
+      line to calc(100% - 16px) 0,
+      arc to 100% 16px of 16px cw,
+      line to 100% 35px,
+      arc to 100% 53px of 9px ccw,
+      line to 100% calc(100% - 16px),
+      arc to calc(100% - 16px) 100% of 16px cw,
+      line to 16px 100%,
+      arc to 0 calc(100% - 16px) of 16px cw,
+      line to 0 53px,
+      arc to 0 35px of 9px ccw,
+      line to 0 16px,
+      arc to 16px 0 of 16px cw,
+      close
+    );
+  }
+}
