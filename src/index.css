@@ -728,8 +728,12 @@ a:focus-visible,
 }
 
 /* 分離陰影改掛外層 frame：glass-bottom-sheet 的 clip-path 會裁掉自身 outset 陰影，
-   而 frame 無 clip-path，向上的分離陰影才留得住。 */
+   而 frame 無 clip-path，向上的分離陰影才留得住。
+   frame 必須帶與玻璃相同的圓角：box-shadow 沿 border-radius 投影，
+   否則方形 frame 的陰影會在玻璃圓角外露出方形「肩膀」（實機圓角殘存）。
+   frame 無背景也不裁 overflow，這個 radius 只影響陰影形狀。 */
 [aria-hidden="false"] .glass-sheet-frame {
+  border-radius: 2rem 2rem 0 0;
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.05);
 }
 
@@ -769,8 +773,10 @@ a:focus-visible,
   border-left: none;
 }
 
-/* 分離陰影改掛外層 frame：glass-sidebar 的 clip-path 會裁掉自身 outset 陰影。 */
+/* 分離陰影改掛外層 frame：glass-sidebar 的 clip-path 會裁掉自身 outset 陰影。
+   同 glass-sheet-frame：radius 讓陰影沿圓角投影，消除圓角外的方形陰影肩膀。 */
 [aria-hidden="false"] .glass-sidebar-frame {
+  border-radius: 0 2rem 2rem 0;
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.04);
 }
 
