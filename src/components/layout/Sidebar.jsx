@@ -165,9 +165,11 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
               onPointerDown={tap.onPointerDown}
               onPointerUp={tap.onPointerUp}
               onClick={tap.guard(() => {
-                onClose()
+                // 不呼叫 onClose()：它是 navigate(-1)，和下面的 push 同 tick 會互相打架
+                // （go(-1) 非同步、push 同步，結果導航被抵消）。直接 replace 導向首頁，
+                // 順便把 sidebar 的 panel entry 蓋掉：back 會回到行程頁本身而非開著的側欄。
                 // ?home=1 告訴 HomePage 略過自動跳轉，避免無限循環
-                navigate('/?home=1')
+                navigate('/?home=1', { replace: true })
               })}
               className="frosted-tab-track press-springy font-serif text-xs text-muted flex items-center gap-1.5 touch-manipulation"
               style={{
