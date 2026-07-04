@@ -238,7 +238,10 @@ export default function ShoppingSection({ rows }) {
         ref={scrollRef}
         className="flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-hide px-8 pb-24 space-y-4 pt-2"
       >
-        <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">逛街清單</h2>
+        <div>
+          <p className="text-2xs tracking-[0.25em] uppercase text-muted font-serif font-medium pt-8 mb-1">Shopping Map</p>
+          <h2 className="text-2xl font-serif font-bold text-jp-text pb-2 pr-12">逛街清單</h2>
+        </div>
         {grouped.length === 0 ? (
           <EmptyState icon={ShoppingBag} title="這個區域還沒有店" hint="切到其他區看看，或回去 shopping tab 加幾筆。" />
         ) : (

@@ -105,7 +105,10 @@ export default function ChecklistSection({ rows, slug }) {
   return (
     <div className="flex flex-col relative h-full">
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-hide px-8 pb-10 pt-2">
-        <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">行李清單</h2>
+        <div>
+          <p className="text-2xs tracking-[0.25em] uppercase text-muted font-serif font-medium pt-8 mb-1">Packing List</p>
+          <h2 className="text-2xl font-serif font-bold text-jp-text pb-2 pr-12">行李清單</h2>
+        </div>
 
         {rows.length === 0 ? (
           <EmptyState icon={ClipboardList} title="尚無行李清單" hint="填好 checklist tab，這裡能勾選 + 看完成進度。" />

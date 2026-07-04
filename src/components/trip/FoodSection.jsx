@@ -50,7 +50,10 @@ export default function FoodSection({ rows }) {
         ref={scrollRef}
         className="flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-hide px-8 pb-24 space-y-6 pt-2"
       >
-        <h2 className="text-2xl font-serif font-bold text-jp-text pt-8 pb-2 pr-12">美食清單</h2>
+        <div>
+          <p className="text-2xs tracking-[0.25em] uppercase text-muted font-serif font-medium pt-8 mb-1">Food List</p>
+          <h2 className="text-2xl font-serif font-bold text-jp-text pb-2 pr-12">美食清單</h2>
+        </div>
         <div className="space-y-8">
           {Object.entries(byCategory).map(([category, items]) => (
             <div key={category}>
