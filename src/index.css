@@ -1032,15 +1032,5 @@ a:focus-visible,
   content: none;
 }
 
-/* 打孔深度提示：沿兩個半圓孔的外緣一圈細內陰影（畫在卡片上、蓋過色帶與虛線，
-   孔內部分被 mask 一起挖掉，只留卡面上的環）。真門票的孔看起來「空」，
-   靠的是邊緣陰影，不是孔裡的內容。 */
-.flight-ticket::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle 14px at 0 44px, rgba(0, 0, 0, 0) 9px, rgba(0, 0, 0, 0.14) 9.5px, rgba(0, 0, 0, 0) 13px),
-    radial-gradient(circle 14px at 100% 44px, rgba(0, 0, 0, 0) 9px, rgba(0, 0, 0, 0.14) 9.5px, rgba(0, 0, 0, 0) 13px);
-}
+/* 撕票口不加孔緣陰影（試過，被否決：顯髒）。
+   洞內的乳白 = sheet 自身的 frost 材質，非殘留層，無法在不打穿 sheet 的前提下消除。 */
