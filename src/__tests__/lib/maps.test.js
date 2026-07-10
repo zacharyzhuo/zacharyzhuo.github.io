@@ -61,14 +61,15 @@ describe('toMapPoints', () => {
     { name: '飯店', type: 'hotel', _day: 1, lat: '35.6', lng: '139.7' },
     { name: '機場', type: 'transport', _day: 1, lat: '35.55', lng: '139.78', time: '08:00' },
   ]
-  it('keeps rows with valid coords; transport/hotel with day become route-only points', () => {
+  it('keeps rows with valid coords; transport/hotel/food/shopping with day become route-only points', () => {
     const pts = toMapPoints(rows)
     expect(pts.map(p => p.name)).toEqual(['明治神宮', '一蘭', '備選咖啡', '飯店', '機場'])
   })
-  it('flags transport/hotel-with-day as routeOnly (bucket = type); others not routeOnly', () => {
+  it('flags transport/hotel/food/shopping-with-day as routeOnly (bucket = type); attraction/backup not routeOnly', () => {
     const byName = Object.fromEntries(toMapPoints(rows).map(p => [p.name, p]))
     expect(byName['飯店']).toMatchObject({ bucket: 'hotel', routeOnly: true })
     expect(byName['機場']).toMatchObject({ bucket: 'transport', routeOnly: true })
+    expect(byName['一蘭']).toMatchObject({ bucket: 'food', routeOnly: true })
     expect(byName['明治神宮'].routeOnly).toBe(false)
     expect(byName['備選咖啡']).toMatchObject({ bucket: 'backup', routeOnly: false })
   })

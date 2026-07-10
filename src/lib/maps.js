@@ -35,9 +35,11 @@ export function pointBucket(row) {
 
 /**
  * 把 normalized itinerary 轉成地圖點（只留有座標者）。
- * `transport` / `hotel` 且有日期 → 標 `routeOnly`：只進「路線」模式（整天動線含
- * 機場 / 港口 / 飯店），不進「探索」（交通非探索點；住宿改由 accommodation tab 供探索）。
- * bucket 用其 type 著色（transport 藍鼠 / hotel 藤鼠）。其餘照 pointBucket。
+ * `transport` / `hotel` / `food` / `shopping` 且有日期 → 標 `routeOnly`：只進「路線」
+ * 模式（畫整天動線），不進「探索」。food / shopping 的探索點改由 food / shopping tab
+ * 清單供應 —— itinerary 與清單若都上探索會重複、且兩邊的 hours/link/desc 常不一致，
+ * 故探索一律以清單為準；交通非探索點；住宿由 accommodation tab 供探索。attraction 仍
+ * 進探索（沒有對應的清單 tab）。bucket 用其 type 著色。其餘照 pointBucket。
  */
 export function toMapPoints(normalized) {
   if (!Array.isArray(normalized)) return []
@@ -46,7 +48,8 @@ export function toMapPoints(normalized) {
     if (!coords) return acc
     const hasDay = row._day !== null && row._day !== undefined
     const type = row.type || 'attraction'
-    const routeOnly = hasDay && (type === 'transport' || type === 'hotel')
+    const routeOnly =
+      hasDay && (type === 'transport' || type === 'hotel' || type === 'food' || type === 'shopping')
     const bucket = routeOnly ? type : pointBucket(row)
     if (!bucket) return acc
     acc.push({
