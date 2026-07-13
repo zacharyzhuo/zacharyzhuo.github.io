@@ -142,7 +142,7 @@ function ShopRow({ name, floor, hours, description, link, marker = 'solid', comp
         <NavButton name={name} link={link} ghost={compact} />
       </div>
       {description && (
-        <p className={`text-secondary leading-relaxed font-serif ${compact ? 'text-[13px]' : 'text-sm'}`}>
+        <p className={`allow-select text-secondary leading-relaxed font-serif ${compact ? 'text-[13px]' : 'text-sm'}`}>
           {description}
         </p>
       )}

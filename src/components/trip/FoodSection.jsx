@@ -109,7 +109,7 @@ export default function FoodSection({ rows }) {
                         )}
                       </div>
                       {(row.note || row.description || row.address) && (
-                        <p className="text-sm text-secondary leading-relaxed font-serif">
+                        <p className="allow-select text-sm text-secondary leading-relaxed font-serif">
                           {row.note || row.description || row.address}
                         </p>
                       )}

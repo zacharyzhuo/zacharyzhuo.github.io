@@ -187,7 +187,7 @@ function HotelTab({ accommodation }) {
               {h.address && (
                 <div className="flex items-center gap-1.5 text-sm text-muted font-serif">
                   <MapPin size={13} className="shrink-0" style={{ color: categoryInk('hotel') }} aria-hidden="true" />
-                  <span className="min-w-0">{h.address}</span>
+                  <span className="allow-select min-w-0">{h.address}</span>
                 </div>
               )}
 
@@ -217,7 +217,7 @@ function HotelTab({ accommodation }) {
               )}
 
               {h.note && (
-                <p className="text-sm text-secondary mt-4 font-serif leading-relaxed whitespace-pre-line">{h.note}</p>
+                <p className="allow-select text-sm text-secondary mt-4 font-serif leading-relaxed whitespace-pre-line">{h.note}</p>
               )}
 
               {h.link && (
