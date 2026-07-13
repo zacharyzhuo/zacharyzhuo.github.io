@@ -78,7 +78,7 @@ function SpotItem({ spot }) {
           </span>
         </div>
         {spot.description && (
-          <p className="text-xs text-muted font-serif leading-relaxed line-clamp-1 pl-[2px]">
+          <p className="allow-select text-xs text-muted font-serif leading-relaxed line-clamp-1 pl-[2px]">
             {spot.description}
           </p>
         )}
@@ -268,7 +268,7 @@ function DetailModal({ row, spots, onClose }) {
                 {current.address && (
                   <span className="inline-flex items-center gap-1 min-w-0">
                     <MapPin size={13} className="shrink-0" style={{ color: categoryInk(current.type) }} />
-                    <span className="truncate">{current.address}</span>
+                    <span className="allow-select truncate">{current.address}</span>
                   </span>
                 )}
               </div>
@@ -294,7 +294,7 @@ function DetailModal({ row, spots, onClose }) {
                   <span className="text-2xs font-serif font-bold uppercase tracking-[0.2em] text-muted shrink-0">關於此處</span>
                   <div className="h-[1px] flex-1 bg-hairline" />
                 </div>
-                <p className="text-jp-text leading-relaxed font-serif text-base opacity-90 whitespace-pre-line">
+                <p className="allow-select text-jp-text leading-relaxed font-serif text-base opacity-90 whitespace-pre-line">
                   {current.note}
                 </p>
               </section>
