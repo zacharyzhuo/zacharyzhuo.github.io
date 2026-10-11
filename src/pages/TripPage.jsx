@@ -453,6 +453,7 @@ export default function TripPage() {
           isOpen={easterEgg.open}
           onClose={easterEgg.reset}
           heartPosition={easterEgg.heartPosition}
+          warm={activeDay === extras.easterEggDay}
         />
       )}
     </div>

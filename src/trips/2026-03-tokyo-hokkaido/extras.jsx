@@ -6,10 +6,12 @@ import ShareSheet from './extras/ShareSheet.jsx'
 import HeartIcon from './extras/HeartIcon.jsx'
 
 const BASE = env.BASE_URL
+// BGM：AAC-LC 160 kbps m4a（原 320 kbps mp3 轉檔，手機 / 耳機聽不出差異，體積減半）
+const BGM_URL = `${BASE}proposal-photos/sukidakara.m4a`
 
 
 // Proposal Modal (彩蛋 - Instagram 限時動態風格)
-const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
+const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
   const [visibleLayer, setVisibleLayer] = useState(0)
   const [showTransition, setShowTransition] = useState(false)
@@ -55,40 +57,40 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
   // 下滑判定門檻：超過才進入拖拉，並以門檻為 0 點起算（不跳 10px）
   const SWIPE_ENGAGE_PX = 10
 
-  // Edge-cache warm-up：在使用者點開彩蛋之前，把所有照片 / 影片悄悄塞進
-  //   - HTTP cache（Fastly edge）
-  //   - SW trip-assets cache（30 天 CacheFirst）
-  // 一旦這趟 trip extras 載入過一次，後續開彩蛋就是熱的。
-  // 流量考量：省流量模式 / 2G 直接跳過；其餘交給瀏覽器 idle queue 排隊。
+  // Warm-up：使用者停在彩蛋那天（warm=true，由 TripPage 以 activeDay === easterEggDay 判斷）才開始，
+  // 依播放順序「逐一」fetch 全部媒體 + BGM，讓 sw.js 的 proposal-media CacheFirst（30 天）存成完整 200 response；
+  // 之後開彩蛋全部零流量、離線也能播（BGM 的 Range 請求由 RangeRequestsPlugin 從快取切片）。
+  // 逐一而非並發：前面的先熱、不跟頁面其他請求搶頻寬；切到別天 / 卸載就 abort。
+  // 流量考量：省流量模式 / 2G 直接跳過（iOS Safari 沒有 navigator.connection，等於永遠執行，
+  // 但有 SW 快取後每 30 天最多跑一次完整下載）。
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (!warm || typeof window === 'undefined') return
     const conn = navigator.connection
     if (conn?.saveData) return
     if (conn && ['slow-2g', '2g'].includes(conn.effectiveType)) return
 
+    const controller = new AbortController()
     const schedule = window.requestIdleCallback || ((cb) => setTimeout(cb, 500))
-    let cancelled = false
-    const handle = schedule(() => {
-      if (cancelled) return
-      for (const url of PROPOSAL_PHOTOS) {
-        if (isVideoUrl(url)) {
-          // 影片用 fetch 觸發 SW caching；不等回應，失敗就算了
-          fetch(url, { cache: 'force-cache', mode: 'no-cors' }).catch(() => {})
-        } else {
-          // 圖片用 Image() 最簡單，所有瀏覽器都支援
-          const img = new Image()
-          img.src = url
+    const handle = schedule(async () => {
+      for (const url of [...PROPOSAL_PHOTOS, BGM_URL]) {
+        if (controller.signal.aborted) return
+        try {
+          // 讀完 body 才算存進 SW cache；失敗（離線 / abort）就停，下次再來
+          const res = await fetch(url, { signal: controller.signal })
+          await res.arrayBuffer()
+        } catch {
+          return
         }
       }
     }, { timeout: 3000 })
 
     return () => {
-      cancelled = true
+      controller.abort()
       if (window.cancelIdleCallback && typeof handle === 'number') {
         try { window.cancelIdleCallback(handle) } catch { /* ignore */ }
       }
     }
-  }, [])
+  }, [warm])
   const currentIsVideo = isVideoUrl(photos[currentPhotoIndex])
   const visibleVideoRef = visibleLayer === 0 ? videoRef0 : videoRef1
 
@@ -579,7 +581,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       {/* BGM */}
       <audio
         ref={bgmRef}
-        src={`${BASE}proposal-photos/sukidakara.mp3`}
+        src={BGM_URL}
         loop
         preload="auto"
       />

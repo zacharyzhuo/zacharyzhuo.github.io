@@ -87,6 +87,7 @@ export default function TripCard({ trip, variant = 'feature' }) {
           {trip.cover_image_url ? (
             <img
               src={trip.cover_image_url}
+              crossOrigin="anonymous"
               alt=""
               width={104}
               height={76}
@@ -125,6 +126,7 @@ export default function TripCard({ trip, variant = 'feature' }) {
       {trip.cover_image_url ? (
         <img
           src={trip.cover_image_url}
+          crossOrigin="anonymous"
           alt={trip.name}
           width={800}
           height={534}

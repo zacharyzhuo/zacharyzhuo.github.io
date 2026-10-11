@@ -25,6 +25,7 @@ export default function DayBanner({ bannerUrl, title, subtitle, dateLabel, tripN
       {bannerUrl ? (
         <img
           src={bannerUrl}
+          crossOrigin="anonymous"
           alt={title || ''}
           width={1200}
           height={400}

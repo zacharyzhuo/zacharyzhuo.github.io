@@ -372,6 +372,7 @@ function DetailModal({ row, spots, onClose }) {
             {current.image && (
               <img
                 src={current.image}
+                crossOrigin="anonymous"
                 alt=""
                 width={800}
                 height={384}
@@ -629,6 +630,7 @@ export default function ItinerarySection({ rows, dayDate, detailKey = null, onOp
                   {row.image && (
                     <img
                       src={row.image}
+                      crossOrigin="anonymous"
                       alt=""
                       width={64}
                       height={64}

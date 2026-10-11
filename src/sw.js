@@ -6,6 +6,7 @@ import { registerRoute, NavigationRoute } from 'workbox-routing'
 import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
+import { RangeRequestsPlugin } from 'workbox-range-requests'
 
 // Vite-plugin-pwa 會在 build 時把 self.__WB_MANIFEST 注入為 precache manifest
 precacheAndRoute(self.__WB_MANIFEST)
@@ -36,17 +37,32 @@ registerRoute(
   })
 )
 
-// 行程靜態資產（banner、proposal 照片、音檔）— 拍下來就少變，cache first
+// Cloudinary 圖床（封面 / banner / itinerary・food 縮圖，URL 來自 sheet）— URL 帶 transformation 參數、內容不變，CacheFirst 30 天。
+// 只收 200（CORS）response：所有 <img> 都帶 crossOrigin="anonymous"（Cloudinary 回 ACAO: *），
+// 不收 opaque（status 0）是因為 Chrome 對 opaque response 的配額計算每筆灌水到 ~7MB。
 registerRoute(
-  ({ url, request }) =>
-    url.pathname.startsWith('/trips/') &&
-    /\.(?:jpe?g|png|webp|avif|gif|svg|mp3|mp4|m4a)$/i.test(url.pathname) &&
-    (request.destination === 'image' || request.destination === 'audio' || request.destination === 'video' || request.destination === ''),
+  ({ url }) => url.hostname === 'res.cloudinary.com',
   new CacheFirst({
-    cacheName: 'trip-assets',
+    cacheName: 'cloudinary-images',
     plugins: [
-      new CacheableResponsePlugin({ statuses: [0, 200] }),
-      new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 }),
+      new CacheableResponsePlugin({ statuses: [200] }),
+      new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30, purgeOnQuotaError: true }),
+    ],
+  })
+)
+
+// 求婚彩蛋媒體（同源 /proposal-photos/：AVIF 照片、mp4、m4a BGM）— 一次性作品永不變，CacheFirst 30 天。
+// 音訊 / 影片元素會發 Range 請求：只快取完整 200 response（206 不存），
+// RangeRequestsPlugin 再從完整快取切出 206 回給元素（Safari 對媒體要求 206，直接回 200 會播不出來）。
+// 完整 response 由 extras.jsx 的 warm-up fetch / 影片 blob fetch 寫入。
+registerRoute(
+  ({ url }) => url.origin === self.location.origin && url.pathname.startsWith('/proposal-photos/'),
+  new CacheFirst({
+    cacheName: 'proposal-media',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [200] }),
+      new RangeRequestsPlugin(),
+      new ExpirationPlugin({ maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 30, purgeOnQuotaError: true }),
     ],
   })
 )

@@ -74,6 +74,7 @@ export default function FoodSection({ rows }) {
                     {row.image && (
                       <img
                         src={row.image}
+                        crossOrigin="anonymous"
                         alt=""
                         width={64}
                         height={64}

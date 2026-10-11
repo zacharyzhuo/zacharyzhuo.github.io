@@ -20,6 +20,8 @@
     <meta property="og:image" content="/gokigen_panda_icon.png" />
     <meta property="og:locale" content="zh_TW" />
     <meta name="twitter:card" content="summary_large_image" />
+    <!-- 封面 / banner / 縮圖都在 Cloudinary；先握手省 DNS + TLS。crossorigin 要對應 <img crossOrigin="anonymous">（CORS 連線池與 no-cors 不共用） -->
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- 只載入全站主字型 Noto Serif JP；Noto Sans JP（font-sans）僅求婚彩蛋用到，改吃系統 sans-serif fallback，省一個 render-blocking family -->

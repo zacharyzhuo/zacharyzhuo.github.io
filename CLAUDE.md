@@ -87,7 +87,7 @@ src/
 │           └── HeartIcon.jsx / ShareSheet.jsx / ContactAvatar.jsx
 ├── App.jsx
 ├── main.jsx                         # React entry；registerSW + onRegisteredSW（回前景/30min 檢查更新版本）
-└── sw.js                            # PWA service worker 原始碼（NetworkFirst/CacheFirst 快取策略，見上方「資料流」段落）
+└── sw.js                            # PWA service worker 原始碼（NetworkFirst/CacheFirst 快取策略，見「資料流」與「靜態資源路徑」段落）
 ```
 
 ### BottomSheet Props
@@ -162,7 +162,7 @@ useEffect(() => {
 找不到時 `setExtras(null)`，不影響通用流程。`2026-03-tokyo-hokkaido/extras.jsx` 匯出：
 - `easterEggDay`：觸發彩蛋的天數（Day 4）
 - `HeartIcon`：愛心 icon 組件
-- `ProposalModal`：求婚彩蛋 modal
+- `ProposalModal`：求婚彩蛋 modal。props `isOpen` / `onClose` / `heartPosition` / `warm`：`warm`（TripPage 傳 `activeDay === easterEggDay`）為 true 才啟動媒體 warm-up（依播放順序逐一 fetch 全部照片 / 影片 + BGM，經 sw.js `proposal-media` CacheFirst 存成完整 response；切到別天 abort）。以前是 modal 一 mount 就並發拉全部，每次開這趟行程頁都燒流量，已改掉。
 
 彩蛋觸發邏輯抽成 `hooks/useEasterEgg.js`：在已選取的 `easterEggDay` 上**連續快速點擊 9 次**（每次間隔 < 2s；常數 `REQUIRED_CLICKS`/`CLICK_GAP_MS`）觸發。
 
@@ -519,6 +519,13 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 ### 靜態資源路徑
 
 `public/trips/<slug>/` 慣例已於 2026-05-31 移除，現無此目錄。行程照片全面改用下方 Cloudinary 外部圖床；唯一殘留本地靜態資源是求婚彩蛋的 `public/proposal-photos/`（扁平結構，不分 slug）。`itinerary`/`food` 的 `image` 欄實作上是原樣 `src={row.image}`，貼 Cloudinary 完整 URL 即可，無路徑慣例可言。
+
+**彩蛋媒體格式（2026-10-11 瘦身，一次性作品留在 repo 不搬 Cloudinary）**：照片 `N.avif`（iPhone 原檔 1179×2096 JPEG 以 sharp AVIF q80 effort 6 轉檔、像素不縮；樣張 PSNR ≥ 42.6 dB / SSIM ≥ 0.99，19.5 MB → 10.5 MB）、BGM `sukidakara.m4a`（`afconvert` AAC-LC 160 kbps，11.9 MB → 6.2 MB）、影片 mp4 不動。舊 JPG / mp3 仍在 git 歷史裡，別再加回來。**勿**把這些塞進 SW precache（`injectManifest.globPatterns` 刻意不含圖片 / 媒體副檔名），走下方 runtime cache。
+
+**SW runtime cache（`sw.js`）對圖片 / 媒體的兩條路由**：
+- `cloudinary-images`：`res.cloudinary.com` CacheFirst 30 天、200 筆、`purgeOnQuotaError`。**只收 200**（不收 opaque）→ 所有吃 sheet URL 的 `<img>`（DayBanner / TripCard ×2 / FoodSection / ItinerarySection 縮圖與 hero）都必須帶 `crossOrigin="anonymous"`，`index.html` 的 `preconnect` 也帶 `crossorigin`（CORS 與 no-cors 連線池不共用）。新增顯示 sheet 圖片的 `<img>` 記得補這個屬性，否則那張圖只走 HTTP cache。
+- `proposal-media`：同源 `/proposal-photos/` CacheFirst 30 天，`CacheableResponsePlugin({ statuses: [200] })` + `RangeRequestsPlugin`：`<audio>` / `<video>` 的 Range 請求命中時由 plugin 從完整快取切 206（Safari 對媒體一定要 206）；miss 時 206 不入快取，完整 200 由 `ProposalModal` 的 warm-up fetch / 影片 blob fetch 寫入。
+- 歷史教訓：原本那條 `trip-assets` 路由比對 `/trips/` 路徑，5 月底拆掉目錄後變成**死路由**（Cloudinary 跨域、彩蛋在 `/proposal-photos/`，什麼都沒命中），extras 的 warm-up 註解還以為有存 SW cache。改路由時用 DevTools → Application → Cache Storage 確認真的有項目進去。
 
 ### 外部圖片（Cloudinary）
 
