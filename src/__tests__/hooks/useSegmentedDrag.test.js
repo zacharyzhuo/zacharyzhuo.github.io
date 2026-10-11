@@ -1,5 +1,6 @@
-import { describe, test, expect } from 'vitest'
-import { rubberBand, nearestIndex, isOverflowing } from '../../hooks/useSegmentedDrag.js'
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
+import { renderHook } from '@testing-library/react'
+import { rubberBand, nearestIndex, isOverflowing, useSegmentedDrag } from '../../hooks/useSegmentedDrag.js'
 
 describe('rubberBand', () => {
   test('returns 0 for no overshoot', () => {
@@ -59,5 +60,75 @@ describe('isOverflowing', () => {
 
   test('true when content clearly exceeds container', () => {
     expect(isOverflowing(400, 320)).toBe(true)
+  })
+})
+
+describe('useSegmentedDrag beginTravel', () => {
+  let track
+  let pill
+
+  const mockMatchMedia = (reduced) => {
+    vi.stubGlobal('matchMedia', vi.fn().mockImplementation((query) => ({
+      matches: reduced && query.includes('prefers-reduced-motion'),
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    })))
+  }
+
+  const setup = () => {
+    track = document.createElement('div')
+    pill = document.createElement('span')
+    track.appendChild(pill)
+    for (const key of ['a', 'b']) {
+      const btn = document.createElement('button')
+      btn.setAttribute('role', 'tab')
+      btn.textContent = key
+      track.appendChild(btn)
+    }
+    document.body.appendChild(track)
+    return renderHook(() => useSegmentedDrag({
+      trackRef: { current: track },
+      pillRef: { current: pill },
+      keys: ['a', 'b'],
+      value: 'a',
+      onChange: () => {},
+    }))
+  }
+
+  beforeEach(() => {
+    vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    track?.remove()
+  })
+
+  test('adds traveling and clears it on the pill transform transitionend', () => {
+    mockMatchMedia(false)
+    const { result } = setup()
+    result.current.beginTravel()
+    expect(pill.classList.contains('traveling')).toBe(true)
+
+    // 內層 fill 冒泡上來的 transitionend 不算
+    const fill = document.createElement('span')
+    pill.appendChild(fill)
+    const bubbled = new Event('transitionend', { bubbles: true })
+    bubbled.propertyName = 'transform'
+    fill.dispatchEvent(bubbled)
+    expect(pill.classList.contains('traveling')).toBe(true)
+
+    const own = new Event('transitionend')
+    own.propertyName = 'transform'
+    pill.dispatchEvent(own)
+    expect(pill.classList.contains('traveling')).toBe(false)
+  })
+
+  test('does not add traveling under prefers-reduced-motion', () => {
+    mockMatchMedia(true)
+    const { result } = setup()
+    result.current.beginTravel()
+    expect(pill.classList.contains('traveling')).toBe(false)
   })
 })

@@ -7,6 +7,7 @@ import { getCategory, BRAND_INK, BACKUP_INK } from '../../lib/categories.js'
 import { sortByDistance, routePoints, nextFocusIndex, buildMapsUrl } from '../../lib/maps.js'
 import { openExternal } from '../../lib/openExternal.js'
 import { tap as hapticTap, bump } from '../../lib/haptic.js'
+import { prefersReducedMotion } from '../../lib/motion.js'
 import { markerIcon, numberedIcon, meIcon } from './mapIcons.js'
 import NearbyStrip from './NearbyStrip.jsx'
 import DayNav from './DayNav.jsx'
@@ -16,6 +17,13 @@ import EmptyState from '../ui/EmptyState.jsx'
 const TOKYO = [35.6762, 139.6503]
 const BUCKETS = ['food', 'shopping', 'attraction', 'hotel', 'backup']
 const BUCKET_LABEL = { food: '美食', attraction: '景點', shopping: '購物', hotel: '住宿', backup: '備選', transport: '交通' }
+
+// 相機動畫時長上限（Leaflet 預設依距離放大，遠點會飛好幾秒）
+const CAM_STEP_S = 0.35     // 路線 stepper 逐站（高頻）
+const CAM_FLY_S = 0.6       // 定位 / 最近卡（偶發，可稍長但要有上限）
+const CAM_FIT_S = 0.35      // 總覽 fitBounds
+// 相機走 Leaflet 的 rAF，CSS 的 reduced-motion 管不到：使用者要求減少動態時改瞬移
+const camOpts = (duration) => (prefersReducedMotion() ? { animate: false } : { duration })
 
 // Leaflet 在「開啟時才長出來」的容器裡需重新量尺寸，否則圖磚渲染成灰塊。
 function InvalidateOnMount() {
@@ -45,7 +53,7 @@ function FitBounds({ positions, positionsKey }) {
   useEffect(() => {
     if (!positions.length) return
     const bounds = L.latLngBounds(positions)
-    map.fitBounds(bounds, { padding: [44, 44], maxZoom: 16 })
+    map.fitBounds(bounds, { padding: [44, 44], maxZoom: 16, ...camOpts(CAM_FIT_S) })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, positionsKey])
   return null
@@ -175,7 +183,7 @@ export default function TripMap({ points, days = [], activeDay = null }) {
       (pos) => {
         const ll = { lat: pos.coords.latitude, lng: pos.coords.longitude }
         setUserPos(ll); setGeoStatus('ok')
-        mapRef.current?.flyTo([ll.lat, ll.lng], 14)
+        mapRef.current?.flyTo([ll.lat, ll.lng], 14, camOpts(CAM_FLY_S))
       },
       () => setGeoStatus('error'),
       { enableHighAccuracy: true, timeout: 8000 }
@@ -184,7 +192,7 @@ export default function TripMap({ points, days = [], activeDay = null }) {
 
   const focusPoint = useCallback((p) => {
     bump()
-    mapRef.current?.flyTo([p.lat, p.lng], 16)
+    mapRef.current?.flyTo([p.lat, p.lng], 16, camOpts(CAM_FLY_S))
     markerRefs.current[p.id]?.openPopup()
   }, [])
 
@@ -206,20 +214,29 @@ export default function TripMap({ points, days = [], activeDay = null }) {
 
   const backToOverview = useCallback(() => { hapticTap(); setFocusIdx(null) }, [])
 
-  // 路線相機：總覽 fit 全部；聚焦則 flyTo 該點並開 popup
+  // 路線相機：總覽 fit 全部；聚焦則飛到該點並開 popup
   useEffect(() => {
     if (mode !== 'route' || !routePts.length) return
     const map = mapRef.current
     if (!map) return
     if (focusIdx === null) {
-      map.fitBounds(L.latLngBounds(routePts.map((p) => [p.lat, p.lng])), { padding: [44, 44], maxZoom: 16, duration: 0.5 })
+      map.fitBounds(L.latLngBounds(routePts.map((p) => [p.lat, p.lng])), { padding: [44, 44], maxZoom: 16, ...camOpts(CAM_FIT_S) })
       return
     }
     const p = routePts[focusIdx]
     if (!p) return
-    map.flyTo([p.lat, p.lng], 16, { duration: 0.6 }) // 上限 0.6s，避免遠點弧線飛太久
     const openPopup = () => markerRefs.current[p.id]?.openPopup()
-    map.once('moveend', openPopup) // 移動結束才開 popup，不會飛到一半就跳出
+    // reduced motion：瞬移後直接開 popup（不靠 moveend）
+    if (prefersReducedMotion()) {
+      map.flyTo([p.lat, p.lng], 16, { animate: false })
+      openPopup()
+      return
+    }
+    // 移動結束才開 popup，不會飛到一半就跳出。
+    // 必須在 flyTo 之後才註冊：flyTo 內部 _stop() 可能同步觸發「前一段飛行」的 moveend，
+    // 先註冊會在新飛行開始前就把 popup 打開
+    map.flyTo([p.lat, p.lng], 16, camOpts(CAM_STEP_S)) // 逐站高頻，時長壓在 CAM_STEP_S
+    map.once('moveend', openPopup)
     return () => map.off('moveend', openPopup)
   }, [focusIdx, mode, routePts])
 
@@ -383,11 +400,12 @@ export default function TripMap({ points, days = [], activeDay = null }) {
 
             {/* locate button（探索模式才有意義）；底部出現膠囊/卡片條時抬高，不被蓋住 */}
             {mode === 'explore' && (
-              /* bottom 位移動畫放外層 wrapper：frosted-glass-button 自帶 transition（transform 彈簧），
-                 若直接在按鈕上加 transition-[bottom] 會互相覆蓋 */
+              /* 抬高位移放外層 wrapper、走 transform（不動 layout）：frosted-glass-button 自帶
+                 transform 彈簧，直接疊在按鈕上會互相覆蓋。88px = 112 − 24（原 bottom-[112px] 與 bottom-6 之差）；
+                 ease-spring-soft 與底部滑入的卡片條同一族曲線 */
               <div
-                className={`absolute right-4 z-[601] transition-[bottom] duration-300 ${
-                  geoStatus === 'idle' ? 'bottom-6' : 'bottom-[112px]'
+                className={`absolute right-4 bottom-6 z-[601] transition-transform duration-300 ease-spring-soft ${
+                  geoStatus === 'idle' ? 'translate-y-0' : '-translate-y-[88px]'
                 }`}
               >
                 <button

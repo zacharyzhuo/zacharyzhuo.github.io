@@ -1,5 +1,5 @@
 // Cold-start 載入骨架：取代置中 spinner，鏡射真實版面讓感知速度更快。
-// animate-pulse 在 prefers-reduced-motion 下會被全域規則停掉（index.css），自動降級為靜態色塊。
+// animate-pulse 在 prefers-reduced-motion 下保留（只改 opacity）：index.css 的 reduced-motion 區塊只針對位移 / 縮放。
 
 /** 單一灰色佔位塊 */
 function Bar({ className = '' }) {

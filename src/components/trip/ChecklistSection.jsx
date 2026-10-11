@@ -3,6 +3,9 @@ import { Check, ClipboardList } from 'lucide-react'
 import { tap, success } from '../../lib/haptic.js'
 import EmptyState from '../ui/EmptyState.jsx'
 
+// 完成慶祝 overlay 的存活時間
+const CELEBRATE_MS = 600 // 與 index.css .bar-celebrate 同值
+
 /**
  * 每趟行程獨立的勾選狀態（透過 storageKey 命名空間隔離）
  *
@@ -25,6 +28,8 @@ export default function ChecklistSection({ rows, slug }) {
 
   // { [category]: true } — 正在慶祝中的 category
   const [celebrating, setCelebrating] = useState({})
+  // 每次有 category 新完成就 +1，當 overlay 的 key，讓重複完成也能重播動畫（keyframes 只在 remount 時重來）
+  const [celebrateTick, setCelebrateTick] = useState(0)
 
   // 上一次 render 各 category 的完成數，用來偵測「剛好完成」的瞬間
   const prevDoneRef = useRef({})
@@ -59,6 +64,7 @@ export default function ChecklistSection({ rows, slug }) {
     if (newlyComplete.length === 0) return
 
     success()
+    setCelebrateTick(t => t + 1)
     setCelebrating(prev => {
       const next = { ...prev }
       newlyComplete.forEach(c => { next[c] = true })
@@ -70,7 +76,7 @@ export default function ChecklistSection({ rows, slug }) {
         newlyComplete.forEach(c => { delete next[c] })
         return next
       })
-    }, 700)
+    }, CELEBRATE_MS)
     return () => clearTimeout(timer)
   }, [checkedItems, rows])
 
@@ -140,13 +146,16 @@ export default function ChecklistSection({ rows, slug }) {
                       </span>
                     )}
                   </div>
-                  {/* 進度條：完成瞬間播放 bar-celebrate 動畫 */}
-                  <div className="h-1 rounded-full bg-stone-200/60 overflow-hidden mb-3">
+                  {/* 進度條：填滿用 transform（compositor），完成瞬間在 track 上疊一層 overlay 播 bar-celebrate；
+                      bar 本身不下 key，否則最後一步會因 remount 直接跳到 100% 而沒有填滿動畫 */}
+                  <div className="relative h-1 rounded-full bg-stone-200/60 overflow-hidden mb-3">
                     <div
-                      key={isCelebrating ? `${category}-celebrating` : category}
-                      className={`h-full bg-jp-green transition-[width] duration-300 ease-out${isCelebrating ? ' bar-celebrate' : ''}`}
-                      style={{ width: `${pct}%` }}
+                      className="absolute inset-0 bg-jp-green origin-left transition-transform duration-300 ease-out"
+                      style={{ transform: `scaleX(${pct / 100})` }}
                     />
+                    {isCelebrating && (
+                      <div key={`${category}-celebrate-${celebrateTick}`} className="absolute inset-0 bar-celebrate pointer-events-none" aria-hidden="true" />
+                    )}
                   </div>
                   <ul className="space-y-1">
                     {items.map((item) => {
@@ -157,7 +166,7 @@ export default function ChecklistSection({ rows, slug }) {
                         <li key={uniqueKey}>
                           <button
                             type="button"
-                            className="w-full flex items-center gap-3 touch-manipulation py-3 min-h-[44px] text-left"
+                            className="w-full flex items-center gap-3 touch-manipulation py-3 min-h-[44px] text-left press-springy rounded-xl active:bg-white/25"
                             onTouchStart={handleTouchStart}
                             onTouchEnd={(e) => handleTouchEnd(e, uniqueKey)}
                             onClick={() => toggle(uniqueKey)}

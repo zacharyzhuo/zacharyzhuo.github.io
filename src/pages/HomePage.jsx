@@ -13,7 +13,7 @@ const LAST_TRIP_KEY = 'lastTripSlug'
 
 export default function HomePage() {
   const { trips, loading, error, refresh } = useTrips()
-  const { pullY, refreshing, triggerThreshold } = usePullToRefresh(refresh)
+  const { refreshing, showIndicator, indicatorRef, contentRef } = usePullToRefresh(refresh)
   const navigate = useNavigate()
   const location = useLocation()
   const redirectedRef = useRef(false)
@@ -49,30 +49,24 @@ export default function HomePage() {
     }
   }, [trips, loading, error, location.search, navigate])
 
-  const showIndicator = pullY > 0 || refreshing
-  const indicatorOpacity = refreshing ? 1 : Math.min(1, pullY / triggerThreshold)
   const indicatorRotation = refreshing ? 'animate-spin' : ''
 
   return (
     <div className="bg-washi min-h-screen safe-area-inset relative overflow-x-hidden">
-      {/* Pull-to-refresh indicator：覆蓋在頂端，隨拉動距離淡入 */}
+      {/* Pull-to-refresh indicator：覆蓋在頂端，隨拉動距離淡入；位置 / 透明度由 usePullToRefresh 直接寫 DOM */}
       {showIndicator && (
         <div
+          ref={indicatorRef}
           className="absolute left-0 right-0 top-0 flex justify-center pointer-events-none z-10"
-          style={{
-            transform: `translateY(${refreshing ? 24 : Math.max(0, pullY - 30)}px)`,
-            opacity: indicatorOpacity,
-          }}
+          style={{ transform: 'translateY(0px)', opacity: 0 }}
         >
           <div className="frosted-glass-button rounded-full p-3 text-muted">
             <RefreshCw size={20} className={indicatorRotation} />
           </div>
         </div>
       )}
-      <div
-        style={{ transform: `translateY(${pullY}px)` }}
-        className={`max-w-2xl mx-auto ${pullY === 0 ? 'transition-transform duration-200 ease-out' : ''}`}
-      >
+      {/* 內容跟手下移與放開歸位都由 usePullToRefresh 經 contentRef 直接寫 transform */}
+      <div ref={contentRef} className="max-w-2xl mx-auto">
       {/* Header：與 trip page 一致 — 英文 caps eyebrow 在上、中文大標在下 */}
       <header className="px-6 pt-8 pb-6">
         <p className="text-xs tracking-[0.25em] uppercase text-stone-400 font-serif font-medium mb-2">Trip Diaries</p>

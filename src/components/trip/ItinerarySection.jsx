@@ -46,6 +46,22 @@ function NowMarker({ time }) {
 }
 const SPOT_TYPE_ORDER = { food: 0, attraction: 1, shopping: 2 }
 
+// DetailModal 拖拉關閉：放開時取「最後 80ms」的尾端速度（非整段平均），規則同 BottomSheet
+const VELOCITY_WINDOW_MS = 80
+const FLICK_VELOCITY = 0.11 // px/ms
+const FLICK_MIN_TRAVEL = 24 // px
+const CLOSE_DISTANCE = 120 // px
+const MIN_CLOSE_MS = 120
+const MAX_CLOSE_MS = 300 // 與 index.css --dur-panel-close 同值
+const DISMISS_FALLBACK_GRACE_MS = 150 // transitionend 後備收尾的寬限
+
+// 讀目前實際的 translateY（含 transition 進行中的位置），讓中途抓住不會跳
+function liveTranslateY(el) {
+  if (!el || typeof DOMMatrixReadOnly === 'undefined') return 0
+  const m = getComputedStyle(el).transform
+  return m && m !== 'none' ? new DOMMatrixReadOnly(m).m42 : 0
+}
+
 function buildGoogleMapsUrl(address, name) {
   const query = address || name || ''
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
@@ -99,10 +115,16 @@ function DetailModal({ row, spots, onClose }) {
   const [displaySpots, setDisplaySpots] = useState([])
   const [dragY, setDragY] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
+  // dismissing：放開判定關閉後，從放開點直接滑出（不等 isOpen 變 false）；dismissMs = 依甩速算的關閉時長
+  const [dismissing, setDismissing] = useState(false)
+  const [dismissMs, setDismissMs] = useState(null)
+  // closeCalledRef：本次開啟已呼叫過 onClose（navigate(-1)）；每次開啟只呼叫一次，避免連退兩頁
+  const closeCalledRef = useRef(false)
+  const samplesRef = useRef([])
+  const baseRef = useRef(0)
   const pillRef = useRef(null)
   const sheetRef = useRef(null)
   const touchStartY = useRef(null)
-  const touchStartTime = useRef(null)
   const dragYRef = useRef(0)
   const onCloseRef = useRef(onClose)
   const titleId = useId()
@@ -118,9 +140,39 @@ function DetailModal({ row, spots, onClose }) {
 
   useModalA11y(isOpen, onClose, sheetRef)
 
+  const resetDismiss = () => {
+    setDismissing(false)
+    setDismissMs(null)
+    setDragY(0)
+    dragYRef.current = 0
+  }
+
+  // 開啟時清掉拖拉狀態；關閉（isOpen → false）時結束 dismissing，改由一般關閉 class 接手（同一個終點，不會重跑動畫）
   useEffect(() => {
-    if (isOpen) { setDragY(0); dragYRef.current = 0; setIsDragging(false) }
+    resetDismiss()
+    if (isOpen) {
+      setIsDragging(false)
+      closeCalledRef.current = false
+    }
   }, [isOpen])
+
+  // 後備：navigate(-1) 沒讓 isOpen 變 false 時，transform 動畫結束也要收尾
+  useEffect(() => {
+    if (!dismissing) return
+    const el = sheetRef.current
+    if (!el) return
+    let timer = null
+    // 再寬限一下才收尾：reduced-motion 下 transition 只有 0.01ms，transitionend 可能比 popstate 先到，
+    // 直接重置會讓面板先閃回開啟位置；正常情況 isOpen 會先變 false，effect cleanup 把 timer 清掉
+    const onEnd = (e) => {
+      if (e.target === el && e.propertyName === 'transform') timer = setTimeout(resetDismiss, DISMISS_FALLBACK_GRACE_MS)
+    }
+    el.addEventListener('transitionend', onEnd)
+    return () => {
+      el.removeEventListener('transitionend', onEnd)
+      clearTimeout(timer)
+    }
+  }, [dismissing])
 
   useScrollLock(isOpen)
 
@@ -133,48 +185,89 @@ function DetailModal({ row, spots, onClose }) {
     if (!el) return
     const onMove = (e) => {
       if (touchStartY.current === null) return
-      const delta = e.touches[0].clientY - touchStartY.current
+      const clientY = e.touches[0].clientY
+      // baseRef：起手時面板的實際位置（開啟動畫進行中被抓住）
+      const delta = clientY - touchStartY.current + baseRef.current
       e.preventDefault()
       // 往下＝關閉方向，1:1 跟手；往上＝反方向，阻尼拉伸（放開彈回）
       const next = delta > 0 ? delta : resist(delta)
       dragYRef.current = next
       setDragY(next)
+      const now = Date.now()
+      const samples = samplesRef.current
+      samples.push({ pos: clientY, t: now })
+      while (samples.length > 1 && now - samples[0].t > VELOCITY_WINDOW_MS) samples.shift()
     }
     el.addEventListener('touchmove', onMove, { passive: false })
     return () => el.removeEventListener('touchmove', onMove)
   }, [isOpen])
 
   const onPillTouchStart = (e) => {
+    // 關閉由歷史驅動（navigate(-1)），抓住無法取消；未開啟或已送出關閉後一律不接手
+    if (!isOpen || closeCalledRef.current) return
+    // 開啟動畫進行中被抓住：從目前實際位置接著拖，不跳
+    const base = liveTranslateY(sheetRef.current)
+    baseRef.current = base
     touchStartY.current = e.touches[0].clientY
-    touchStartTime.current = Date.now()
+    samplesRef.current = [{ pos: e.touches[0].clientY, t: Date.now() }]
+    dragYRef.current = base
+    setDragY(base)
     setIsDragging(true)
   }
 
   const onPillTouchEnd = (e) => {
     if (touchStartY.current === null) return
-    const elapsed = Math.max(1, Date.now() - touchStartTime.current)
-    const velocity = dragYRef.current / elapsed
+    // 放開當下再裁一次窗口：「快拖 → 停住 → 放開」時，最後一次 touchmove 留下的舊樣本不能算進尾端速度
+    const now = Date.now()
+    const samples = samplesRef.current.filter(s => now - s.t <= VELOCITY_WINDOW_MS)
+    const first = samples[0]
+    const last = samples[samples.length - 1]
+    // 尾端速度 px/ms，正值＝往下（關閉方向）
+    const v = samples.length > 1 ? (last.pos - first.pos) / Math.max(1, last.t - first.t) : 0
+    // captured：面板視覺位置（含起手 base），用於剩餘距離；travel：手指實際位移，用於關閉判定
+    // （開啟動畫中途點一下，base 可能已超過門檻，不能因此零位移就關掉）
     const captured = dragYRef.current
+    const travel = captured - baseRef.current
     touchStartY.current = null
-    setIsDragging(false)
-    setDragY(0)
-    dragYRef.current = 0
-    if (captured > 120 || velocity > 0.5) {
+    const isFlick = v > FLICK_VELOCITY && travel > FLICK_MIN_TRAVEL
+    const shouldClose = travel > CLOSE_DISTANCE || isFlick
+    if (shouldClose && !closeCalledRef.current) {
+      // 從放開點直接滑出，不先歸零（否則 isOpen 仍 true 的那幾幀會先彈回頂再被 navigate(-1) 關掉）
+      closeCalledRef.current = true
+      if (isFlick) {
+        const remaining = Math.max(0, (sheetRef.current?.offsetHeight ?? 0) - captured)
+        setDismissMs(Math.round(Math.min(MAX_CLOSE_MS, Math.max(MIN_CLOSE_MS, remaining / v))))
+      }
+      setIsDragging(false)
+      setDismissing(true)
       // 擋掉 iOS 在 touchend 後於同座標補發的 synthetic click：
       // sheet 滑走後那個 click 會落在底下的行程卡上，誤開別張卡
       if (e?.cancelable) e.preventDefault()
       onCloseRef.current()
+    } else {
+      setIsDragging(false)
+      setDragY(0)
+      dragYRef.current = 0
     }
   }
 
   const sheetClass = [
     // max-w-2xl mx-auto：桌面寬螢幕置中收窄（inset-x-0 + max-width + margin:auto 置中技巧），行動裝置滿版不受影響
     'fixed inset-x-0 bottom-0 z-50 transform max-w-2xl mx-auto',
-    // 開啟用 Q 彈彈簧（overshoot 由單層延伸玻璃覆蓋，無縫），關閉維持乾淨 ease-out
-    isDragging ? '' : (isOpen ? 'transition-transform duration-500 ease-spring-soft' : 'transition-transform duration-300 ease-out'),
+    // 開啟用 Q 彈彈簧（overshoot 由單層延伸玻璃覆蓋，無縫），關閉維持乾淨 ease-out（時長走 --dur-panel-close token）
+    isDragging
+      ? ''
+      : (dismissing || !isOpen)
+        ? 'transition-transform duration-[var(--dur-panel-close)] ease-out'
+        : 'transition-transform duration-500 ease-spring-soft',
+    (dismissing || (dragY === 0 && !isOpen)) ? 'translate-y-full' : (dragY === 0 ? 'translate-y-0' : ''),
     // sheet-hidden：關閉動畫結束後 visibility 隱藏，避免 Safari 工具列透出貼在視窗底線的圓角頂緣
-    dragY === 0 ? (isOpen ? 'translate-y-0' : 'translate-y-full sheet-hidden') : '',
+    (!isOpen && !dismissing && dragY === 0) ? 'sheet-hidden' : '',
   ].filter(Boolean).join(' ')
+
+  const sheetStyle = dismissing
+    ? (dismissMs ? { transitionDuration: `${dismissMs}ms` } : undefined)
+    : (dragY !== 0 ? { transform: `translateY(${dragY}px)` } : undefined)
 
   const current = row || displayRow
   const currentSpots = row ? spots : displaySpots
@@ -207,7 +300,7 @@ function DetailModal({ row, spots, onClose }) {
         aria-hidden={!isOpen}
         tabIndex={-1}
         className={sheetClass}
-        style={dragY !== 0 ? { transform: `translateY(${dragY}px)` } : undefined}
+        style={sheetStyle}
       >
         {/* 單一毛玻璃層：往下延伸超過停駐邊（-bottom-56），開啟 overshoot / 反向拉由「同一塊」玻璃覆蓋 → 無接縫。
             內容層疊在上面、不帶 backdrop。 */}
@@ -223,6 +316,7 @@ function DetailModal({ row, spots, onClose }) {
             className="relative z-10 flex justify-center pt-3 pb-2 touch-manipulation select-none flex-shrink-0"
             onTouchStart={onPillTouchStart}
             onTouchEnd={onPillTouchEnd}
+            onTouchCancel={onPillTouchEnd}
           >
             <div className="w-10 h-1 rounded-full bg-stone-400/70" />
           </div>

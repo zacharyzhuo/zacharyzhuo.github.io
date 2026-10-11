@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { describe, it, expect, beforeAll, beforeEach, afterAll, afterEach, vi } from 'vitest'
@@ -37,5 +37,30 @@ describe('useTrips', () => {
     const { result } = renderHook(() => useTrips())
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.error).not.toBeNull()
+  })
+
+  it('refresh() resolves only after the refetch settles', async () => {
+    const { result } = renderHook(() => useTrips())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    // 延遲回應：refresh 的 promise 必須等到這個 fetch 完成才 resolve
+    let release
+    const gate = new Promise(r => { release = r })
+    let hits = 0
+    server.use(http.get(BASE_URL, async () => {
+      hits += 1
+      await gate
+      return HttpResponse.text(CSV_WITH_DRAFT)
+    }))
+
+    let settled = false
+    let pending
+    act(() => { pending = result.current.refresh().then(() => { settled = true }) })
+    await waitFor(() => expect(hits).toBe(1))
+    expect(settled).toBe(false)
+
+    release()
+    await act(async () => { await pending })
+    expect(settled).toBe(true)
   })
 })

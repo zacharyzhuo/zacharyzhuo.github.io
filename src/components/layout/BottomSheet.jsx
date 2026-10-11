@@ -4,29 +4,77 @@ import { useModalA11y } from '../../hooks/useModalA11y.js'
 import { useCancelableTap } from '../../hooks/useCancelableTap.js'
 import { resist } from '../../lib/gesture.js'
 
+// 放開時取「最後 80ms」的尾端速度（非整段平均），甩一下就能關
+const VELOCITY_WINDOW_MS = 80
+const FLICK_VELOCITY = 0.11 // px/ms
+const FLICK_MIN_TRAVEL = 24 // px：太短的甩動不算
+const CLOSE_DISTANCE = 120 // px
+const MIN_CLOSE_MS = 120
+const MAX_CLOSE_MS = 300 // 與 index.css --dur-panel-close 同值
+const DISMISS_FALLBACK_GRACE_MS = 150 // transitionend 後備收尾的寬限
+
+// 讀目前實際的 translateY（含 transition 進行中的位置），讓中途抓住不會跳
+function liveTranslateY(el) {
+  if (!el || typeof DOMMatrixReadOnly === 'undefined') return 0
+  const m = getComputedStyle(el).transform
+  return m && m !== 'none' ? new DOMMatrixReadOnly(m).m42 : 0
+}
+
 export default function BottomSheet({ isOpen, onClose, title, children, noScroll = false, noStickyTitle = false, tall = false }) {
   const [dragY, setDragY] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
+  // dismissing：放開判定關閉後，從放開點直接滑出（不等 isOpen 變 false）；dismissMs = 依甩速算的關閉時長
+  const [dismissing, setDismissing] = useState(false)
+  const [dismissMs, setDismissMs] = useState(null)
+  // closeCalledRef：本次開啟已呼叫過 onClose（navigate(-1)）；每次開啟只呼叫一次，避免連退兩頁
+  const closeCalledRef = useRef(false)
+  const samplesRef = useRef([])
+  const baseRef = useRef(0)
   const headerDragRef = useRef(null)
-  const contentScrollRef = useRef(null)
   const sheetRef = useRef(null)
   const touchStartY = useRef(null)
-  const touchStartTime = useRef(null)
   const dragYRef = useRef(0)
   const onCloseRef = useRef(onClose)
   const titleId = useId()
   const tap = useCancelableTap()
 
   useModalA11y(isOpen, onClose, sheetRef)
-  // 用來追蹤這次 touch 是不是「從 content 頂端開始往下拉 = 拖關」的情境
-  const contentDragActiveRef = useRef(false)
 
   useEffect(() => { onCloseRef.current = onClose }, [onClose])
 
-  // Reset drag state when sheet opens
+  const resetDismiss = () => {
+    setDismissing(false)
+    setDismissMs(null)
+    setDragY(0)
+    dragYRef.current = 0
+  }
+
+  // 開啟時清掉拖拉狀態；關閉（isOpen → false）時結束 dismissing，改由一般關閉 class 接手（同一個終點，不會重跑動畫）
   useEffect(() => {
-    if (isOpen) { setDragY(0); dragYRef.current = 0; setIsDragging(false) }
+    resetDismiss()
+    if (isOpen) {
+      setIsDragging(false)
+      closeCalledRef.current = false
+    }
   }, [isOpen])
+
+  // 後備：navigate(-1) 沒讓 isOpen 變 false（例如回到別的 route 前的空窗），transform 動畫結束時也要收尾
+  useEffect(() => {
+    if (!dismissing) return
+    const el = sheetRef.current
+    if (!el) return
+    let timer = null
+    // 再寬限一下才收尾：reduced-motion 下 transition 只有 0.01ms，transitionend 可能比 popstate 先到，
+    // 直接重置會讓面板先閃回開啟位置；正常情況 isOpen 會先變 false，effect cleanup 把 timer 清掉
+    const onEnd = (e) => {
+      if (e.target === el && e.propertyName === 'transform') timer = setTimeout(resetDismiss, DISMISS_FALLBACK_GRACE_MS)
+    }
+    el.addEventListener('transitionend', onEnd)
+    return () => {
+      el.removeEventListener('transitionend', onEnd)
+      clearTimeout(timer)
+    }
+  }, [dismissing])
 
   // Header（pill + 標題列）區整片都可以拖；non-passive 才能 preventDefault
   useEffect(() => {
@@ -35,95 +83,89 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
 
     const onMove = (e) => {
       if (touchStartY.current === null) return
-      const delta = e.touches[0].clientY - touchStartY.current
+      const clientY = e.touches[0].clientY
+      // baseRef：起手時面板的實際位置（開啟/關閉動畫進行中被抓住）
+      const delta = clientY - touchStartY.current + baseRef.current
       e.preventDefault()
       // 往下＝關閉方向，1:1 跟手；往上＝反方向，阻尼拉伸（放開彈回）
       const next = delta > 0 ? delta : resist(delta)
       dragYRef.current = next
       setDragY(next)
+      const now = Date.now()
+      const samples = samplesRef.current
+      samples.push({ pos: clientY, t: now })
+      while (samples.length > 1 && now - samples[0].t > VELOCITY_WINDOW_MS) samples.shift()
     }
 
     el.addEventListener('touchmove', onMove, { passive: false })
     return () => el.removeEventListener('touchmove', onMove)
   }, [])
 
-  // 可捲動內容：捲到頂時繼續往下拉，視為拖關手勢
-  useEffect(() => {
-    const el = contentScrollRef.current
-    if (!el) return
-
-    const onTouchStart = (e) => {
-      // 只有在內容已捲到頂時，才有可能進入「拖關」模式
-      if (el.scrollTop > 0) return
-      touchStartY.current = e.touches[0].clientY
-      touchStartTime.current = Date.now()
-      contentDragActiveRef.current = true
-    }
-
-    const onTouchMove = (e) => {
-      if (!contentDragActiveRef.current || touchStartY.current === null) return
-      const delta = e.touches[0].clientY - touchStartY.current
-      if (delta > 0 && el.scrollTop === 0) {
-        e.preventDefault()
-        if (!isDragging) setIsDragging(true)
-        dragYRef.current = delta
-        setDragY(delta)
-      } else if (delta < 0) {
-        // 向上滑：交還給原生 scroll
-        contentDragActiveRef.current = false
-        touchStartY.current = null
-      }
-    }
-
-    const onTouchEnd = (e) => {
-      if (!contentDragActiveRef.current) return
-      contentDragActiveRef.current = false
-      handleDragRelease(e)
-    }
-
-    el.addEventListener('touchstart', onTouchStart, { passive: true })
-    el.addEventListener('touchmove', onTouchMove, { passive: false })
-    // touchend 需 non-passive：拖關成立時 preventDefault 擋 iOS synthetic click（見 handleDragRelease）
-    el.addEventListener('touchend', onTouchEnd, { passive: false })
-    el.addEventListener('touchcancel', onTouchEnd, { passive: true })
-    return () => {
-      el.removeEventListener('touchstart', onTouchStart)
-      el.removeEventListener('touchmove', onTouchMove)
-      el.removeEventListener('touchend', onTouchEnd)
-      el.removeEventListener('touchcancel', onTouchEnd)
-    }
-  }, [isDragging])
-
   const handleDragRelease = (e) => {
     if (touchStartY.current === null) return
-    const elapsed = Math.max(1, Date.now() - touchStartTime.current)
-    const velocity = dragYRef.current / elapsed
+    // 放開當下再裁一次窗口：「快拖 → 停住 → 放開」時，最後一次 touchmove 留下的舊樣本不能算進尾端速度
+    const now = Date.now()
+    const samples = samplesRef.current.filter(s => now - s.t <= VELOCITY_WINDOW_MS)
+    const first = samples[0]
+    const last = samples[samples.length - 1]
+    // 尾端速度 px/ms，正值＝往下（關閉方向）
+    const v = samples.length > 1 ? (last.pos - first.pos) / Math.max(1, last.t - first.t) : 0
+    // captured：面板視覺位置（含起手 base），用於剩餘距離；travel：手指實際位移，用於關閉判定
+    // （開啟動畫中途點一下，base 可能已超過門檻，不能因此零位移就關掉）
     const captured = dragYRef.current
+    const travel = captured - baseRef.current
     touchStartY.current = null
-    setIsDragging(false)
-    setDragY(0)
-    dragYRef.current = 0
-    if (captured > 120 || velocity > 0.5) {
+    const isFlick = v > FLICK_VELOCITY && travel > FLICK_MIN_TRAVEL
+    const shouldClose = travel > CLOSE_DISTANCE || isFlick
+    if (shouldClose && !closeCalledRef.current) {
+      // 從放開點直接滑出，不先歸零（否則 isOpen 仍 true 的那幾幀會先彈回頂再被 navigate(-1) 關掉）
+      closeCalledRef.current = true
+      if (isFlick) {
+        const remaining = Math.max(0, (sheetRef.current?.offsetHeight ?? 0) - captured)
+        setDismissMs(Math.round(Math.min(MAX_CLOSE_MS, Math.max(MIN_CLOSE_MS, remaining / v))))
+      }
+      setIsDragging(false)
+      setDismissing(true)
       // 擋掉 iOS 在 touchend 後補發的 synthetic click（sheet 滑走後會誤點底下內容）
       if (e?.cancelable) e.preventDefault()
       onCloseRef.current()
+    } else {
+      setIsDragging(false)
+      setDragY(0)
+      dragYRef.current = 0
     }
   }
 
   const onHeaderTouchStart = (e) => {
+    // 關閉由歷史驅動（navigate(-1)），抓住無法取消；未開啟或已送出關閉後一律不接手
+    if (!isOpen || closeCalledRef.current) return
+    // 開啟動畫進行中被抓住：從目前實際位置接著拖，不跳
+    const base = liveTranslateY(sheetRef.current)
+    baseRef.current = base
     touchStartY.current = e.touches[0].clientY
-    touchStartTime.current = Date.now()
+    samplesRef.current = [{ pos: e.touches[0].clientY, t: Date.now() }]
+    dragYRef.current = base
+    setDragY(base)
     setIsDragging(true)
   }
 
   const sheetClass = [
     // max-w-2xl mx-auto：桌面寬螢幕置中收窄（inset-x-0 + max-width + margin:auto 置中技巧），行動裝置滿版不受影響
     'fixed inset-x-0 bottom-0 z-50 max-w-2xl mx-auto',
-    // 開啟用 Q 彈彈簧（overshoot 由單層延伸玻璃覆蓋，無縫），關閉維持乾淨 ease-out
-    isDragging ? '' : (isOpen ? 'transition-transform duration-500 ease-spring-soft' : 'transition-transform duration-300 ease-out'),
+    // 開啟用 Q 彈彈簧（overshoot 由單層延伸玻璃覆蓋，無縫），關閉維持乾淨 ease-out（時長走 --dur-panel-close token）
+    isDragging
+      ? ''
+      : (dismissing || !isOpen)
+        ? 'transition-transform duration-[var(--dur-panel-close)] ease-out'
+        : 'transition-transform duration-500 ease-spring-soft',
+    (dismissing || (dragY === 0 && !isOpen)) ? 'translate-y-full' : (dragY === 0 ? 'translate-y-0' : ''),
     // sheet-hidden：關閉動畫結束後 visibility 隱藏，避免 Safari 工具列透出貼在視窗底線的圓角頂緣
-    dragY === 0 ? (isOpen ? 'translate-y-0' : 'translate-y-full sheet-hidden') : '',
+    (!isOpen && !dismissing && dragY === 0) ? 'sheet-hidden' : '',
   ].filter(Boolean).join(' ')
+
+  const sheetStyle = dismissing
+    ? (dismissMs ? { transitionDuration: `${dismissMs}ms` } : undefined)
+    : (dragY !== 0 ? { transform: `translateY(${dragY}px)` } : undefined)
 
   return (
     <>
@@ -142,7 +184,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
         aria-hidden={!isOpen}
         tabIndex={-1}
         className={sheetClass}
-        style={dragY !== 0 ? { transform: `translateY(${dragY}px)` } : undefined}
+        style={sheetStyle}
       >
         {/* 單一毛玻璃層：往下延伸超過停駐邊（-bottom-56），開啟 overshoot / 反向拉都由「同一塊」
             玻璃覆蓋 → 構造上無接縫（取代舊的 glass-overshoot-fill 貼塊）。內容層疊在上面、不帶 backdrop。
@@ -195,7 +237,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, noScroll
                捲動內容會滑進 pill 底下、裁在與 glass 同弧度的圓角內。 */
             <div className="absolute inset-0 overflow-hidden rounded-t-[2rem]">{children}</div>
           ) : (
-            <div ref={contentScrollRef} className="overflow-y-auto overscroll-contain px-8 pb-10 space-y-4 flex-1 pt-2">
+            <div className="overflow-y-auto overscroll-contain px-8 pb-10 space-y-4 flex-1 pt-2">
               {children}
             </div>
           )}

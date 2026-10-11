@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react'
 import { tap } from '../../lib/haptic.js'
 import { formatToday } from '../../lib/tripDate.js'
+import { prefersReducedMotion } from '../../lib/motion.js'
 
 function getDayOfWeek(dateStr) {
   if (!dateStr) return ''
@@ -47,7 +48,7 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
     const elRect = el.getBoundingClientRect()
     const btnRect = activeBtn.getBoundingClientRect()
     const delta = (btnRect.left + btnRect.width / 2) - (elRect.left + elRect.width / 2)
-    el.scrollTo({ left: el.scrollLeft + delta, behavior: 'smooth' })
+    el.scrollTo({ left: el.scrollLeft + delta, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
   }, [activeDay])
 
   return (
@@ -75,7 +76,7 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
                 data-active={isActive}
                 data-day={day}
                 onClick={() => { if (!isActive) tap(); onSelect(day) }}
-                className="grid place-items-center px-2.5 min-h-[44px] flex-shrink-0 touch-manipulation relative snap-center"
+                className="grid place-items-center px-2.5 min-h-[44px] flex-shrink-0 touch-manipulation relative snap-center press-lift press-lift-sm"
                 aria-label={`選擇第 ${day} 天`}
               >
                 <span className="flex items-baseline gap-1">
@@ -96,7 +97,7 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
               data-active={isActive}
               data-day={day}
               onClick={() => { if (!isActive) tap(); onSelect(day) }}
-              className="flex flex-col items-center gap-1 min-w-[4rem] flex-shrink-0 min-h-[44px] justify-center touch-manipulation px-2 relative snap-center"
+              className="flex flex-col items-center gap-1 min-w-[4rem] flex-shrink-0 min-h-[44px] justify-center touch-manipulation px-2 relative snap-center press-lift press-lift-sm"
               aria-label={`選擇第 ${day} 天`}
             >
               {isEasterDay && easterEggIcon ? (

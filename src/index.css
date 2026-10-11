@@ -36,6 +36,15 @@
   /* 較柔版：給大行程面板（sheet / 抽屜）開啟用。面板改單層玻璃延伸（無接縫），
      可放大 overshoot 做明顯回彈；frost 延伸 224px 足以覆蓋。 */
   --ease-spring-soft: cubic-bezier(0.34, 1.5, 0.5, 1);
+  /* 與 Tailwind 內建 `ease-out` 同曲線；給 JS inline transition（輪播 settle / 下拉歸位）
+     與 `.sheet-hidden` 用，確保與 JSX 的 `ease-out` class 一致。
+     AUDIT 的強曲線 (0.23,1,0.32,1) 已試過、user 偏好原本手感，勿再改回。 */
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  /* press-in 220ms（iOS26 原生節奏，user 定案；AUDIT 建議 100–160ms 已評估後不採） */
+  --dur-press-in: 220ms;
+  --dur-press-out: 0.4s;
+  /* 面板關閉時長：.sheet-hidden 的 visibility 延遲與 JSX 的 duration-[…] 必須同值 */
+  --dur-panel-close: 300ms;
 }
 
 body {
@@ -121,19 +130,6 @@ a:focus-visible,
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Respect reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
 /* Hide Scrollbar but keep functionality */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
@@ -145,10 +141,9 @@ a:focus-visible,
 }
 
 /* ── Trip card（首頁行程卡）──────────────────────────────────
-   feature 大卡（雜誌封面）的底部漸層暗角 + active 紅色呼吸光環。
+   feature 大卡（雜誌封面）的底部漸層暗角 + active 紅色靜態外框。
    scrim「窄而濃」：底緣近不透明鎖住文字，38% 以上全透明 → 圖片中上段保持
-   清透、亮圖也讀得清；不依賴 backdrop-filter，圖未載入時不會出現實心色塊。
-   呼吸光環動畫在 prefers-reduced-motion 下由上方全域 reset 自動降為靜態。 */
+   清透、亮圖也讀得清；不依賴 backdrop-filter，圖未載入時不會出現實心色塊。 */
 .trip-scrim {
   background: linear-gradient(to top,
     rgba(15, 13, 10, 0.92) 0%,
@@ -157,6 +152,8 @@ a:focus-visible,
     transparent 58%);
 }
 
+/* active 行程卡：靜態紅框。呼吸光暈已移除：外擴 box-shadow 在 overflow-hidden 的卡片內
+   永遠被裁掉看不到，卻無限重繪整張卡；「進行中」pill 內的 animate-pulse 紅點已是 live 指示。 */
 .trip-halo::after {
   content: "";
   position: absolute;
@@ -164,119 +161,6 @@ a:focus-visible,
   border: 2px solid rgba(185, 54, 50, 0.72);
   border-radius: 1rem; /* 對齊 rounded-2xl */
   pointer-events: none;
-  animation: tripHalo 2.2s ease-in-out infinite;
-}
-
-@keyframes tripHalo {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(185, 54, 50, 0); }
-  50% { box-shadow: 0 0 16px 2px rgba(185, 54, 50, 0.5); }
-}
-
-/* Modal Animation */
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-slide-up {
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Proposal Modal Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes floatHeart {
-  0% {
-    transform: translateY(0) translateX(0) rotate(0deg);
-    opacity: 1;
-  }
-
-  50% {
-    transform: translateY(-100px) translateX(20px) rotate(180deg);
-    opacity: 0.8;
-  }
-
-  100% {
-    transform: translateY(-200px) translateX(-20px) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-@keyframes sparkle {
-
-  0%,
-  100% {
-    opacity: 0;
-    transform: scale(0);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-.animate-float-heart {
-  animation: floatHeart 3s ease-out forwards;
-}
-
-.animate-sparkle {
-  animation: sparkle 2s ease-in-out infinite;
-}
-
-/* 愛心彈出動畫 */
-@keyframes heartPop {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-
-  60% {
-    transform: scale(1.2);
-    opacity: 1;
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
 }
 
 /* 愛心搖晃動畫 */
@@ -300,81 +184,9 @@ a:focus-visible,
   }
 }
 
-/* 愛心放大動畫 */
-@keyframes heartExpand {
-  0% {
-    transform: scale(1) rotate(0deg);
-    opacity: 1;
-  }
-
-  100% {
-    /* 使用足夠大的 scale 值確保填滿整個螢幕（包括對角線） */
-    transform: scale(150) rotate(0deg);
-    opacity: 1;
-  }
-}
-
 /* 日期條中的愛心動畫：直接顯示 + 搖晃兩下 */
 .animate-heart-pop-shake {
   animation: heartShake 0.6s ease-in-out 0.1s 2;
-}
-
-/* 全螢幕愛心動畫：搖晃兩下 + 慢慢放大（流暢版本） */
-@keyframes heartFullSequence {
-
-  /* 開始：正常大小 */
-  0% {
-    transform: scale(1) rotate(0deg);
-    opacity: 1;
-  }
-
-  /* 搖晃第一下 */
-  8% {
-    transform: rotate(-10deg) scale(1.05);
-  }
-
-  16% {
-    transform: rotate(10deg) scale(1.05);
-  }
-
-  /* 搖晃第二下 */
-  24% {
-    transform: rotate(-8deg) scale(1.02);
-  }
-
-  32% {
-    transform: rotate(8deg) scale(1.02);
-  }
-
-  /* 回到中心，準備放大 */
-  40% {
-    transform: rotate(0deg) scale(1);
-    opacity: 1;
-  }
-
-  /* 開始慢慢放大 */
-  45% {
-    transform: scale(2) rotate(0deg);
-  }
-
-  60% {
-    transform: scale(10) rotate(0deg);
-  }
-
-  80% {
-    transform: scale(50) rotate(0deg);
-  }
-
-  100% {
-    transform: scale(200) rotate(0deg);
-    opacity: 1;
-  }
-}
-
-.animate-heart-expand {
-  animation: heartFullSequence 7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-  will-change: transform;
-  transform-origin: center center;
 }
 
 /* 過場動畫：愛心放大並淡出，然後照片淡入 */
@@ -401,7 +213,7 @@ a:focus-visible,
 @keyframes bgFadeIn {
   0%   { opacity: 0;      background-color: white; }
   55%  { opacity: 1;      background-color: white; }
-  90%  { opacity: 1;      background-color: white; animation-timing-function: ease-in; }
+  90%  { opacity: 1;      background-color: white; animation-timing-function: ease; }
   100% { opacity: 0.9999; background-color: black; }
 }
 
@@ -421,17 +233,7 @@ a:focus-visible,
   transform-origin: center center;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  shape-rendering: auto;
-  image-rendering: auto;
   position: absolute;
-  filter: brightness(1) !important;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  isolation: isolate;
-  -webkit-perspective: 1000;
-  perspective: 1000;
 }
 
 .animate-bg-fade-in {
@@ -454,13 +256,11 @@ a:focus-visible,
   animation: heartBounce 0.45s ease-out;
 }
 
-@keyframes shareSlideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-
-.animate-share-slide-up {
-  animation: shareSlideUp 0.3s ease-out forwards;
+/* 限時動態進度條：目前那格用 CSS 動畫線性填滿（scaleX，compositor-only），
+   暫停靠 animation-play-state，切換照片靠 key 重掛載重新開始 */
+@keyframes story-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
 }
 
 @keyframes bubbleFadeIn {
@@ -478,7 +278,7 @@ a:focus-visible,
 }
 
 .animate-bubble-out {
-  animation: bubbleFadeOut 0.3s ease-in forwards;
+  animation: bubbleFadeOut 0.3s var(--ease-out) forwards;
 }
 
 @keyframes planeFly {
@@ -544,25 +344,28 @@ a:focus-visible,
   box-shadow:
     0 8px 32px 0 rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  /* 只動 compositor 友善屬性 + 色彩；transform 用 Q 彈彈簧讓放開時回彈 */
+  /* 只動 compositor 友善屬性 + 色彩；transform 用 Q 彈彈簧讓放開時回彈（--dur-press-out） */
   transition:
-    transform 0.4s var(--ease-spring),
-    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform var(--dur-press-out) var(--ease-spring),
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
-.frosted-glass-button:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow:
-    0 12px 40px 0 rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+/* hover 只給真正有滑鼠的裝置：觸控 tap 後 :hover 會黏住（手寫 CSS 不吃 Tailwind 的 hoverOnlyWhenSupported） */
+@media (hover: hover) and (pointer: fine) {
+  .frosted-glass-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow:
+      0 12px 40px 0 rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
 }
 
 /* 按下：iOS26 lift —— 浮起微放大、body 變近乎全透（玻璃感交給更強 backdrop）、
    邊緣高光變亮（擬折射的「邊緣有光」暗示）、投影加深拉遠（離表面更高）。
-   press-in 用較短彈簧快速回饋；放開落回 base 的 0.4s 彈簧 Q 彈。
+   press-in 用 --dur-press-in（140ms）彈簧快速回饋；放開落回 base 的 --dur-press-out（0.4s）彈簧 Q 彈。
    backdrop-filter 不進 transition（重繪昂貴，瞬切，同 frosted-tab-pill.lifted 做法）。 */
 .frosted-glass-button:active {
   transform: scale(1.1);
@@ -575,10 +378,10 @@ a:focus-visible,
     inset 0 0 18px rgba(255, 255, 255, 0.12),
     0 12px 30px 0 rgba(0, 0, 0, 0.14);
   transition:
-    transform 0.22s var(--ease-spring),
-    box-shadow 0.2s ease,
-    background-color 0.2s ease,
-    border-color 0.2s ease;
+    transform var(--dur-press-in) var(--ease-spring),
+    box-shadow 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 /* 靜態毛玻璃面板：給「裝多顆按鈕」的浮動控制（如路線 stepper 膠囊）。
@@ -594,14 +397,36 @@ a:focus-visible,
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
+/* 地圖底部「離你最近」卡片條 / 狀態膠囊：掛載時從下方滑入（@starting-style，無需 JS）。
+   stagger 只做裝飾，不阻擋點擊；舊瀏覽器沒有 @starting-style 就直接出現，無害。
+   用獨立的 `translate` 屬性而非 `transform`：膠囊靠 Tailwind -translate-x-1/2（transform）置中，
+   若起始值寫 transform 會蓋掉置中、變成斜著滑進來；translate 與 transform 會疊加，互不干擾。
+   卡片（glass-card press-springy）另見下方 .glass-card.press-springy.nearby-enter。 */
+.nearby-enter {
+  transition: translate 0.5s var(--ease-spring-soft), opacity 0.3s ease;
+  transition-delay: var(--enter-delay, 0ms);
+}
+@starting-style {
+  .nearby-enter {
+    translate: 0 100%;
+    opacity: 0;
+  }
+}
+
 /* 通用 press 微彈：iOS26 lift —— 按下「浮起」微放大、放開 Q 彈落回。
    套在可點卡片 / 選單項 / CTA。卡片量體大，1.03 已足夠明顯，勿再加大。
-   prefers-reduced-motion 由全域 reset 自動降級為瞬時。 */
+   press-in --dur-press-in（140ms）、放開 --dur-press-out（0.4s）彈簧；background-color 給選單項 hover 底色過渡。
+   prefers-reduced-motion：檔尾的 reduced-motion 區塊只拿掉縮放（transform），底色變化保留。 */
 .press-springy {
-  transition: transform 0.4s var(--ease-spring);
+  transition:
+    transform var(--dur-press-out) var(--ease-spring),
+    background-color 0.2s ease;
 }
 .press-springy:active {
   transform: scale(1.03);
+  transition:
+    transform var(--dur-press-in) var(--ease-spring),
+    background-color 0.15s ease;
 }
 
 /* 可點玻璃卡（glass-card + press-springy 並用）：lift 語言的卡片版。
@@ -609,25 +434,55 @@ a:focus-visible,
    （glass-card 刻意無框），只用「body 變更透 + 投影加深拉遠」表達抬起。 */
 .glass-card.press-springy {
   transition:
-    transform 0.4s var(--ease-spring),
-    background-color 0.25s ease,
-    box-shadow 0.25s ease;
+    transform var(--dur-press-out) var(--ease-spring),
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+/* 最近卡片條的卡：glass-card.press-springy 的 transition 簡寫特異性較高，會吃掉 .nearby-enter
+   的滑入與 stagger，故合併列出。delay 只給滑入（translate / opacity），press 回饋不延遲。
+   須放在 :active 規則之前（同特異性，靠順序讓 press-in 曲線勝出）。 */
+.glass-card.press-springy.nearby-enter {
+  transition:
+    translate 0.5s var(--ease-spring-soft),
+    opacity 0.3s ease,
+    transform var(--dur-press-out) var(--ease-spring),
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+  transition-delay: var(--enter-delay, 0ms), var(--enter-delay, 0ms), 0s, 0s, 0s;
+}
+/* 滑入途中被按住：:active 的 transition 簡寫若不含 translate / opacity，進場會被截斷瞬跳到終點，故一併列出 */
+.glass-card.press-springy.nearby-enter:active {
+  transition:
+    translate 0.5s var(--ease-spring-soft),
+    opacity 0.3s ease,
+    transform var(--dur-press-in) var(--ease-spring),
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .glass-card.press-springy:active {
   background: rgba(255, 255, 255, 0.3);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  transition:
+    transform var(--dur-press-in) var(--ease-spring),
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 /* 無玻璃材質的純 press lift：給「玻璃容器內」的小按鈕（如地圖 stepper ‹ ›）。
    容器本身勿做「整顆均勻 scale 彈跳」（見 frosted-glass-panel 註解），
    press 彈簧屬於內層單一按鈕。
-   節奏同 frosted-glass-button：press-in 0.22s 快彈、放開回 0.4s 彈簧 Q 彈落回。 */
+   節奏同 frosted-glass-button：press-in --dur-press-in（140ms）快彈、放開回 --dur-press-out（0.4s）彈簧 Q 彈落回。 */
 .press-lift {
-  transition: transform 0.4s var(--ease-spring);
+  transition: transform var(--dur-press-out) var(--ease-spring);
 }
 .press-lift:active {
   transform: scale(1.15);
-  transition: transform 0.22s var(--ease-spring);
+  transition: transform var(--dur-press-in) var(--ease-spring);
+}
+
+/* 緊鄰排列的小格（DayNav 日期）：lift 收到 1.06，避免放大時壓到隔壁格 */
+.press-lift.press-lift-sm:active {
+  transform: scale(1.06);
 }
 
 /* 寬文字 pill 的收斂版 lift（如地圖底圖切換鈕）：
@@ -642,7 +497,7 @@ a:focus-visible,
    與被禁止的「整顆均勻 scale 彈跳」不同：小幅度（7%）且方向性，內鍵位移 <10px 不影響按壓。
    dir-* 與 pressed 分開：放開時只移除 pressed、保留 dir-*，origin 不跳、回彈動畫從同一錨點收回。 */
 .stepper-squish {
-  transition: transform 0.4s var(--ease-spring);
+  transition: transform var(--dur-press-out) var(--ease-spring);
 }
 .stepper-squish.dir-left {
   transform-origin: right center;
@@ -652,53 +507,18 @@ a:focus-visible,
 }
 .stepper-squish.pressed {
   transform: scaleX(1.07) scaleY(0.93);
-  transition: transform 0.22s var(--ease-spring);
-}
-
-/* 深色背景的毛玻璃按鈕（用於 Instagram 風格） */
-.frosted-glass-button-dark {
-  background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: var(--glass-button);
-  -webkit-backdrop-filter: var(--glass-button);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    0 8px 32px 0 rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition:
-    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.frosted-glass-button-dark:hover {
-  background: rgba(0, 0, 0, 0.3);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow:
-    0 12px 40px 0 rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  transform: translateY(-1px);
-}
-
-/* 深色版同樣走 lift 語言：浮起微放大 + 變更透 + 邊緣高光變亮 */
-.frosted-glass-button-dark:active {
-  transform: scale(1.06);
-  background: rgba(0, 0, 0, 0.08);
-  border-color: rgba(255, 255, 255, 0.35);
-  box-shadow:
-    0 12px 30px 0 rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: transform var(--dur-press-in) var(--ease-spring);
 }
 
 /* 關閉狀態的 sheet 殼：translate-y-full 後頂緣剛好貼在 layout viewport 底線，
    iOS Safari 半透明工具列（visual viewport 之外）會把圓角頂緣透出來。
-   解法：關閉動畫（300ms ease-out）跑完後 visibility 隱藏。
+   解法：關閉動畫（--dur-panel-close + --ease-out）跑完後 visibility 隱藏。
    transition 覆蓋 Tailwind 的 transition-transform（本 class 在 utilities 之後，cascade 勝出），
-   transform 部分維持與原 close 動畫相同的 300ms ease-out。
+   transform 部分與 JSX 的 close 動畫（duration-300 ease-out）同值。
    開啟時 class 被移除，visibility 立即恢復（開啟態的 transition 不含 visibility）。 */
 .sheet-hidden {
   visibility: hidden;
-  transition: transform 300ms cubic-bezier(0, 0, 0.2, 1), visibility 0s linear 300ms;
+  transition: transform var(--dur-panel-close) var(--ease-out), visibility 0s linear var(--dur-panel-close);
 }
 
 /* Bottom sheet 玻璃卡片（DetailModal 用）- Frosted glass 模擬 */
@@ -841,7 +661,7 @@ a:focus-visible,
   width: 0;
   transform: translateX(0);
   pointer-events: none;
-  /* iOS26 Q 彈：較大 overshoot 的彈簧曲線 */
+  /* iOS26 Q 彈：較大 overshoot 的彈簧曲線；0.52s（iOS26 Q 彈節奏，user 定案） */
   transition:
     transform 0.52s var(--ease-spring),
     width 0.52s var(--ease-spring);
@@ -871,8 +691,8 @@ a:focus-visible,
     0 4px 15px rgba(0, 0, 0, 0.1);
   transition:
     transform 0.52s var(--ease-spring),
-    background-color 0.3s ease,
-    box-shadow 0.3s ease;
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 /* 膠囊頂部亮面 */
@@ -889,28 +709,35 @@ a:focus-visible,
 }
 
 /* 按住/拖拉：膠囊放大超出範圍 + 變更透明（Slack / iOS26 press morph）。
-   放大(press-in)用較短 transition 快速回饋；放開時自動回到 base fill 的 0.52s 彈簧慢慢 Q 彈。 */
+   放大(press-in)用較短 transition 快速回饋；放開時自動回到 base fill 的 0.3s 彈簧 Q 彈。 */
 /* 透明玻璃態：press 按住(lifted) 與 切換滑行(traveling) 共用。
    body 近乎全透，玻璃感交給 backdrop frosted + 明亮細邊。 */
 .frosted-tab-pill.lifted .frosted-tab-pill-fill,
 .frosted-tab-pill.traveling .frosted-tab-pill-fill {
   background: rgba(255, 255, 255, 0.015);
-  backdrop-filter: var(--glass-tab-lifted);
-  -webkit-backdrop-filter: var(--glass-tab-lifted);
   border-color: rgba(255, 255, 255, 0.75);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.6),
     inset 0 0 24px rgba(255, 255, 255, 0.12),
     0 12px 30px rgba(0, 0, 0, 0.12);
 }
+/* 按住（靜止）才上最強 frosted；滑行中保持 8px（移動中的大 blur 每幀重取樣，iOS 易掉幀） */
+.frosted-tab-pill.lifted .frosted-tab-pill-fill {
+  backdrop-filter: var(--glass-tab-lifted);
+  -webkit-backdrop-filter: var(--glass-tab-lifted);
+}
+.frosted-tab-pill.traveling:not(.lifted) .frosted-tab-pill-fill {
+  backdrop-filter: var(--glass-tab-active);
+  -webkit-backdrop-filter: var(--glass-tab-active);
+}
 
-/* press 按住才放大超出範圍（快速放大，放開時回到 base 0.52s 慢慢 Q 彈） */
+/* press 按住才放大超出範圍（--dur-press-in 140ms 快速放大，放開時回到 base 0.3s Q 彈） */
 .frosted-tab-pill.lifted .frosted-tab-pill-fill {
   transform: scale(1.32);
   transition:
-    transform 0.22s var(--ease-spring),
-    background-color 0.2s ease,
-    box-shadow 0.2s ease;
+    transform var(--dur-press-in) var(--ease-spring),
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 /* 拖拉中：移除 backdrop-filter（iOS Safari 移動 blur 元素會 jank/取樣錯誤），換半透明實底逃生艙 */
@@ -920,31 +747,12 @@ a:focus-visible,
   background: rgba(255, 255, 255, 0.35);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .frosted-tab-pill,
-  .frosted-tab-pill-fill {
-    transition: none;
-  }
-  .frosted-tab-pill.lifted .frosted-tab-pill-fill,
-  .frosted-glass-button:active,
-  .frosted-glass-button-dark:active,
-  .press-springy:active,
-  .press-lift:active,
-  .stepper-squish.pressed {
-    transform: none;
-  }
-}
-
 .frosted-tab-btn {
   flex: none;
   white-space: nowrap;
   border-radius: 9999px;
-  /* 彈性動畫：只列實際會變的 paint 屬性，不含 backdrop-filter（重繪昂貴）與 all */
-  transition:
-    color 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-    background-color 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-    border-color 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* 只有文字色會變（選取由膠囊呈現）；顏色不會 overshoot，用平順 ease 淡入淡出 */
+  transition: color 0.2s ease;
   position: relative;
   z-index: 1;
   /* 文字疊在移動膠囊之上 */
@@ -963,10 +771,13 @@ a:focus-visible,
   /* 預留邊框位置 */
 }
 
-/* 非選中狀態：只變文字色，不加深底色（選取由膠囊呈現，且觸控 sticky hover 會殘留變深） */
-.frosted-tab-btn:hover:not(.active) {
-  color: #57534e;
-  /* stone-600 */
+/* 非選中狀態：只變文字色，不加深底色（選取由膠囊呈現）；
+   只給真正有滑鼠的裝置，觸控 tap 後 :hover 會黏住 */
+@media (hover: hover) and (pointer: fine) {
+  .frosted-tab-btn:hover:not(.active) {
+    color: #57534e;
+    /* stone-600 */
+  }
 }
 
 /* 選中狀態：玻璃感改由移動膠囊呈現，按鈕本身只變文字色（避免「兩塊玻璃」） */
@@ -976,17 +787,17 @@ a:focus-visible,
 }
 
 /* 清單 category 完成慶祝動畫 */
+/* overlay 疊在綠色填滿上的白色閃光；不動 scaleX（底下的填滿仍在 transition 中），不用 filter（paint 重） */
 @keyframes bar-complete {
-  0%   { transform: scaleX(1);   filter: brightness(1); }
-  30%  { transform: scaleX(1.01); filter: brightness(1.35); }
-  60%  { transform: scaleX(1);   filter: brightness(1.15); }
-  100% { transform: scaleX(1);   filter: brightness(1); }
+  0%   { background: rgba(255, 255, 255, 0);    }
+  30%  { background: rgba(255, 255, 255, 0.55); }
+  100% { background: rgba(255, 255, 255, 0);    }
 }
 
 @keyframes check-pop {
-  0%   { transform: scale(0.5); opacity: 0; }
-  60%  { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(1);   opacity: 1; }
+  0%   { transform: scale(0.92); opacity: 0; }
+  60%  { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1);    opacity: 1; }
 }
 
 .bar-celebrate {
@@ -995,7 +806,7 @@ a:focus-visible,
 
 .check-pop {
   display: inline-block;
-  animation: check-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: check-pop 0.3s var(--ease-spring) forwards;
 }
 
 /* ── 登機證撕票口（FlightsTab）────────────────────────────
@@ -1034,3 +845,73 @@ a:focus-visible,
 
 /* 撕票口不加孔緣陰影（試過，被否決：顯髒）。
    洞內的乳白 = sheet 自身的 frost 材質，非殘留層，無法在不打穿 sheet 的前提下消除。 */
+
+/* 使用者要求減少透明（iOS「降低透明度」）：玻璃改為近實色、關掉 backdrop blur。
+   只動材質，不動版面與動效。 */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-card { background: rgba(255, 255, 255, 0.92); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .glass-bottom-sheet, .glass-sidebar { background: rgba(251, 250, 245, 0.96); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .glass-day-nav { background: rgba(251, 250, 245, 0.94); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .frosted-glass-button, .frosted-glass-panel, .frosted-tab-track { background: rgba(255, 255, 255, 0.85); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .frosted-glass-button:active { background: rgba(255, 255, 255, 0.75); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .frosted-tab-pill-fill,
+  .frosted-tab-pill.lifted .frosted-tab-pill-fill,
+  .frosted-tab-pill.traveling .frosted-tab-pill-fill { background: rgba(255, 255, 255, 0.95); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+
+/* ── prefers-reduced-motion ─────────────────────────────────────
+   原則（AUDIT §6）：拿掉「位移 / 縮放」，保留「顏色 / 透明度」等幫助理解的回饋。
+   不用 `*` 通殺：那會連 spinner、淡入淡出、按壓底色都一起凍住。
+   JS 驅動的動畫（Leaflet flyTo、smooth scroll、教學 peek）各自用 lib/motion.js 的
+   prefersReducedMotion() 分支，CSS 管不到它們。 */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+
+  /* 位移類 transition 瞬切：面板開關、輪播、卡片 hover 放大、.sheet-hidden 的 visibility 延遲 */
+  .transition-transform,
+  .sheet-hidden,
+  .frosted-tab-pill,
+  .frosted-tab-pill-fill {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+
+  /* 最近卡片條 / 狀態膠囊：拿掉滑入位移，只留淡入（opacity） */
+  .nearby-enter { translate: none !important; }
+  @starting-style {
+    .nearby-enter { translate: none; }
+  }
+
+  /* press lift / squish：不縮放，但保留底色與投影的變化（顏色回饋留著） */
+  .press-springy:active,
+  .glass-card.press-springy:active,
+  .press-lift:active,
+  .stepper-squish.pressed,
+  .frosted-glass-button:active,
+  .frosted-tab-pill.lifted .frosted-tab-pill-fill {
+    transform: none !important;
+  }
+
+  /* 一次性 keyframe（縮放 / 位移）：瞬間到終態 */
+  .check-pop,
+  .bar-celebrate,
+  .animate-heart-pop-shake,
+  .animate-heart-bounce,
+  .animate-plane-fly,
+  .animate-bubble-in,
+  .animate-bubble-out,
+  .animate-photo-fade-in,
+  .animate-bg-fade-in {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+  }
+  /* 全螢幕放大過場：比 .animate-heart-transition 自己的 !important 高一層特異性才壓得過 */
+  html .animate-heart-transition {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+  }
+
+  /* 保留：animate-spin（refresh 進行中唯一訊號）、animate-pulse（opacity）、
+     transition-opacity / transition-colors、.frosted-tab-btn color、.traveling 淡入淡出。 */
+}

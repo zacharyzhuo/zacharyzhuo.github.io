@@ -18,8 +18,11 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
   const [isPaused, setIsPaused] = useState(false)
   const [elapsedBeforePause, setElapsedBeforePause] = useState(0)
   const [pauseStartTime, setPauseStartTime] = useState(null)
+  // 目前圖片計時起點（= interval effect 的 startTime）；null = 沒有在計時（影片 / 轉場 / 關閉）
+  const photoStartTimeRef = useRef(null)
   const [heartLiked, setHeartLiked] = useState(false)
-  const [heartBounce, setHeartBounce] = useState(false)
+  // 每點一次 +1，當 key 用來重掛載愛心 → 連點也能每次重播彈跳
+  const [heartBounceTick, setHeartBounceTick] = useState(0)
   const [bgmStarted, setBgmStarted] = useState(false)
   const [inputFocused, setInputFocused] = useState(false)
   const [inputValue, setInputValue] = useState('')
@@ -35,6 +38,8 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
   const swipeRef = useRef(null)
   const isSwipingRef = useRef(false)
   const justSwipedRef = useRef(false)
+  // 下滑手勢的近期取樣 [{ y, t }]，放開時算速度（甩動關閉）
+  const swipeSamplesRef = useRef([])
   // iOS Safari 不會 preload hidden video，用 fetch 下載 blob 後轉成 blob URL
   const videoBlobCache = useRef(new Map())
   // 用 state 觸發 re-render，讓播放 effect 在 blob 就緒後能取用新 src
@@ -42,6 +47,13 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
 
   const photos = PROPOSAL_PHOTOS
   const PHOTO_DURATION = 6000
+  // 甩動關閉：取放開前 80ms 內的位移算速度，超過 0.11 px/ms 且至少拉了 24px 即關閉
+  const SWIPE_VELOCITY_WINDOW_MS = 80
+  const SWIPE_DISMISS_VELOCITY = 0.11
+  const SWIPE_DISMISS_MIN_PX = 24
+  const SWIPE_DISMISS_DISTANCE = 120
+  // 下滑判定門檻：超過才進入拖拉，並以門檻為 0 點起算（不跳 10px）
+  const SWIPE_ENGAGE_PX = 10
 
   // Edge-cache warm-up：在使用者點開彩蛋之前，把所有照片 / 影片悄悄塞進
   //   - HTTP cache（Fastly edge）
@@ -149,7 +161,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       setShowTransition(false)
       setHasStartedTransition(false)
       setHeartLiked(false)
-      setHeartBounce(false)
+      setHeartBounceTick(0)
       setInputFocused(false)
       setShareOpen(false)
       setSwipeY(0)
@@ -258,10 +270,14 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
 
   // 自動播放和進度條（僅圖片）
   useEffect(() => {
-    if (!isOpen || showTransition || currentIsVideo) return
+    if (!isOpen || showTransition || currentIsVideo) {
+      photoStartTimeRef.current = null
+      return
+    }
     if (isPaused) return
 
     const startTime = Date.now() - elapsedBeforePause
+    photoStartTimeRef.current = startTime
     const interval = setInterval(() => {
       if (isPaused) return
       const elapsed = Date.now() - startTime
@@ -282,6 +298,16 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
 
     return () => clearInterval(interval)
   }, [isOpen, currentPhotoIndex, showTransition, isPaused, elapsedBeforePause, photos.length, currentIsVideo])
+
+  // 暫停的唯一記帳點：isPaused 轉 true 時（長按 / 滑鼠按住 / 輸入框聚焦 / 開分享面板皆同）
+  // 由計時起點算出已播時間，恢復時 interval 從這裡接續，與 CSS story-progress 凍結點一致。
+  // 各觸發點不再自行抓 elapsed（之前只有 touch / mouse 會抓，其餘路徑恢復時會用到舊值）
+  useEffect(() => {
+    if (!isPaused || photoStartTimeRef.current === null) return
+    const elapsed = Math.min(PHOTO_DURATION, Date.now() - photoStartTimeRef.current)
+    photoStartTimeRef.current = null
+    setElapsedBeforePause(elapsed)
+  }, [isPaused])
 
   // 切換照片時重置進度
   useEffect(() => {
@@ -319,6 +345,19 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     }, 50)
     return () => clearInterval(interval)
   }, [isOpen, showTransition, currentIsVideo, isPaused, currentPhotoIndex, visibleLayer, visibleVideoRef])
+
+  // 進度條樣式：過去 = 滿、未來 = 空；目前那格（圖片）交給 story-progress CSS 動畫線性填滿，
+  // 暫停用 animationPlayState 凍結。影片的長度不固定，仍沿用 interval 量 currentTime 的 progress（scaleX）。
+  // interval 只負責推進 currentPhotoIndex 與暫停時的 elapsed 記帳，不再驅動圖片進度條的 DOM。
+  const progressBarStyle = (index) => {
+    if (index < currentPhotoIndex) return { transform: 'scaleX(1)' }
+    if (index > currentPhotoIndex) return { transform: 'scaleX(0)' }
+    if (currentIsVideo || progress >= 100) return { transform: `scaleX(${progress / 100})` }
+    return {
+      animation: `story-progress ${PHOTO_DURATION}ms linear forwards`,
+      animationPlayState: isPaused ? 'paused' : 'running',
+    }
+  }
 
   // --- 事件處理 ---
 
@@ -366,9 +405,8 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     const touch = e.touches[0]
     swipeRef.current = { x: touch.clientX, y: touch.clientY }
     isSwipingRef.current = false
+    swipeSamplesRef.current = []
 
-    const currentElapsed = (progress / 100) * PHOTO_DURATION
-    setElapsedBeforePause(currentElapsed)
     setIsPaused(true)
     setPauseStartTime(Date.now())
   }
@@ -380,9 +418,14 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
     const dy = touch.clientY - swipeRef.current.y
     const dx = Math.abs(touch.clientX - swipeRef.current.x)
 
-    if (dy > 10 && dy > dx * 1.5) {
+    // 一旦進入拖拉就持續跟手（往回拉到門檻內也不會卡住舊位置）
+    if (isSwipingRef.current || (dy > SWIPE_ENGAGE_PX && dy > dx * 1.5)) {
       isSwipingRef.current = true
-      setSwipeY(Math.max(0, dy))
+      setSwipeY(Math.max(0, dy - SWIPE_ENGAGE_PX))
+      const now = performance.now()
+      const samples = swipeSamplesRef.current.filter((p) => now - p.t <= SWIPE_VELOCITY_WINDOW_MS)
+      samples.push({ y: touch.clientY, t: now })
+      swipeSamplesRef.current = samples
     }
   }
 
@@ -391,7 +434,21 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
 
     // 下滑關閉
     if (isSwipingRef.current) {
-      if (swipeY > 120) {
+      // 速度：只看放開前 80ms 內的取樣；停住後才放開 → 無取樣 → 速度 0
+      const now = performance.now()
+      const recent = swipeSamplesRef.current.filter((p) => now - p.t <= SWIPE_VELOCITY_WINDOW_MS)
+      let velocity = 0
+      if (recent.length >= 2) {
+        const first = recent[0]
+        const last = recent[recent.length - 1]
+        const dt = last.t - first.t
+        if (dt > 0) velocity = (last.y - first.y) / dt
+      }
+      swipeSamplesRef.current = []
+      if (
+        swipeY > SWIPE_DISMISS_DISTANCE ||
+        (velocity > SWIPE_DISMISS_VELOCITY && swipeY > SWIPE_DISMISS_MIN_PX)
+      ) {
         onClose()
       }
       setSwipeY(0)
@@ -418,8 +475,6 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
   // 桌面端滑鼠暫停
   const handleMouseDown = (e) => {
     if (e.target.closest('button') || e.target.closest('input')) return
-    const currentElapsed = (progress / 100) * PHOTO_DURATION
-    setElapsedBeforePause(currentElapsed)
     setIsPaused(true)
     setPauseStartTime(Date.now())
   }
@@ -438,8 +493,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
   // 愛心彈跳
   const handleHeartClick = useCallback(() => {
     setHeartLiked((prev) => !prev)
-    setHeartBounce(true)
-    setTimeout(() => setHeartBounce(false), 500)
+    setHeartBounceTick((t) => t + 1)
   }, [])
 
   // 輸入框焦點 → 暫停故事
@@ -598,7 +652,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
             userSelect: 'none',
             WebkitUserSelect: 'none',
             transform: swipeY > 0 ? `translateY(${swipeY}px) scale(${Math.max(0.9, 1 - swipeY * 0.0008)})` : undefined,
-            transition: swipeY === 0 ? 'transform 0.3s ease' : undefined,
+            transition: swipeY === 0 ? 'transform 0.3s var(--ease-out)' : undefined,
             borderRadius: swipeY > 0 ? '16px' : undefined,
             overflow: 'hidden',
           }}
@@ -617,7 +671,9 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
                     opacity: isVisible ? 1 : 0,
                     pointerEvents: isVisible ? 'auto' : 'none',
                     zIndex: isVisible ? 2 : 1,
-                    transition: 'opacity 200ms ease',
+                    // 只讓「進場層」淡入；退場層等 200ms 進場完成後才瞬切為 0，
+                    // 避免兩層同時半透明時透出黑底（中途變暗）。onTransitionEnd 仍會觸發，buffer 換 src 邏輯不變
+                    transition: isVisible ? 'opacity 200ms ease' : 'opacity 0ms linear 200ms',
                   }}
                   onTransitionEnd={() => {
                     // 淡出完成後才更新 buffer 層的 src，避免 iOS Safari 在 src 改變時清空畫面
@@ -675,14 +731,10 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
                   className="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden"
                 >
                   <div
-                    className="h-full bg-white transition-all duration-75 ease-linear"
-                    style={{
-                      width: index < currentPhotoIndex
-                        ? '100%'
-                        : index === currentPhotoIndex
-                        ? `${progress}%`
-                        : '0%',
-                    }}
+                    // 目前那格以 currentPhotoIndex 當 key：換照片即重掛載、動畫從 0 重跑
+                    key={index === currentPhotoIndex ? `current-${currentPhotoIndex}` : 'static'}
+                    className="h-full bg-white origin-left"
+                    style={progressBarStyle(index)}
                   />
                 </div>
               ))}
@@ -774,12 +826,13 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
               <button
                 type="button"
                 onClick={handleHeartClick}
-                className={`touch-manipulation flex items-center justify-center w-11 h-11 flex-shrink-0 ${heartBounce ? 'animate-heart-bounce' : ''}`}
+                className="touch-manipulation flex items-center justify-center w-11 h-11 flex-shrink-0"
                 aria-label={heartLiked ? '取消喜歡' : '喜歡'}
               >
                 <Heart
+                  key={heartBounceTick}
                   size={24}
-                  className={heartLiked ? 'text-red-500' : 'text-white'}
+                  className={`${heartLiked ? 'text-red-500' : 'text-white'} ${heartBounceTick > 0 ? 'animate-heart-bounce' : ''}`}
                   fill={heartLiked ? 'currentColor' : 'none'}
                   strokeWidth={2}
                 />

@@ -1,5 +1,5 @@
-import { describe, test, expect, afterEach } from 'vitest'
-import { render, screen, fireEvent, cleanup } from '@testing-library/react'
+import { describe, test, expect, afterEach, vi } from 'vitest'
+import { render, screen, fireEvent, cleanup, act } from '@testing-library/react'
 import ChecklistSection from '../../components/trip/ChecklistSection.jsx'
 
 const rows = [
@@ -11,6 +11,7 @@ const rows = [
 afterEach(() => {
   cleanup()
   localStorage.clear()
+  vi.useRealTimers()
 })
 
 describe('ChecklistSection localStorage 持久化', () => {
@@ -61,5 +62,23 @@ describe('ChecklistSection localStorage 持久化', () => {
     // Assert
     const saved = JSON.parse(localStorage.getItem('trip-checklist:v1:tokyo-2026'))
     expect(saved['證件-護照']).toBe(false)
+  })
+})
+
+describe('ChecklistSection 完成慶祝', () => {
+  test('勾完 category 最後一項時渲染 bar-celebrate overlay，CELEBRATE_MS 後移除', () => {
+    // Arrange
+    vi.useFakeTimers()
+    const { container } = render(<ChecklistSection rows={rows} slug="tokyo-2026" />)
+    fireEvent.click(screen.getByRole('checkbox', { name: /護照/ }))
+    expect(container.querySelector('.bar-celebrate')).toBeNull()
+
+    // Act
+    fireEvent.click(screen.getByRole('checkbox', { name: /機票/ }))
+
+    // Assert
+    expect(container.querySelector('.bar-celebrate')).not.toBeNull()
+    act(() => { vi.advanceTimersByTime(600) })
+    expect(container.querySelector('.bar-celebrate')).toBeNull()
   })
 })

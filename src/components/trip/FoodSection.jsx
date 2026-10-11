@@ -100,7 +100,7 @@ export default function FoodSection({ rows }) {
                             href={row.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-2.5 frosted-glass-button rounded-full text-secondary transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0 ml-2"
+                            className="p-2.5 frosted-glass-button rounded-full text-secondary touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0 ml-2"
                             onClick={e => e.stopPropagation()}
                             aria-label={`查看 ${row.name} 的位置`}
                           >

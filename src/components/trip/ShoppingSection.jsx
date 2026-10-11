@@ -74,7 +74,7 @@ function NavButton({ name, link, ghost = false }) {
       className={
         ghost
           ? 'p-2.5 text-stone-400 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0'
-          : 'p-2.5 frosted-glass-button rounded-full text-secondary transition-colors touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0'
+          : 'p-2.5 frosted-glass-button rounded-full text-secondary touch-manipulation min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0'
       }
       onClick={e => e.stopPropagation()}
       aria-label={`查看 ${name} 的位置`}

@@ -6,6 +6,9 @@ const bucketLabel = (bucket) => (bucket === 'backup' ? '備選' : getCategory(bu
 
 // 只列最近的前幾個，避免一排無限長
 const MAX_CARDS = 12
+// 卡片滑入 stagger：每張 40ms，第 6 張起不再加（總延遲上限 200ms）
+const STAGGER_MS = 40
+const MAX_STAGGER_STEPS = 5
 
 /**
  * 探索模式「離你最近」底部橫向卡片條（**非** BottomSheet：無把手、不蓋半屏、不像第二層 modal）。
@@ -19,10 +22,12 @@ const MAX_CARDS = 12
  */
 export default function NearbyStrip({ ranked, status, onSelect }) {
   if (status === 'idle') return null
+  // 三個分支的根節點各給不同 key：否則 React 會沿用同一個 div、只換 className，
+  // locating → ok 時不會重新掛載，@starting-style 的滑入就不會觸發
 
   if (status === 'locating' || status === 'error') {
     return (
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-6 z-[600] frosted-glass-panel rounded-full px-4 py-2">
+      <div key="status-pill" className="nearby-enter absolute left-1/2 -translate-x-1/2 bottom-6 z-[600] frosted-glass-panel rounded-full px-4 py-2">
         <span className="text-sm font-serif text-muted">
           {status === 'locating' ? '定位中…' : '無法取得位置（權限被拒或逾時）'}
         </span>
@@ -33,21 +38,22 @@ export default function NearbyStrip({ ranked, status, onSelect }) {
   // status === 'ok'
   if (!ranked.length) {
     return (
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-6 z-[600] frosted-glass-panel rounded-full px-4 py-2">
+      <div key="empty-pill" className="nearby-enter absolute left-1/2 -translate-x-1/2 bottom-6 z-[600] frosted-glass-panel rounded-full px-4 py-2">
         <span className="text-sm font-serif text-muted">附近沒有可顯示的點</span>
       </div>
     )
   }
 
   return (
-    <div className="absolute left-0 right-0 bottom-0 z-[600] pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+    <div key="card-strip" className="absolute left-0 right-0 bottom-0 z-[600] pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
       <div className="flex gap-2 overflow-x-auto scrollbar-hide snap-x px-4">
-        {ranked.slice(0, MAX_CARDS).map((p) => (
+        {ranked.slice(0, MAX_CARDS).map((p, i) => (
           <button
             key={p.id}
             type="button"
             onClick={() => onSelect(p)}
-            className="snap-start flex-none w-44 glass-card press-springy relative rounded-2xl px-3.5 py-2.5 text-left touch-manipulation"
+            style={{ '--enter-delay': `${Math.min(i, MAX_STAGGER_STEPS) * STAGGER_MS}ms` }}
+            className="nearby-enter snap-start flex-none w-44 glass-card press-springy relative rounded-2xl px-3.5 py-2.5 text-left touch-manipulation"
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-sm font-serif font-bold text-jp-text truncate">{p.name}</span>

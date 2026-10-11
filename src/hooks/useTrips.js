@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { sheetURL, parseCSV } from '../lib/sheets.js'
 import { getCached, setCached, clearCached } from '../lib/swrCache.js'
 import { env } from '../lib/env.js'
@@ -16,13 +16,23 @@ export function useTrips() {
   const [loading, setLoading] = useState(() => !getCached(TRIPS_CACHE_KEY))
   const [error, setError] = useState(null)
   const [refreshTick, setRefreshTick] = useState(0)
+  // 待 resolve 的 refresh() promise：fetch effect 完成（成功或失敗）時 resolve
+  const refreshResolveRef = useRef(null)
 
-  const refresh = useCallback(async () => {
-    clearCached(TRIPS_CACHE_KEY)
-    setRefreshTick(t => t + 1)
-    // 等待一個 microtask 讓 effect 跑完，UI 端可 await 拿到 fresh 完成
-    await new Promise(r => setTimeout(r, 600))
+  const settleRefresh = useCallback(() => {
+    refreshResolveRef.current?.()
+    refreshResolveRef.current = null
   }, [])
+
+  const refresh = useCallback(() => {
+    clearCached(TRIPS_CACHE_KEY)
+    // 前一次 refresh 還沒完成就又被呼叫 → 先放掉舊的，避免它永遠 pending
+    settleRefresh()
+    return new Promise((resolve) => {
+      refreshResolveRef.current = resolve // effect 完成（成功或失敗）時 resolve
+      setRefreshTick(t => t + 1)
+    })
+  }, [settleRefresh])
 
   // 回前景 → 靜默 refetch index sheet（不清 localStorage，背景拿新清單不重載）
   useRevalidateOnVisible(useCallback(() => {
@@ -34,6 +44,7 @@ export function useTrips() {
     if (!indexSheetId) {
       setError(new Error('VITE_INDEX_SHEET_ID not configured'))
       setLoading(false)
+      settleRefresh()
       return
     }
 
@@ -55,12 +66,14 @@ export function useTrips() {
         setError(err)
       })
       .finally(() => {
+        // 被取消代表有更新的一輪 effect 接手，由那一輪負責 resolve
         if (cancelled) return
         setLoading(false)
+        settleRefresh()
       })
 
     return () => { cancelled = true }
-  }, [refreshTick])
+  }, [refreshTick, settleRefresh])
 
   return { trips, loading, error, refresh }
 }

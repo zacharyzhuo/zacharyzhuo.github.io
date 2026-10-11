@@ -1,5 +1,6 @@
 import { useRef, useMemo } from 'react'
 import { tap } from '../../lib/haptic.js'
+import { prefersReducedMotion } from '../../lib/motion.js'
 import { useSegmentedDrag } from '../../hooks/useSegmentedDrag.js'
 
 /**
@@ -43,7 +44,7 @@ export default function SegmentedControl({
       onChange(key)
     }
     if (isDegraded) {
-      e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+      e.currentTarget.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'nearest', inline: 'center' })
     }
   }
 
@@ -56,7 +57,12 @@ export default function SegmentedControl({
       : Math.min(keys.length - 1, idx + 1)
     if (nextIdx !== idx) {
       tap()
-      beginTravel()
+      // 鍵盤切換不動畫（AUDIT：鍵盤觸發的動作不該有動畫）：暫關 transition 讓膠囊瞬移
+      const pill = pillRef.current
+      if (pill) {
+        pill.style.transition = 'none'
+        requestAnimationFrame(() => requestAnimationFrame(() => { pill.style.transition = '' }))
+      }
       onChange(keys[nextIdx])
     }
   }

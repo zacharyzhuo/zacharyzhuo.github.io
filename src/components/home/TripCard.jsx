@@ -131,7 +131,7 @@ export default function TripCard({ trip, variant = 'feature' }) {
           loading="eager"
           fetchPriority="high"
           decoding="async"
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
           style={status === 'past' ? { filter: 'saturate(0.85)' } : undefined}
         />
       ) : (

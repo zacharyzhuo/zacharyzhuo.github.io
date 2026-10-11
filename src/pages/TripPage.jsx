@@ -27,6 +27,7 @@ const FoodSection = lazy(() => import('../components/trip/FoodSection.jsx'))
 const TripMap = lazy(() => import('../components/trip/TripMap.jsx'))
 
 const LAST_TRIP_KEY = 'lastTripSlug'
+const PANEL_CLOSE_MS = 300 // 與 index.css --dur-panel-close 同值
 
 // 側欄 icon：純分類色 icon（無圓底，與時間軸軌道同語言）。
 // shopping / food 直接取分類色；info 借交通色（航班為主）、checklist 用品牌綠。
@@ -72,6 +73,26 @@ export default function TripPage() {
   const mapOpen = panel === 'map'
   const detailState = panel === 'detail' ? location.state : null
   const [extras, setExtras] = useState(null)
+
+  // 關閉時內容多留 --dur-panel-close，讓滑下去的面板裡還有東西（空玻璃板滑走很突兀；地圖則是圖磚瞬間消失）；
+  // DetailModal 用 displayRow 做同一件事。isOpen 仍由 activeModal / mapOpen 即時驅動。
+  const openSheet = activeModal ?? (mapOpen ? 'map' : null)
+  const [renderedSheet, setRenderedSheet] = useState(openSheet)
+  useEffect(() => {
+    if (openSheet) { setRenderedSheet(openSheet); return }
+    const id = setTimeout(() => setRenderedSheet(null), PANEL_CLOSE_MS)
+    return () => clearTimeout(id)
+  }, [openSheet])
+
+  // 地圖每次開啟都要是新的 TripMap instance（mode / routeDay / focusIdx 重置成「探索 + 當天」）。
+  // 關閉後 renderedSheet 仍讓它掛載 PANEL_CLOSE_MS，此時重開會沿用舊 instance → 以開啟次數當 key 強制重掛。
+  // 用 render 期間比對前值（React 官方「prop 變動時調整 state」寫法），避免 effect 造成先渲染舊 instance 再重掛
+  const [mapOpenCount, setMapOpenCount] = useState(mapOpen ? 1 : 0)
+  const [prevMapOpen, setPrevMapOpen] = useState(mapOpen)
+  if (mapOpen !== prevMapOpen) {
+    setPrevMapOpen(mapOpen)
+    if (mapOpen) setMapOpenCount((c) => c + 1)
+  }
 
   // 開啟＝push 一筆新 history；關閉（X／ESC／backdrop／拖曳關閉）一律 navigate(-1)，
   // 讓 UI 關閉動作與瀏覽器上一頁行為完全一致，不會兩者狀態打架。
@@ -125,9 +146,11 @@ export default function TripPage() {
     shoppingHook.refresh, checklistHook.refresh, foodHook.refresh, daysHook.refresh,
     prepareHook.refresh,
   ])
-  const { pullY, refreshing, triggerThreshold } = usePullToRefresh(refreshAllSheets, {
-    // sidebar / modal / 彩蛋打開時停掉 pull-to-refresh，避免跟拖曳關閉手勢衝突
-    enabled: !sidebarOpen && !activeModal && !mapOpen,
+  const { refreshing, showIndicator: showPullIndicator, indicatorRef: pullIndicatorRef } = usePullToRefresh(refreshAllSheets, {
+    // 任何疊層（側欄 / 四個 sheet / 地圖 / 行程詳情 DetailModal）打開時停掉 pull-to-refresh，
+    // 避免跟拖曳關閉手勢衝突：DetailModal 高度 85vh 時把手落在頂端 140px 起手區內，
+    // 曾因 panel === 'detail' 沒被排除而「拖關 modal 同時觸發刷新」。
+    enabled: panel === null,
   })
 
   // Trip-specific extras（求婚彩蛋）lazy load
@@ -267,19 +290,15 @@ export default function TripPage() {
 
   const yearMonth = getYearMonth(trip.dates)
   const tripNameEn = getTripNameEn(trip, slug)
-  const showPullIndicator = pullY > 0 || refreshing
-  const pullIndicatorOpacity = refreshing ? 1 : Math.min(1, pullY / triggerThreshold)
 
   return (
     <div className="bg-washi min-h-screen text-jp-text font-serif pb-12 safe-area-inset relative">
       {/* Pull-to-refresh indicator：floating，不平移內容（避免干擾 day swipe transform） */}
       {showPullIndicator && (
         <div
+          ref={pullIndicatorRef}
           className="fixed left-0 right-0 top-0 flex justify-center pointer-events-none z-30"
-          style={{
-            transform: `translateY(${refreshing ? 24 : Math.max(0, pullY - 30)}px)`,
-            opacity: pullIndicatorOpacity,
-          }}
+          style={{ transform: 'translateY(0px)', opacity: 0 }}
         >
           <div className="frosted-glass-button rounded-full p-3 text-muted">
             <RefreshCw size={20} className={refreshing ? 'animate-spin' : ''} />
@@ -380,7 +399,7 @@ export default function TripPage() {
 
       {/* Section Modals */}
       <BottomSheet isOpen={activeModal === 'info'} onClose={closePanel} title="旅程資訊" noScroll noStickyTitle>
-        {activeModal === 'info' && (
+        {renderedSheet === 'info' && (
           <Suspense fallback={<SectionSkeleton />}>
             {flightsHook.loading || accommodationHook.loading || prepareHook.loading
               ? <SectionSkeleton />
@@ -390,7 +409,7 @@ export default function TripPage() {
       </BottomSheet>
 
       <BottomSheet isOpen={activeModal === 'checklist'} onClose={closePanel} title="行李清單" noScroll noStickyTitle>
-        {activeModal === 'checklist' && (
+        {renderedSheet === 'checklist' && (
           <Suspense fallback={<SectionSkeleton bottomBar={false} />}>
             {checklistHook.loading
               ? <SectionSkeleton bottomBar={false} />
@@ -400,7 +419,7 @@ export default function TripPage() {
       </BottomSheet>
 
       <BottomSheet isOpen={activeModal === 'shopping'} onClose={closePanel} title="逛街清單" noScroll noStickyTitle>
-        {activeModal === 'shopping' && (
+        {renderedSheet === 'shopping' && (
           <Suspense fallback={<SectionSkeleton />}>
             {shoppingHook.loading
               ? <SectionSkeleton />
@@ -410,7 +429,7 @@ export default function TripPage() {
       </BottomSheet>
 
       <BottomSheet isOpen={activeModal === 'food'} onClose={closePanel} title="美食清單" noScroll noStickyTitle>
-        {activeModal === 'food' && (
+        {renderedSheet === 'food' && (
           <Suspense fallback={<SectionSkeleton />}>
             {foodHook.loading
               ? <SectionSkeleton />
@@ -421,9 +440,9 @@ export default function TripPage() {
 
       {/* Map */}
       <BottomSheet isOpen={mapOpen} onClose={closePanel} title="行程地圖" noScroll noStickyTitle tall>
-        {mapOpen && (
+        {renderedSheet === 'map' && (
           <Suspense fallback={<SectionSkeleton />}>
-            <TripMap points={mapPoints} days={days} activeDay={activeDay} />
+            <TripMap key={mapOpenCount} points={mapPoints} days={days} activeDay={activeDay} />
           </Suspense>
         )}
       </BottomSheet>
