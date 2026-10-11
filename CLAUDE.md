@@ -40,6 +40,7 @@ Vite + React SPA (GitHub Pages)
 | 變數 | 說明 |
 |---|---|
 | `VITE_INDEX_SHEET_ID` | Index Sheet 的 Google Sheet ID |
+| `VITE_CARTO_API_KEY` | （選填）CARTO basemaps API key。CARTO 自 2026 起強制要 key，沒有會出「API KEY REQUIRED」浮水印圖磚；本地 `.env.local`、CI 走 GitHub Actions secret（已設）。key 須在 CARTO 後台綁 `trip.zacharyzhuo.com` / `zacharyzhuo.github.io` / 本機開發來源 |
 
 統一從 `src/lib/env.js` 讀取，請勿直接散用 `import.meta.env.XXX`。
 

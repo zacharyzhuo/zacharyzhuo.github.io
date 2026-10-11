@@ -40,6 +40,12 @@ export const env = {
   get IS_PROD() {
     return !!import.meta.env.PROD
   },
+  // CARTO basemaps API key（選填）。CARTO 自 2026 起對 basemaps.cartocdn.com 強制要 key，
+  // 無 key 時圖磚會變成「API KEY REQUIRED」浮水印。key 是前端公開 key，靠 CARTO 後台綁網域限制；
+  // 本地放 .env.local、CI 走 GitHub Actions secret，勿寫死在程式碼。
+  get CARTO_API_KEY() {
+    return (import.meta.env.VITE_CARTO_API_KEY || '').trim()
+  },
   // CI 在 build 時注入 commit sha；本地 build 時可能為 'dev'
   get APP_VERSION() {
     return import.meta.env.VITE_APP_VERSION || 'dev'

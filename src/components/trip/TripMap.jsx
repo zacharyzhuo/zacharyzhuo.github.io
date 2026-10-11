@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Clock, Crosshair, Layers, MapPin, Navigation
 import { getCategory, BRAND_INK, BACKUP_INK } from '../../lib/categories.js'
 import { sortByDistance, routePoints, nextFocusIndex, buildMapsUrl } from '../../lib/maps.js'
 import { openExternal } from '../../lib/openExternal.js'
+import { env } from '../../lib/env.js'
 import { tap as hapticTap, bump } from '../../lib/haptic.js'
 import { prefersReducedMotion } from '../../lib/motion.js'
 import { markerIcon, numberedIcon, meIcon } from './mapIcons.js'
@@ -15,6 +16,10 @@ import SegmentedControl from '../ui/SegmentedControl.jsx'
 import EmptyState from '../ui/EmptyState.jsx'
 
 const TOKYO = [35.6762, 139.6503]
+// CARTO Positron 圖磚：必須帶 ?key=（見 lib/env.js CARTO_API_KEY 註解）；沒 key 就退回無 key URL（會出浮水印，但不會壞）
+const CARTO_TILE_URL = env.CARTO_API_KEY
+  ? `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${env.CARTO_API_KEY}`
+  : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
 const BUCKETS = ['food', 'shopping', 'attraction', 'hotel', 'backup']
 const BUCKET_LABEL = { food: '美食', attraction: '景點', shopping: '購物', hotel: '住宿', backup: '備選', transport: '交通' }
 
@@ -348,7 +353,7 @@ export default function TripMap({ points, days = [], activeDay = null }) {
               ) : (
                 <TileLayer
                   key="carto"
-                  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                  url={CARTO_TILE_URL}
                   attribution='&copy; OpenStreetMap &copy; CARTO'
                   subdomains="abcd"
                   maxZoom={20}
