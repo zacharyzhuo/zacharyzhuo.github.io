@@ -89,7 +89,7 @@ export default function ShareSheet({ isOpen, onClose }) {
       >
         <div
           ref={sheetRef}
-          className="relative rounded-t-2xl overflow-hidden animate-share-slide-up"
+          className="relative w-full max-w-2xl mx-auto rounded-t-2xl overflow-hidden animate-share-slide-up"
           style={{ backgroundColor: '#262626' }}
           onClick={(e) => e.stopPropagation()}
           onTouchStart={handleDragStart}

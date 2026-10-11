@@ -586,7 +586,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       {/* Instagram 限時動態 */}
       {!showTransition && hasStartedTransition && (
         <div
-          className="flex flex-col w-full h-full bg-black cursor-pointer animate-photo-fade-in select-none"
+          className="flex flex-col w-full h-full max-w-2xl mx-auto bg-black cursor-pointer animate-photo-fade-in select-none"
           onClick={handlePhotoClick}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -815,7 +815,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       {/* 鍵盤打開時：黑色背景填滿鍵盤高度區域，消除縫隙 */}
       {inputFocused && keyboardHeight > 0 && (
         <div
-          className="fixed left-0 right-0 z-[199] bg-black"
+          className="fixed left-0 right-0 max-w-2xl mx-auto z-[199] bg-black"
           style={{ bottom: 0, height: keyboardHeight }}
         />
       )}
@@ -823,7 +823,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition }) => {
       {/* 浮動輸入列：貼在黑色填充層上方 */}
       {inputFocused && keyboardHeight > 0 && (
         <div
-          className="fixed left-0 right-0 z-[200] flex items-center px-3 py-2 bg-black"
+          className="fixed left-0 right-0 max-w-2xl mx-auto z-[200] flex items-center px-3 py-2 bg-black"
           style={{ bottom: keyboardHeight }}
           onClick={(e) => e.stopPropagation()}
         >
