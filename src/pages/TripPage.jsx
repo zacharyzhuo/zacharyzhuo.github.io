@@ -349,7 +349,7 @@ export default function TripPage() {
               easterEgg.handleDayClick(day, prevActive)
             }}
             easterEggDay={extras?.easterEggDay}
-            easterEggIcon={easterEgg.activated && extras ? <extras.HeartIcon activated /> : null}
+            easterEggIcon={easterEgg.activated && extras ? <extras.HeartIcon activated hidden={easterEgg.heartHidden} /> : null}
           />
         )}
 
@@ -453,6 +453,7 @@ export default function TripPage() {
           isOpen={easterEgg.open}
           onClose={easterEgg.reset}
           heartPosition={easterEgg.heartPosition}
+          onRevealStart={easterEgg.hideHeart}
           warm={activeDay === extras.easterEggDay}
         />
       )}

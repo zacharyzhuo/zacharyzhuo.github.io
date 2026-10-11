@@ -100,20 +100,24 @@ export default function DayNav({ days, activeDay, onSelect, easterEggIcon, easte
               className="flex flex-col items-center gap-1 min-w-[4rem] flex-shrink-0 min-h-[44px] justify-center touch-manipulation px-2 relative snap-center press-lift press-lift-sm"
               aria-label={`選擇第 ${day} 天`}
             >
-              {isEasterDay && easterEggIcon ? (
-                easterEggIcon
-              ) : (
-                <>
-                  <span className={`text-xs tracking-widest uppercase font-serif ${dowClass}`}>
-                    {dow ? `週${dow}` : `Day${day}`}
-                  </span>
-                  <span className={`text-2xl font-serif leading-none tabular-nums ${
-                    isActive ? 'text-jp-text' : 'text-stone-400'
-                  }`}>
-                    {dom || String(day).padStart(2, '0')}
-                  </span>
-                  {isActive && <div className={`w-1 h-1 rounded-full mt-1 ${isToday ? 'bg-jp-red' : 'bg-jp-text'}`} />}
-                </>
+              {/* 彩蛋愛心出現時，日期 / 數字 / 圓點改 invisible 留在原位（不拿掉）：
+                  格子與整列 DayNav 高度不變、頁面不跳，icon 絕對置中在同一個中心點，
+                  開窗的起點（第 9 下量到的格子中心）才會跟 icon 完全重合 */}
+              <span className={`flex flex-col items-center gap-1 ${isEasterDay && easterEggIcon ? 'invisible' : ''}`}>
+                <span className={`text-xs tracking-widest uppercase font-serif ${dowClass}`}>
+                  {dow ? `週${dow}` : `Day${day}`}
+                </span>
+                <span className={`text-2xl font-serif leading-none tabular-nums ${
+                  isActive ? 'text-jp-text' : 'text-stone-400'
+                }`}>
+                  {dom || String(day).padStart(2, '0')}
+                </span>
+                {isActive && <div className={`w-1 h-1 rounded-full mt-1 ${isToday ? 'bg-jp-red' : 'bg-jp-text'}`} />}
+              </span>
+              {isEasterDay && easterEggIcon && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  {easterEggIcon}
+                </span>
               )}
             </button>
           )

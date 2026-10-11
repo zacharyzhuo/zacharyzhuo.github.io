@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
+import { success } from '../lib/haptic.js'
 
 // 連續快速點擊閾值
 const REQUIRED_CLICKS = 9
@@ -13,6 +14,8 @@ export function useEasterEgg({ extras }) {
   const [open, setOpen] = useState(false)
   const [heartPosition, setHeartPosition] = useState(null)
   const [activated, setActivated] = useState(false)
+  // 開窗起跑後把 DayNav 的愛心 icon 藏起來（窗本身就是那顆愛心）
+  const [heartHidden, setHeartHidden] = useState(false)
   const clickCount = useRef(0)
   const lastClickTime = useRef(0)
 
@@ -38,6 +41,8 @@ export function useEasterEgg({ extras }) {
 
     if (newCount < REQUIRED_CLICKS) return
 
+    // 愛心出現的同一幀打較強 haptic（因果、同步：apple-design §13）
+    success()
     setActivated(true)
     clickCount.current = 0
     const btn = document.querySelector(`[data-day="${day}"]`)
@@ -48,12 +53,26 @@ export function useEasterEgg({ extras }) {
     setOpen(true)
   }, [extras])
 
+  const hideHeart = useCallback(() => setHeartHidden(true), [])
+
+  // icon 真的畫出來後，用 icon 自己的矩形再量一次中心（第 9 下量的是格子中心；
+  // 兩者理論上重合，這裡是保險：之後 1.1s 內任何 sticky / 捲動造成的偏移都以 icon 為準）
+  useEffect(() => {
+    if (!activated || !extras) return
+    const icon = document.querySelector(`[data-day="${extras.easterEggDay}"] svg`)
+    if (!icon) return
+    const rect = icon.getBoundingClientRect()
+    if (rect.width === 0 && rect.height === 0) return
+    setHeartPosition({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
+  }, [activated, extras])
+
   const reset = useCallback(() => {
     setOpen(false)
     clickCount.current = 0
     setActivated(false)
+    setHeartHidden(false)
     setHeartPosition(null)
   }, [])
 
-  return { open, heartPosition, activated, handleDayClick, reset }
+  return { open, heartPosition, activated, heartHidden, hideHeart, handleDayClick, reset }
 }

@@ -44,6 +44,9 @@ export const PROPOSAL_PHOTOS = [
   `${BASE}proposal-photos/38.mp4`,
 ]
 
+/** 1~8.mp4 是整面 HEART_COLOR 藍底的對話截圖動畫：開窗過程窗裡就是這個藍（見 heartReveal.js） */
+export const INTRO_BLUE_SLIDES = 8
+
 export const SHARE_CONTACTS = [
   {
     name: 'Angelet Y.',

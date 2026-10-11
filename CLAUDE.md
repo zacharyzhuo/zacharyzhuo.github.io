@@ -164,7 +164,15 @@ useEffect(() => {
 - `HeartIcon`：愛心 icon 組件
 - `ProposalModal`：求婚彩蛋 modal。props `isOpen` / `onClose` / `heartPosition` / `warm`：`warm`（TripPage 傳 `activeDay === easterEggDay`）為 true 才啟動媒體 warm-up（依播放順序逐一 fetch 全部照片 / 影片 + BGM，經 sw.js `proposal-media` CacheFirst 存成完整 response；切到別天 abort）。以前是 modal 一 mount 就並發拉全部，每次開這趟行程頁都燒流量，已改掉。
 
-彩蛋觸發邏輯抽成 `hooks/useEasterEgg.js`：在已選取的 `easterEggDay` 上**連續快速點擊 9 次**（每次間隔 < 2s；常數 `REQUIRED_CLICKS`/`CLICK_GAP_MS`）觸發。
+彩蛋觸發邏輯抽成 `hooks/useEasterEgg.js`：在已選取的 `easterEggDay` 上**連續快速點擊 9 次**（每次間隔 < 2s；常數 `REQUIRED_CLICKS`/`CLICK_GAP_MS`）觸發；第 9 下同一幀打 `haptic.success()`。
+
+**過場「愛心開窗」（2026-10-11 重做，取代舊的「淡藍愛心放大 + 白底淡入淡出 + 切黑」）**：幾何與 keyframes 在 `extras/heartReveal.js`（純函式、有測試）。
+- 敘事：第 9 下，日期格長出一顆**跟開場影片同色**的藍愛心（`HEART_COLOR` `#95D5F5` = `1~8.mp4` 整面藍底對話截圖動畫**解碼後實測**的顏色，設計稿的 #89CFF0 經影片壓縮會偏亮；**勿憑設計稿換色票**，色差會看成兩顆愛心疊著）；開窗起跑那幀 `onRevealStart` → `useEasterEgg.hideHeart` 把 DayNav 的 icon `visibility:hidden`，畫面上只剩窗這一顆。底欄與整個舞台一律黑底（user 指定）。窗開滿後 root 掛 `.animate-stage-settle`（0.5s background-color keyframe）逼 iOS Safari 瀏覽器模式重採頂部 tint 成黑，否則狀態列那條會停在米白、看起來像頂端被切掉（舊版靠 `bgFadeIn` 做同一件事，勿再拿掉）。媒體尺寸 `.story-media`：瀏覽器模式 `contain`（Safari 工具列吃掉高度、cover 會切頭；頁面端藏不掉工具列，iPhone 不開放元素 fullscreen），`@media (display-mode: standalone)` 才 `cover` + 錨頂滿版，綻放 + 心跳兩下（`.animate-heart-bloom-beat`，`BEAT_MS` 1100ms），然後那顆愛心本身變成一扇窗慢慢打開（`REVEAL_MS` 1800ms），窗裡就是第一支藍底影片，開滿後進度條 / 帳號 / 底欄才淡入（`CHROME_FADE_MS`）。
+- 實作：限時動態是一張**靜態滿版層**（`windowRef`），開 / 關窗只動它的 `clip-path: path(愛心)`，48 段 path 由 `clipKeyframes` 在 JS 算好（倍率在**對數空間**套 ease-in-out；線性空間會前 100ms 衝到幾十倍再爬），瀏覽器只在相鄰的 path 之間插值。沒有 transform、沒有反向縮放的子層（第一版用「外層 scale(S) × 內層 scale(1/S)」雙層，實機會因兩層動畫不同步而抖，已棄用）。
+- 時序：第 9 下就 `hasStartedTransition`（限時動態掛載、root `visibility:hidden`，第一支影片趁心跳先跑起來），`BEAT_MS` 後 `revealStarted`（root 可見、BGM 起、WAAPI 開窗），開滿 `showTransition` 回 false。舞台（滿版層、欄、media 區、safe-area 覆蓋、底欄）**一律黑底**（user 指定；曾做過開場跟著藍、已退回），contain 留出的邊也是黑；開場藍只在影片本身：`currentPhotoIndex < INTRO_BLUE_SLIDES`（8）的影片帶同色 `poster`，第一幀 decode 前影片區就是藍。
+- 結束時 `onfinish` 先把 inline `clip-path` 寫成 `none` 再 `cancel()`，最後才 setState，避免交接那一幀窗縮回 32px。
+- 關閉（下滑 / X / ESC）一律走 `requestClose()`：窗開著就 UI 淡出 + 反向收回 icon（`COLLAPSE_MS` 600）再 `onClose`，進出同一條路；下滑的位移同時 0.3s 歸零。root 在開 / 關窗期間 `backgroundColor: transparent`（窗外看得到行程頁）。
+- `prefers-reduced-motion`：不等心跳、不開窗，root 300ms opacity 淡入，關閉直接 `onClose`。第 9 下同一幀 `haptic.success()`。
 
 ---
 
@@ -436,7 +444,7 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
   - **切日輪播（`useDaySwipe`）**：手勢期間**零 React state**（全走 ref + 直接寫 `carouselRef.style`，`carouselStyle` 只剩 `position: relative`、`carouselClassName` 恆空字串）；snap-back / commit 中途再抓會從 live transform 接手、取消 settle timer（不鎖輸入）；速度同上（trailing 80ms、0.11 px/ms、最少 24px，速度方向優先）；邊界用 `rubberBand(x, 80)`；`will-change` 只在手勢中掛。`peek()` 教學在 reduced-motion 下直接略過。
   - **下拉刷新（`usePullToRefresh`）**：拖動中直接寫 `indicatorRef` / `contentRef` 的 transform/opacity（不 setState），放開後 200ms `--ease-out` 歸位、indicator 淡完才卸載（`showIndicator`）；spinner 至少轉 300ms，`useTrips.refresh()` 等 fetch effect 真的 settle 才 resolve。`touchmove` 是 non-passive，過死區且確定縱向才 `preventDefault`；不設 `overscroll-behavior`（會跟 Safari 原生下拉刷新打架，已試過拿掉），只靠 non-passive `preventDefault`。
   - **勿無差別灑**：進度條、fade、骨架、列表整列不套。
-  - **`prefers-reduced-motion`（不再是 `*` 通殺）**：`index.css` 檔尾**唯一**一個 `@media` 區塊，只拿掉「位移 / 縮放」（`.transition-transform`、`.sheet-hidden`、tab 膠囊、press 的 `transform`、一次性 keyframe 瞬間到終態、`html .animate-heart-transition` 用更高特異性壓過它自己的 `!important`），**保留**顏色 / 透明度 / `animate-spin` / `animate-pulse`。新規則一律放在這個區塊之前，讓它維持檔尾。另有 `prefers-reduced-transparency` 區塊把玻璃改近實色。原生 CSS `:hover` 要包 `@media (hover: hover) and (pointer: fine)`（Tailwind 的 `hoverOnlyWhenSupported` 不涵蓋手寫 CSS）。
+  - **`prefers-reduced-motion`（不再是 `*` 通殺）**：`index.css` 檔尾**唯一**一個 `@media` 區塊，只拿掉「位移 / 縮放」（`.transition-transform`、`.sheet-hidden`、tab 膠囊、press 的 `transform`、一次性 keyframe 瞬間到終態；彩蛋開窗是 WAAPI，由 JS 的 `prefersReducedMotion()` 分支處理），**保留**顏色 / 透明度 / `animate-spin` / `animate-pulse`。新規則一律放在這個區塊之前，讓它維持檔尾。另有 `prefers-reduced-transparency` 區塊把玻璃改近實色。原生 CSS `:hover` 要包 `@media (hover: hover) and (pointer: fine)`（Tailwind 的 `hoverOnlyWhenSupported` 不涵蓋手寫 CSS）。
 - **按下滑出取消（`useCancelableTap`）**：選中類可點元件（TripCard、ItinerarySection 卡片、Sidebar 選單項）用 `hooks/useCancelableTap.js`：按下 setPointerCapture，放開時 `isPointInRect` 判定放開點是否仍在元件內，滑出去放開＝取消，避免長按/誤觸。呼叫一次回傳 `{ onPointerDown, onPointerUp, guard, guardLink }`，`guard(fn)` 包原本 onClick，可服務 `.map()` 清單（同時只按一個）。原生 onClick 保留給鍵盤無障礙。ChecklistSection 已自帶距離式（移動 >10px 不 toggle）取消，不重複套。
   - **`guardLink`**：`TripCard`（首頁行程卡）改用 react-router `<Link>`（原生右鍵/開新分頁語意，取代舊的 `<button onClick={navigate(...)}>`），取消時對 click event 呼叫 `preventDefault()` 擋掉導航；但 modifier 鍵（cmd/ctrl/shift/alt）或非左鍵點擊一律略過不攔截，保留 cmd-click/中鍵開新分頁的原生行為。
   - 過往卡片 status pill 不再顯示「回顧」，改用 `tripDays()`（`lib/tripDate.js`）算出的行程天數（如「5 天」）；日期格式異常算不出來則不顯示 pill。

@@ -1,17 +1,23 @@
 import React, { useState, useEffect, useRef, useCallback, useReducer } from 'react'
 import { Heart, X, Music, Send } from 'lucide-react'
 import { env } from '../../lib/env.js'
-import { PROPOSAL_PHOTOS, isVideoUrl } from './extras/data.js'
+import { PROPOSAL_PHOTOS, INTRO_BLUE_SLIDES, isVideoUrl } from './extras/data.js'
 import ShareSheet from './extras/ShareSheet.jsx'
 import HeartIcon from './extras/HeartIcon.jsx'
+import { prefersReducedMotion } from '../../lib/motion.js'
+import { HEART_COLOR, revealGeometry, clipKeyframes, clipStyle, BEAT_MS, REVEAL_MS, COLLAPSE_MS, CHROME_FADE_MS } from './extras/heartReveal.js'
 
 const BASE = env.BASE_URL
 // BGM：AAC-LC 160 kbps m4a（原 320 kbps mp3 轉檔，手機 / 耳機聽不出差異，體積減半）
 const BGM_URL = `${BASE}proposal-photos/sukidakara.m4a`
+// 開場藍底影片在第一幀 decode 出來前的 poster：同色，窗打開時裡面不會先黑一下
+const BLUE_POSTER = 'data:image/svg+xml,' + encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><rect width="2" height="2" fill="${HEART_COLOR}"/></svg>`
+)
 
 
 // Proposal Modal (彩蛋 - Instagram 限時動態風格)
-const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
+const ProposalModal = ({ isOpen, onClose, heartPosition, onRevealStart, warm = false }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
   const [visibleLayer, setVisibleLayer] = useState(0)
   const [showTransition, setShowTransition] = useState(false)
@@ -32,6 +38,14 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
   const [shareOpen, setShareOpen] = useState(false)
   const [swipeY, setSwipeY] = useState(0)
   const [keyboardHeight, setKeyboardHeight] = useState(0)
+  // 關窗中：限時動態收回 DayNav 那顆愛心，收完才真的 onClose
+  const [closing, setClosing] = useState(false)
+  const closingRef = useRef(false)
+  // 開窗已起跑（root 可見；之前限時動態已掛載但 visibility:hidden，讓第一支影片先跑起來）
+  const [revealStarted, setRevealStarted] = useState(false)
+  // 愛心開窗：限時動態滿版層，只動它的 clip-path；幾何在開窗那刻量一次、關窗沿用
+  const windowRef = useRef(null)
+  const geomRef = useRef(null)
   const bubbleTimerRef = useRef(null)
   const videoRef0 = useRef(null)
   const videoRef1 = useRef(null)
@@ -167,35 +181,32 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
       setInputFocused(false)
       setShareOpen(false)
       setSwipeY(0)
+      setClosing(false)
+      closingRef.current = false
+      setRevealStarted(false)
+      // 限時動態第 9 下就掛載（root 先 visibility:hidden）：第一支影片趁 icon 心跳那 1.1s 先跑起來，
+      // 開窗時窗裡已經是它的藍
+      setHasStartedTransition(true)
 
-      if (heartPosition) {
-        const shakeTimer = setTimeout(() => {
-          setShowTransition(true)
-          setHasStartedTransition(true)
-        }, 1200)
-
-        const transitionTimer = setTimeout(() => {
-          setShowTransition(false)
-        }, 3700)
-
-        return () => {
-          clearTimeout(shakeTimer)
-          clearTimeout(transitionTimer)
-        }
-      } else {
-        setShowTransition(true)
-        setHasStartedTransition(true)
-        const transitionTimer = setTimeout(() => {
-          setShowTransition(false)
-        }, 2500)
-
-        return () => {
-          clearTimeout(transitionTimer)
-        }
-      }
+      // 有 heartPosition（從 DayNav 點出來）：icon 綻放 + 心跳兩下（BEAT_MS）後開窗；
+      // 沒有（其他入口）：從視窗中心直接開。reduced-motion：不等心跳、不開窗，root 300ms 淡入
+      const center = heartPosition || { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+      const reduced = prefersReducedMotion()
+      const delay = heartPosition && !reduced ? BEAT_MS : 0
+      const timer = setTimeout(() => {
+        geomRef.current = revealGeometry(center, window.innerWidth, window.innerHeight)
+        setRevealStarted(true)
+        setShowTransition(!reduced)
+        // 窗出現的同一幀把 DayNav 的 icon 藏掉，畫面上只剩窗這一顆愛心
+        onRevealStart?.()
+      }, delay)
+      return () => clearTimeout(timer)
     } else {
       setShowTransition(false)
       setHasStartedTransition(false)
+      setRevealStarted(false)
+      setClosing(false)
+      closingRef.current = false
       setInputFocused(false)
       setInputValue('')
       setChatBubble(null)
@@ -203,7 +214,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
       setSwipeY(0)
       if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current)
     }
-  }, [isOpen, heartPosition])
+  }, [isOpen, heartPosition, onRevealStart])
 
   // BGM
   const tryPlayBGM = useCallback(() => {
@@ -215,7 +226,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
   useEffect(() => {
     const audio = bgmRef.current
     if (!audio) return
-    if (isOpen && hasStartedTransition && !showTransition) {
+    if (isOpen && revealStarted && !closing) {
       audio.play()
         .then(() => setBgmStarted(true))
         .catch(() => {})
@@ -226,7 +237,59 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
         setBgmStarted(false)
       }
     }
-  }, [isOpen, hasStartedTransition, showTransition])
+  }, [isOpen, revealStarted, closing])
+
+  // 開窗：showTransition 轉 true 時（限時動態層已掛載、inline clip 是 32px 愛心）跑 WAAPI，只動 clip-path。
+  // 結束時先把 inline clip 直接寫成 none 再 cancel 動畫，最後才 setState，
+  // 否則 cancel → re-render 之間會有一幀窗縮回 32px。
+  useEffect(() => {
+    if (!showTransition) return
+    const el = windowRef.current
+    const g = geomRef.current
+    if (!el || !g || prefersReducedMotion() || typeof el.animate !== 'function') {
+      setShowTransition(false)
+      return
+    }
+    const a = el.animate(clipKeyframes(g), { duration: REVEAL_MS, fill: 'forwards' })
+    let finished = false
+    a.onfinish = () => {
+      finished = true
+      el.style.clipPath = 'none'
+      el.style.webkitClipPath = 'none'
+      a.cancel()
+      setShowTransition(false)
+    }
+    return () => { if (!finished) a.cancel() }
+  }, [showTransition])
+
+  // 關窗：closing 轉 true 時 inline clip 已是蓋滿的愛心（視覺上跟全開一樣），反向收回 32px 再 onClose
+  useEffect(() => {
+    if (!closing) return
+    const el = windowRef.current
+    const g = geomRef.current
+    if (!el || !g || typeof el.animate !== 'function') {
+      onClose()
+      return
+    }
+    const a = el.animate(clipKeyframes(g, { reverse: true }), { duration: COLLAPSE_MS, fill: 'forwards' })
+    let finished = false
+    a.onfinish = () => {
+      finished = true
+      onClose()
+    }
+    return () => { if (!finished) a.cancel() }
+  }, [closing, onClose])
+
+  // 所有關閉入口（下滑、X、ESC）都走這裡：窗開著就先收窗，其餘情況直接關
+  const requestClose = useCallback(() => {
+    if (closingRef.current) return
+    closingRef.current = true
+    if (!revealStarted || showTransition || prefersReducedMotion()) {
+      onClose()
+      return
+    }
+    setClosing(true)
+  }, [revealStarted, showTransition, onClose])
 
   // 鍵盤高度追蹤：inputFocused 時用 visualViewport 取得鍵盤高度
   useEffect(() => {
@@ -251,7 +314,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
 
   // Safari chrome 顏色：Instagram 出現後用 CSS animation 白→黑觸發 Safari 重新採色
   useEffect(() => {
-    if (!isOpen || !hasStartedTransition || showTransition) return
+    if (!isOpen || !revealStarted || showTransition) return
 
     const oldMeta = document.querySelector('meta[name="theme-color"]')
     if (oldMeta) oldMeta.remove()
@@ -268,11 +331,11 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
       restored.content = '#FBFAF5'
       document.head.appendChild(restored)
     }
-  }, [isOpen, hasStartedTransition, showTransition])
+  }, [isOpen, revealStarted, showTransition])
 
   // 自動播放和進度條（僅圖片）
   useEffect(() => {
-    if (!isOpen || showTransition || currentIsVideo) {
+    if (!isOpen || !revealStarted || showTransition || currentIsVideo) {
       photoStartTimeRef.current = null
       return
     }
@@ -299,7 +362,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
     }, 50)
 
     return () => clearInterval(interval)
-  }, [isOpen, currentPhotoIndex, showTransition, isPaused, elapsedBeforePause, photos.length, currentIsVideo])
+  }, [isOpen, revealStarted, currentPhotoIndex, showTransition, isPaused, elapsedBeforePause, photos.length, currentIsVideo])
 
   // 暫停的唯一記帳點：isPaused 轉 true 時（長按 / 滑鼠按住 / 輸入框聚焦 / 開分享面板皆同）
   // 由計時起點算出已播時間，恢復時 interval 從這裡接續，與 CSS story-progress 凍結點一致。
@@ -338,7 +401,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
 
   // 影片進度條
   useEffect(() => {
-    if (!isOpen || showTransition || !currentIsVideo || isPaused) return
+    if (!isOpen || !revealStarted || showTransition || !currentIsVideo || isPaused) return
     const interval = setInterval(() => {
       const v = visibleVideoRef.current
       if (!v || !v.duration || !isFinite(v.duration)) return
@@ -346,7 +409,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
       setProgress(p)
     }, 50)
     return () => clearInterval(interval)
-  }, [isOpen, showTransition, currentIsVideo, isPaused, currentPhotoIndex, visibleLayer, visibleVideoRef])
+  }, [isOpen, revealStarted, showTransition, currentIsVideo, isPaused, currentPhotoIndex, visibleLayer, visibleVideoRef])
 
   // 進度條樣式：過去 = 滿、未來 = 空；目前那格（圖片）交給 story-progress CSS 動畫線性填滿，
   // 暫停用 animationPlayState 凍結。影片的長度不固定，仍沿用 interval 量 currentTime 的 progress（scaleX）。
@@ -451,7 +514,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
         swipeY > SWIPE_DISMISS_DISTANCE ||
         (velocity > SWIPE_DISMISS_VELOCITY && swipeY > SWIPE_DISMISS_MIN_PX)
       ) {
-        onClose()
+        requestClose()
       }
       setSwipeY(0)
       isSwipingRef.current = false
@@ -551,31 +614,44 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
     const onKey = (e) => {
       if (e.key === 'Escape') {
         e.preventDefault()
-        onClose()
+        requestClose()
       }
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [isOpen, onClose])
+  }, [isOpen, requestClose])
 
   if (!isOpen) return null
 
-  const displayPosition = heartPosition || {
-    x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0,
-    y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0
+  const reducedMotion = prefersReducedMotion()
+  // 開窗 / 關窗期間限時動態層套 inline clip（WAAPI 的 clip-path 蓋在上面動）；全開後沒有 clip
+  const windowClip = (showTransition || closing) && geomRef.current
+    ? clipStyle(geomRef.current, closing ? 'end' : 'start')
+    : undefined
+  // 限時動態的 UI（進度條 / 帳號 / 右上鈕 / 底欄）：窗開滿才淡入、關窗一開始就淡出，
+  // 開窗過程窗裡只有影片的藍，不會有一堆白色小 UI 擠在小窗裡
+  const chromeStyle = {
+    opacity: (!revealStarted || showTransition || closing) ? 0 : 1,
+    transition: `opacity ${CHROME_FADE_MS}ms ease`,
   }
+  // 舞台（滿版層 / 欄 / media 區 / 狀態列覆蓋 / 底欄）一律黑底（user 指定），contain 留出來的邊也是黑；
+  // 開場藍只存在於影片本身：1~8.mp4 帶同色 poster，第一幀 decode 前影片區就是藍，窗從 icon 打開時裡面是藍
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-label="求婚彩蛋"
-      className="fixed inset-0 z-[100] overflow-hidden"
+      // animate-stage-settle：窗開滿後跑一次 background-color keyframe，逼 iOS Safari（瀏覽器模式）
+      // 重新採樣頁面頂端顏色把頂部 tint 轉黑（它不會因為 theme-color meta 換了就重採；舊版靠 bgFadeIn 做這件事）
+      className={`fixed inset-0 z-[100] overflow-hidden ${(revealStarted && !showTransition && !closing) ? 'animate-stage-settle' : ''}`}
       style={{
-        pointerEvents: showTransition ? 'none' : 'auto',
-        backgroundColor: (hasStartedTransition && !showTransition) ? 'black' : 'transparent',
-        opacity: (showTransition || hasStartedTransition) ? 1 : 0,
-        visibility: (showTransition || hasStartedTransition) ? 'visible' : 'hidden'
+        pointerEvents: (!revealStarted || showTransition || closing) ? 'none' : 'auto',
+        // 開 / 關窗期間 root 透明：窗外看得到底下的行程頁，窗內才是限時動態
+        backgroundColor: (revealStarted && !showTransition && !closing) ? 'black' : 'transparent',
+        opacity: revealStarted ? 1 : 0,
+        visibility: revealStarted ? 'visible' : 'hidden',
+        transition: reducedMotion ? 'opacity 300ms ease' : undefined,
       }}
     >
       {/* BGM */}
@@ -586,63 +662,17 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
         preload="auto"
       />
 
-      {/* 統一背景層：過場期間白色 → Instagram 期間黑色，平滑過渡 */}
-      <div
-        className={showTransition ? 'absolute inset-0 animate-bg-fade-in' : 'absolute inset-0'}
-        style={{
-          backgroundColor: (hasStartedTransition && !showTransition) ? 'black' : 'white',
-          zIndex: showTransition ? 9998 : 0,
-        }}
-      />
-
-      {/* 過場動畫：愛心放大 */}
-      {showTransition && displayPosition && (
+      {/* 愛心開窗：限時動態滿版層，開 / 關窗只動它的 clip-path（幾何與 keyframes 見 extras/heartReveal.js）。
+          舞台一律黑底（user 指定） */}
+      {hasStartedTransition && (
+        <div ref={windowRef} className="absolute inset-0 bg-black" style={windowClip}>
+        {/* Safari 頂部 safe-area 黑色覆蓋（狀態列區域） */}
         <div
-          key={`heart-transition-${isOpen}`}
-          className="absolute animate-heart-transition"
-          style={{
-            left: `${displayPosition.x}px`,
-            top: `${displayPosition.y}px`,
-            transformOrigin: 'center center',
-            willChange: 'transform, opacity',
-            pointerEvents: 'none',
-            zIndex: 9999
-          }}
-        >
-          <Heart
-            size={256}
-            style={{
-              color: '#89CFF0',
-              fill: '#89CFF0',
-              strokeWidth: 1,
-              shapeRendering: 'auto',
-              display: 'block',
-              filter: 'brightness(1)',
-              opacity: 1,
-              transform: 'translateZ(0) scale(0.125)',
-              WebkitTransform: 'translateZ(0) scale(0.125)',
-              imageRendering: 'auto',
-              WebkitFontSmoothing: 'antialiased',
-              MozOsxFontSmoothing: 'grayscale',
-              textRendering: 'optimizeLegibility',
-              willChange: 'transform'
-            }}
-          />
-        </div>
-      )}
-
-      {/* Safari 頂部 safe-area 黑色覆蓋（狀態列區域） */}
-      {!showTransition && hasStartedTransition && (
-        <div
-          className="fixed top-0 left-0 right-0 bg-black z-[99]"
+          className="absolute top-0 left-0 right-0 z-[99] bg-black"
           style={{ height: 'env(safe-area-inset-top)' }}
         />
-      )}
-
-      {/* Instagram 限時動態 */}
-      {!showTransition && hasStartedTransition && (
         <div
-          className="flex flex-col w-full h-full max-w-2xl mx-auto bg-black cursor-pointer animate-photo-fade-in select-none"
+          className="flex flex-col w-full h-full max-w-2xl mx-auto cursor-pointer select-none"
           onClick={handlePhotoClick}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -653,13 +683,16 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
           style={{
             userSelect: 'none',
             WebkitUserSelect: 'none',
+            backgroundColor: 'black',
             transform: swipeY > 0 ? `translateY(${swipeY}px) scale(${Math.max(0.9, 1 - swipeY * 0.0008)})` : undefined,
             transition: swipeY === 0 ? 'transform 0.3s var(--ease-out)' : undefined,
             borderRadius: swipeY > 0 ? '16px' : undefined,
             overflow: 'hidden',
           }}
         >
-          {/* 雙層預載 */}
+          {/* 雙層預載。媒體尺寸用 .story-media（index.css）依顯示模式分流：
+              瀏覽器模式可視區被 Safari 工具列吃掉、比 9:16 矮 → contain 等比縮小、黑底留邊、整張都看得到；
+              PWA standalone 全螢幕 → cover 滿版、錨頂 */}
           <div className="flex-1 min-h-0 relative overflow-hidden bg-black">
             {[0, 1].map((layer) => {
               const idx = getLayerIndex(layer)
@@ -692,10 +725,11 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
                     <video
                       ref={layer === 0 ? videoRef0 : videoRef1}
                       src={photos[idx]}
-                      className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                      className="absolute inset-0 w-full h-full story-media pointer-events-none"
                       playsInline
                       muted
                       preload="auto"
+                      poster={idx < INTRO_BLUE_SLIDES ? BLUE_POSTER : undefined}
                       autoPlay={isVisible}
                       onEnded={() => {
                         if (currentPhotoIndex < photos.length - 1) {
@@ -714,7 +748,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
                     <img
                       src={photos[idx]}
                       alt={`${idx + 1}`}
-                      className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                      className="absolute inset-0 w-full h-full story-media pointer-events-none"
                       draggable="false"
                       onError={(e) => {
                         e.target.style.display = 'none'
@@ -726,7 +760,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
             })}
 
             {/* 進度條 */}
-            <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 px-2 pt-2">
+            <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 px-2 pt-2" style={chromeStyle}>
               {photos.map((_, index) => (
                 <div
                   key={index}
@@ -743,7 +777,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
             </div>
 
             {/* 左上角：Profile + 帳號 */}
-            <div className="absolute top-4 left-4 z-20 flex items-center gap-2 h-[44px]">
+            <div className="absolute top-4 left-4 z-20 flex items-center gap-2 h-[44px]" style={chromeStyle}>
               <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center overflow-hidden flex-shrink-0">
                 <img
                   src={`${BASE}proposal-photos/gokigen_panda.png`}
@@ -757,7 +791,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
             </div>
 
             {/* 右上角：播放音樂 + 關閉 */}
-            <div className="absolute top-4 right-4 z-20 flex items-center h-[44px] gap-1">
+            <div className="absolute top-4 right-4 z-20 flex items-center h-[44px] gap-1" style={chromeStyle}>
               {!bgmStarted && (
                 <button
                   type="button"
@@ -775,7 +809,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  onClose()
+                  requestClose()
                 }}
                 className="touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
                 aria-label="關閉"
@@ -816,7 +850,8 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
           {/* 下方：輸入框 + 愛心 + 分享（鍵盤打開時隱藏，改用浮動輸入列） */}
           {!inputFocused && (
             <div
-              className="flex items-center gap-2 px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] bg-black flex-shrink-0"
+              className="flex items-center gap-2 px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] flex-shrink-0"
+              style={{ ...chromeStyle, backgroundColor: 'black' }}
               onClick={(e) => e.stopPropagation()}
             >
               <div
@@ -864,6 +899,7 @@ const ProposalModal = ({ isOpen, onClose, heartPosition, warm = false }) => {
             autoComplete="off"
             readOnly={false}
           />
+        </div>
         </div>
       )}
 
