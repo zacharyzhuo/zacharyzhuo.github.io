@@ -110,6 +110,38 @@ function SpotItem({ spot }) {
   )
 }
 
+// 交通是「站和站之間的連接」，不是停留點：降級成時間軸上的精簡一行，讓景點 / 美食卡浮出來。
+// 有縮圖或街道亮點的交通列維持完整卡片，避免那些資料在時間軸上被藏起來。
+function isCompactTransit(row, spots) {
+  return row.type === 'transport' && !row.image && spots.length === 0
+}
+
+// 精簡交通行：名稱 + 說明一行 + 目的地一行；仍可點，點開同一個 DetailModal（note / Maps 都在裡面）。
+function TransitRow({ row, label, tap, onOpen }) {
+  return (
+    <button
+      type="button"
+      onPointerDown={tap.onPointerDown}
+      onPointerUp={tap.onPointerUp}
+      onClick={tap.guard(onOpen)}
+      aria-label={`${row.time} ${label} ${row.name} 詳情`}
+      className="transit-row w-full flex flex-col gap-0.5 text-left font-serif rounded-xl pl-1 pr-2 pt-1.5 pb-1 -ml-1 touch-manipulation cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
+      style={{ '--wash': categoryWash(row.type) }}
+    >
+      <span className="text-sm font-semibold text-secondary leading-snug">{row.name}</span>
+      {row.description && (
+        <span className="text-xs text-muted line-clamp-1 leading-relaxed">{row.description}</span>
+      )}
+      {row.address && (
+        <span className="flex items-center gap-1.5 text-xs text-muted opacity-80 min-w-0">
+          <MapPin size={12} className="shrink-0" style={{ color: categoryInk(row.type) }} />
+          <span className="truncate">{row.address}</span>
+        </span>
+      )}
+    </button>
+  )
+}
+
 function DetailModal({ row, spots, onClose }) {
   const [displayRow, setDisplayRow] = useState(null)
   const [displaySpots, setDisplaySpots] = useState([])
@@ -529,6 +561,7 @@ export default function ItinerarySection({ rows, dayDate, detailKey = null, onOp
           const { label, icon: Icon } = getCategory(row.type)
           const isLast = i === mainRows.length - 1
           const spots = sortSpots(spotsByParent[row.name] ?? [])
+          const compact = isCompactTransit(row, spots)
 
           return (
             <Fragment key={`${row.time}:${row.name}`}>
@@ -553,6 +586,11 @@ export default function ItinerarySection({ rows, dayDate, detailKey = null, onOp
                 {!isLast && <div className="w-[1.5px] bg-hairline flex-1 mt-1" />}
               </div>
 
+              {compact ? (
+                <div className="flex-1 min-w-0 pb-5 relative">
+                  <TransitRow row={row} label={label} tap={cardTap} onOpen={() => openDetail(row)} />
+                </div>
+              ) : (
               <div className="flex-1 min-w-0 pb-7 relative">
                 <button
                   type="button"
@@ -560,18 +598,17 @@ export default function ItinerarySection({ rows, dayDate, detailKey = null, onOp
                   onPointerUp={cardTap.onPointerUp}
                   onClick={cardTap.guard(() => openDetail(row))}
                   aria-label={`${row.time} ${label} ${row.name} 詳情`}
-                  className="glass-card press-springy relative rounded-2xl py-4 pr-4 pl-4 h-full w-full flex flex-row gap-3 items-start text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
+                  className="glass-card press-springy itinerary-card relative rounded-2xl py-4 pr-4 pl-4 h-full w-full flex flex-row gap-3 items-start text-left touch-manipulation overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-jp-green/60"
                 >
-                  {/* 内側淡彩（定案）：卡片玻璃自帶從脊線暈開的分類色淡彩（有色玻璃感）。
-                      用 categories.js 的 wash（高明度水彩版）；內容層需 relative 才疊在淡彩上。
+                  {/* 内側淡彩（定案）：從時間軸節點高度發出的分類色光（radial），底下墊一層白
+                      讓冷色疊在白上而非米白上（冷色 × 暖米白會中和成灰）。濃度 / 白底 / 按下點亮
+                      都在 index.css 的 .card-wash；這裡只餵 --wash。內容層需 relative 才疊在淡彩上。
                       （曾試過並淘汰：包住整卡的 radial 橢圓 alpha 0.55 → 太重不自然；
-                       下緣色影 → 見 git 1d970bd） */}
+                       下緣色影 → 見 git 1d970bd；冷色調高 alpha → 整卡太重） */}
                   <div
                     aria-hidden="true"
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      background: `linear-gradient(100deg, rgba(${categoryWash(row.type)}, 0.2), rgba(${categoryWash(row.type)}, 0.05) 45%, transparent 70%)`,
-                    }}
+                    className="card-wash absolute inset-0 pointer-events-none"
+                    style={{ '--wash': categoryWash(row.type) }}
                   />
                   {/* 分類色細脊線（2px 半透） */}
                   <span
@@ -641,6 +678,7 @@ export default function ItinerarySection({ rows, dayDate, detailKey = null, onOp
                   )}
                 </button>
               </div>
+              )}
             </div>
             </Fragment>
           )

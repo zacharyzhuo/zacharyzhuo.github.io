@@ -16,6 +16,9 @@
   --text-muted: #78716c;     /* 原 text-stone-500：小標 / 註記 */
   --hairline: #e7e5e4;       /* stone-200：1px 分隔線 / timeline 連接線（淡，與設計預覽一致） */
 
+  /* 行程卡分類淡彩（.card-wash）：淡彩底下墊的白，讓冷色疊在白上不發灰（user 定案 0.7） */
+  --wash-lift: 0.7;
+
   /* 鍵盤焦點 ring */
   --glass-focus-ring: rgba(94, 140, 97, 0.6);
 
@@ -435,6 +438,56 @@ a:focus-visible,
     box-shadow 0.15s ease;
 }
 
+/* 行程卡分類淡彩：光從時間軸節點高度（左緣 1.5rem）發出，濃度維持舊版線性淡彩的等級
+   （峰值 0.22，user 指定「濃淡照舊」；冷色調高 alpha 的方案已否決：整卡太重）。
+   第二層是同光形的白底墊色（--wash-lift），解冷色 × 暖米白中和成灰。
+   --wash-boost：按下 lift 時光變亮（C），靠 @property 才能隨 transition 漸變。 */
+@property --wash-boost {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+.card-wash {
+  background:
+    radial-gradient(circle 300px at 0 1.5rem,
+      rgba(var(--wash), calc(0.22 * var(--wash-boost))) 0%,
+      rgba(var(--wash), calc(0.08 * var(--wash-boost))) 40%,
+      rgba(var(--wash), 0) 75%),
+    radial-gradient(circle 300px at 0 1.5rem,
+      rgba(255, 255, 255, var(--wash-lift)) 0%,
+      rgba(255, 255, 255, 0) 70%);
+}
+/* 三個 class 才蓋得過 .glass-card.press-springy 的 transition 簡寫 */
+.glass-card.press-springy.itinerary-card {
+  transition:
+    transform var(--dur-press-out) var(--ease-spring),
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    --wash-boost var(--dur-press-out) ease;
+}
+.glass-card.press-springy.itinerary-card:active {
+  --wash-boost: 1.9;
+  transition:
+    transform var(--dur-press-in) var(--ease-spring),
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    --wash-boost var(--dur-press-in) ease;
+}
+
+/* 精簡交通行（ItinerarySection 的 TransitRow）：無玻璃材質，按下浮起 + 透出一抹分類色 */
+.transit-row {
+  transition:
+    transform var(--dur-press-out) var(--ease-spring),
+    background-color 0.2s ease;
+}
+.transit-row:active {
+  transform: scale(1.03);
+  background-color: rgba(var(--wash), 0.14);
+  transition:
+    transform var(--dur-press-in) var(--ease-spring),
+    background-color 0.15s ease;
+}
+
 /* 無玻璃材質的純 press lift：給「玻璃容器內」的小按鈕（如地圖 stepper ‹ ›）。
    容器本身勿做「整顆均勻 scale 彈跳」（見 frosted-glass-panel 註解），
    press 彈簧屬於內層單一按鈕。
@@ -852,6 +905,7 @@ a:focus-visible,
   /* press lift / squish：不縮放，但保留底色與投影的變化（顏色回饋留著） */
   .press-springy:active,
   .glass-card.press-springy:active,
+  .transit-row:active,
   .press-lift:active,
   .stepper-squish.pressed,
   .frosted-glass-button:active,

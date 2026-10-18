@@ -422,7 +422,7 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 - **底色**：`#FBFAF5`（米白）＋ feTurbulence 和紙噪點，兩者都直接在 **body 自己的 background** 上（噪點隨頁捲動，均勻噪點察覺不到）。
   - **iOS 26 PWA 狀態列結論（勿再追）**：狀態列 letterbox 強制跟隨系統外觀，頁面端**無法控制**；方案已窮舉否決，實測過程見 `docs/decisions.md` 的 status-bar 條。head 維持最簡形狀：單一 `theme-color`，**勿加 `apple-mobile-web-app-*` meta**；長期解是深色模式（token 地基已鋪）。
   - 滿版頁面 wrapper 仍一律鋪 `.bg-washi`（米白 + 噪點）：這是紙感紋理的載體（噪點不再用 fixed 偽元素層）。
-  - **分類色「内側淡彩」（玻璃透明感的色彩來源）**：行程卡玻璃內帶一抹從脊線往右暈開的分類 `wash` 色淡彩（`ItinerarySection`，卡內 `absolute inset-0` linear-gradient 0.2→透明；內容層與縮圖需 `relative` 疊在淡彩上），像有色玻璃。營業時間 badge 底色刻意極淡（`white/15`），不透明白底會在淡彩上蓋出白斑。
+  - **分類色「内側淡彩」（玻璃透明感的色彩來源）**：行程卡玻璃內帶一抹分類 `wash` 色淡彩（`ItinerarySection` 的 `.card-wash`，樣式在 `index.css`）：**從時間軸節點高度（左緣 1.5rem）發出的 radial**（峰值 0.22，濃淡維持舊線性版等級），底下墊一層同光形的白（`--wash-lift: 0.7`），讓冷色疊在白上而非米白上（冷色 × 暖米白會中和成灰，交通藍曾因此發灰）；按下 lift 時 `--wash-boost`（`@property`）升到 1.9 讓光變亮。**冷色調高 alpha 已試過否決（整卡太重）**，濃淡勿再加。內容層與縮圖需 `relative` 疊在淡彩上。營業時間 badge 底色刻意極淡（`white/15`），不透明白底會在淡彩上蓋出白斑。
   - **歷史教訓（勿走回頭路）**：四角色斑背景、包卡 radial 光暈、下緣色影（C 變體）三案皆已否決，**定案內側淡彩（D）**；否決原因與 git 位置見 `docs/decisions.md` 的 background-glow 條。
   - **光暈色票鐵則**：光暈用 `categories.js` 各分類的 `wash`（高明度水彩版 `'R, G, B'`），**勿直接用 ink** —— ink 是文字色（明度低），拉濃會讀成髒灰陰影；濃度感用彩度與 alpha 撐，不能用暗度撐。
 - **Accent**：`#5E8C61`（明るい抹茶）
@@ -490,6 +490,8 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 ### 行程時間軸（ItinerarySection）
 
 每筆行程是 **三欄**：`時間 | 軌道節點 | 卡片`。
+
+- **交通降級成精簡一行（`TransitRow`）**：`type === 'transport'` 且無 `image`、無街道亮點的列，不畫玻璃卡，改成名稱 + 說明一行（line-clamp-1）+ 目的地一行；整行仍是 button，點開同一個 DetailModal（`note`、Maps 都在裡面）。按下 `.transit-row`：lift + 透出 `--wash` 14%。判斷在 `isCompactTransit`。理由：交通是站與站的連接而非停留點，降級後景點 / 美食卡的層級才浮得出來。有 image 或亮點的交通列維持完整卡片，避免資料被藏起來。
 
 - **節點化軌道**：每個時間點是**純分類色 type icon（無圓底）**（`categoryInk` 著色、`size 18`，放在 `w-7 h-7` 置中盒維持對齊），下接 `w-[1.5px]` 連接線；刻意輕量（先前的實心圓底 + 4px 脊線份量太重）。
 - **卡片細脊線**：卡片 `overflow-hidden` + 絕對定位 **`w-[2px]` 半透**分類色 spine（`categoryInk` + `80` alpha ≈ 50%）；內容左 padding `pl-4`。

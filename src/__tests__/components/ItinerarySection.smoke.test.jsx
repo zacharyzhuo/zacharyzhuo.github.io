@@ -20,6 +20,37 @@ describe('ItinerarySection 渲染冒煙測試', () => {
   })
 })
 
+describe('交通列降級成精簡一行', () => {
+  const cardOf = (name) => screen.getByText(name).closest('button')
+
+  test('transport 渲染成精簡行（非玻璃卡），其他分類維持玻璃卡', () => {
+    render(<ItinerarySection rows={rows} dayDate="2026/06/04" />)
+    expect(cardOf('抵達機場').className).toContain('transit-row')
+    expect(cardOf('抵達機場').className).not.toContain('glass-card')
+    expect(cardOf('Check-in').className).toContain('glass-card')
+  })
+
+  test('精簡行仍保留目的地一行，且點開是同一個 DetailModal', () => {
+    render(<ItinerarySection rows={rows} dayDate="2026/06/04" />)
+    expect(screen.getByText('機場')).toBeTruthy()
+    fireEvent.click(cardOf('抵達機場'))
+    expect(screen.getByRole('dialog').textContent).toContain('出關後集合')
+  })
+
+  test('有 image 或亮點的 transport 維持完整玻璃卡（避免資料被藏起來）', () => {
+    const withImage = [{ time: '10:00', name: '港口渡輪', type: 'transport', image: 'https://res.cloudinary.com/x.jpg', _spots: [] }]
+    render(<ItinerarySection rows={withImage} dayDate="2026/06/04" />)
+    expect(cardOf('港口渡輪').className).toContain('glass-card')
+    cleanup()
+    const withSpot = [
+      { time: '10:00', name: '車站', type: 'transport', _spots: [] },
+      { time: '', name: '站內便當', type: 'food', parent: '車站', _spots: [] },
+    ]
+    render(<ItinerarySection rows={withSpot} dayDate="2026/06/04" />)
+    expect(cardOf('車站').className).toContain('glass-card')
+  })
+})
+
 describe('DetailModal 拖拉關閉', () => {
   const key = '2026/06/04|09:50|抵達機場'
 
