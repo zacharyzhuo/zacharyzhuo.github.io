@@ -116,13 +116,13 @@ describe('sortByDistance', () => {
 
 describe('routePoints', () => {
   const pts = [
-    { name: 'B', day: 1, time: '12:30' },
-    { name: 'A', day: 1, time: '09:00' },
-    { name: 'noTime', day: 1, time: '' },
-    { name: 'otherDay', day: 2, time: '08:00' },
+    { name: 'label', day: 1, time: '早上' },
+    { name: 'A', day: 1, time: '08:00' },
+    { name: 'otherDay', day: 2, time: '07:00' },
+    { name: 'B', day: 1, time: '10:00' },
   ]
-  it('keeps only the given day, sorted by time, untimed last', () => {
-    expect(routePoints(pts, 1).map(p => p.name)).toEqual(['A', 'B', 'noTime'])
+  it('keeps only the given day, in sheet order (same as timeline), even with label times', () => {
+    expect(routePoints(pts, 1).map(p => p.name)).toEqual(['label', 'A', 'B'])
   })
 })
 

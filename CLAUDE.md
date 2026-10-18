@@ -391,7 +391,7 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 
 ### 路線模式
 
-只取**選中那天有座標的點**（含 routeOnly 的交通/住宿）按 `time` 排序，畫編號 marker + 品牌綠虛線（綠=動線語意，非分類色）。清單（food/shopping/accommodation）點 `day=null` 自然不進路線。要看哪天由 modal 內的 `DayNav` 選（預設 `activeDay`）。
+只取**選中那天有座標的點**（含 routeOnly 的交通/住宿）**照 sheet 列順序**（= 時間軸卡片順序；不按 `time` 排，因為 `早上`/`晚上` 這類標籤解析不出來會被排到最後，曾讓第一站變最後一號），畫編號 marker + 品牌綠虛線（綠=動線語意，非分類色）。清單（food/shopping/accommodation）點 `day=null` 自然不進路線。要看哪天由 modal 內的 `DayNav` 選（預設 `activeDay`）。
 
 > **路線 = 「那天怎麼移動」，跨國/跨海長線是 OK 的**（產品定義）。抵達/離境日的跨國交通列（機場接送、出發國機場）**照填座標**，路線會 fit 到跨國範圍、拉一條跨海線呈現整天移動 —— 這是刻意的，**不要**為了避免長線而把那些列留空。
 

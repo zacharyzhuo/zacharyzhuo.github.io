@@ -89,18 +89,13 @@ export function sortByDistance(points, origin) {
     .sort((a, b) => a._dist - b._dist)
 }
 
-function timeKey(t) {
-  const m = /^(\d{1,2}):(\d{2})/.exec(String(t || '').trim())
-  if (!m) return Number.MAX_SAFE_INTEGER
-  return Number(m[1]) * 60 + Number(m[2])
-}
-
-/** 某一天的點，按 time 升序（無 time 排最後）。 */
+/**
+ * 某一天的點，維持 sheet 列順序（= 時間軸卡片順序）。
+ * 不按 time 排：time 欄混有 `早上`/`晚上` 這類標籤，解析不出來會被排到最後，
+ * 造成路線編號與時間軸對不上。
+ */
 export function routePoints(points, day) {
-  return points
-    .filter((p) => p.day === day)
-    .slice()
-    .sort((a, b) => timeKey(a.time) - timeKey(b.time))
+  return points.filter((p) => p.day === day)
 }
 
 /**
