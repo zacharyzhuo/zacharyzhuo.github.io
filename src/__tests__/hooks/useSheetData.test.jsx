@@ -1,8 +1,9 @@
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { describe, it, expect, beforeAll, beforeEach, afterAll, afterEach } from 'vitest'
 import { useSheetData, __clearSheetCache } from '../../hooks/useSheetData.js'
+import { getCached } from '../../lib/swrCache.js'
 
 const SHEET_ID = 'test-sheet-123'
 const CSV = '"name","time"\n"福岡","12:00"'
@@ -53,5 +54,20 @@ describe('useSheetData', () => {
     expect(result.current.loading).toBe(false)
     expect(result.current.data).toEqual([])
     expect(result.current.error).toBeNull()
+  })
+
+  it('refresh() keeps stale data and localStorage entry when the refetch fails (offline pull-to-refresh)', async () => {
+    const { result } = renderHook(() => useSheetData(SHEET_ID, 'flights'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.data).toEqual([{ name: '福岡', time: '12:00' }])
+    expect(getCached(`${SHEET_ID}:flights`)).toEqual([{ name: '福岡', time: '12:00' }])
+
+    server.use(http.get(BASE_URL, () => HttpResponse.error()))
+    act(() => { result.current.refresh() })
+    await waitFor(() => expect(result.current.error).not.toBeNull())
+
+    // 失敗後畫面上的資料與 localStorage 都不能被清掉（舊版會在呼叫 refresh() 那一刻就先清掉）
+    expect(result.current.data).toEqual([{ name: '福岡', time: '12:00' }])
+    expect(getCached(`${SHEET_ID}:flights`)).toEqual([{ name: '福岡', time: '12:00' }])
   })
 })

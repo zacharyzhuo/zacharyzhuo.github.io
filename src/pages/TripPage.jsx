@@ -14,6 +14,7 @@ import { categoryInk, BRAND_INK } from '../lib/categories.js'
 import { toMapPoints, listToMapPoints, shoppingToMapPoints, mergeMapPoints } from '../lib/maps.js'
 import { TripSkeleton, SectionSkeleton } from '../components/ui/Skeletons.jsx'
 import ErrorState from '../components/ui/ErrorState.jsx'
+import ErrorBoundary from '../components/ui/ErrorBoundary.jsx'
 import Sidebar from '../components/layout/Sidebar.jsx'
 import BottomSheet from '../components/layout/BottomSheet.jsx'
 import DayNav from '../components/trip/DayNav.jsx'
@@ -288,6 +289,20 @@ export default function TripPage() {
     )
   }
 
+  // 核心資料（itinerary，驅動時間軸內容與 DayNav 的 days 清單）fetch 失敗又沒有任何快取資料可退回時，
+  // 整頁沒東西可顯示，給全頁 ErrorState + 重試；有 stale cache 則照 SWR 語意照常顯示舊資料，不擋。
+  if (itineraryHook.error && itinerary.length === 0) {
+    return (
+      <main id="main" tabIndex={-1} className="bg-washi min-h-screen safe-area-inset flex flex-col items-center justify-center">
+        <ErrorState
+          title="無法載入行程資料"
+          message="請檢查網路連線後重試"
+          onAction={() => { itineraryHook.refresh(); daysHook.refresh() }}
+        />
+      </main>
+    )
+  }
+
   const yearMonth = getYearMonth(trip.dates)
   const tripNameEn = getTripNameEn(trip, slug)
 
@@ -400,50 +415,66 @@ export default function TripPage() {
       {/* Section Modals */}
       <BottomSheet isOpen={activeModal === 'info'} onClose={closePanel} title="旅程資訊" noScroll noStickyTitle>
         {renderedSheet === 'info' && (
-          <Suspense fallback={<SectionSkeleton />}>
+          <LazySection fallback={<SectionSkeleton />}>
             {flightsHook.loading || accommodationHook.loading || prepareHook.loading
               ? <SectionSkeleton />
-              : <TripInfoSection flights={flights} accommodation={accommodation} prepare={prepare} />}
-          </Suspense>
+              : flightsHook.error && flights.length === 0
+                && accommodationHook.error && accommodation.length === 0
+                && prepareHook.error && prepare.length === 0
+                ? (
+                  <SectionError onRetry={() => {
+                    flightsHook.refresh()
+                    accommodationHook.refresh()
+                    prepareHook.refresh()
+                  }} />
+                )
+                : <TripInfoSection flights={flights} accommodation={accommodation} prepare={prepare} />}
+          </LazySection>
         )}
       </BottomSheet>
 
       <BottomSheet isOpen={activeModal === 'checklist'} onClose={closePanel} title="行李清單" noScroll noStickyTitle>
         {renderedSheet === 'checklist' && (
-          <Suspense fallback={<SectionSkeleton bottomBar={false} />}>
+          <LazySection fallback={<SectionSkeleton bottomBar={false} />}>
             {checklistHook.loading
               ? <SectionSkeleton bottomBar={false} />
-              : <ChecklistSection key={`checklist-${slug}`} rows={checklist} slug={slug} />}
-          </Suspense>
+              : checklistHook.error && checklist.length === 0
+                ? <SectionError onRetry={checklistHook.refresh} />
+                : <ChecklistSection key={`checklist-${slug}`} rows={checklist} slug={slug} />}
+          </LazySection>
         )}
       </BottomSheet>
 
       <BottomSheet isOpen={activeModal === 'shopping'} onClose={closePanel} title="逛街清單" noScroll noStickyTitle>
         {renderedSheet === 'shopping' && (
-          <Suspense fallback={<SectionSkeleton />}>
+          <LazySection fallback={<SectionSkeleton />}>
             {shoppingHook.loading
               ? <SectionSkeleton />
-              : <ShoppingSection rows={shopping} />}
-          </Suspense>
+              : shoppingHook.error && shopping.length === 0
+                ? <SectionError onRetry={shoppingHook.refresh} />
+                : <ShoppingSection rows={shopping} />}
+          </LazySection>
         )}
       </BottomSheet>
 
       <BottomSheet isOpen={activeModal === 'food'} onClose={closePanel} title="美食清單" noScroll noStickyTitle>
         {renderedSheet === 'food' && (
-          <Suspense fallback={<SectionSkeleton />}>
+          <LazySection fallback={<SectionSkeleton />}>
             {foodHook.loading
               ? <SectionSkeleton />
-              : <FoodSection rows={foodItems} />}
-          </Suspense>
+              : foodHook.error && foodItems.length === 0
+                ? <SectionError onRetry={foodHook.refresh} />
+                : <FoodSection rows={foodItems} />}
+          </LazySection>
         )}
       </BottomSheet>
 
       {/* Map */}
       <BottomSheet isOpen={mapOpen} onClose={closePanel} title="行程地圖" noScroll noStickyTitle tall>
         {renderedSheet === 'map' && (
-          <Suspense fallback={<SectionSkeleton />}>
+          <LazySection fallback={<SectionSkeleton />}>
             <TripMap key={mapOpenCount} points={mapPoints} days={days} activeDay={activeDay} />
-          </Suspense>
+          </LazySection>
         )}
       </BottomSheet>
 
@@ -458,6 +489,28 @@ export default function TripPage() {
         />
       )}
     </div>
+  )
+}
+
+// Section modal 內的錯誤狀態：fetch 失敗且沒有任何快取資料可退回時取代 EmptyState，
+// 讓「失敗」與「本來就沒資料」可以區分，並提供重試。有 stale cache 時不會走到這裡
+// （SWR 語意：照常顯示舊資料，背景重試失敗不打擾使用者）。
+function SectionError({ onRetry }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full px-8">
+      <ErrorState message="請檢查網路連線後重試" onAction={onRetry} />
+    </div>
+  )
+}
+
+// lazy section 的外框：Suspense 管載入中；ErrorBoundary 接住 chunk 載入失敗（離線且 SW 沒快取到），
+// 只把這個 sheet 換成錯誤狀態，不讓 lazy import 的 reject 冒到 App 的全域 boundary 把整個 app 弄掛。
+// React.lazy 會記住失敗的 import，所以重試只能整頁重載。
+function LazySection({ fallback, children }) {
+  return (
+    <ErrorBoundary fallback={<SectionError onRetry={() => window.location.reload()} />}>
+      <Suspense fallback={fallback}>{children}</Suspense>
+    </ErrorBoundary>
   )
 }
 

@@ -57,7 +57,7 @@ export default function NearbyStrip({ ranked, status, onSelect }) {
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-sm font-serif font-bold text-jp-text truncate">{p.name}</span>
-              <span className="text-xs font-bold text-jp-green tabular-nums flex-none">{formatDistance(p._dist)}</span>
+              <span className="text-xs font-bold text-jp-green-text tabular-nums flex-none">{formatDistance(p._dist)}</span>
             </div>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="w-2.5 h-2.5 rounded-full flex-none" style={{ background: dotColor(p.bucket) }} />

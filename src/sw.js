@@ -12,6 +12,22 @@ import { RangeRequestsPlugin } from 'workbox-range-requests'
 precacheAndRoute(self.__WB_MANIFEST)
 cleanupOutdatedCaches()
 
+// Lazy route chunk（TripMap/leaflet、彩蛋 extras、各 section，見 vite.config.js injectManifest.globIgnores）
+// 不在 precache manifest 裡，改在這裡用 runtime CacheFirst：檔名帶 content hash，內容不可能變，
+// 使用者第一次點開那個 section/地圖時才下載 + 快取，之後（含離線）直接命中。
+// precacheAndRoute 內部的 route 已先註冊，命中 manifest 裡的 URL（app shell）時那條路由優先，
+// 這條只接手 manifest 沒收的 /assets/*.js|.css，兩者不會互相搶。
+registerRoute(
+  ({ url }) => url.origin === self.location.origin && /^\/assets\/.*\.(js|css)$/.test(url.pathname),
+  new CacheFirst({
+    cacheName: 'app-lazy-chunks',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [200] }),
+      new ExpirationPlugin({ maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 30 }),
+    ],
+  })
+)
+
 // HashRouter 下所有 navigation 請求都走 / index.html
 registerRoute(
   new NavigationRoute(

@@ -9,7 +9,7 @@ import { useCancelableTap } from '../../hooks/useCancelableTap.js'
 import { formatToday } from '../../lib/tripDate.js'
 import { resist } from '../../lib/gesture.js'
 import { openExternal } from '../../lib/openExternal.js'
-import { getCategory, categoryChipStyle, categoryInk, categoryWash, chipStyle, BRAND_INK } from '../../lib/categories.js'
+import { getCategory, categoryChipStyle, categoryInk, categoryText, categoryWash, chipStyle, BRAND_INK, BRAND_TEXT } from '../../lib/categories.js'
 import EmptyState from '../ui/EmptyState.jsx'
 
 function formatNowHHMM() {
@@ -368,12 +368,12 @@ function DetailModal({ row, spots, onClose }) {
           <div className="overflow-y-auto overscroll-contain px-8 pb-32 flex-1 -mt-6 pt-12">
             {/* 彩色 eyebrow（分類） */}
             <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-sm font-serif font-bold" style={{ color: categoryInk(current.type) }}>
+              <span className="text-sm font-serif font-bold" style={{ color: categoryText(current.type) }}>
                 {typeInfo.label}
               </span>
               <span
                 className="text-2xs font-serif font-bold uppercase tracking-[0.25em]"
-                style={{ color: categoryInk(current.type), opacity: 0.6 }}
+                style={{ color: categoryText(current.type) }}
               >
                 {typeInfo.en}
               </span>
@@ -432,7 +432,7 @@ function DetailModal({ row, spots, onClose }) {
               <section>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xs font-serif font-bold uppercase tracking-[0.2em] text-muted shrink-0">街道亮點</span>
-                  <span className="text-2xs text-stone-400 font-serif tabular-nums shrink-0">{currentSpots.length}</span>
+                  <span className="text-2xs text-muted font-serif tabular-nums shrink-0">{currentSpots.length}</span>
                   <div className="h-[1px] flex-1 bg-hairline" />
                 </div>
                 <div>
@@ -620,7 +620,7 @@ export default function ItinerarySection({ rows, dayDate, detailKey = null, onOp
                   <div className="relative flex-1 min-w-0 flex flex-col">
                   <span
                     className="text-2xs font-serif font-bold uppercase tracking-[0.15em] mb-1"
-                    style={{ color: categoryInk(row.type) }}
+                    style={{ color: categoryText(row.type) }}
                   >
                     {label}
                   </span>
@@ -654,7 +654,7 @@ export default function ItinerarySection({ rows, dayDate, detailKey = null, onOp
                       {spots.length > 0 && (
                         <span
                           className="text-xs font-bold font-serif shrink-0 px-2 py-0.5 rounded-full border backdrop-blur-sm ml-auto"
-                          style={chipStyle(BRAND_INK)}
+                          style={chipStyle(BRAND_INK, BRAND_TEXT)}
                         >
                           {spots.length} 個亮點
                         </span>

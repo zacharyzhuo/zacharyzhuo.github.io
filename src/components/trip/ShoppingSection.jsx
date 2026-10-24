@@ -2,9 +2,10 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { ShoppingBag, Clock, Navigation } from 'lucide-react'
 import EmptyState from '../ui/EmptyState.jsx'
 import SegmentedControl from '../ui/SegmentedControl.jsx'
-import { categoryInk } from '../../lib/categories.js'
+import { categoryInk, categoryText } from '../../lib/categories.js'
 
 const SHOP_INK = categoryInk('shopping')
+const SHOP_TEXT = categoryText('shopping')
 
 /**
  * Flat CSV rows → grouped display units.
@@ -92,7 +93,7 @@ function ShopMeta({ floor, hours }) {
   if (!floor && !hours) return null
   return (
     <div className="flex items-center gap-1.5 text-sm text-muted font-serif mt-1 tabular-nums flex-wrap">
-      {floor && <span className="font-bold" style={{ color: SHOP_INK }}>{floor}</span>}
+      {floor && <span className="font-bold" style={{ color: SHOP_TEXT }}>{floor}</span>}
       {floor && hours && <span className="opacity-40">·</span>}
       {hours && (
         <span className="flex items-center gap-1.5">

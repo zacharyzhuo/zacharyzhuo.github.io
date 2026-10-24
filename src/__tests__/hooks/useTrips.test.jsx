@@ -3,6 +3,7 @@ import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { describe, it, expect, beforeAll, beforeEach, afterAll, afterEach, vi } from 'vitest'
 import { useTrips } from '../../hooks/useTrips.js'
+import { getCached } from '../../lib/swrCache.js'
 
 // mock env variable
 vi.stubEnv('VITE_INDEX_SHEET_ID', 'index-sheet-id')
@@ -62,5 +63,23 @@ describe('useTrips', () => {
     release()
     await act(async () => { await pending })
     expect(settled).toBe(true)
+  })
+
+  it('refresh() keeps stale trips and localStorage entry when the refetch fails (offline pull-to-refresh)', async () => {
+    const { result } = renderHook(() => useTrips())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.trips).toHaveLength(1)
+    expect(getCached('trips:index')).toHaveLength(1)
+
+    server.use(http.get(BASE_URL, () => HttpResponse.error()))
+    let pending
+    act(() => { pending = result.current.refresh() })
+    await waitFor(() => expect(result.current.error).not.toBeNull())
+    await act(async () => { await pending })
+
+    // 失敗後畫面上的 trips 與 localStorage 都不能被清掉（舊版會在呼叫 refresh() 那一刻就先清掉）
+    expect(result.current.error).not.toBeNull()
+    expect(result.current.trips).toHaveLength(1)
+    expect(getCached('trips:index')).toHaveLength(1)
   })
 })

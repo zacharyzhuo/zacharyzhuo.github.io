@@ -35,6 +35,8 @@ export default class ErrorBoundary extends Component {
 
   render() {
     if (!this.state.hasError) return this.props.children
+    // 局部 boundary（如 lazy section 離線載不到 chunk）：給了 fallback 就只換掉這一塊，不接管整頁
+    if (this.props.fallback) return this.props.fallback
 
     return (
       <div className="bg-washi min-h-screen flex flex-col items-center justify-center px-6 safe-area-inset">

@@ -52,7 +52,7 @@ export default function ExchangeRate({ countryCode }) {
           <ArrowLeftRight size={12} className="text-stone-400" aria-hidden="true" />
           {line}
         </span>
-        <span className="font-serif text-2xs text-stone-400 tracking-wide">
+        <span className="font-serif text-2xs text-muted tracking-wide">
           {updated ? `updated ${updated} · ` : ''}tap to flip
         </span>
       </button>

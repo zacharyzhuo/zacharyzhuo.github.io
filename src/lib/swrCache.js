@@ -27,16 +27,3 @@ export function setCached(key, data) {
   }
 }
 
-export function clearCached(key) {
-  try {
-    localStorage.removeItem(PREFIX + key)
-  } catch { /* ignore */ }
-}
-
-export function clearAllCached() {
-  try {
-    for (const k of Object.keys(localStorage)) {
-      if (k.startsWith(PREFIX)) localStorage.removeItem(k)
-    }
-  } catch { /* ignore */ }
-}

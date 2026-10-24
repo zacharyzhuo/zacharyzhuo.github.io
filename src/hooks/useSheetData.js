@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { sheetURL, parseCSV } from '../lib/sheets.js'
-import { getCached, setCached, clearCached } from '../lib/swrCache.js'
+import { getCached, setCached } from '../lib/swrCache.js'
 import { useRevalidateOnVisible } from './useRevalidateOnVisible.js'
 
 // key -> Promise<rows>。同一 sheet+tab 的並行 request 共用同一個 Promise，避免重複 fetch
@@ -12,26 +12,25 @@ export function __clearSheetCache() {
 }
 
 /**
- * 主動失效一個 sheet tab 的 cache（in-memory + localStorage 都清）。下次 useSheetData
- * 重新讀取時會走網路。給 pull-to-refresh 用。
+ * 主動失效一個 sheet tab 的 cache：只清 in-memory promiseCache，強制下次 useSheetData
+ * 重新讀取時走網路。**不先清 localStorage**——離線時 refetch 失敗要保留舊資料
+ * （fetchSheet 內的 setCached 只在成功時才覆蓋 localStorage，失敗時維持原樣）。給 pull-to-refresh 用。
  */
-export function invalidateSheet(sheetId, tabName) {
+function invalidateSheet(sheetId, tabName) {
   if (!sheetId || !tabName) return
-  const key = `${sheetId}:${tabName}`
-  promiseCache.delete(key)
-  clearCached(key)
+  promiseCache.delete(`${sheetId}:${tabName}`)
 }
 
 /**
  * 軟 revalidate：只清 in-memory promiseCache，**保留 localStorage**（冷啟動瞬開 + 離線 fallback
  * 不受影響）。下次 fetch 走網路拿新資料、成功才覆蓋 localStorage。給 resume-on-visible 用。
  */
-export function revalidateSheet(sheetId, tabName) {
+function revalidateSheet(sheetId, tabName) {
   if (!sheetId || !tabName) return
   promiseCache.delete(`${sheetId}:${tabName}`)
 }
 
-export function fetchSheet(sheetId, tabName) {
+function fetchSheet(sheetId, tabName) {
   const key = `${sheetId}:${tabName}`
   if (!promiseCache.has(key)) {
     const p = fetch(sheetURL(sheetId, tabName))

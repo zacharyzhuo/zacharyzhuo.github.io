@@ -4,7 +4,7 @@ import EmptyState from '../ui/EmptyState.jsx'
 import SegmentedControl from '../ui/SegmentedControl.jsx'
 import { useCancelableTap } from '../../hooks/useCancelableTap.js'
 import { openExternal } from '../../lib/openExternal.js'
-import { categoryInk } from '../../lib/categories.js'
+import { categoryInk, categoryText } from '../../lib/categories.js'
 
 // 登機證撕票口：在色帶下緣（y=44px，對應色帶高度 h-11）兩側挖「真的」半圓鏤空，
 // 透出底層 BottomSheet 背景。樣式在 index.css 的 .flight-ticket：
@@ -57,13 +57,13 @@ function FlightsTab({ flights }) {
               {/* 登機證色帶：transport 半透明淡色 + 深色字（清透版，不再大面積實心）。h-11=44px 對應撕票口 y */}
               <div
                 className="flex justify-between items-center px-5 h-11"
-                style={{ backgroundColor: `${categoryInk('transport')}33`, color: categoryInk('transport') }}
+                style={{ backgroundColor: `${categoryInk('transport')}33`, color: categoryText('transport') }}
               >
                 <span className="font-serif font-bold tracking-wide flex items-center gap-2">
                   <Plane size={15} className="rotate-90" aria-hidden="true" />
                   {f.flight_no}
                 </span>
-                <span className="font-serif font-bold text-sm tabular-nums opacity-75">{f.date}</span>
+                <span className="font-serif font-bold text-sm tabular-nums">{f.date}</span>
               </div>
 
               {/* 撕票虛線（兩端的鏤空由卡片 mask 挖出）；stone-400 較明顯的虛線 */}
@@ -171,12 +171,12 @@ function HotelTab({ accommodation }) {
             <div className="glass-card p-6 rounded-2xl relative overflow-hidden">
               {/* 編輯排版：eyebrow（子型別 + STAY · 入住日）→ 大標 → 地址 → 髮絲線入住資訊 */}
               <div className="flex items-baseline gap-2 mb-1.5 flex-wrap">
-                <span className="text-sm font-serif font-bold" style={{ color: categoryInk('hotel') }}>
+                <span className="text-sm font-serif font-bold" style={{ color: categoryText('hotel') }}>
                   {h.type === 'hotel' ? '飯店' : h.type === 'airbnb' ? 'Airbnb' : '住宿'}
                 </span>
                 <span
                   className="text-2xs font-serif font-bold uppercase tracking-[0.25em]"
-                  style={{ color: categoryInk('hotel'), opacity: 0.6 }}
+                  style={{ color: categoryText('hotel') }}
                 >
                   STAY{h.date ? ` · ${h.date}` : ''}
                 </span>

@@ -194,7 +194,8 @@ iOS「加入桌面」的 PWA 背景恢復是 **warm resume**：不重載頁面�
 
 對策（`hooks/useRevalidateOnVisible.js`：背景 >10s 後回前景才觸發，避免短暫切換猛打網路）：
 - **資料**：`useSheetData` / `useTrips` 掛 `useRevalidateOnVisible` → 回前景時**背景靜默重抓 + bump refetchTick，不重載整頁**。`useSheetData` 額外呼叫 `revalidateSheet`（只清 in-memory `promiseCache`，保留 localStorage）；`useTrips` 沒有 promiseCache 這層，單純 bump tick 讓 `useEffect` 重新 fetch（localStorage 快取一樣保留、成功後才覆蓋）。localStorage（冷啟動瞬開、離線 fallback）與 SW 的圖片/字型 CacheFirst **完全不受影響**。
-  - 注意區分：`invalidateSheet`（pull-to-refresh 用，**連 localStorage 一起清**）vs `revalidateSheet`（resume 用，**只清 in-memory**，僅 `useSheetData` 會呼叫）。
+  - 注意區分：`invalidateSheet`（pull-to-refresh 用，清 in-memory 並強制重抓）vs `revalidateSheet`（resume 用，**只清 in-memory**，僅 `useSheetData` 會呼叫）。兩者都**不刪 localStorage**：重抓成功才覆蓋（2026-10-24 改；舊版先清 localStorage，離線時下拉一次、下次冷啟動就整頁空白）。`useTrips.refresh()` 同理。
+  - **抓取失敗要看得到**：`TripPage` 在 itinerary 抓失敗且無任何資料時顯示整頁 `ErrorState`（可重試）；四個 sheet（info / checklist / shopping / food）各自在「error 且無資料」時顯示 inline `SectionError`。有舊資料時一律照 SWR 顯示舊資料、不出錯誤 UI。
 - **App 版本**：`main.jsx` 的 `onRegisteredSW` 除了 30 分鐘 interval，另加 `visibilitychange→visible` 時 `registration.update()`；有新版照 `registerType:'autoUpdate'` + `onNeedRefresh→updateSW(true)` **靜默自動重載**。
 - **SW 網路層（兩層 JS 快取之下還有第三層）**：`sw.js` 對同一批 gviz CSV 請求（`docs.google.com/.../gviz/tq`）也做 `NetworkFirst`（5s timeout、1 天 maxAge、50 筆上限）。`invalidateSheet`/`revalidateSheet` **都不會清這層**，弱網時 pull-to-refresh 仍可能吐出 SW 快取的舊 response。
 
@@ -467,9 +468,10 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 - **`jp-green #5E8C61`（明るい抹茶）是全站唯一主 accent**（連結 / active / CTA / 進度條 / focus ring），**不當分類色用**；景點用偏黃的若葉與品牌綠區隔，避免「品牌 or 分類」混淆。
 - API：
   - `getCategory(type)`：回 `{ label, en, icon, ink }`（`en` 為大寫英文，給編輯排版 eyebrow 用），未知 type 退回景點。
-  - `categoryChipStyle(type)` / `chipStyle(ink)`：**淡玻璃 chip**（文字 ink / 邊框 ink@40% / 底 ink@10%），搭配 className `border backdrop-blur-sm rounded`。用於小標籤。
+  - `categoryChipStyle(type)` / `chipStyle(ink, text)`：**淡玻璃 chip**（文字 `text` 變體 / 邊框 ink@40% / 底 ink@10%），搭配 className `border backdrop-blur-sm rounded`。用於小標籤。
   - `categorySolidStyle(type)` / `solidStyle(ink)`：**實心**（底 ink / 字白）。目前無引用（航班色帶已改半透明、側欄改純 icon），保留 API 供未來實心場景。
-  - `categoryInk(type)`：純 ink 色（給脊線、節點底色等）。
+  - `categoryInk(type)`：純 ink 色（給脊線、節點、icon、marker 等**非文字**用途，3:1 即可）。
+  - `categoryText(type)` / `BRAND_TEXT`（Tailwind `text-jp-green-text`，CSS `--jp-green-text #547C56`）：**文字專用**加深版，在米白與 10% 淡色 chip 上皆 ≥ 4.5:1（WCAG AA，有測試守住）。**分類色或品牌綠當文字用（eyebrow、chip 字、標籤）一律用 text 變體，勿直接用 ink**（ink 當 10px 字只有 3.0 到 3.5:1）。`text-stone-400` 只給純裝飾 icon / placeholder，有意義的淡字用 `text-muted`。
   - `BRAND_INK`：品牌綠（= `jp-green` `#5E8C61`）的 JS 字面值，給 inline style 餵 `chipStyle` / `solidStyle` 用（Tailwind class 不適用時）；勿再散寫 hex。`categoryWash(type)`：分類水彩色 `'R, G, B'`（卡片光暈用）。
 - 引用處：`ItinerarySection`（時間軸節點 + 脊線 + eyebrow + modal 編輯排版）、`ShoppingSection`（樓層 `FloorTag` 用淡 chip）、`FoodSection`（店名前弁柄色點）、`TripInfoSection`（航班登機證色帶用 transport 半透明淡色 + 深色字、航線用 transport ink；行前準備玻璃連結卡用 jp-green 外連 icon；住宿 hotel/airbnb 同屬住宿分類，同色靠文字區分）、`TripPage` 的 `MENU_ITEMS`（側欄 icon，**純色 icon 無圓底**）。
 - **日期是 metadata 不是分類**，勿套分類色：航班日期在登機證色帶上（transport 深色字）、住宿日期在 eyebrow 的 `STAY · <date>`。
@@ -535,6 +537,7 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 **SW runtime cache（`sw.js`）對圖片 / 媒體的兩條路由**：
 - `cloudinary-images`：`res.cloudinary.com` CacheFirst 30 天、200 筆、`purgeOnQuotaError`。**只收 200**（不收 opaque）→ 所有吃 sheet URL 的 `<img>`（DayBanner / TripCard ×2 / FoodSection / ItinerarySection 縮圖與 hero）都必須帶 `crossOrigin="anonymous"`，`index.html` 的 `preconnect` 也帶 `crossorigin`（CORS 與 no-cors 連線池不共用）。新增顯示 sheet 圖片的 `<img>` 記得補這個屬性，否則那張圖只走 HTTP cache。
 - `proposal-media`：同源 `/proposal-photos/` CacheFirst 30 天，`CacheableResponsePlugin({ statuses: [200] })` + `RangeRequestsPlugin`：`<audio>` / `<video>` 的 Range 請求命中時由 plugin 從完整快取切 206（Safari 對媒體一定要 206）；miss 時 206 不入快取，完整 200 由 `ProposalModal` 的 warm-up fetch / 影片 blob fetch 寫入。
+- `app-lazy-chunks`：同源 `/assets/*.{js,css}` CacheFirst。`vite.config.js` 的 `globIgnores` 只排除**大且非核心**的 lazy chunk（TripMap / leaflet、彩蛋 extras），它們第一次用到才抓、之後離線可用。**核心 section（航班住宿 / 行李 / 逛街 / 美食）必須留在 precache**：每次部署 hash 都變，runtime cache 等於永遠是空的，排除它們就是「出國離線第一次點開就載不到」（2026-10-24 review 抓到的迴歸）。lazy section 外層一律包 `TripPage` 的 `LazySection`（ErrorBoundary + Suspense），chunk 載入失敗只換掉那個 sheet，不冒到全域 boundary。
 - 歷史教訓：原本那條 `trip-assets` 路由比對 `/trips/` 路徑，5 月底拆掉目錄後變成**死路由**（Cloudinary 跨域、彩蛋在 `/proposal-photos/`，什麼都沒命中），extras 的 warm-up 註解還以為有存 SW cache。改路由時用 DevTools → Application → Cache Storage 確認真的有項目進去。
 
 ### 外部圖片（Cloudinary）
@@ -560,6 +563,8 @@ itinerary 點**全留**（保留 `day`，能進路線）；清單（food/shoppin
 ## 部署
 
 GitHub Actions push to master → `npm ci` → **`npm test`（gate，測試沒過不繼續 build）** → Vite build → 部署至 GitHub Pages（`actions/upload-pages-artifact` + `actions/deploy-pages`，非 legacy `gh-pages` 分支）。走 `deploy-pages` 本來就不會跑 Jekyll，不需要 `.nojekyll`（該檔已移除）。
+
+**CSP**：Pages 不能設 header，改由 `vite.config.js` 的 build-only plugin 注入 `<meta http-equiv="Content-Security-Policy">`（dev 有 React refresh inline script，所以只在 build 加）。**新增任何外部來源（API、圖床、圖磚、字型）都要同步加進該 CSP**，否則 production 會被擋而 dev 看不出來；驗證方式：`npm run build && npm run preview`，開 DevTools console 看有無 `Refused to ...`。
 
 ---
 

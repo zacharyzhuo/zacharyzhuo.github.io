@@ -272,7 +272,9 @@ export default function TripMap({ points, days = [], activeDay = null }) {
           <button
             type="button"
             onClick={() => { hapticTap(); setBasemap((b) => (b === 'simple' ? 'transit' : 'simple')) }}
-            className="pointer-events-auto frosted-glass-button press-calm absolute left-5 inset-y-0 my-auto inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-jp-text text-xs font-serif font-bold touch-manipulation"
+            // 視覺維持 h-9（36px）不膨脹版面；::before 往外擴 4px（before:-inset-1）補滿 44px
+            // 觸控目標（button 本身已是 position:absolute，足以當 pseudo 的 containing block）。
+            className="pointer-events-auto frosted-glass-button press-calm absolute left-5 inset-y-0 my-auto inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-jp-text text-xs font-serif font-bold touch-manipulation before:absolute before:-inset-1 before:content-['']"
             aria-label={basemap === 'simple' ? '切換到交通底圖（顯示車站）' : '切換回簡約底圖'}
           >
             <Layers size={15} />
@@ -284,14 +286,17 @@ export default function TripMap({ points, days = [], activeDay = null }) {
             {BUCKETS.map((b) => {
               const on = active.has(b)
               const ink = b === 'backup' ? BACKUP_INK : getCategory(b).ink
+              const text = b === 'backup' ? BACKUP_INK : getCategory(b).text
               return (
                 <button
                   key={b}
                   type="button"
                   onClick={() => toggleBucket(b)}
-                  style={on ? { color: ink, borderColor: `${ink}59` } : undefined}
+                  // 未選中不再用 opacity 壓對比（stone-400 2.41:1 再乘 0.55 更糟）：
+                  // 改用 text-muted（4.5+:1）+ 透明邊框區分，選中才上分類色邊框/文字。
+                  style={on ? { color: text, borderColor: `${ink}59` } : { borderColor: 'transparent' }}
                   className={`frosted-glass-button text-xs font-serif font-bold px-4 py-1.5 rounded-full touch-manipulation ${
-                    on ? '' : 'text-stone-400 opacity-55'
+                    on ? '' : 'text-muted'
                   }`}
                 >
                   {BUCKET_LABEL[b]}
@@ -446,7 +451,9 @@ export default function TripMap({ points, days = [], activeDay = null }) {
                   onPointerCancel={releaseStep}
                   onPointerLeave={releaseStep}
                   disabled={focusIdx === 0}
-                  className="w-10 h-10 grid place-items-center rounded-full text-jp-text press-lift disabled:opacity-30 touch-manipulation"
+                  // 視覺維持 w-10 h-10（40px）不膨脹膠囊內距；relative + ::before 往外擴 2px
+                  // （before:-inset-0.5）補滿 44px 觸控目標，不影響 stepper-squish 的父層 transform。
+                  className="relative w-10 h-10 grid place-items-center rounded-full text-jp-text press-lift disabled:opacity-30 touch-manipulation before:absolute before:-inset-0.5 before:content-['']"
                   aria-label="上一站"
                 >
                   <ChevronLeft size={20} />
@@ -467,7 +474,7 @@ export default function TripMap({ points, days = [], activeDay = null }) {
                   onPointerCancel={releaseStep}
                   onPointerLeave={releaseStep}
                   disabled={focusIdx === routePts.length - 1}
-                  className="w-10 h-10 grid place-items-center rounded-full text-jp-text press-lift disabled:opacity-30 touch-manipulation"
+                  className="relative w-10 h-10 grid place-items-center rounded-full text-jp-text press-lift disabled:opacity-30 touch-manipulation before:absolute before:-inset-0.5 before:content-['']"
                   aria-label="下一站"
                 >
                   <ChevronRight size={20} />

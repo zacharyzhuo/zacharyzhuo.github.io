@@ -9,6 +9,10 @@ export default {
         'jp-bg': '#FBFAF5',
         'jp-text': '#2C2C2C',
         'jp-green': '#5E8C61',
+        // jp-green 當小字文字色只有 3.72:1，不合 WCAG AA；同色相拉低明度的文字專用版本
+        // （= src/lib/categories.js 的 BRAND_TEXT，兩處數值須同步）。jp-green 本身仍留給
+        // fill/ring/icon/大字（這些不吃 4.5:1 門檻）。
+        'jp-green-text': 'var(--jp-green-text)',
         'jp-red': '#B93632',
         'jp-light-gray': '#E5E5E5',
         // 語意文字/線條 token，背後吃 CSS 變數（深色模式時只改 :root 變數即可一次翻）。

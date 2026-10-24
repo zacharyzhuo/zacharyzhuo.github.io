@@ -69,7 +69,7 @@ export default function HomePage() {
       <div ref={contentRef} className="max-w-2xl mx-auto">
       {/* Header：與 trip page 一致 — 英文 caps eyebrow 在上、中文大標在下 */}
       <header className="px-6 pt-8 pb-6">
-        <p className="text-xs tracking-[0.25em] uppercase text-stone-400 font-serif font-medium mb-2">Trip Diaries</p>
+        <p className="text-xs tracking-[0.25em] uppercase text-muted font-serif font-medium mb-2">Trip Diaries</p>
         <h1 className="text-3xl font-serif font-bold text-jp-text tracking-[0.04em]">旅行記錄</h1>
       </header>
 
@@ -91,7 +91,7 @@ export default function HomePage() {
             {nowNext.length > 0 && (
               <section>
                 <div className="flex items-center gap-2.5 mb-3.5 px-1">
-                  <span className="text-2xs tracking-[0.3em] uppercase text-jp-green font-serif font-bold">Now &amp; Next</span>
+                  <span className="text-2xs tracking-[0.3em] uppercase text-jp-green-text font-serif font-bold">Now &amp; Next</span>
                   <span className="flex-1 h-px bg-jp-green/25" />
                 </div>
                 <div className="space-y-4">

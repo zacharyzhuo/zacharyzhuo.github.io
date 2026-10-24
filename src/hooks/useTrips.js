@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { sheetURL, parseCSV } from '../lib/sheets.js'
-import { getCached, setCached, clearCached } from '../lib/swrCache.js'
+import { getCached, setCached } from '../lib/swrCache.js'
 import { env } from '../lib/env.js'
 import { useRevalidateOnVisible } from './useRevalidateOnVisible.js'
 
@@ -25,8 +25,8 @@ export function useTrips() {
   }, [])
 
   const refresh = useCallback(() => {
-    clearCached(TRIPS_CACHE_KEY)
-    // 前一次 refresh 還沒完成就又被呼叫 → 先放掉舊的，避免它永遠 pending
+    // 不先清 localStorage：refetch 失敗（離線）時要保留舊清單，success 時下方 effect 的
+    // setCached 自然覆蓋。前一次 refresh 還沒完成就又被呼叫 → 先放掉舊的，避免它永遠 pending
     settleRefresh()
     return new Promise((resolve) => {
       refreshResolveRef.current = resolve // effect 完成（成功或失敗）時 resolve

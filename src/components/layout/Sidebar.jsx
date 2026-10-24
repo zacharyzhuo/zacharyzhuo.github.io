@@ -283,7 +283,7 @@ export default function Sidebar({ isOpen, onClose, onSelect, sections, tripNameE
             <p className="text-xs text-secondary font-serif tracking-widest uppercase opacity-70">
               {tripNameEn || 'Trip'}
             </p>
-            <p className="text-2xs text-stone-400 font-mono mt-1 opacity-60" title={env.APP_VERSION}>
+            <p className="text-2xs text-muted font-mono mt-1" title={env.APP_VERSION}>
               v{env.APP_VERSION === 'dev' ? 'dev' : env.APP_VERSION.slice(0, 7)}
             </p>
           </div>
